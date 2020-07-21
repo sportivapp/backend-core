@@ -1,0 +1,13 @@
+exports.seed = (knex, Promise) => knex('euser').del()
+  .then(() =>
+    knex('euser').insert(
+      [
+        {
+          eusernik: 123456789,
+          eusername: 'nawakaraadmin',
+          euseremail: 'nawakaraadmin@nawakara.com',
+          euserpassword: '$2y$10$UzQchZo/FrFs4UMzrRPp2OXj.tjV495wGW977M4SSczXqdVUWRaKu',
+          eusermobilenumber: '(021) 7669911'
+        }
+      ]
+    ));

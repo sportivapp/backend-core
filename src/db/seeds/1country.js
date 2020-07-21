@@ -3,7 +3,7 @@ exports.seed = (knex, Promise) => knex('ecountry').del()
     knex('ecountry').insert(
       [
         {
-          ecountryname: 'Indo'
+          ecountryname: 'Indonesia'
         }
       ]
 ));

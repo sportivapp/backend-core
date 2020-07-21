@@ -1,23 +1,23 @@
 const Model = require('./Model');
 
-class Company extends Model {
+class Country extends Model {
   static get tableName() {
-    return 'ecompany';
+    return 'estate';
   };
 
   static get idColumn() {
-    return 'ecompanyid'
+    return 'estateid'
   };
 
   static get jsonSchema() {
     return {
       type: 'object',
-      required: [],
+      required: ['estatename'],
       properties: {
-        
+        estatename: { type: 'string', minLength: 1, maxLength: 256 }
       }
     };
   }
 }
 
-module.exports = Company;
+module.exports = State;

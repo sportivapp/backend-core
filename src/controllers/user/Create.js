@@ -1,4 +1,4 @@
-const usersService = require('../../services/usersService');
+const userService = require('../../services/userService');
 
 module.exports = async (req, res, next) => {
 
@@ -13,7 +13,7 @@ module.exports = async (req, res, next) => {
             eusermobilenumber: mobileNumber
         }
 
-        const user = await usersService.createUser( userDTO );
+        const user = await userService.createUser(userDTO);
 
         return res.status(200).json({
             data: user
