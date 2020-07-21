@@ -1,19 +1,26 @@
-const Users = require('../../models/Users');
+const usersService = require('../../services/usersService');
 
 module.exports = async (req, res, next) => {
 
     try {
 
         const { nik, name, email, password, mobileNumber } = req.body;
+        const userDTO = { 
+            eusernik: nik, 
+            eusername: name, 
+            euseremail: email, 
+            euserpassword: password, 
+            eusermobilenumber: mobileNumber
+        }
 
-        const user = await Users.query().insert({ eusernik: nik, eusername: name, euseremail: email, euserpassword: password, eusermobilenumber: mobileNumber });
+        const user = await usersService.createUser( userDTO );
 
         return res.status(200).json({
             data: user
         });
 
     } catch(e) {
-        return res.status(500).send(e.stack);
+        next(e);
     }
 
 }

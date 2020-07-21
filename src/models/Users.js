@@ -14,9 +14,11 @@ class Users extends Model {
       type: 'object',
       required: ['eusernik', 'eusername', 'euseremail', 'euserpassword', 'eusermobilenumber'],
       properties: {
-        userId: { type: 'int' },
-        title: { type: 'string', minLength: 1, maxLength: 255 },
-        text: { type: 'string', minLength: 1, maxLength: 255 }
+        eusernik: { type: 'integer' },
+        eusername: { type: 'string', minLength: 1, maxLength: 256 },
+        euseremail: { type: 'string', minLength: 1, maxLength: 256 },
+        euserpassword: { type: 'string', minLength: 1, maxLength: 256 },
+        eusermobilenumber: { type: 'string', minLength: 1, maxLength: 256 }
       }
     };
   }
