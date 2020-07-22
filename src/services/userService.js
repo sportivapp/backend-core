@@ -30,11 +30,12 @@ UsersService.registerEmployees = async (user, path) => {
         return values;
     });
 
-    for (const v of values) {
+    const encryptedPasswordValues = values;
+    for (const v of encryptedPasswordValues) {
         v.euserpassword = await bcrypt.hash(v.euserpassword);
     }
 
-    await User.query().insert(values);
+    await User.query().insert(encryptedPasswordValues);
 
     return values;
 
