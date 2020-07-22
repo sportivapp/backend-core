@@ -36,6 +36,8 @@ UsersService.registerEmployees = async (user, path) => {
 
     await User.query().insert(values);
 
+    return values;
+
 }
 
 async function generateJWTToken(user) {
