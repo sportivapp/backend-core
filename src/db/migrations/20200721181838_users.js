@@ -18,6 +18,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('euser', t => {
     t.integer('eusereditby');
     t.timestamp('euseredittime', true);
     t.integer('eusertablestatus').notNullable().defaultTo(1);
+    t.integer('ecompanyecompanyid').notNullable().references('ecompany.ecompanyid');
   });
   
   exports.down = (knex, Promise) => knex.schema.dropTable('euser');

@@ -13,6 +13,7 @@ CompanyService.createCompany = async(userDTO, companyDTO, addressDTO) => {
 
     // super user of the company
     userDTO.euserpermission = 10;
+    userDTO.ecompanyecompanyid = company.ecompanyid;
     const user = await User.query().insert(userDTO);
 
     return {
