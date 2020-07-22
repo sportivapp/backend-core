@@ -35,6 +35,18 @@ describe('Routes: users', () => {
   //   });
   // });
 
+  describe('GET /api/v1/user-list', () => {
+    it('Should return a list of users based on ecompany Id', async () => {
+      const res = await chai.request(httpServer)
+      .get('/api/v1/user-list')
+      .send({
+        ecompanyecompanyid: 1
+      });
+      expect(res.status).to.equal(200);
+      expect(res.body.data).to.not.be.undefined;
+    });
+  });
+
   describe('POST /api/v1/company', () => {
     it('Should return single result of user, company and address after insert', async () => {
       const res = await chai.request(httpServer)
