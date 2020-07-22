@@ -30,14 +30,14 @@ module.exports = (chai, httpServer, expect) => {
   });
 
   describe('GET /api/v1/user-import-template', () => {
-    it('Should return correct file path', async () => {
+    it('Should return file with correct content', async () => {
       const res = await chai.request(httpServer)
-      .post('/api/v1/user-import-template')
+      .get('/api/v1/user-import-template')
       .send();
 
       expect(res.status).to.equal(200);
-      expect(res.body.data).to.have.property('path');
-      expect(res.body.data.path).to.equal(templatePath);
+      expect(res.header['content-type']).to.equal('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      expect(res.header['content-disposition']).to.equal('attachment; filename="Import Data Karyawan Template.xlsx"');
     })
   })
 
