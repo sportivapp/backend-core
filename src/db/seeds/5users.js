@@ -7,7 +7,8 @@ exports.seed = (knex, Promise) => knex('euser').del()
           eusername: 'nawakaraadmin',
           euseremail: 'nawakaraadmin@nawakara.com',
           euserpassword: '$2y$10$UzQchZo/FrFs4UMzrRPp2OXj.tjV495wGW977M4SSczXqdVUWRaKu',
-          eusermobilenumber: '987654321'
+          eusermobilenumber: '987654321',
+          ecompanyecompanyid: 1
         }
       ]
     ));
