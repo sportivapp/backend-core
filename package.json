@@ -28,6 +28,8 @@
     "lodash": "^4.17.19",
     "morgan": "^1.10.0",
     "objection": "^2.2.1",
-    "pg": "^8.3.0"
+    "pg": "^8.3.0",
+    "swagger-jsdoc": "^4.0.0",
+    "swagger-ui-express": "^4.1.4"
   }
 }
