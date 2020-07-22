@@ -4,22 +4,23 @@ module.exports = async (req, res, next) => {
 
     try {
 
-        const { nik, name, email, password, mobileNumber } = req.body;
-        const userDTO = { 
-            eusernik: nik, 
-            eusername: name, 
-            euseremail: email, 
-            euserpassword: password, 
-            eusermobilenumber: mobileNumber
+        const path = req.file.path;
+        const user = req.user;
+
+        if (user.permission !== 10) {
+            return res.status(401).json({
+                data: 'You cannot register employees'
+            })
         }
 
-        const user = await userService.createUser(userDTO);
+        await userService.registerEmployees(user, path);
 
         return res.status(200).json({
-            data: user
+            data: 'Success register employees'
         });
 
     } catch(e) {
+        console.log(e);
         next(e);
     }
 

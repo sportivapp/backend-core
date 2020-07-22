@@ -3,31 +3,41 @@ const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 dotenv.config();
+const readXlsxFile = require("read-excel-file/node");
 
 const UsersService = {};
 
-// UsersService.createUser = async (userDTO) => {
+UsersService.registerEmployees = async (user, path) => {
 
-//     userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
+    const values = await readXlsxFile(path).then((rows) => {
+        // skip header
+        rows.shift();
 
-//     const user = await Users.query().insert(userDTO);
+        let values = [];
 
-//     return user;
+        for (const row of rows) {
 
-// }
+            values.push({
+                eusernik: row[0],
+                eusername: row[1],
+                euseremail: row[2],
+                eusermobilenumber: row[3].toString(),
+                euserpassword: 'emtiv' + row[1],
+                ecompanyecompanyid: user.companyId
+            });
+        }
 
-UsersService.login = async (loginDTO) => {
+        return values;
+    });
 
-    const user = await User.query().select().where('euseremail', loginDTO.euseremail).first();
-    const success = await bcrypt.compare(loginDTO.euserpassword, user.euserpassword);
-
-    let token = null;
-
-    if (success === true) {
-        token = await generateJWTToken(user);
+    const encryptedPasswordValues = values;
+    for (const v of encryptedPasswordValues) {
+        v.euserpassword = await bcrypt.hash(v.euserpassword);
     }
 
-    return token;
+    await User.query().insert(encryptedPasswordValues);
+
+    return values;
 
 }
 
@@ -39,9 +49,25 @@ async function generateJWTToken(user) {
         email: user.euseremail,
         name: user.eusername,
         mobileNumber: user.eusermobilenumber,
-        permission: user.euserpermission
+        permission: user.euserpermission,
+        companyId: user.ecompanyecompanyid
     }
     const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' });
+
+    return token;
+
+}
+
+UsersService.login = async (loginDTO) => {
+
+    const user = await User.query().select().where('euseremail', loginDTO.euseremail).first();
+    const success = await bcrypt.compare(loginDTO.euserpassword, user.euserpassword);
+
+    let token = null;
+
+    if (success === true) {
+        token = await generateJWTToken(user);
+    }
 
     return token;
 

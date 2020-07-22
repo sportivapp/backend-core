@@ -3,6 +3,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
     knex('euser').insert(
       [
         {
+          euserpermission: 10,
           eusernik: 123456789,
           eusername: 'nawakaraadmin',
           euseremail: 'nawakaraadmin@nawakara.com',
