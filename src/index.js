@@ -4,6 +4,10 @@ const   express     = require('express'),
 
 const app = express();
 const routes = require('./routes/v1');
+const swaggerDoc = require('./swaggerDoc');
+
+// use swagger
+swaggerDoc(app);
 
 app.use(cors());
 app.use((_, res, next) => {
@@ -38,6 +42,7 @@ app.use((error, req, res, next) => {
     });
 
 });
+
 
 const httpPORT = process.env.PORT || 3000;
 const httpServer = app.listen(httpPORT, function() {
