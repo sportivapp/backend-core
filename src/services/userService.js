@@ -3,18 +3,67 @@ const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 dotenv.config();
+const readXlsxFile = require("read-excel-file/node");
 
 const UsersService = {};
 
-// UsersService.createUser = async (userDTO) => {
+UsersService.registerEmployees = async (user, path) => {
 
-//     userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
+    const values = await readXlsxFile(path).then((rows) => {
+        // skip header
+        rows.shift();
 
-//     const user = await Users.query().insert(userDTO);
+        let values = [];
 
-//     return user;
+        for (const row of rows) {
 
-// }
+            values.push({
+                eusernik: row[0],
+                eusername: row[1],
+                euseremail: row[2],
+                eusermobilenumber: row[3].toString(),
+                euserpassword: 'emtiv' + row[1],
+                ecompanyecompanyid: user.companyId
+            });
+        }
+
+        return values;
+    });
+
+    const encryptedPasswordValues = values;
+    for (const v of encryptedPasswordValues) {
+        v.euserpassword = await bcrypt.hash(v.euserpassword);
+    }
+
+    await User.query().insert(encryptedPasswordValues);
+
+    return values;
+
+}
+
+async function generateJWTToken(user) {
+
+    const config = {
+        sub: user.euserid,
+        iat: Date.now() / 1000.0,
+        email: user.euseremail,
+        name: user.eusername,
+        mobileNumber: user.eusermobilenumber,
+        permission: user.euserpermission,
+        companyId: user.ecompanyecompanyid
+    }
+    const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' });
+
+    return token;
+
+}
+
+UsersService.getAllUserByCompanyId = async ( ecompanyId ) => {
+    const users = await User.query().select().where('ecompanyecompanyid', ecompanyId);
+
+    return users;
+
+}
 
 UsersService.login = async (loginDTO) => {
 
@@ -28,29 +77,6 @@ UsersService.login = async (loginDTO) => {
     }
 
     return token;
-
-}
-
-async function generateJWTToken(user) {
-
-    const config = {
-        sub: user.euserid,
-        iat: Date.now() / 1000.0,
-        email: user.euseremail,
-        name: user.eusername,
-        mobileNumber: user.eusermobilenumber,
-        permission: user.euserpermission
-    }
-    const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' });
-
-    return token;
-
-}
-
-UsersService.getAllUserByCompanyId = async ( ecompanyId ) => {
-    const users = await User.query().select().where('ecompanyecompanyid', ecompanyId);
-
-    return users;
 
 }
 
