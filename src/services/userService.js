@@ -6,28 +6,9 @@ dotenv.config();
 
 const UsersService = {};
 
-// UsersService.createUser = async (userDTO) => {
+UsersService.createUser = async (path) => {
 
-//     userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
-
-//     const user = await Users.query().insert(userDTO);
-
-//     return user;
-
-// }
-
-UsersService.login = async (loginDTO) => {
-
-    const user = await User.query().select().where('euseremail', loginDTO.euseremail).first();
-    const success = await bcrypt.compare(loginDTO.euserpassword, user.euserpassword);
-
-    let token = null;
-
-    if (success === true) {
-        token = await generateJWTToken(user);
-    }
-
-    return token;
+    
 
 }
 
@@ -42,6 +23,21 @@ async function generateJWTToken(user) {
         permission: user.euserpermission
     }
     const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' });
+
+    return token;
+
+}
+
+UsersService.login = async (loginDTO) => {
+
+    const user = await User.query().select().where('euseremail', loginDTO.euseremail).first();
+    const success = await bcrypt.compare(loginDTO.euserpassword, user.euserpassword);
+
+    let token = null;
+
+    if (success === true) {
+        token = await generateJWTToken(user);
+    }
 
     return token;
 
