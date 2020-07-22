@@ -1,25 +1,25 @@
-const Users = require('../models/Users');
+const User = require('../models/User');
 const bcrypt = require('../helper/bcrypt');
-const jwt = require('jwt-simple');
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+dotenv.config();
 
 const UsersService = {};
 
-UsersService.createUser = async (userDTO) => {
+// UsersService.createUser = async (userDTO) => {
 
-    userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
+//     userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
 
-    const user = await Users.query().insert(userDTO);
+//     const user = await Users.query().insert(userDTO);
 
-    return user;
+//     return user;
 
-}
+// }
 
 UsersService.login = async (loginDTO) => {
 
-    const user = await Users.query().select().where('euseremail', loginDTO.euseremail).first();
+    const user = await User.query().select().where('euseremail', loginDTO.euseremail).first();
     const success = await bcrypt.compare(loginDTO.euserpassword, user.euserpassword);
-    console.log(user);
-    console.log(success);
 
     let token = null;
 
@@ -41,7 +41,7 @@ async function generateJWTToken(user) {
         mobileNumber: user.eusermobilenumber,
         permission: user.euserpermission
     }
-    const token = jwt.encode(config, process.env.SECRET || 'test');
+    const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' });
 
     return token;
 

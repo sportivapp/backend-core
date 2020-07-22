@@ -16,8 +16,12 @@ module.exports = async (req, res, next) => {
             return res.status(400).json('Wrong email or password')
         }
 
+        const data = {
+            token: token
+        }
+
         return res.status(200).json({
-            data: token
+            data: data
         });
 
     } catch(e) {

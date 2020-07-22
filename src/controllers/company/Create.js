@@ -1,27 +1,30 @@
-const Company = require('../../models/Company');
-const Address = require('../../models/Address');
+const companyService = require('../../services/companyService');
 
 module.exports = async (req, res, next) => {
 
     try {
 
-        const { name, email, street, postalCode } = req.body;
-        let companyDTO = { 
-            ecompanyname: name,
-            ecompanyemailaddress: email
+        const { nik, name, email, password, mobileNumber, companyName, companyEmail, street, postalCode } = req.body;
+        const userDTO = { 
+            eusernik: nik, 
+            eusername: name, 
+            euseremail: email, 
+            euserpassword: password, 
+            eusermobilenumber: mobileNumber
+        }
+        const companyDTO = { 
+            ecompanyname: companyName,
+            ecompanyemailaddress: companyEmail
         }
         const addressDTO = {
             eaddressstreet: street,
             eaddresspostalcode: postalCode
         }
 
-        const address = await Address.query().insert(addressDTO);
-
-        companyDTO.eaddresseaddressid = address.eaddressid;
-        const company = await Company.query().insert(companyDTO);
+        const data = await companyService.createCompany(userDTO, companyDTO, addressDTO);
 
         return res.status(200).json({
-            data: company
+            data: data
         });
 
     } catch(e) {

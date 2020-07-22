@@ -1,18 +1,17 @@
-const jwt = require("jwt-simple");
-const secret = require("../secret/appsecret").secret;
+const jwt = require("jsonwebtoken");
+const dotenv = require('dotenv');
+dotenv.config();
 
-exports.authToken = async (req, res, next) => {
+exports.authenticateToken = async (req, res, next) => {
 
-    const token = req.headers.authorization;
-    if (!token) return res.status(401).send("You need to log in first.");
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (token === null) return res.status(401).json("You need to log in first.");
 
-    let user = new Object();
-    try {
-        user = jwt.decode(token, secret, false, 'HS256');
-    } catch(e) {
-        return res.status(401).json(e.stack);
-    }
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function(err, token) {
+        if (err) return res.status(403)('Unauthorized access');
+        req.user = user;
+        next();
+    });
 
-    req.user = user;
-    next();
 }
