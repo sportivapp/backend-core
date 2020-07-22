@@ -13,7 +13,41 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage })
 
+/**
+ * @swagger
+ * definitions:
+ *  Login:
+ *      properties:
+ *          email:
+ *              type: string
+ *          password:
+ *              type: string
+ */
+
 router.post('/user', auth.authenticateToken, upload.single('employee'), Create);
+
+/**
+ * @swagger
+ * /user-login:
+ *   post:
+ *     summary: user login
+ *     tags:
+ *       - Login
+ *     description: Login
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: UserLogin
+ *         description: 
+ *         in: body
+ *         schema:
+ *          $ref: '#/definitions/Login'
+ *     responses:
+ *       '200':
+ *         description: do login
+ *         schema:
+ *          $ref: '#/definitions/Login'
+ */
 router.post('/user-login', Login);
 router.get('/user-list', List);
 
