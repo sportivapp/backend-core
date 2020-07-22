@@ -1,3 +1,5 @@
+const templatePath = require('../templates');
+
 module.exports = (chai, httpServer, expect) => {
   
   describe('GET /api/v1/user-list', () => {
@@ -26,5 +28,17 @@ module.exports = (chai, httpServer, expect) => {
       expect(res.body.data).to.have.property('token');
     });
   });
+
+  describe('GET /api/v1/user-import-template', () => {
+    it('Should return correct file path', async () => {
+      const res = await chai.request(httpServer)
+      .post('/api/v1/user-import-template')
+      .send();
+
+      expect(res.status).to.equal(200);
+      expect(res.body.data).to.have.property('path');
+      expect(res.body.data.path).to.equal(templatePath);
+    })
+  })
 
 }
