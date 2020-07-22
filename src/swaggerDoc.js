@@ -3,60 +3,6 @@ const   swaggerJsDoc= require('swagger-jsdoc'),
 
 const routes = require('./routes/v1');
 
-
-// paths: {
-//   "/users": {
-//     "post": {
-//       "summary": "Add user",
-//       "tags": [
-//         "Users"
-//       ],
-//       "description": "add user to system",
-//       "parameters": [
-//           {
-//             "name": "user",
-//             "in": "body",
-//             "description": "add user",
-//             "schema": {
-//               "$ref": "#/definitions/User"
-//             }
-//           }
-//         ],
-//       "produces": [
-//         "application/json"
-//       ],
-//       "responses": {
-//         "200": {
-//           "description": "Login Success",
-//           "schema": {
-//             "$ref": "#/definitions/User"
-//           }
-//         }
-//       }
-//     }
-//   }
-
-// "definitions
-//   "User": {
-//     "properties": {
-//       "nik": {
-//         "type": "integer"
-//       },
-//       "name": {
-//           "type": "string"
-//       },
-//       "email": {
-//           "type": "string"
-//       },
-//       "password": {
-//           "type": "string"
-//       },
-//       "mobileNumber": {
-//           "type": "string"
-//       }
-//     }
-//   },
-// }
 const options = {
     swaggerDefinition: {
         info: {
