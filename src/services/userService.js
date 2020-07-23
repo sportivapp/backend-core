@@ -53,7 +53,7 @@ async function generateJWTToken(user) {
         permission: user.euserpermission,
         companyId: user.ecompanyecompanyid
     }
-    const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' });
+    const token = jwt.sign(config, 'b901e0023206475b33e682485682f9f1d05dc693b602f75393c036c46676b3658ebed78a9820ba766d6dab58331706fc41d2723ac614b577fd810c3e4137d8ca', { expiresIn: '1800s' });
 
     return token;
 
