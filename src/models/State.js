@@ -1,6 +1,6 @@
 const Model = require('./Model');
 
-class Country extends Model {
+class State extends Model {
   static get tableName() {
     return 'estate';
   };

@@ -1,6 +1,7 @@
 const Company = require('../models/Company');
 const Address = require('../models/Address');
 const User = require('../models/User');
+const bcrypt = require('../helper/bcrypt');
 
 const CompanyService = {};
 
@@ -14,6 +15,7 @@ CompanyService.createCompany = async(userDTO, companyDTO, addressDTO) => {
     // super user of the company
     userDTO.euserpermission = 10;
     userDTO.ecompanyecompanyid = company.ecompanyid;
+    userDTO.password = await bcrypt.hash(userDTO.password);
     const user = await User.query().insert(userDTO);
 
     return {
