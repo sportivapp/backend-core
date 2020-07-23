@@ -1,8 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
-const dotenv = require('dotenv');
-dotenv.config();
+require('dotenv').config();
 const readXlsxFile = require("read-excel-file/node");
 
 const UsersService = {};
