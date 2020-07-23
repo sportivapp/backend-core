@@ -42,9 +42,6 @@ UsersService.registerEmployees = async (user, path) => {
 
 async function generateJWTToken(user) {
 
-    console.log(require('dotenv').config());
-    console.log(process.env.ACCESS_TOKEN_SECRET);
-
     const config = {
         sub: user.euserid,
         iat: Date.now() / 1000.0,
