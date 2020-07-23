@@ -7,10 +7,16 @@ module.exports = async (req, res, next) => {
         const user = req.user;
         const { newPassword } = req.body; 
 
-        await userService.changeUserPassword(user, newPassword);
+        // return 1 for true , 0 for false
+        const changePassword = await userService.changeUserPassword(user, newPassword);
+
+        const data = {
+            isDeleted: (changePassword) ? true : false,
+            message: (changePassword) ? "Password Successfully Changed!" : "Failed to Change Password!"
+        }
 
         return res.status(200).json({
-            data: 'Password Successfully Change!'
+            data: data
         });
         
     } catch (e) {
