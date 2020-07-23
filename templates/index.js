@@ -1,1 +1,1 @@
-module.exports = __dirname + '\\Import Data Karyawan Template.xlsx';
+module.exports = __dirname + '/Import Data Karyawan Template.xlsx';
