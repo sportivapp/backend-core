@@ -4,6 +4,8 @@ module.exports = async (req, res, next) => {
 
     try {
 
+        console.log('halo?');
+
         const path = req.file.path;
         const user = req.user;
 
