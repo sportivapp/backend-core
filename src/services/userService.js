@@ -90,7 +90,13 @@ UsersService.changeUserPassword = async ( user , newPassword) => {
     });
 
     return newData;
+}
 
+UsersService.deleteUserById = async ( euserId ) => {
+    
+    const deletedUser = await User.query().select().where('euserid', euserId).del();
+
+    return deletedUser;
 }
 
 module.exports = UsersService;
