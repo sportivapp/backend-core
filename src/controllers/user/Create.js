@@ -13,6 +13,8 @@ module.exports = async (req, res, next) => {
             })
         }
 
+        console.log(req.file);
+
         const employees = await userService.registerEmployees(user, path);
 
         return res.status(200).json({
