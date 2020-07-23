@@ -4,8 +4,6 @@ module.exports = async (req, res, next) => {
 
     try {
 
-        console.log('halo?');
-
         const path = req.file.path;
         const user = req.user;
 
@@ -14,8 +12,6 @@ module.exports = async (req, res, next) => {
                 data: 'You cannot register employees'
             })
         }
-
-        console.log(req.file);
 
         const employees = await userService.registerEmployees(user, path);
 

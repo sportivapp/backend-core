@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const { Create, Login , List, Template } = require('../../controllers/user');
 const auth = require('../../middlewares/authentication');
+const uploadPath = require('../../../uploads');
 const multer = require('multer');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        console.log(file);
-        cb(null, 'uploads/')
+        cb(null, uploadPath);
     },
     filename: function (req, file, cb) {
         cb(null, Date.now() + '-' + file.originalname);
