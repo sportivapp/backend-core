@@ -4,10 +4,6 @@ const   express     = require('express'),
 
 const app = express();
 const routes = require('./routes/v1');
-const swaggerDoc = require('./swaggerDoc');
-
-// use swagger
-swaggerDoc(app);
 
 app.use(cors());
 app.use((_, res, next) => {
