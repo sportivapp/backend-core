@@ -5,7 +5,7 @@ module.exports = (chai, httpServer, expect) => {
       const res = await chai.request(httpServer)
       .get('/api/v1/user-list')
       .send({
-        ecompanyecompanyid: 1
+        companyId: 1
       });
       expect(res.status).to.equal(200);
       expect(res.body.data).to.not.be.undefined;
