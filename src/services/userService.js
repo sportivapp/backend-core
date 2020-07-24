@@ -2,8 +2,7 @@ const User = require('../models/User');
 const UserChangePassword = require('../models/UserChangePassword');
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
-const dotenv = require('dotenv');
-dotenv.config();
+require('dotenv').config();
 const readXlsxFile = require("read-excel-file/node");
 
 const UsersService = {};
@@ -59,8 +58,10 @@ async function generateJWTToken(user) {
 
 }
 
-UsersService.getAllUserByCompanyId = async ( ecompanyId ) => {
-    const users = await User.query().select().where('ecompanyecompanyid', ecompanyId);
+UsersService.getAllUserByCompanyId = async ( companyId ) => {
+    
+    const users = await User.query().select('eusername', 'euseremail', 'eusernik', 'eusermobilenumber')
+    .where('ecompanyecompanyid', companyId);
 
     return users;
 
@@ -92,9 +93,9 @@ UsersService.changeUserPassword = async ( user , newPassword) => {
     return newData;
 }
 
-UsersService.deleteUserById = async ( euserId ) => {
+UsersService.deleteUserById = async ( userId ) => {
     
-    const deletedUser = await User.query().select().where('euserid', euserId).del();
+    const deletedUser = await User.query().select().where('euserid', userId).del();
 
     return deletedUser;
 }

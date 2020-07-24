@@ -11,7 +11,7 @@ module.exports = async (req, res, next) => {
         const changePassword = await userService.changeUserPassword(user, newPassword);
 
         const data = {
-            isDeleted: (changePassword) ? true : false,
+            isChanged: (changePassword) ? true : false,
             message: (changePassword) ? "Password Successfully Changed!" : "Failed to Change Password!"
         }
 

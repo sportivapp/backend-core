@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { Create, Login , List, ChangePassword, Delete} = require('../../controllers/user');
+const { Create, Login , List, Template, ChangePassword, Delete} = require('../../controllers/user');
 const auth = require('../../middlewares/authentication');
+const uploadPath = require('../../../uploads');
 const multer = require('multer');
-const Template = require('../../controllers/user/Template');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/')
+        cb(null, uploadPath);
     },
     filename: function (req, file, cb) {
         cb(null, Date.now() + '-' + file.originalname);
