@@ -1,5 +1,3 @@
-const templatePath = require('../templates');
-
 module.exports = (chai, httpServer, expect) => {
   
   describe('GET /api/v1/user-list', () => {
