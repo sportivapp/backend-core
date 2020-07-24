@@ -61,7 +61,7 @@ module.exports = (chai, httpServer, expect) => {
   });
 
   describe('PUT /api/v1/change-password', () => {
-    it('Should return isDeleted true', async () => {
+    it('Should return isChanged true', async () => {
       const login = await chai.request(httpServer)
       .post('/api/v1/user-login')
       .send({
