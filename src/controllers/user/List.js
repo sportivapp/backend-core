@@ -4,9 +4,9 @@ module.exports = async (req, res, next) => {
 
     try {
 
-        const ecompanyId = req.body.ecompanyecompanyid;
+        const ecompanyId = req.body.companyId;
         
-        const users = await userService.getAllUserByCompanyId(ecompanyId);
+        const users = await userService.getAllUserByCompanyId(companyId);
 
         return res.status(200).json({
             data: users

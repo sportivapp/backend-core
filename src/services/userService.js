@@ -58,8 +58,9 @@ async function generateJWTToken(user) {
 
 }
 
-UsersService.getAllUserByCompanyId = async ( ecompanyId ) => {
-    const users = await User.query().select().where('ecompanyecompanyid', ecompanyId);
+UsersService.getAllUserByCompanyId = async ( companyId ) => {
+    
+    const users = await User.query().select().where('ecompanyecompanyid', companyId);
 
     return users;
 
