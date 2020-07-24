@@ -4,6 +4,7 @@ const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const readXlsxFile = require("read-excel-file/node");
+const emailService = require('../helper/emailService');
 
 const UsersService = {};
 
@@ -98,6 +99,16 @@ UsersService.deleteUserById = async ( userId ) => {
     const deletedUser = await User.query().select().where('euserid', userId).del();
 
     return deletedUser;
+}
+
+UsersService.sendForgotPasswordLink = async ( userEmail ) => {
+    const isEmailAvailable = await User.query().select().where('euseremail', userEmail).first();
+
+    if(isEmailAvailable) {
+        await emailService.sendForgotPasswordLink(userEmail);
+    }
+
+    return true;
 }
 
 module.exports = UsersService;
