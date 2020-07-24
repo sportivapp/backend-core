@@ -16,7 +16,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
           eusernik: 111111111,
           eusername: 'nawakarauser',
           euseremail: 'nawakarauser@nawakara.com',
-          euserpassword: '$2y$10$NpWABbq3oj8NWtpegmNIU..MWwX8ufWfhv03NyHuaULXXKOQa777G',
+          euserpassword: '$2y$10$0QN7AN62i6hjTMboj2OAROle8q9D9prO41KgUYgniRnGWqo2G6YN.',
           eusermobilenumber: '11111111',
           ecompanyecompanyid: 1
         },

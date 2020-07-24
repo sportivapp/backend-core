@@ -41,8 +41,46 @@ module.exports = (chai, httpServer, expect) => {
     });
   });
 
-  describe('PUT /api/v1/user-change-password', () => {
+  describe('DEL /api/v1/user-delete', () => {
+    it('Should return isDeleted true', async () => {
+      const login = await chai.request(httpServer)
+      .post('/api/v1/user-login')
+      .send({
+        email: 'nawakaraadmin@nawakara.com',
+        password: 'emtivnawakaraadmin'
+      });
+      const res = await chai.request(httpServer)
+      .delete('/api/v1/user-delete')
+      .set('authorization', login.body.data.token)
+      .send({
+        userId: 2
+      });
 
+      expect(res.status).to.equal(200);
+      expect(res.body.data.isDeleted).to.equal(true);
+      expect(res.body.data.message).to.equal('User Successfully Delete!');
+    });
+  });
+
+  describe('PUT /api/v1/change-password', () => {
+    it('Should return isDeleted true', async () => {
+      const login = await chai.request(httpServer)
+      .post('/api/v1/user-login')
+      .send({
+        email: 'nawakarauser@nawakara.com',
+        password: 'emtivnawakarauser'
+      });
+      const res = await chai.request(httpServer)
+      .put('/api/v1/user-change-password')
+      .set('authorization', login.body.data.token)
+      .send({
+        newPassword: 'nawakarauserpassword'
+      });
+
+      expect(res.status).to.equal(200);
+      expect(res.body.data.isChanged).to.equal(true);
+      expect(res.body.data.message).to.equal('Password Successfully Changed!');
+    });
   });
 
 }

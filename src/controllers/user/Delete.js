@@ -5,11 +5,11 @@ module.exports = async (req, res, next) => {
     try {
         
         const user = req.user;
-        const userId = req.body.euserId;
+        const userId = req.body.userId;
 
         if (user.permission !== 10) {
             return res.status(401).json({
-                data: 'You cannot register employees'
+                data: 'You cannot delete employees'
             })
         }
 
