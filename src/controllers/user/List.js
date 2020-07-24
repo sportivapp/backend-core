@@ -4,7 +4,7 @@ module.exports = async (req, res, next) => {
 
     try {
 
-        const ecompanyId = req.body.companyId;
+        const companyId = req.body.companyId;
         
         const users = await userService.getAllUserByCompanyId(companyId);
 
