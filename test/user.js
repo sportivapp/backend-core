@@ -38,7 +38,11 @@ module.exports = (chai, httpServer, expect) => {
       expect(res.status).to.equal(200);
       expect(res.header['content-type']).to.equal('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       expect(res.header['content-disposition']).to.equal('attachment; filename="Import Data Karyawan Template.xlsx"');
-    })
-  })
+    });
+  });
+
+  describe('PUT /api/v1/user-change-password', () => {
+
+  });
 
 }
