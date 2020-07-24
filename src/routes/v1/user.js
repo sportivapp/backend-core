@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Create, Login , List, Template, ChangePassword, Delete} = require('../../controllers/user');
+const { Create, Login , List, Template, ChangePassword, Delete, ForgotPassword} = require('../../controllers/user');
 const auth = require('../../middlewares/authentication');
 const uploadPath = require('../../../uploads');
 const multer = require('multer');
@@ -16,6 +16,7 @@ const upload = multer({ storage: storage })
 
 router.post('/user', auth.authenticateToken, upload.single('employee'), Create);
 router.post('/user-login', Login);
+router.post('/user-forgot-password', ForgotPassword);
 router.get('/user-list', List);
 router.get('/user-import-template', Template);
 router.put('/user-change-password', auth.authenticateToken, ChangePassword);
