@@ -28,4 +28,12 @@ ProjectService.editProject = async(projectId, projectDTO) => {
 
 }
 
+ProjectService.deleteProject = async(projectId) => {
+
+    const project = await Project.query().delete().where('eprojectid', projectId);
+
+    return project;
+
+}
+
 module.exports = ProjectService;

@@ -66,4 +66,23 @@ module.exports = (chai, httpServer, expect) => {
         expect(res.body.data).to.not.be.undefined;
       });
     });
+
+    describe('DEL /api/v1/project', () => {
+      it('Should return single deleted project id', async () => {
+        const login = await chai.request(httpServer)
+        .post('/api/v1/user-login')
+        .send({
+          email: 'nawakarapm@nawakara.com',
+          password: 'emtivnawakarapm'
+        });
+
+        const res = await chai.request(httpServer)
+        .delete('/api/v1/project/1')
+        .set('authorization', login.body.data.token)
+        .send();
+  
+        expect(res.status).to.equal(200);
+        expect(res.body.data).to.not.be.undefined;
+      });
+    });
 }

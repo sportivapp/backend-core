@@ -23,9 +23,6 @@ module.exports = async (req, res, next) => {
             eprojectaddress: address
         }
 
-        console.log(projectId);
-        console.log(projectDTO);
-
         const project = await projectService.editProject(projectId, projectDTO);
 
         return res.status(200).json({
