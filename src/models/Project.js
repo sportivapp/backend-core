@@ -1,6 +1,6 @@
 const Model = require('./Model');
 
-class Company extends Model {
+class Project extends Model {
   static get tableName() {
     return 'eproject';
   };
@@ -20,4 +20,4 @@ class Company extends Model {
   }
 }
 
-module.exports = Company;
+module.exports = Project;

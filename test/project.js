@@ -22,4 +22,23 @@ module.exports = (chai, httpServer, expect) => {
           expect(res.body.data).to.not.be.undefined;
         });
       });
+
+    describe('GET /api/v1/project', () => {
+      it('Should return a list of projects based on project manager user id', async () => {
+        const login = await chai.request(httpServer)
+        .post('/api/v1/user-login')
+        .send({
+          email: 'nawakarapm@nawakara.com',
+          password: 'emtivnawakarapm'
+        });
+
+        const res = await chai.request(httpServer)
+        .get('/api/v1/project')
+        .set('authorization', login.body.data.token)
+        .send();
+
+        expect(res.status).to.equal(200);
+        expect(res.body.data).to.not.be.undefined;
+      });
+    });
 }

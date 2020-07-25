@@ -10,4 +10,12 @@ ProjectService.createProject = async(projectDTO) => {
 
 }
 
+ProjectService.getProjects = async(userId) => {
+
+    const projects = await Project.query().where('eprojectcreateby', userId);
+
+    return projects;
+
+}
+
 module.exports = ProjectService;
