@@ -12,9 +12,19 @@ ProjectService.createProject = async(projectDTO) => {
 
 ProjectService.getProjects = async(userId) => {
 
-    const projects = await Project.query().where('eprojectcreateby', userId);
+    const projects = await Project.query()
+    .select('eprojectid', 'eprojectname', 'eprojectcode', 'eprojectstartdate', 'eprojectenddate', 'eprojectaddress')
+    .where('eprojectcreateby', userId);
 
     return projects;
+
+}
+
+ProjectService.editProject = async(projectId, projectDTO) => {
+
+    const project = await Project.query().update(projectDTO).where('eprojectid', projectId);
+
+    return project;
 
 }
 

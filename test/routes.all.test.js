@@ -12,7 +12,7 @@ const userTest = require('./user');
 const projectTest = require('./project');
 const project = require('./project');
 
-describe('Routes: users', () => {
+describe('Routes: ', () => {
   beforeEach(() => {
     return knex.migrate.rollback()
       .then(() => knex.migrate.latest())

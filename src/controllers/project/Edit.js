@@ -4,15 +4,16 @@ module.exports = async (req, res, next) => {
 
     try {
 
-        const { code, name, startDate, endDate, address } = req.body;
         const user = req.user;
 
         if (user.permission !== 9) {
             return res.status(401).json({
-                data: 'You cannot create project'
+                data: 'You cannot edit project'
             })
         }
 
+        const { projectId } = req.params;
+        const { code, name, startDate, endDate, address } = req.body;
         const projectDTO = { 
             eprojectcode: code, 
             eprojectname: name,
@@ -22,7 +23,10 @@ module.exports = async (req, res, next) => {
             eprojectaddress: address
         }
 
-        const project = await projectService.createProject(projectDTO);
+        console.log(projectId);
+        console.log(projectDTO);
+
+        const project = await projectService.editProject(projectId, projectDTO);
 
         return res.status(200).json({
             data: project
