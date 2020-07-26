@@ -96,7 +96,7 @@ UsersService.changeUserPassword = async ( user , newPassword) => {
 
 UsersService.deleteUserById = async ( userId ) => {
     
-    const deletedUser = await User.query().select().where('euserid', userId).del();
+    const deletedUser = await User.query().delete().where('euserid', userId);
 
     return deletedUser;
 }
