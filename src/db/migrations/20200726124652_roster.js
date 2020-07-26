@@ -8,7 +8,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('eroster', t => {
     t.timestamp('erosteredittime', true);
     t.integer('erostereditby');
     t.integer('eprojecttablestatus').notNullable().defaultTo(1);
-    t.integer('eprojecteprojectid').notNullable().references('eproject.eprojectid');
+    t.integer('eprojecteprojectid').references('eproject.eprojectid').onDelete('CASCADE');
     t.integer('erostersupervisoruserid').references('euser.euserid');
     t.integer('erosterheaduserid').references('euser.euserid');
   });

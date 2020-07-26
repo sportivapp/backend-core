@@ -7,7 +7,7 @@ module.exports = async (req, res, next) => {
         const { code, name, startDate, endDate, address } = req.body;
         const user = req.user;
 
-        if (user.permission !== 9) {
+        if (user.permission !== 8) {
             return res.status(401).json({
                 data: 'You cannot create project'
             })
