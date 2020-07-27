@@ -1,7 +1,7 @@
 const Roster = require('../models/Roster');
 const RosterUserMapping = require('../models/RosterUserMapping');
 
-RosterService = {};
+const RosterService = {};
 
 RosterService.createRoster = async ( rosterDTO, userIds ) => {
     const newRoster = await Roster.query().insert(rosterDTO);
