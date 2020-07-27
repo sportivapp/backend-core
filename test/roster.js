@@ -85,7 +85,7 @@ module.exports = (chai, httpServer, expect) => {
       });
   
     describe('PUT /api/v1/roster', () => {
-      it('Should return single updated roster id', async () => {
+      it('Should return single updated roster', async () => {
         const login = await chai.request(httpServer)
         .post('/api/v1/user-login')
         .send({
@@ -100,8 +100,29 @@ module.exports = (chai, httpServer, expect) => {
           rosterId: 1,
           rosterName: 'test1',
           rosterDescription: 'this is test1',
-          projectId: 1,
-          userIds: [3]
+          projectId: 1
+        });
+  
+        expect(res.status).to.equal(200);
+        expect(res.body.data).to.not.be.undefined;
+      });
+    });
+
+    describe('PUT /api/v1/roster-members', () => {
+      it('Should return updated roster members', async () => {
+        const login = await chai.request(httpServer)
+        .post('/api/v1/user-login')
+        .send({
+          email: 'nawakarapm@nawakara.com',
+          password: 'emtivnawakarapm'
+        });
+  
+        const res = await chai.request(httpServer)
+        .put('/api/v1/roster-members')
+        .set('authorization', login.body.data.token)
+        .send({
+          rosterId: 1,
+          userIds: [1,2]
         });
   
         expect(res.status).to.equal(200);
