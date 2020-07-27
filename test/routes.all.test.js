@@ -23,9 +23,9 @@ describe('Routes: ', () => {
     return knex.migrate.rollback();
   });
 
-  companyTest(chai, httpServer, expect);
-  userTest(chai, httpServer, expect);
-  projectTest(chai, httpServer, expect);
+  // companyTest(chai, httpServer, expect);
+  // userTest(chai, httpServer, expect);
+  // projectTest(chai, httpServer, expect);
   rosterTest(chai, httpServer, expect);
 
 });

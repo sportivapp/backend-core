@@ -41,20 +41,16 @@ RosterService.viewRosterById = async ( rosterId ) => {
     return roster;
 }
 
-RosterService.updateRosterById = async ( rosterId, rosterDTO ) => {
+RosterService.updateRosterById = async ( rosterId, rosterDTO, userIds ) => {
+    // delete member that's in the roster
+    await RosterUserMapping.query().delete().where('erostererosterid', rosterId);
 
     const updateRoster = await Roster.query().select().where('erosterid', rosterId).update(rosterDTO);
 
-    return updateRoster;
-}
-
-RosterService.updateMemberByRosterId = async ( rosterId, userIds ) => {
-    // delete member that's in the roster
-    await RosterUserMapping.query().delete().where('erostererosterid', rosterId);
     // Insert the updated member
-    const updatedMember = await RosterService.addMember(rosterId, userIds);
+    await RosterService.addMember(rosterId, userIds);
 
-    return updatedMember;
+    return updateRoster;
 }
 
 RosterService.deleteRosterById = async ( rosterId ) => {

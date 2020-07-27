@@ -5,7 +5,7 @@ module.exports = async (req, res, next) => {
     try {
 
         const user = req.user;
-        const { rosterId, rosterName, rosterDescription , projectId, supervisorId, headUserId } = req.body;
+        const { rosterId, rosterName, rosterDescription , projectId, supervisorId, headUserId, userIds } = req.body;
 
         if (user.permission !== 8) {
             return res.status(401).json({
@@ -22,7 +22,7 @@ module.exports = async (req, res, next) => {
         }
 
         // return 1 for true , 0 for false
-        const updateRoster = await RosterService.updateRosterById( rosterId, rosterDTO );
+        const updateRoster = await RosterService.updateRosterById( rosterId, rosterDTO, userIds );
 
         const data = {
             isUpdated: (updateRoster) ? true : false,

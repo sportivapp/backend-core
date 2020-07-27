@@ -3,7 +3,6 @@ const ListMember = require('./ListMember');
 const List = require('./List');
 const View = require('./View');
 const Update = require('./Update');
-const UpdateMember = require('./UpdateMember');
 const Delete = require('./Delete');
 
-module.exports = { Create, ListMember, List, View, Update, UpdateMember, Delete};
+module.exports = { Create, ListMember, List, View, Update, Delete};
