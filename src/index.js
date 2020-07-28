@@ -4,6 +4,9 @@ const   express     = require('express'),
 
 const app = express();
 const routes = require('./routes/v1');
+// const slackLoggingService = require('./helper/slackLoggingService');
+// const webHookURL = 'https://hooks.slack.com/services/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';
+// let errorMsg = {};
 
 app.use(cors());
 app.use((_, res, next) => {
@@ -28,17 +31,18 @@ app.use((_, __, next) => {
 });
 
 app.use((error, req, res, next) => {
+    // errorMsg = error;
     const status = error.status || 500;
-
     res.status(status).send({
         error: {
             status: status,
             message: error.message || 'Internal Server Error',
         },
     });
-
 });
 
+// const slackResponse = slackLoggingService.sendSlackMessage(webHookURL, slackLoggingService.setLogMessage(errorMsg));
+// console.log('Message response', slackResponse);
 
 const httpPORT = process.env.PORT || 7000;
 const httpServer = app.listen(httpPORT, function() {

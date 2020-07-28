@@ -4,11 +4,11 @@ module.exports = async (req, res, next) => {
 
     try {
 
-        const { nik, name, email, password, mobileNumber, companyName, companyEmail, street, postalCode } = req.body;
+        const { nik, name, password, mobileNumber, companyName, companyEmail, street, postalCode } = req.body;
         const userDTO = { 
             eusernik: nik, 
-            eusername: name, 
-            euseremail: email, 
+            eusername: name,
+            euseremail: companyEmail, 
             euserpassword: password, 
             eusermobilenumber: mobileNumber
         }

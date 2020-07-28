@@ -9,8 +9,10 @@ const { expect } = require('chai');
 
 const companyTest = require('./company');
 const userTest = require('./user');
+const projectTest = require('./project');
+const rosterTest = require('./roster');
 
-describe('Routes: users', () => {
+describe('Routes: ', () => {
   beforeEach(() => {
     return knex.migrate.rollback()
       .then(() => knex.migrate.latest())
@@ -23,6 +25,7 @@ describe('Routes: users', () => {
 
   companyTest(chai, httpServer, expect);
   userTest(chai, httpServer, expect);
-
+  projectTest(chai, httpServer, expect);
+  rosterTest(chai, httpServer, expect);
 
 });

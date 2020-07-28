@@ -1,8 +1,10 @@
 const User = require('../models/User');
+const UserChangePassword = require('../models/UserChangePassword');
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const readXlsxFile = require("read-excel-file/node");
+const emailService = require('../helper/emailService');
 
 const UsersService = {};
 
@@ -57,8 +59,10 @@ async function generateJWTToken(user) {
 
 }
 
-UsersService.getAllUserByCompanyId = async ( ecompanyId ) => {
-    const users = await User.query().select().where('ecompanyecompanyid', ecompanyId);
+UsersService.getAllUserByCompanyId = async ( companyId ) => {
+    
+    const users = await User.query().select('eusername', 'euseremail', 'eusernik', 'eusermobilenumber')
+    .where('ecompanyecompanyid', companyId);
 
     return users;
 
@@ -77,6 +81,34 @@ UsersService.login = async (loginDTO) => {
 
     return token;
 
+}
+
+UsersService.changeUserPassword = async ( user , newPassword) => {
+
+    const encryptedPassword = await bcrypt.hash(newPassword);
+
+    const newData = await UserChangePassword.query().select().where('euserid', user.sub).update({
+        euserpassword: encryptedPassword
+    });
+
+    return newData;
+}
+
+UsersService.deleteUserById = async ( userId ) => {
+    
+    const deletedUser = await User.query().delete().where('euserid', userId);
+
+    return deletedUser;
+}
+
+UsersService.sendForgotPasswordLink = async ( userEmail ) => {
+    const isEmailAvailable = await User.query().select().where('euseremail', userEmail).first();
+
+    if(isEmailAvailable) {
+        await emailService.sendForgotPasswordLink(userEmail);
+    }
+
+    return true;
 }
 
 module.exports = UsersService;
