@@ -14,19 +14,19 @@ module.exports = async (req, res, next) => {
         }
 
         const { announcementId } = req.params;
-        const { announcementTitle, announcementContent } = req.body;
+        const { announcementTitle, announcementContent, userIds } = req.body;
 
         const announcementDTO = {
             eannouncementtitle: announcementTitle,
             eannouncementcontent: announcementContent,
             eannouncementeditby: user.sub,
-            eannouncementedittime: Date.now()
+            eannouncementedittime: new Date(Date.now())
         }
 
-        const isUpdated = await announcementService.updateAnnouncement(announcementId, announcementDTO);
+        const isUpdated = await announcementService.updateAnnouncement(announcementId, announcementDTO, userIds);
 
         const data = {
-            isDeleted: (isUpdated) ? true : false,
+            isUpdated: (isUpdated) ? true : false,
             message: (isUpdated) ? "Successfully update announcement!" : "Failed to update announcement!"
         }
 
