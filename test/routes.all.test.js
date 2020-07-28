@@ -11,6 +11,7 @@ const companyTest = require('./company');
 const userTest = require('./user');
 const projectTest = require('./project');
 const rosterTest = require('./roster');
+const announcementTest = require('./announcement');
 
 describe('Routes: ', () => {
   beforeEach(() => {
@@ -23,9 +24,10 @@ describe('Routes: ', () => {
     return knex.migrate.rollback();
   });
 
-  // companyTest(chai, httpServer, expect);
-  // userTest(chai, httpServer, expect);
-  // projectTest(chai, httpServer, expect);
+  companyTest(chai, httpServer, expect);
+  userTest(chai, httpServer, expect);
+  projectTest(chai, httpServer, expect);
   rosterTest(chai, httpServer, expect);
+  announcementTest(chai, httpServer, expect);
 
 });
