@@ -10,7 +10,6 @@ exports.up = (knex, Promise) => knex.schema.createTable('eannouncement', t => {
     t.timestamp('eannouncementdeletetime', false);
     t.integer('eannouncementdeletestatus').defaultTo(0);
     t.integer('eannouncementtablestatus').notNullable().defaultTo(1);
-    t.integer('eusereuserid').notNullable().references('euser.euserid');
   });
   
   exports.down = (knex, Promise) => knex.schema.dropTable('eannouncement');
