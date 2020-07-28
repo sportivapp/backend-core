@@ -4,7 +4,7 @@ module.exports = async (req, res, next) => {
 
     try {
 
-        const { announcementTitle, announcementContent } = req.body;
+        const { announcementTitle, announcementContent, userIds } = req.body;
         const user = req.user;
 
         if (user.permission !== 7) {
@@ -16,11 +16,10 @@ module.exports = async (req, res, next) => {
         const announcementDTO = {
             eannouncementtitle: announcementTitle,
             eannouncementcontent: announcementContent,
-            eannouncementcreateby: user.sub,
-            eusereuserid: user.sub
+            eannouncementcreateby: user.sub
         }
 
-        const announcement = await announcementService.createAnnouncement(announcementDTO);
+        const announcement = await announcementService.createAnnouncement(announcementDTO, userIds);
 
         return res.status(200).json({
             data: announcement
