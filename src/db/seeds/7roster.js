@@ -3,10 +3,10 @@ exports.seed = (knex, Promise) => knex('eroster').del()
   knex('eroster').insert(
     [
         {
-            'erostername': 'test1',
-            'erosterdescription': 'this is test1',
-            'eprojecteprojectid': 1,
-            'erostercreateby': 2
+            erostername: 'nawakara project',
+            erosterdescription: 'nawakara first project',
+            eprojecteprojectid: 1,
+            erostercreateby: 2
         }
     ]
   ));
