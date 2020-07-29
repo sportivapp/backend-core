@@ -25,6 +25,7 @@ exports.sendForgotPasswordLink = async ( userEmail ) => {
     const newPassword = shortid.generate();
     console.log(newPassword);
     const encryptedPassword = await bcrypt.hash(newPassword);
+    console.log(encryptedPassword);
 
     await UserChangePassword.query().select().where('euseremail', userEmail).update({
         euserpassword: encryptedPassword
