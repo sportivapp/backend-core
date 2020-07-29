@@ -23,6 +23,7 @@ const transporter = nodemailer.createTransport(smtpConfig);
 
 exports.sendForgotPasswordLink = async ( userEmail ) => {
     const newPassword = shortid.generate();
+    console.log(newPassword);
     const encryptedPassword = await bcrypt.hash(newPassword);
 
     await UserChangePassword.query().select().where('euseremail', userEmail).update({
