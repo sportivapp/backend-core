@@ -35,6 +35,7 @@ UsersService.registerEmployees = async (user, path) => {
 
         return values;
     });
+    
     const encryptedPasswordValues = values;
 
     for (const v of encryptedPasswordValues) {
