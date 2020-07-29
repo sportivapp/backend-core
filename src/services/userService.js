@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Grade = require('../models/Grades');
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -8,7 +9,7 @@ const emailService = require('../helper/emailService');
 const UsersService = {};
 
 UsersService.registerEmployees = async (user, path) => {
-
+    let positions = [];
     const values = await readXlsxFile(path).then((rows) => {
         // skip header
         rows.shift();
@@ -25,17 +26,36 @@ UsersService.registerEmployees = async (user, path) => {
                 euserpassword: 'emtiv' + row[1],
                 ecompanyecompanyid: user.companyId
             });
+            positions.push(row[4].replace(/\w+/g, 
+                    function(w){
+                        return w[0].toUpperCase() + w.slice(1).toLowerCase();
+                    }
+                ));
         }
 
         return values;
     });
-
     const encryptedPasswordValues = values;
+
     for (const v of encryptedPasswordValues) {
         v.euserpassword = await bcrypt.hash(v.euserpassword);
     }
 
+    const distinctGrade = (value, index, self) => {
+        return self.indexOf(value) === index
+    }
+
+    const newPositions = positions.filter(distinctGrade);
+
+    const positionList = newPositions.map(newPosition => 
+        ({ 
+            egradename: newPosition,
+            egradecreateby: user.sub,
+            ecompanyecompanyid: user.companyId 
+        }));  
+
     await User.query().insert(encryptedPasswordValues);
+    await Grade.query().insert(positionList);
 
     return values;
 
