@@ -1,6 +1,6 @@
 exports.up = (knex, Promise) => knex.schema.createTable('egrade', t => {
     t.increments('egradeid').primary().unsigned();
-    t.string('egrandename', 256).notNullable();
+    t.string('egradename', 256).notNullable();
     t.integer('egradecreateby').notNullable();
     t.string('egradedescription', 256);
     t.timestamp('egradecreatetime', false).notNullable().defaultTo(knex.fn.now());
