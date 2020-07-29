@@ -13,7 +13,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
         },
         {
           euserpermission: 9,
-          eusernik: 99999999,
+          eusernik: 999999999,
           eusername: 'nawakarahrd',
           euseremail: 'nawakarahrd@nawakara.com',
           euserpassword: '$2y$10$WdQCsI5fJycPmk4OVOzl0O70qSQAF44UFADY/2LuX3X5X15jQfns6',
@@ -27,15 +27,6 @@ exports.seed = (knex, Promise) => knex('euser').del()
           euseremail: 'nawakarapm@nawakara.com',
           euserpassword: '$2y$10$Bvc8IkjHw420Eu7T/PbwwOfnKRuhy0NP3P3FwLkm7hdzPJ2lFdvs.',
           eusermobilenumber: '888888888',
-          ecompanyecompanyid: 1
-        },
-        {
-          euserpermission: 7,
-          eusernik: 777777777,
-          eusername: 'nawakaradanru',
-          euseremail: 'nawakaradanru@nawakara.com',
-          euserpassword: '$2y$10$rYjVoeD7q47GD382oqleDeRgjG/De/t6xFBP8GA0LonbghWOWxvqa',
-          eusermobilenumber: '777777777',
           ecompanyecompanyid: 1
         },
         {
