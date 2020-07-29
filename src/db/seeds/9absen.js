@@ -7,21 +7,21 @@ exports.seed = (knex, Promise) => knex('eabsen').del()
             eabsenstatus: 'Hadir',
             eabsendescription: 'Sehat',
             eabsencreateby: 5,
-            eusereuserid: 5
+            eusereuserid: 4
         },
         {
             eabsenlocationdistanceaccuracy: '99',
             eabsenstatus: 'Hadir',
             eabsendescription: 'Sedikit pilek',
             eabsencreateby: 6,
-            eusereuserid: 6
+            eusereuserid: 5
         },
         {
             eabsenlocationdistanceaccuracy: '100',
             eabsenstatus: 'Sakit',
             eabsendescription: 'Tidak enak badan',
             eabsencreateby: 7,
-            eusereuserid: 7
+            eusereuserid: 6
         },
 
     ]
