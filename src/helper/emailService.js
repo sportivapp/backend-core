@@ -30,7 +30,7 @@ exports.sendForgotPasswordLink = async ( userId, email ) => {
     // await UserChangePassword.query().select().where('euseremail', userEmail).update({
     //     euserpassword: encryptedPassword
     // });
-    await User.query().updateAndFetchById(userId, { euserpassword: encryptedPassword });
+    await User.query().patchAndFetchById(userId, { euserpassword: encryptedPassword });
 
     // const html = 'Forgot password link';
 
