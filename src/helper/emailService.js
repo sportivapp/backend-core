@@ -3,6 +3,7 @@ const nodemailer = require("nodemailer");
 const shortid = require("shortid");
 const bcrypt = require('../helper/bcrypt');
 const UserChangePassword = require('../models/UserChangePassword');
+const User = require('../models/User');
 
 const smtpConfig = {
     host: process.env.MAIL_SMTPHOST,
@@ -22,19 +23,20 @@ const smtpConfig = {
 
 const transporter = nodemailer.createTransport(smtpConfig);
 
-exports.sendForgotPasswordLink = async ( userEmail ) => {
+exports.sendForgotPasswordLink = async ( userId, email ) => {
     const newPassword = await shortid.generate();
     const encryptedPassword = await bcrypt.hash(newPassword);
 
-    await UserChangePassword.query().select().where('euseremail', userEmail).update({
-        euserpassword: encryptedPassword
-    });
+    // await UserChangePassword.query().select().where('euseremail', userEmail).update({
+    //     euserpassword: encryptedPassword
+    // });
+    await User.query().updateAndFetchById(userId, { euserpassword: encryptedPassword });
 
     // const html = 'Forgot password link';
 
     const info = await transporter.sendMail({
         from: process.env.MAIL_SMTPNAME, // sender address
-        to: userEmail, // list of receivers
+        to: email, // list of receivers
         subject: 'Forgot Password Code - Nawakara', // Subject line
         text: 'Berikut adalah password baru kamu: ' + newPassword, // plain text body
         // html: html
