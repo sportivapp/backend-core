@@ -1,5 +1,4 @@
 const User = require('../models/User');
-const UserChangePassword = require('../models/UserChangePassword');
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -88,9 +87,6 @@ UsersService.changeUserPassword = async ( user , newPassword) => {
     const encryptedPassword = await bcrypt.hash(newPassword);
 
     const newData = await User.query().patchAndFetchById(user.sub, { euserpassword: encryptedPassword });
-    // const newData = await UserChangePassword.query().select().where('euserid', user.sub).update({
-    //     euserpassword: encryptedPassword
-    // });
 
     return newData;
 }

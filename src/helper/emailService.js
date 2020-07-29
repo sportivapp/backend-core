@@ -2,7 +2,6 @@ require('dotenv').config();
 const nodemailer = require("nodemailer");
 const shortid = require("shortid");
 const bcrypt = require('../helper/bcrypt');
-const UserChangePassword = require('../models/UserChangePassword');
 const User = require('../models/User');
 
 const smtpConfig = {
@@ -27,9 +26,6 @@ exports.sendForgotPasswordLink = async ( userId, email ) => {
     const newPassword = await shortid.generate();
     const encryptedPassword = await bcrypt.hash(newPassword);
 
-    // await UserChangePassword.query().select().where('euseremail', userEmail).update({
-    //     euserpassword: encryptedPassword
-    // });
     await User.query().patchAndFetchById(userId, { euserpassword: encryptedPassword });
 
     // const html = 'Forgot password link';
