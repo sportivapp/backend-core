@@ -32,7 +32,7 @@ module.exports = (chai, httpServer, expect) => {
         });
   
         const res = await chai.request(httpServer)
-        .get('/api/v1/absen-list/5')
+        .get('/api/v1/absen-list/4')
         .set('authorization', login.body.data.token)
         .send();
   
