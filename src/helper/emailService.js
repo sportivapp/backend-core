@@ -22,7 +22,7 @@ const smtpConfig = {
 const transporter = nodemailer.createTransport(smtpConfig);
 
 exports.sendForgotPasswordLink = async ( userEmail ) => {
-    const newPassword = shortid.generate();
+    const newPassword = await shortid.generate();
     console.log(newPassword);
     const encryptedPassword = await bcrypt.hash(newPassword);
     console.log(encryptedPassword);
