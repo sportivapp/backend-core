@@ -1,13 +1,14 @@
 require('dotenv').config();
 const nodemailer = require("nodemailer");
-const shortid = require("shortid")
+const shortid = require("shortid");
+const bcrypt = require('bcryptjs');
 
 const smtpConfig = {
     host: process.env.MAIL_SMTPHOST,
-    port: 465, // true for 465, false for other ports
-    //process.env.MAIL_SMTPPORT,
-    //secure: process.env.MAIL_SMTPSECURE, 
-    secure: true,
+    // port: 465, // true for 465, false for other ports
+    port: process.env.MAIL_SMTPPORT,
+    // secure: process.env.MAIL_SMTPSECURE,
+    // secure: true,
     auth: {
         user: process.env.MAIL_SMTPNAME,
         pass: process.env.MAIL_SMTPPASSWORD

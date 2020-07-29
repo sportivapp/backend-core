@@ -70,6 +70,7 @@ UsersService.getAllUserByCompanyId = async ( companyId ) => {
 
 UsersService.login = async (loginDTO) => {
 
+    console.log(loginDTO);
     const user = await User.query().select().where('euseremail', loginDTO.euseremail).first();
     const success = await bcrypt.compare(loginDTO.euserpassword, user.euserpassword);
 
@@ -101,11 +102,11 @@ UsersService.deleteUserById = async ( userId ) => {
     return deletedUser;
 }
 
-UsersService.sendForgotPasswordLink = async ( userEmail ) => {
-    const isEmailAvailable = await User.query().select().where('euseremail', userEmail).first();
+UsersService.sendForgotPasswordLink = async ( email ) => {
+    const isEmailAvailable = await User.query().select().where('euseremail', email).first();
 
     if(isEmailAvailable) {
-        await emailService.sendForgotPasswordLink(userEmail);
+        await emailService.sendForgotPasswordLink(email);
     }
 
     return true;

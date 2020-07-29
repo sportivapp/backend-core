@@ -4,9 +4,9 @@ module.exports = async (req, res, next) => {
 
     try {
 
-        const userEmail = req.body.userEmail; 
+        const email = req.body.email; 
 
-        await userService.sendForgotPasswordLink( userEmail );
+        await userService.sendForgotPasswordLink( email );
 
         const data = {
             message: "Successfully Send Password"
