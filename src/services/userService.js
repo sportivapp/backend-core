@@ -70,7 +70,6 @@ UsersService.getAllUserByCompanyId = async ( companyId ) => {
 
 UsersService.login = async (loginDTO) => {
 
-    console.log(loginDTO);
     const user = await User.query().select().where('euseremail', loginDTO.euseremail).first();
     const success = await bcrypt.compare(loginDTO.euserpassword, user.euserpassword);
 
