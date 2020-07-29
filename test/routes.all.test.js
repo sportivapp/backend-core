@@ -12,6 +12,7 @@ const userTest = require('./user');
 const projectTest = require('./project');
 const rosterTest = require('./roster');
 const announcementTest = require('./announcement');
+const absenTest = require('./absen');
 
 describe('Routes: ', () => {
   beforeEach(() => {
@@ -29,5 +30,6 @@ describe('Routes: ', () => {
   projectTest(chai, httpServer, expect);
   rosterTest(chai, httpServer, expect);
   announcementTest(chai, httpServer, expect);
+  absenTest(chai, httpServer, expect);
 
 });
