@@ -7,13 +7,15 @@ const companyRoutes = require('./company');
 const projectRoutes = require('./project');
 const rosterRoutes = require('./roster');
 const announcementRoutes = require('./announcement');
+const absenRoutes = require('./absen');
 
 router.use('/api/v1', [
     userRoutes,
     companyRoutes,
     projectRoutes,
     rosterRoutes,
-    announcementRoutes
+    announcementRoutes,
+    absenRoutes
 ]);
 
 module.exports = router;
