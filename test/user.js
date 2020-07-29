@@ -65,7 +65,7 @@ module.exports = (chai, httpServer, expect) => {
       const login = await chai.request(httpServer)
       .post('/api/v1/user-login')
       .send({
-        email: 'nawakarauser@nawakara.com',
+        email: 'nawakarauser1@nawakara.com',
         password: 'emtivnawakarauser'
       });
       const res = await chai.request(httpServer)
@@ -77,7 +77,7 @@ module.exports = (chai, httpServer, expect) => {
       const login2 = await chai.request(httpServer)
       .post('/api/v1/user-login')
       .send({
-        email: 'nawakarauser@nawakara.com',
+        email: 'nawakarauser1@nawakara.com',
         password: 'nawakarauserpassword'
       });
 
