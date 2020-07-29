@@ -41,8 +41,26 @@ exports.seed = (knex, Promise) => knex('euser').del()
         {
           euserpermission: 1,
           eusernik: 111111111,
-          eusername: 'nawakarauser',
-          euseremail: 'nawakarauser@nawakara.com',
+          eusername: 'nawakarauser1',
+          euseremail: 'nawakarauser1@nawakara.com',
+          euserpassword: '$2y$10$0QN7AN62i6hjTMboj2OAROle8q9D9prO41KgUYgniRnGWqo2G6YN.',
+          eusermobilenumber: '11111111',
+          ecompanyecompanyid: 1
+        },
+        {
+          euserpermission: 1,
+          eusernik: 111111111,
+          eusername: 'nawakarauser2',
+          euseremail: 'nawakarauser2@nawakara.com',
+          euserpassword: '$2y$10$0QN7AN62i6hjTMboj2OAROle8q9D9prO41KgUYgniRnGWqo2G6YN.',
+          eusermobilenumber: '11111111',
+          ecompanyecompanyid: 1
+        },
+        {
+          euserpermission: 1,
+          eusernik: 111111111,
+          eusername: 'nawakarauser3',
+          euseremail: 'nawakarauser3@nawakara.com',
           euserpassword: '$2y$10$0QN7AN62i6hjTMboj2OAROle8q9D9prO41KgUYgniRnGWqo2G6YN.',
           eusermobilenumber: '11111111',
           ecompanyecompanyid: 1
