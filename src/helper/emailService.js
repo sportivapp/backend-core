@@ -2,6 +2,7 @@ require('dotenv').config();
 const nodemailer = require("nodemailer");
 const shortid = require("shortid");
 const bcrypt = require('../helper/bcrypt');
+const UserChangePassword = require('../models/UserChangePassword');
 
 const smtpConfig = {
     host: process.env.MAIL_SMTPHOST,
