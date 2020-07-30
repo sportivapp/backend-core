@@ -13,8 +13,8 @@ exports.up = (knex, Promise) => knex.schema.createTable('eabsen', t => {
     t.timestamp('eabsendeletetime', false);
     t.integer('eabsendeletestatus').defaultTo(0);
     t.integer('eabsentablestatus').notNullable().defaultTo(1);
-    t.integer('eusereuserid').notNullable().references('euser.euserid');
-    // t.integer('elocationelocationid').notNullable().references('elocation.elocationid');
+    t.integer('eusereuserid').references('euser.euserid');
+    t.integer('elocationelocationid').notNullable().references('elocation.elocationid');
   });
   
   exports.down = (knex, Promise) => knex.schema.dropTable('eabsen');
