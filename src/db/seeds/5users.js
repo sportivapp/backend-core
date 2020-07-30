@@ -13,7 +13,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
         },
         {
           euserpermission: 9,
-          eusernik: 99999999,
+          eusernik: 999999999,
           eusername: 'nawakarahrd',
           euseremail: 'nawakarahrd@nawakara.com',
           euserpassword: '$2y$10$WdQCsI5fJycPmk4OVOzl0O70qSQAF44UFADY/2LuX3X5X15jQfns6',
@@ -30,19 +30,28 @@ exports.seed = (knex, Promise) => knex('euser').del()
           ecompanyecompanyid: 1
         },
         {
-          euserpermission: 7,
-          eusernik: 777777777,
-          eusername: 'nawakaradanru',
-          euseremail: 'nawakaradanru@nawakara.com',
-          euserpassword: '$2y$10$rYjVoeD7q47GD382oqleDeRgjG/De/t6xFBP8GA0LonbghWOWxvqa',
-          eusermobilenumber: '777777777',
+          euserpermission: 1,
+          eusernik: 111111111,
+          eusername: 'nawakarauser1',
+          euseremail: 'nawakarauser1@nawakara.com',
+          euserpassword: '$2y$10$0QN7AN62i6hjTMboj2OAROle8q9D9prO41KgUYgniRnGWqo2G6YN.',
+          eusermobilenumber: '11111111',
           ecompanyecompanyid: 1
         },
         {
           euserpermission: 1,
           eusernik: 111111111,
-          eusername: 'nawakarauser',
-          euseremail: 'nawakarauser@nawakara.com',
+          eusername: 'nawakarauser2',
+          euseremail: 'nawakarauser2@nawakara.com',
+          euserpassword: '$2y$10$0QN7AN62i6hjTMboj2OAROle8q9D9prO41KgUYgniRnGWqo2G6YN.',
+          eusermobilenumber: '11111111',
+          ecompanyecompanyid: 1
+        },
+        {
+          euserpermission: 1,
+          eusernik: 111111111,
+          eusername: 'nawakarauser3',
+          euseremail: 'nawakarauser3@nawakara.com',
           euserpassword: '$2y$10$0QN7AN62i6hjTMboj2OAROle8q9D9prO41KgUYgniRnGWqo2G6YN.',
           eusermobilenumber: '11111111',
           ecompanyecompanyid: 1

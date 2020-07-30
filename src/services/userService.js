@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const UserChangePassword = require('../models/UserChangePassword');
+const Grade = require('../models/Grades');
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -9,7 +9,7 @@ const emailService = require('../helper/emailService');
 const UsersService = {};
 
 UsersService.registerEmployees = async (user, path) => {
-
+    let positions = [];
     const values = await readXlsxFile(path).then((rows) => {
         // skip header
         rows.shift();
@@ -26,17 +26,37 @@ UsersService.registerEmployees = async (user, path) => {
                 euserpassword: 'emtiv' + row[1],
                 ecompanyecompanyid: user.companyId
             });
+            positions.push(row[4].replace(/\w+/g, 
+                    function(w){
+                        return w[0].toUpperCase() + w.slice(1).toLowerCase();
+                    }
+                ));
         }
 
         return values;
     });
-
+    
     const encryptedPasswordValues = values;
+
     for (const v of encryptedPasswordValues) {
         v.euserpassword = await bcrypt.hash(v.euserpassword);
     }
 
+    const distinctGrade = (value, index, self) => {
+        return self.indexOf(value) === index
+    }
+
+    const newPositions = positions.filter(distinctGrade);
+
+    const positionList = newPositions.map(newPosition => 
+        ({ 
+            egradename: newPosition,
+            egradecreateby: user.sub,
+            ecompanyecompanyid: user.companyId 
+        }));  
+
     await User.query().insert(encryptedPasswordValues);
+    await Grade.query().insert(positionList);
 
     return values;
 
@@ -70,7 +90,6 @@ UsersService.getAllUserByCompanyId = async ( companyId ) => {
 
 UsersService.login = async (loginDTO) => {
 
-    console.log(loginDTO);
     const user = await User.query().select().where('euseremail', loginDTO.euseremail).first();
     const success = await bcrypt.compare(loginDTO.euserpassword, user.euserpassword);
 
@@ -88,9 +107,7 @@ UsersService.changeUserPassword = async ( user , newPassword) => {
 
     const encryptedPassword = await bcrypt.hash(newPassword);
 
-    const newData = await UserChangePassword.query().select().where('euserid', user.sub).update({
-        euserpassword: encryptedPassword
-    });
+    const newData = await User.query().patchAndFetchById(user.sub, { euserpassword: encryptedPassword });
 
     return newData;
 }
@@ -106,7 +123,8 @@ UsersService.sendForgotPasswordLink = async ( email ) => {
     const isEmailAvailable = await User.query().select().where('euseremail', email).first();
 
     if(isEmailAvailable) {
-        await emailService.sendForgotPasswordLink(email);
+        const userId = isEmailAvailable.euserid;
+        await emailService.sendForgotPasswordLink(userId, email);
     }
 
     return true;
