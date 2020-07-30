@@ -1,4 +1,5 @@
 const Model = require('./Model');
+const Project = require('./Project');
 
 class Roster extends Model {
   static get tableName() {
@@ -21,6 +22,17 @@ class Roster extends Model {
         erosterheaduserid: {type: 'integer' }
       }
     };
+  }
+
+  static relationMappings = {
+    project: {
+      relation: Model.BelongsToOneRelation,
+      modelClass: Project,
+      join: {
+        from: 'eroster.eprojecteprojectid',
+        to: 'eproject.eprojectid'
+      }
+    }
   }
 }
 

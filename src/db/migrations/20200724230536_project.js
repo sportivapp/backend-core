@@ -5,8 +5,8 @@ exports.up = (knex, Promise) => knex.schema.createTable('eproject', t => {
     t.string('eprojectdescription');
     t.string('eaddresslatitude');
     t.string('eaddresslongitude');
-    t.timestamp('eprojectstartdate', true).notNullable();
-    t.timestamp('eprojectenddate', true).notNullable();
+    t.date('eprojectstartdate', true).notNullable();
+    t.date('eprojectenddate', true).notNullable();
     t.string('eprojectaddress');
     t.boolean('eprojectisactive').notNullable().defaultTo(true);
     t.integer('eprojectcreateby').notNullable();
