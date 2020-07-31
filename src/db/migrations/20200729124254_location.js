@@ -17,6 +17,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('elocation', t => {
     t.timestamp('elocationdeletetime', false);
     t.integer('elocationdeletestatus').defaultTo(0);
     t.integer('elocationtablestatus').notNullable().defaultTo(1);
+    // t.integer('edeviceedeviceid').notNullable().references('edevice.edeviceid');
     t.integer('edeviceedeviceid').notNullable().references('edevice.edeviceid');
   });
   
