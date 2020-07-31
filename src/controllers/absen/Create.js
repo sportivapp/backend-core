@@ -8,7 +8,7 @@ module.exports = async (req, res, next) => {
 
         if (user.permission !== 1){
             return res.status(401).json({
-                data: 'You cannot view absen'
+                data: 'You cannot create absen'
             })
         }
 
