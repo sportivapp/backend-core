@@ -5,7 +5,7 @@ module.exports = async (req, res, next) => {
 
     const { permitId } = req.params
 
-    const user = { ...req.user }
+    const user = req.user
 
     try {
         const result = await permitService.deletePermitById(permitId, user)

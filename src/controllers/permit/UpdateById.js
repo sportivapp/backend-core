@@ -7,7 +7,7 @@ module.exports = async (req, res, next) => {
 
     const permitRequest = req.body
 
-    const user = { ...req.user }
+    const user = req.user
 
     const permitDTO = {
         epermitdescription: permitRequest.description,

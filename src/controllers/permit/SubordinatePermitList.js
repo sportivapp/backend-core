@@ -5,7 +5,7 @@ module.exports = async (req, res, next) => {
 
     const { page, size } = req.query
 
-    const user = { ...req.user }
+    const user = req.user
 
     try {
         const pageObj = await permitService.getSubordinatePermitList(parseInt(page), parseInt(size), user)
