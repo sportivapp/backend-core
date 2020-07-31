@@ -4,16 +4,7 @@ const AbsenService = require('../../services/absenService');
 module.exports = async (req, res, next) => {
 
     try {
-        // userId sementara dikirim dari body, seharusnya dari token
-        // const user = req.user;
         const { locationAccuracy, absenTime, absenStatus, absenDescription, imageFile, imageType, deviceId, userId } = req.body;
-
-        // if (user.permission !== 1){
-        //     return res.status(401).json({
-        //         data: 'You cannot create absen'
-        //     })
-        // }
-
         
         const locationDTO = {
             elocationcode: 'tay',
