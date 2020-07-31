@@ -22,6 +22,21 @@ class User extends Model {
       }
     };
   }
+
+  static get relationMappings() {
+
+    const Permit = require('./Permit')
+    return {
+      permits: {
+        relation: Model.HasManyRelation,
+        modelClass: Permit,
+        join: {
+          from: 'euser.euserid',
+          to: 'epermit.euseruserid'
+        }
+      }
+    }
+  }
 }
 
 module.exports = User;
