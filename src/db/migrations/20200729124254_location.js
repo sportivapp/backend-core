@@ -4,7 +4,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('elocation', t => {
     t.string('elocationname', 256);
     t.string('elocationdescription', 256);
     t.string('elocationlongitude', 51).notNullable();
-    t.string('elocationlattitude', 51).notNullable();
+    t.string('elocationlatitude', 51).notNullable();
     t.string('elocationaddress', 256);
     t.time('elocationtimein', false);
     t.time('elocationtimeout', false);
@@ -17,7 +17,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('elocation', t => {
     t.timestamp('elocationdeletetime', false);
     t.integer('elocationdeletestatus').defaultTo(0);
     t.integer('elocationtablestatus').notNullable().defaultTo(1);
-    // t.integer('edeviceedeviceid').notNullable().references('edevice.edeviceid');
+    t.integer('edeviceedeviceid').notNullable().references('edevice.edeviceid');
   });
   
   exports.down = (knex, Promise) => knex.schema.dropTable('elocation');
