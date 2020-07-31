@@ -3,7 +3,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('eabsen', t => {
     t.string('eabsenlocationdistanceaccuracy', 256);
     t.string('eabsenstatus', 256);
     t.string('eabsendescription', 256);
-    t.timestamp('eabsentime', false).notNullable().defaultTo(knex.fn.now());
+    t.timestamp('eabsentime', false).notNullable();
     t.integer('eabsensyncstatus');
     t.integer('eabsencreateby').notNullable();
     t.timestamp('eabsencreatetime', false).notNullable().defaultTo(knex.fn.now());
