@@ -7,7 +7,7 @@ module.exports = async (req, res, next) => {
 
         const user = req.user;
 
-        if (user.permission !== 7) {
+        if (user.permission !== 7 || user.permission !== 8) {
             return res.status(401).json({
                 data: 'You cannot update announcement'
             })
