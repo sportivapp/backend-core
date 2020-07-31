@@ -4,7 +4,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
       [
         {
           euserpermission: 10,
-          eusernik: 123456789,
+          eusernik: 'E1',
           eusername: 'nawakaraadmin',
           euseremail: 'nawakaraadmin@nawakara.com',
           euserpassword: '$2y$10$UzQchZo/FrFs4UMzrRPp2OXj.tjV495wGW977M4SSczXqdVUWRaKu',
@@ -13,7 +13,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
         },
         {
           euserpermission: 9,
-          eusernik: 999999999,
+          eusernik: 'E2',
           eusername: 'nawakarahrd',
           euseremail: 'nawakarahrd@nawakara.com',
           euserpassword: '$2y$10$WdQCsI5fJycPmk4OVOzl0O70qSQAF44UFADY/2LuX3X5X15jQfns6',
@@ -22,7 +22,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
         },
         {
           euserpermission: 8,
-          eusernik: 888888888,
+          eusernik: 'E3',
           eusername: 'nawakarapm',
           euseremail: 'nawakarapm@nawakara.com',
           euserpassword: '$2y$10$Bvc8IkjHw420Eu7T/PbwwOfnKRuhy0NP3P3FwLkm7hdzPJ2lFdvs.',
@@ -31,7 +31,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
         },
         {
           euserpermission: 1,
-          eusernik: 111111111,
+          eusernik: 'E4',
           eusername: 'nawakarauser1',
           euseremail: 'nawakarauser1@nawakara.com',
           euserpassword: '$2y$10$0QN7AN62i6hjTMboj2OAROle8q9D9prO41KgUYgniRnGWqo2G6YN.',
@@ -40,7 +40,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
         },
         {
           euserpermission: 1,
-          eusernik: 111111111,
+          eusernik: 'E5',
           eusername: 'nawakarauser2',
           euseremail: 'nawakarauser2@nawakara.com',
           euserpassword: '$2y$10$0QN7AN62i6hjTMboj2OAROle8q9D9prO41KgUYgniRnGWqo2G6YN.',
@@ -49,7 +49,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
         },
         {
           euserpermission: 1,
-          eusernik: 111111111,
+          eusernik: 'E6',
           eusername: 'nawakarauser3',
           euseremail: 'nawakarauser3@nawakara.com',
           euserpassword: '$2y$10$0QN7AN62i6hjTMboj2OAROle8q9D9prO41KgUYgniRnGWqo2G6YN.',
