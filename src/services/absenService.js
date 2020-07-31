@@ -1,11 +1,16 @@
 const Absen = require('../models/Absen');
+const Image = require('../models/Image');
+const Location = require('../models/Location');
 
 const AbsenService = {};
 
-AbsenService.createAbsen = async ( absenDTO ) => {
+AbsenService.createAbsenByPOS = async ( absenDTO, imageDTO ) => {
+    
     const absen = await Absen.query().insert(absenDTO);
 
-    return absen;
+    const image = await Image.query().insert(imageDTO);
+
+    return { absen, image };
 }
 
 AbsenService.listAbsenById = async ( userId ) => {
@@ -35,6 +40,13 @@ AbsenService.deleteAbsen = async ( absenId, userSub ) => {
     });
 
     return deletedAbsen;
+}
+
+AbsenService.createLocation = async ( locationDTO ) => {
+
+    const location = await Location.query().insert(locationDTO);
+
+    return location;
 }
 
 module.exports = AbsenService;

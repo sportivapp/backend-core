@@ -2,7 +2,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('euser', t => {
     t.increments('euserid').primary().unsigned();
     t.integer('euserpermission').notNullable().defaultTo(1);
     t.integer('euseruserstatus').notNullable().defaultTo(1);
-    t.integer('eusernik');
+    t.string('eusernik');
     t.timestamp('euserlastlogout', true);
     t.string('eusername', 256).notNullable();
     t.string('euseremail', 256).notNullable();

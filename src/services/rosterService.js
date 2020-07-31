@@ -1,5 +1,6 @@
 const Roster = require('../models/Roster');
 const RosterUserMapping = require('../models/RosterUserMapping');
+const { types } = require('pg');
 
 const RosterService = {};
 
@@ -64,11 +65,13 @@ RosterService.deleteRosterById = async ( rosterId ) => {
 
 RosterService.generateRosterShiftForDate = async (hourType, formation, rosterId, date) => {
 
+    // return date as is
+    types.setTypeParser(1082, value => value);
+
     const roster = await Roster.query().select('eproject.eprojectstartdate')
     .join('eproject', 'eroster.eprojecteprojectid', 'eproject.eprojectid').where('erosterid', rosterId).first();
 
-    // const start = roster.eprojectstartdate; => 2020-07-24 becomes 2020-07-23...
-    const start = '2020-07-01';
+    const start = roster.eprojectstartdate;
     const shifts = await RosterService.getRosterShiftsByDate(hourType, formation, start, date);
 
     return shifts;
