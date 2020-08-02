@@ -1,17 +1,22 @@
 const Announcement = require('../models/Announcement');
 const AnnouncementUserMapping = require('../models/AnnouncementUserMapping');
 const AnnouncementDelete = require('../models/AnnouncementDelete');
+const ServiceHelper = require('../helper/ServiceHelper')
 
 const AnnouncementService = {};
 
-AnnouncementService.getAllAnnouncement = async () => {
-    const allAnnouncement = await Announcement.query().select().where('eannouncementdeletestatus', 0);
+AnnouncementService.getAllAnnouncement = async (page, size, user) => {
+    const announcementPage = await Announcement.query().select().where('eannouncementdeletestatus', 0).page( page, size);
 
-    return allAnnouncement;
+    if (announcementPage && user.permission !== 1) return
+
+    return ServiceHelper.toPageObj(page, size, announcementPage);
 }
 
-AnnouncementService.getAnnouncementById = async (announcementId) => {
+AnnouncementService.getAnnouncementById = async (announcementId, user) => {
     const announcement = await Announcement.query().select().where('eannouncementid', announcementId).first();
+
+    if (announcement && user.permission !== 1) return
 
     return announcement;
 }
@@ -28,7 +33,9 @@ AnnouncementService.addUser = async (announcementId, userIds) => {
     return insertedUser;
 }
 
-AnnouncementService.createAnnouncement = async ( announcementDTO, userIds ) => {
+AnnouncementService.createAnnouncement = async ( announcementDTO, userIds, user ) => {
+    if (user.permission === 1) return
+
     const announcement = await Announcement.query().insert(announcementDTO);
 
     await AnnouncementService.addUser(announcement.eannouncementid, userIds);
@@ -37,28 +44,33 @@ AnnouncementService.createAnnouncement = async ( announcementDTO, userIds ) => {
 }
 
 
-AnnouncementService.updateAnnouncement = async (announcementId, announcementDTO, userIds) => {
+AnnouncementService.updateAnnouncement = async (announcementId, announcementDTO, userIds, user) => {
+    
+    if (user.permission === 1) return
+
     // remove user that has the announcement
     await AnnouncementUserMapping.query().delete().where('eannouncementeannouncementid', announcementId);
 
-    const updatedAnnouncement = await Announcement.query().where('eannouncementid', announcementId).update(announcementDTO);
+    const result = await Announcement.query().where('eannouncementid', announcementId).update(announcementDTO);
 
     // Insert user that get the announcement
     await AnnouncementService.addUser(parseInt(announcementId, 10) , userIds);
 
-    return updatedAnnouncement;
+    return result;
 }
 
 //soft delete ( not actually deleted )
-AnnouncementService.deleteAnnouncement = async (announcementId, userSub) => {
+AnnouncementService.deleteAnnouncement = async (announcementId, user) => {
 
-    const deleteAnnouncement = await AnnouncementDelete.query().where('eannouncementid', announcementId).update({
+    if (user.permission === 1) return
+
+    const result = await AnnouncementDelete.query().where('eannouncementid', announcementId).update({
         eannouncementdeletestatus: 1,
-        eannouncementdeleteby: userSub,
+        eannouncementdeleteby: user.sub,
         eannouncementdeletetime: new Date( Date.now() )
     });
 
-    return deleteAnnouncement;
+    return result;
 }
 
 module.exports = AnnouncementService;
