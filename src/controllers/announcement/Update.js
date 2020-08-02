@@ -1,20 +1,12 @@
+const ResponseHelper = require('../../helper/ResponseHelper')
 const announcementService = require('../../services/announcementService');
-const { fn } = require('../../db/config');
-
 module.exports = async (req, res, next) => {
+   
+    const user = req.user;
+    const { announcementId } = req.params;
+    const { announcementTitle, announcementContent, userIds } = req.body;
 
     try {
-
-        const user = req.user;
-
-        if (user.permission !== 7 || user.permission !== 8) {
-            return res.status(401).json({
-                data: 'You cannot update announcement'
-            })
-        }
-
-        const { announcementId } = req.params;
-        const { announcementTitle, announcementContent, userIds } = req.body;
 
         const announcementDTO = {
             eannouncementtitle: announcementTitle,
@@ -23,16 +15,11 @@ module.exports = async (req, res, next) => {
             eannouncementedittime: new Date(Date.now())
         }
 
-        const isUpdated = await announcementService.updateAnnouncement(announcementId, announcementDTO, userIds);
+        const result = await announcementService.updateAnnouncement(announcementId, announcementDTO, userIds, user);
 
-        const data = {
-            isUpdated: (isUpdated) ? true : false,
-            message: (isUpdated) ? "Successfully update announcement!" : "Failed to update announcement!"
-        }
-
-        return res.status(200).json({
-            data: data
-        });
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch(e) {
         next(e);

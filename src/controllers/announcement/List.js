@@ -1,22 +1,15 @@
+const ResponseHelper = require('../../helper/ResponseHelper')
 const announcementService = require('../../services/announcementService');
 
 module.exports = async (req, res, next) => {
 
+    const { page, size } = req.query
+    const user = req.user;
+
     try {
+        const pageObj = await announcementService.getAllAnnouncement(parseInt(page), parseInt(size), user);
 
-        const user = req.user;
-
-        if (user.permission !== 1 && user.permission !== 7) {
-            return res.status(401).json({
-                data: 'You cannot get all announcement'
-            })
-        }
-
-        const announcement = await announcementService.getAllAnnouncement();
-
-        return res.status(200).json({
-            data: announcement
-        });
+        return res.status(200).json(ResponseHelper.toBaseResponse(pageObj.data, pageObj.paging))
         
     } catch (e) {
         next(e);

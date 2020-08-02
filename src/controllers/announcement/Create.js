@@ -1,17 +1,12 @@
+const ResponseHelper = require('../../helper/ResponseHelper')
 const announcementService = require('../../services/announcementService');
 
 module.exports = async (req, res, next) => {
+    
+    const { announcementTitle, announcementContent, userIds } = req.body;
+    const user = req.user;
 
     try {
-
-        const { announcementTitle, announcementContent, userIds } = req.body;
-        const user = req.user;
-
-        if (user.permission !== 7 || user.permission !== 8) {
-            return res.status(401).json({
-                data: 'You cannot create announcement'
-            })
-        }
 
         const announcementDTO = {
             eannouncementtitle: announcementTitle,
@@ -19,11 +14,11 @@ module.exports = async (req, res, next) => {
             eannouncementcreateby: user.sub
         }
 
-        const announcement = await announcementService.createAnnouncement(announcementDTO, userIds);
+        const result = await announcementService.createAnnouncement(announcementDTO, userIds, user);
 
-        return res.status(200).json({
-            data: announcement
-        });
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
         
     } catch (e) {
         next(e);
