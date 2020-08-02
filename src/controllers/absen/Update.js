@@ -7,12 +7,6 @@ module.exports = async (req, res, next) => {
     const { absenId } = req.params;
     const { locationAccuracy, absenStatus, absenDescription } = req.body;
 
-    if (user.permission !== 1){
-        return res.status(401).json({
-            data: 'You cannot update absen'
-        })
-    }
-
     try {
 
         const absenDTO = {
@@ -23,7 +17,7 @@ module.exports = async (req, res, next) => {
             eabsenedittime: new Date(Date.now())
         }
 
-        const result = await absenService.editAbsen(absenId, absenDTO);
+        const result = await absenService.editAbsen(absenId, absenDTO, user);
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))

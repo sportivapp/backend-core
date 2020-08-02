@@ -6,15 +6,9 @@ module.exports = async (req, res, next) => {
     const user = req.user;
     const { absenId } = req.params;
 
-    if (user.permission !== 1) {
-        return res.status(401).json({
-            data: 'You cannot delete absen'
-        })
-    }
-
     try {
 
-        const result = await absenService.deleteAbsen(absenId, user.sub);
+        const result = await absenService.deleteAbsen(absenId, user);
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))

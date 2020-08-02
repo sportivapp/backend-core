@@ -1,6 +1,7 @@
 const Absen = require('../models/Absen');
 const Image = require('../models/Image');
 const Location = require('../models/Location');
+const ServiceHelper = require('../helper/ServiceHelper')
 
 const AbsenService = {};
 
@@ -13,33 +14,37 @@ AbsenService.createAbsenByPOS = async ( absenDTO, imageDTO ) => {
     return { absen, image };
 }
 
-AbsenService.listAbsenById = async ( userId ) => {
-    const absen = await Absen.query().select().where('eusereuserid', userId).andWhere('eabsendeletestatus', 0).orderBy('eabsencreatetime', 'asc');
+AbsenService.listAbsenById = async ( page, size, userId ) => {
+    const absenPage = await Absen.query().select().where('eusereuserid', userId).andWhere('eabsendeletestatus', 0).orderBy('eabsencreatetime', 'asc').page(page, size);
 
-    return absen;
+    return ServiceHelper.toPageObj(page, size, absenPage);
 }
 
-AbsenService.listAbsen = async () => {
-    const absen = await Absen.query().select().where('eabsendeletestatus', 0).orderBy('eabsencreatetime');
+AbsenService.listAbsen = async ( page, size ) => {
+    const absenPage = await Absen.query().select().where('eabsendeletestatus', 0).orderBy('eabsencreatetime').page(page, size);
 
-    return absen;
+    return ServiceHelper.toPageObj(page, size, absenPage);
 }
 
-AbsenService.editAbsen = async ( absenId, absenDTO ) => {
-    const updatedAbsen = await Absen.query().where('eabsenid', absenId).update(absenDTO);
+AbsenService.editAbsen = async ( absenId, absenDTO, user ) => {
+    const absen = await Absen.query().where('eabsenid', absenId).andWhere('eusereuserid', user.sub).update(absenDTO);
 
-    return updatedAbsen;
+    if (user.permission !== 1 && absen) return
+
+    return absen;
 }
 
 // soft delete absen
-AbsenService.deleteAbsen = async ( absenId, userSub ) => {
-    const deletedAbsen = await Absen.query().where('eabsenid', absenId).update({
-        eabsendeleteby: userSub,
+AbsenService.deleteAbsen = async ( absenId, user ) => {
+    const absen = await Absen.query().where('eabsenid', absenId).andWhere('eusereuserid', user.sub).update({
+        eabsendeleteby: user.sub,
         eabsendeletetime: new Date(Date.now()),
         eabsendeletestatus: 1
     });
 
-    return deletedAbsen;
+    if (user.permission !== 1 && absen) return
+
+    return absen;
 }
 
 AbsenService.createLocation = async ( locationDTO ) => {
