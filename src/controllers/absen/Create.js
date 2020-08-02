@@ -38,7 +38,7 @@ module.exports = async (req, res, next) => {
 
     try {
 
-        const result = await absenService.createAbsenByPOS(absenDTO, imageDTO, locationDTO);
+        const result = await absenService.createAbsenByPOS(absenDTO, imageDTO);
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
