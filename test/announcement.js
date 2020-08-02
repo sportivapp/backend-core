@@ -4,8 +4,8 @@ module.exports = (chai, httpServer, expect) => {
         const login = await chai.request(httpServer)
         .post('/api/v1/user-login')
         .send({
-          email: 'nawakaradanru@nawakara.com',
-          password: 'emtivnawakaradanru'
+          email: 'nawakarapm@nawakara.com',
+          password: 'emtivnawakarapm'
         });
   
         const res = await chai.request(httpServer)
@@ -27,8 +27,8 @@ module.exports = (chai, httpServer, expect) => {
         const login = await chai.request(httpServer)
         .post('/api/v1/user-login')
         .send({
-            email: 'nawakaradanru@nawakara.com',
-            password: 'emtivnawakaradanru'
+            email: 'nawakarauser2@nawakara.com',
+            password: 'emtivnawakarauser'
         });
   
         const res = await chai.request(httpServer)
@@ -46,8 +46,8 @@ module.exports = (chai, httpServer, expect) => {
           const login = await chai.request(httpServer)
           .post('/api/v1/user-login')
           .send({
-            email: 'nawakaradanru@nawakara.com',
-            password: 'emtivnawakaradanru'
+            email: 'nawakarauser2@nawakara.com',
+            password: 'emtivnawakarauser'
           });
     
           const res = await chai.request(httpServer)
@@ -65,8 +65,8 @@ module.exports = (chai, httpServer, expect) => {
         const login = await chai.request(httpServer)
         .post('/api/v1/user-login')
         .send({
-            email: 'nawakaradanru@nawakara.com',
-            password: 'emtivnawakaradanru'
+          email: 'nawakarapm@nawakara.com',
+          password: 'emtivnawakarapm'
         });
   
         const res = await chai.request(httpServer)
@@ -88,8 +88,8 @@ module.exports = (chai, httpServer, expect) => {
         const login = await chai.request(httpServer)
         .post('/api/v1/user-login')
         .send({
-            email: 'nawakaradanru@nawakara.com',
-            password: 'emtivnawakaradanru'
+          email: 'nawakarapm@nawakara.com',
+          password: 'emtivnawakarapm'
         });
   
         const res = await chai.request(httpServer)

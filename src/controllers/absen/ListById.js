@@ -1,23 +1,16 @@
+const ResponseHelper = require('../../helper/ResponseHelper')
 const absenService = require('../../services/absenService');
 
 module.exports = async (req, res, next) => {
 
+    const { page, size } = req.query
+    const { userId } = req.params
+
     try {
 
-        const { userId } = req.params;
-        const user = req.user;
+        const pageObj = await absenService.listAbsenById(parseInt(page), parseInt(size), userId);
 
-        if (user.permission !== 1) {
-            return res.status(401).json({
-                data: 'You cannot view list absen by id'
-            })
-        }
-
-        const absen = await absenService.listAbsenById(userId);
-
-        return res.status(200).json({
-            data: absen
-        });
+        return res.status(200).json(ResponseHelper.toBaseResponse(pageObj.data, pageObj.paging))
         
     } catch (e) {
         next(e);

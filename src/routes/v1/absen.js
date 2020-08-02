@@ -4,8 +4,8 @@ const { Create, List, ListById, Update, Delete } = require('../../controllers/ab
 const auth = require('../../middlewares/authentication');
 
 router.post('/absen', Create);
-router.get('/absen-list/:userId', auth.authenticateToken, ListById);
-router.get('/absen-list', auth.authenticateToken, List);
+router.get('/absen-list/:userId', ListById);
+router.get('/absen-list', List);
 router.put('/absen/:absenId', auth.authenticateToken, Update);
 router.put('/absen-delete/:absenId', auth.authenticateToken, Delete);
 
