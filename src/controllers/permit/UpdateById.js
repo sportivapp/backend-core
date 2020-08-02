@@ -11,14 +11,14 @@ module.exports = async (req, res, next) => {
 
     const permitDTO = {
         epermitdescription: permitRequest.description,
-        epermitStartDate: permitRequest.startDate,
-        epermitEndDate: permitRequest.endDate
+        epermitstartdate: permitRequest.startDate,
+        epermitenddate: permitRequest.endDate
     }
 
     try {
         const result = await permitService.updatePermitById(permitId, permitDTO, user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
-        return res.status(500).json(ResponseHelper.toErrorResponse(500))
+        next(e)
     }
 }

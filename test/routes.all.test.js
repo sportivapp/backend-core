@@ -13,7 +13,7 @@ const projectTest = require('./project');
 const rosterTest = require('./roster');
 const announcementTest = require('./announcement');
 const absenTest = require('./absen');
-
+const permitTest = require('./permit')
 describe('Routes: ', () => {
   beforeEach(() => {
     return knex.migrate.rollback()
@@ -31,5 +31,7 @@ describe('Routes: ', () => {
   rosterTest(chai, httpServer, expect);
   announcementTest(chai, httpServer, expect);
   absenTest(chai, httpServer, expect);
+  permitTest(chai, httpServer, expect)
+
 
 });

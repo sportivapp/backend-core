@@ -12,6 +12,5 @@ module.exports = async (req, res, next) => {
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
     } catch (e) {
         next(e)
-        return res.status(500).json(ResponseHelper.toErrorResponse(500))
     }
 }

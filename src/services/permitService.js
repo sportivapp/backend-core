@@ -17,8 +17,7 @@ permitService.getSubordinatePermitList = async (page, size, user) => {
 
     let permissionLevel = 0
 
-    if (user.permission === 7) permissionLevel = 1
-    else if (user.permission === 8) permissionLevel = 7
+    if (user.permission === 7 || user.permission === 8) permissionLevel = 1
 
     const subordinatesQuery = User.query().where('euserpermission', permissionLevel)
 
@@ -55,7 +54,7 @@ permitService.requestApproval = async (permitId, user) => {
     if (!permit || permit.user.euserid != user.sub)
         return
 
-    return Permit.query().patchAndFetchById(permitId, { epermitstatus: 1 })
+    return permit.$query().patchAndFetch({ epermitstatus: 1 })
 }
 
 permitService.createPermit = async (permitDTO, user) => {
@@ -69,7 +68,7 @@ permitService.createPermit = async (permitDTO, user) => {
     else {
         const foundUser = await User.query().where("euserid", permitDTO.euseruserid).first()
         if (!isDanruPermitByPM(foundUser.euserpermission, user.permission)
-            && !isStaffPermitByDanruAndPM(foundUser.euserpermission, user.permission))
+            && !isStaffPermitByDanruOrPM(foundUser.euserpermission, user.permission))
             return
     }
 
@@ -80,24 +79,20 @@ permitService.updatePermitStatusById = async (permitId, status, user) => {
 
     let permit = await permitService.getPermitById(permitId, user)
 
-    if (!isStaffPermitByDanru(permit.user.euserpermission, user.permission)
-        && !isDanruPermitByPM(permit.user.euserpermission, user.permission))
-        return
-
-    else
-        return Permit.query().patchAndFetchById(permitId, { epermitstatus: status })
+    if(!isStaffPermitByDanruOrPM(permit.user.euserpermission, user.permission)
+        && !isDanruPermitByPM(permit.user.euserpermission, user.permission)) return
+    else return permit.$query().patchAndFetch({ epermitstatus: status })
 }
 
 permitService.updatePermitById = async (permitId, permitDTO, user) => {
 
     const permit = await permitService.getPermitById(permitId, user)
 
-    permit.epermitdescription = permitDTO.epermitdescription
-    permit.epermitstartdate = permitDTO.epermitstartdate
-    permit.epermitenddate = permitDTO.epermitenddate
-
-    return Permit.query().update(permit)
-
+    return permit.$query().patchAndFetch({
+        epermitdescription: permitDTO.epermitdescription,
+        epermitstartdate: permitDTO.epermitstartdate,
+        epermitenddate: permitDTO.epermitenddate
+    })
 }
 
 permitService.deletePermitById = async (permitId, user) => {
@@ -128,7 +123,7 @@ function isStaffPermitByDanru(permission, superiorPermission) {
     return permission === 1 && superiorPermission === 7
 }
 
-function isStaffPermitByDanruAndPM(permission, superiorPermission) {
+function isStaffPermitByDanruOrPM(permission, superiorPermission) {
 
     return permission === 1 && (superiorPermission === 7 || superiorPermission === 8)
 }
