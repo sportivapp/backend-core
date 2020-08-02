@@ -22,7 +22,7 @@ exports.seed = (knex) => knex('epermit').del()
                     epermitdescription: 'nawakara permit pm',
                     epermitstartdate: '2020-12-12',
                     epermitenddate: '2020-12-24',
-                    epermitstatus: 2,
+                    epermitstatus: 1,
                     euseruserid: 3,
                     epermitcreateby: 4
                 }

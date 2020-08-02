@@ -11,6 +11,6 @@ module.exports = async (req, res, next) => {
         const result = await permitService.updatePermitStatusById(permitId, status, user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
-        return res.status(500).json(ResponseHelper.toErrorResponse(500))
+        next(e)
     }
 }
