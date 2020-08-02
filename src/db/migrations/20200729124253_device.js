@@ -9,9 +9,9 @@ exports.up = (knex, Promise) => knex.schema.createTable('edevice', t => {
     t.timestamp('edeviceedittime', false);
     t.integer('edevicedeleteby');
     t.timestamp('edevicedeletetime', false);
-    t.integer('edevicedeletestatus').defaultTo(0);
+    t.integer('edevicedeletesta tus').defaultTo(0);
     t.integer('edevicetablestatus').notNullable().defaultTo(1);
-    t.integer('eprojecteprojectid').nullable().references('eproject.eprojectid').onDelete('SET NULL');
+    t.integer('eprojecteprojectid').notNullable().references('eproject.eprojectid');
   });
   
   exports.down = (knex, Promise) => knex.schema.dropTable('edevice');
