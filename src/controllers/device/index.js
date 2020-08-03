@@ -20,7 +20,7 @@ controller.getDevices = async (req, res, next) => {
 
 }
 
-controller.GetDeviceById = async (req, res, next) => {
+controller.getDeviceById = async (req, res, next) => {
 
     const { deviceId } = req.params
 
@@ -34,7 +34,7 @@ controller.GetDeviceById = async (req, res, next) => {
     }
 }
 
-controller.CreateDevice = async (req, res, next) => {
+controller.createDevice = async (req, res, next) => {
 
     if(!isUserValid(req.user))
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
@@ -58,7 +58,7 @@ controller.CreateDevice = async (req, res, next) => {
     }
 }
 
-controller.UpdateDevice = async (req, res, next) => {
+controller.updateDevice = async (req, res, next) => {
 
     if(!isUserValid(req.user))
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
@@ -82,7 +82,7 @@ controller.UpdateDevice = async (req, res, next) => {
     }
 }
 
-controller.DeleteDevice = async (req, res, next) => {
+controller.deleteDevice = async (req, res, next) => {
 
     if(!isUserValid(req.user))
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
@@ -97,7 +97,7 @@ controller.DeleteDevice = async (req, res, next) => {
     }
 }
 
-controller.GetProjectsByDeviceId = async (req, res, next) => {
+controller.getProjectsByDeviceId = async (req, res, next) => {
 
     const { page, size } = req.query
 
@@ -111,7 +111,7 @@ controller.GetProjectsByDeviceId = async (req, res, next) => {
     }
 }
 
-controller.SaveProjectsIntoDevice = async (req, res, next) => {
+controller.saveProjectsIntoDevice = async (req, res, next) => {
 
     if(!isUserValid(req.user))
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
