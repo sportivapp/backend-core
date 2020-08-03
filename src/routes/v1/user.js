@@ -17,9 +17,9 @@ const upload = multer({ storage: storage })
 router.post('/user', auth.authenticateToken, upload.single('employee'), Create);
 router.post('/user-login', Login);
 router.post('/user-forgot-password', ForgotPassword);
-router.get('/user-list/:companyId', auth.authenticateToken, List);
+router.get('/user/:companyId', auth.authenticateToken, List);
 router.get('/user-import-template', Template);
 router.put('/user-change-password', auth.authenticateToken, ChangePassword);
-router.delete('/user-delete/:userId', auth.authenticateToken, Delete);
+router.delete('/user/:userId', auth.authenticateToken, Delete);
 
 module.exports = router;

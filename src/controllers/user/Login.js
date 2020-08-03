@@ -1,4 +1,5 @@
 const userService = require('../../services/userService');
+const ResponseHelper = require('../../helper/ResponseHelper')
 
 module.exports = async (req, res, next) => {
 
@@ -10,19 +11,11 @@ module.exports = async (req, res, next) => {
 
     try {
 
-        const token = await userService.login(loginDTO);
+        const result = await userService.login(loginDTO);
 
-        if (token === null) {
-            return res.status(400).json('Wrong email or password')
-        }
-
-        const data = {
-            token: token
-        }
-
-        return res.status(200).json({
-            data: data
-        });
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch(e) {
         next(e);

@@ -11,7 +11,7 @@ const UsersService = {};
 
 UsersService.registerEmployees = async (user, path) => {
 
-    if (user.permission !== 10) return
+    if (user.permission < 9) return
 
     let positions = [];
     const values = await readXlsxFile(path).then((rows) => {
@@ -120,7 +120,7 @@ UsersService.changeUserPassword = async ( user , newPassword) => {
 
 UsersService.deleteUserById = async ( userId, user ) => {
     
-    if (user.permission !== 10) return
+    if (user.permission < 9) return
 
     const result = await User.query().delete().where('euserid', userId);
 
