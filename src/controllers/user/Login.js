@@ -2,13 +2,13 @@ const userService = require('../../services/userService');
 
 module.exports = async (req, res, next) => {
 
-    try {
+    const { email, password } = req.body;
+    const loginDTO = { 
+        euseremail: email, 
+        euserpassword: password
+    }
 
-        const { email, password } = req.body;
-        const loginDTO = { 
-            euseremail: email, 
-            euserpassword: password
-        }
+    try {
 
         const token = await userService.login(loginDTO);
 

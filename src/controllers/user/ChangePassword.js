@@ -2,10 +2,10 @@ const userService = require('../../services/userService');
 
 module.exports = async (req, res, next) => {
 
-    try {
+    const user = req.user;
+    const { newPassword } = req.body; 
 
-        const user = req.user;
-        const { newPassword } = req.body; 
+    try {
 
         // return 1 for true , 0 for false
         const changePassword = await userService.changeUserPassword(user, newPassword);

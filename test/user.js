@@ -2,11 +2,17 @@ module.exports = (chai, httpServer, expect) => {
   
   describe('GET /api/v1/user-list', () => {
     it('Should return a list of users based on ecompany Id', async () => {
-      const res = await chai.request(httpServer)
-      .get('/api/v1/user-list')
-      .send({
-        companyId: 1
+      const login = await chai.request(httpServer)
+      .post('/api/v1/user-login')
+      .send({ 
+        email: 'nawakaraadmin@nawakara.com', 
+        password: 'emtivnawakaraadmin' 
       });
+
+      const res = await chai.request(httpServer)
+      .get('/api/v1/user-list/1')
+      .set('authorization', login.body.data.token)
+      .send();
       expect(res.status).to.equal(200);
       expect(res.body.data).to.not.be.undefined;
     });
@@ -40,23 +46,21 @@ module.exports = (chai, httpServer, expect) => {
   });
 
   describe('DEL /api/v1/user-delete', () => {
-    it('Should return isDeleted true', async () => {
+    it('Should return success message', async () => {
       const login = await chai.request(httpServer)
       .post('/api/v1/user-login')
       .send({
         email: 'nawakaraadmin@nawakara.com',
         password: 'emtivnawakaraadmin'
       });
+
       const res = await chai.request(httpServer)
-      .delete('/api/v1/user-delete')
+      .delete('/api/v1/user-delete/1')
       .set('authorization', login.body.data.token)
-      .send({
-        userId: 2
-      });
+      .send();
 
       expect(res.status).to.equal(200);
-      expect(res.body.data.isDeleted).to.equal(true);
-      expect(res.body.data.message).to.equal('User Successfully Delete!');
+      expect(res.body.data).to.not.be.undefined;
     });
   });
 

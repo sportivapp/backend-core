@@ -1,23 +1,18 @@
 const userService = require('../../services/userService');
+const ResponseHelper = require('../../helper/ResponseHelper')
 
 module.exports = async (req, res, next) => {
 
+    const path = req.file.path;
+    const user = req.user;
+
     try {
 
-        const path = req.file.path;
-        const user = req.user;
+        const result = await userService.registerEmployees(user, path);
 
-        if (user.permission !== 10) {
-            return res.status(401).json({
-                data: 'You cannot register employees'
-            })
-        }
-
-        const employees = await userService.registerEmployees(user, path);
-
-        return res.status(200).json({
-            data: employees
-        });
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch(e) {
         next(e);

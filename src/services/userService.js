@@ -5,10 +5,14 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const readXlsxFile = require("read-excel-file/node");
 const emailService = require('../helper/emailService');
+const ServiceHelper = require('../helper/ServiceHelper')
 
 const UsersService = {};
 
 UsersService.registerEmployees = async (user, path) => {
+
+    if (user.permission !== 10) return
+
     let positions = [];
     const values = await readXlsxFile(path).then((rows) => {
         // skip header
@@ -79,12 +83,14 @@ async function generateJWTToken(user) {
 
 }
 
-UsersService.getAllUserByCompanyId = async ( companyId ) => {
+UsersService.getAllUserByCompanyId = async ( page, size, companyId, user ) => {
     
-    const users = await User.query().select('eusername', 'euseremail', 'eusernik', 'eusermobilenumber')
-    .where('ecompanyecompanyid', companyId);
+    const userPage = await User.query().select('eusername', 'euseremail', 'eusernik', 'eusermobilenumber')
+    .where('ecompanyecompanyid', companyId).page(page, size);
 
-    return users;
+    if (user.permission < 8 && userPage) return 
+ 
+    return ServiceHelper.toPageObj(page, size, userPage)
 
 }
 
@@ -112,11 +118,13 @@ UsersService.changeUserPassword = async ( user , newPassword) => {
     return newData;
 }
 
-UsersService.deleteUserById = async ( userId ) => {
+UsersService.deleteUserById = async ( userId, user ) => {
     
-    const deletedUser = await User.query().delete().where('euserid', userId);
+    if (user.permission !== 10) return
 
-    return deletedUser;
+    const result = await User.query().delete().where('euserid', userId);
+
+    return result;
 }
 
 UsersService.sendForgotPasswordLink = async ( email ) => {
