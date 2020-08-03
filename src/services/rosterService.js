@@ -1,15 +1,19 @@
 const Roster = require('../models/Roster');
 const RosterUserMapping = require('../models/RosterUserMapping');
+const ServiceHelper = require('../helper/ServiceHelper')
 const { types } = require('pg');
 
 const RosterService = {};
 
-RosterService.createRoster = async ( rosterDTO, userIds ) => {
-    const newRoster = await Roster.query().insert(rosterDTO);
+RosterService.createRoster = async ( rosterDTO, userIds, user ) => {
 
-    await RosterService.addMember(newRoster.erosterid, userIds )
+    if (user.permission !== 8 && user.permission !== 10) return
 
-    return newRoster;
+    const result = await Roster.query().insert(rosterDTO);
+
+    await RosterService.addMember(result.erosterid, userIds )
+
+    return result;
 }
 
 RosterService.addMember = async ( rosterId, userIds ) => {
@@ -19,48 +23,61 @@ RosterService.addMember = async ( rosterId, userIds ) => {
             eusereuserid: user
         }));  
 
-    const insertedMembers = await RosterUserMapping.query().insert(members);
+    const result = await RosterUserMapping.query().insert(members);
 
-    return insertedMembers;
+    return result;
 }
 
-RosterService.getAllRosters = async () => {
-    const rosters = await Roster.query().select();
+RosterService.getAllRosters = async ( page, size, user ) => {
 
-    return rosters;
+    if (user.permission !== 8 && user.permission !== 10) return
+
+    const rosterPage = await Roster.query().select().page(page, size);
+
+    return ServiceHelper.toPageObj(page, size, rosterPage);
+
 }
 
-RosterService.getAllMemberById = async ( rosterId ) => {
-    const members = await RosterUserMapping.query().select().where('erostererosterid', rosterId);
+RosterService.getAllMemberById = async ( page, size, rosterId, user ) => {
 
-    return members;
+    if (user.permission !== 7 && user.permission !== 8 && user.permission !== 10) return
+
+    const membersPage = await RosterUserMapping.query().select().where('erostererosterid', rosterId).page(page, size);
+
+    return ServiceHelper.toPageObj(page, size, membersPage);
 }
 
-RosterService.viewRosterById = async ( rosterId ) => {
-    const roster = await Roster.query().select().where('erosterid', rosterId).first();
+RosterService.viewRosterById = async (rosterId, user ) => {
 
-    return roster;
+    if (user.permission !== 8 && user.permission !== 10) return
+
+    const result = await Roster.query().select().where('erosterid', rosterId).first();
+
+    return result;
 }
 
-RosterService.updateRosterById = async ( rosterId, rosterDTO, userIds ) => {
+RosterService.updateRosterById = async ( rosterId, rosterDTO, userIds, user ) => {
+
+    if (user.permission !== 8 && user.permission !== 10) return
+
     // delete member that's in the roster
     await RosterUserMapping.query().delete().where('erostererosterid', rosterId);
 
-    const updateRoster = await Roster.query().select().where('erosterid', rosterId).update(rosterDTO);
+    const result = await Roster.query().select().where('erosterid', rosterId).update(rosterDTO);
 
     // Insert the updated member
     await RosterService.addMember(rosterId, userIds);
 
-    return updateRoster;
+    return result;
 }
 
-RosterService.deleteRosterById = async ( rosterId ) => {
-    // delete member that's in the roster
-    await RosterUserMapping.query().delete().where('erostererosterid', rosterId);
+RosterService.deleteRosterById = async ( rosterId, user ) => {
 
-    const deletedRoster = await Roster.query().delete().where('erosterid', rosterId);
+    if (user.permission !== 8 && user.permission !== 10) return
 
-    return deletedRoster;
+    const result = await Roster.query().delete().where('erosterid', rosterId);
+
+    return result;
 }
 
 RosterService.generateRosterShiftForDate = async (hourType, formation, rosterId, date) => {

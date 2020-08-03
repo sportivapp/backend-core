@@ -33,11 +33,9 @@ module.exports = (chai, httpServer, expect) => {
         });
   
         const res = await chai.request(httpServer)
-        .get('/api/v1/roster')
+        .get('/api/v1/roster/1')
         .set('authorization', login.body.data)
-        .send({
-          rosterId: 1
-        });
+        .send();
   
         expect(res.status).to.equal(200);
         expect(res.body.data).to.not.be.undefined;
@@ -54,18 +52,16 @@ module.exports = (chai, httpServer, expect) => {
           });
     
           const res = await chai.request(httpServer)
-          .get('/api/v1/roster-members')
+          .get('/api/v1/roster-members/1')
           .set('authorization', login.body.data)
-          .send({
-              rosterId: 1
-          });
+          .send();
     
           expect(res.status).to.equal(200);
           expect(res.body.data).to.not.be.undefined;
         });
       });
 
-      describe('GET /api/v1/roster-list', () => {
+      describe('GET /api/v1/roster', () => {
         it('Should return a list of roste', async () => {
           const login = await chai.request(httpServer)
           .post('/api/v1/user-login')
@@ -75,7 +71,7 @@ module.exports = (chai, httpServer, expect) => {
           });
     
           const res = await chai.request(httpServer)
-          .get('/api/v1/roster-list')
+          .get('/api/v1/roster')
           .set('authorization', login.body.data)
           .send();
     
@@ -94,7 +90,7 @@ module.exports = (chai, httpServer, expect) => {
         });
   
         const res = await chai.request(httpServer)
-        .put('/api/v1/roster')
+        .put('/api/v1/roster/1')
         .set('authorization', login.body.data)
         .send({
           rosterId: 1,
@@ -119,11 +115,9 @@ module.exports = (chai, httpServer, expect) => {
         });
   
         const res = await chai.request(httpServer)
-        .delete('/api/v1/roster')
+        .delete('/api/v1/roster/1')
         .set('authorization', login.body.data)
-        .send({
-          rosterId: 1
-        });
+        .send();
   
         expect(res.status).to.equal(200);
         expect(res.body.data).to.not.be.undefined;
