@@ -122,9 +122,14 @@ UsersService.deleteUserById = async ( userId, user ) => {
     
     if (user.permission < 9) return
 
-    const result = await User.query().delete().where('euserid', userId);
+    const user = await User.query().where('euserid', userId).update({
+        euserdeleteby: user.sub,
+        euserdeletetime: new Date(Date.now()),
+        euserdeletestatus: 1
+    });
 
-    return result;
+    return user;
+
 }
 
 UsersService.sendForgotPasswordLink = async ( email ) => {
