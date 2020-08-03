@@ -8,7 +8,6 @@ deviceService.getDevices = async (page, size) => {
 
     const devicePage = await Device.query()
         .page(page, size)
-    console.log(devicePage)
     return ServiceHelper.toPageObj(page, size, devicePage)
 }
 
@@ -38,7 +37,6 @@ deviceService.deleteDevice = async (deviceId) => {
 
     await ProjectDeviceMapping.query().delete().where('edevicedeviceid', deviceId)
     const affectedRow = await Device.query().deleteById(deviceId)
-    console.log(affectedRow)
     return affectedRow === 1
 }
 
@@ -47,7 +45,6 @@ deviceService.getProjectsByDeviceId = async (deviceId, page, size) => {
     const projectPage = await ProjectDeviceMapping.query()
         .where('edevicedeviceid', parseInt(deviceId))
         .page(page, size)
-    console.log(projectPage.results)
     return ServiceHelper.toPageObj(page, size, projectPage)
 }
 
