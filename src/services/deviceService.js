@@ -50,40 +50,16 @@ deviceService.getProjectsByDeviceId = async (deviceId, page, size) => {
 
 deviceService.saveProjectsIntoDevice = async (deviceId, projectIds) => {
 
-    const existedRelations = await ProjectDeviceMapping.query()
-    .where('edevicedeviceid', deviceId)
-
-    let sameRelations = []
-
     const projects = projectIds
         .map(projectId => ({
             eprojectprojectid: projectId,
             edevicedeviceid: parseInt(deviceId)}))
-        .filter(project => {
 
-            let existed = existedRelations.indexOf(project)
-
-            //if project relation already exist in DB, push to sameRelations array
-            if(existed >= 0) {
-                sameRelations.push(project)
-                return false
-            }
-            return true
-    })
-
-    //search for project relations to be deleted
-    const removedProjects = existedRelations
-        .filter(relation => sameRelations.indexOf(relation) === -1)
-        .map(relation => relation.eprojectprojectid)
 
     await ProjectDeviceMapping.query().delete()
         .where('edevicedeviceid', deviceId)
-        .whereIn('eprojectprojectid', removedProjects)
 
-    if(projects.length > 0)
-        return ProjectDeviceMapping.query().insert(projects)
-    else
-        return sameRelations
+    return ProjectDeviceMapping.query().insert(projects)
 }
 
 module.exports = deviceService
