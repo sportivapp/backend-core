@@ -40,7 +40,6 @@ RosterService.getAllRosters = async ( page, size, user ) => {
 
 RosterService.getAllMemberById = async ( page, size, rosterId, user ) => {
 
-    // Cekin sur ini permissionnya bisa diliat semua permission ato gimana
     if (user.permission !== 7 && user.permission !== 8 && user.permission !== 10) return
 
     const membersPage = await RosterUserMapping.query().select().where('erostererosterid', rosterId).page(page, size);
