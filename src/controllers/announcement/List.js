@@ -9,6 +9,9 @@ module.exports = async (req, res, next) => {
     try {
         const pageObj = await announcementService.getAllAnnouncement(parseInt(page), parseInt(size), user);
 
+        if(!pageObj)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400))
+
         return res.status(200).json(ResponseHelper.toBaseResponse(pageObj.data, pageObj.paging))
         
     } catch (e) {
