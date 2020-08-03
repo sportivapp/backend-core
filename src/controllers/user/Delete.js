@@ -1,29 +1,18 @@
 const userService = require('../../services/userService');
+const ResponseHelper = require('../../helper/ResponseHelper')
 
 module.exports = async (req, res, next) => {
+        
+    const user = req.user;
+    const { userId } = req.params;
 
     try {
-        
-        const user = req.user;
-        const userId = req.body.userId;
 
-        if (user.permission !== 10) {
-            return res.status(401).json({
-                data: 'You cannot delete employees'
-            })
-        }
+        const result = await userService.deleteUserById(userId, user);
 
-        // return 1 for true , 0 for false
-        const deleteUser = await userService.deleteUserById(userId);
-
-        const data = {
-            isDeleted: (deleteUser) ? true : false,
-            message: (deleteUser) ? "User Successfully Delete!" : "User Not Found!"
-        }
-
-        return res.status(200).json({
-            data: data
-        })
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch (e) {
         next(e);

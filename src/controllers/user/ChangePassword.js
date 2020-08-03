@@ -1,23 +1,19 @@
 const userService = require('../../services/userService');
+const ResponseHelper = require('../../helper/ResponseHelper')
 
 module.exports = async (req, res, next) => {
 
+    const user = req.user;
+    const { newPassword } = req.body; 
+
     try {
 
-        const user = req.user;
-        const { newPassword } = req.body; 
+        const result = await userService.changeUserPassword(user, newPassword);
 
-        // return 1 for true , 0 for false
-        const changePassword = await userService.changeUserPassword(user, newPassword);
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
-        const data = {
-            isChanged: (changePassword) ? true : false,
-            message: (changePassword) ? "Password Successfully Changed!" : "Failed to Change Password!"
-        }
-
-        return res.status(200).json({
-            data: data
-        });
         
     } catch (e) {
         next(e);

@@ -10,7 +10,7 @@ module.exports = (chai, httpServer, expect) => {
   
         const res = await chai.request(httpServer)
         .post('/api/v1/roster')
-        .set('authorization', login.body.data.token)
+        .set('authorization', login.body.data)
         .send({
             rosterName: 'test1',
             rosterDescription: 'this is test1',
@@ -34,7 +34,7 @@ module.exports = (chai, httpServer, expect) => {
   
         const res = await chai.request(httpServer)
         .get('/api/v1/roster')
-        .set('authorization', login.body.data.token)
+        .set('authorization', login.body.data)
         .send({
           rosterId: 1
         });
@@ -55,7 +55,7 @@ module.exports = (chai, httpServer, expect) => {
     
           const res = await chai.request(httpServer)
           .get('/api/v1/roster-members')
-          .set('authorization', login.body.data.token)
+          .set('authorization', login.body.data)
           .send({
               rosterId: 1
           });
@@ -76,7 +76,7 @@ module.exports = (chai, httpServer, expect) => {
     
           const res = await chai.request(httpServer)
           .get('/api/v1/roster-list')
-          .set('authorization', login.body.data.token)
+          .set('authorization', login.body.data)
           .send();
     
           expect(res.status).to.equal(200);
@@ -95,7 +95,7 @@ module.exports = (chai, httpServer, expect) => {
   
         const res = await chai.request(httpServer)
         .put('/api/v1/roster')
-        .set('authorization', login.body.data.token)
+        .set('authorization', login.body.data)
         .send({
           rosterId: 1,
           rosterName: 'test1',
@@ -120,7 +120,7 @@ module.exports = (chai, httpServer, expect) => {
   
         const res = await chai.request(httpServer)
         .delete('/api/v1/roster')
-        .set('authorization', login.body.data.token)
+        .set('authorization', login.body.data)
         .send({
           rosterId: 1
         });

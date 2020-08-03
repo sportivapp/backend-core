@@ -19,7 +19,7 @@ module.exports = (chai, httpServer, expect) => {
 
             const res = await chai.request(httpServer)
                 .post('/api/v1/permit')
-                .set('authorization', login.body.data.token)
+                .set('authorization', login.body.data)
                 .send(requestBody)
 
             expect(res.status).to.equal(200)
@@ -40,7 +40,7 @@ module.exports = (chai, httpServer, expect) => {
 
             const res = await chai.request(httpServer)
                 .get('/api/v1/permit/1')
-                .set('authorization', login.body.data.token)
+                .set('authorization', login.body.data)
                 .send()
 
             expect(res.status).to.equal(200)
@@ -62,7 +62,7 @@ module.exports = (chai, httpServer, expect) => {
 
             const res = await chai.request(httpServer)
                 .get(`/api/v1/permit?page=${page}&size=${size}`)
-                .set('authorization', login.body.data.token)
+                .set('authorization', login.body.data)
                 .send()
 
             expect(res.status).to.equal(200)
@@ -86,7 +86,7 @@ module.exports = (chai, httpServer, expect) => {
 
             const getResponse = await chai.request(httpServer)
                 .get(`/api/v1/permit/${id}`)
-                .set('authorization', login.body.data.token)
+                .set('authorization', login.body.data)
                 .send()
 
             expect(getResponse.status).to.equal(200)
@@ -95,7 +95,7 @@ module.exports = (chai, httpServer, expect) => {
 
             const res = await chai.request(httpServer)
                 .get(`/api/v1/permit/${id}/request`)
-                .set('authorization', login.body.data.token)
+                .set('authorization', login.body.data)
                 .send()
 
             expect(res.status).to.equal(200)
@@ -118,7 +118,7 @@ module.exports = (chai, httpServer, expect) => {
 
             const res = await chai.request(httpServer)
                 .get(`/api/v1/permit?page=${page}&size=${size}`)
-                .set('authorization', login.body.data.token)
+                .set('authorization', login.body.data)
                 .send()
 
             expect(res.status).to.equal(200)
@@ -142,7 +142,7 @@ module.exports = (chai, httpServer, expect) => {
 
             const getResponse = await chai.request(httpServer)
                 .get(`/api/v1/permit/${id}`)
-                .set('authorization', login.body.data.token)
+                .set('authorization', login.body.data)
                 .send()
 
             expect(getResponse.status).to.equal(200)
@@ -156,7 +156,7 @@ module.exports = (chai, httpServer, expect) => {
 
             const res = await chai.request(httpServer)
                 .put(`/api/v1/permit/${id}`)
-                .set('authorization', login.body.data.token)
+                .set('authorization', login.body.data)
                 .send(requestBody);
 
             expect(res.status).to.equal(200)
@@ -178,7 +178,7 @@ module.exports = (chai, httpServer, expect) => {
 
             const getResponse = await chai.request(httpServer)
                 .get(`/api/v1/permit/subordinate?page=${page}&size=${size}`)
-                .set('authorization', login.body.data.token)
+                .set('authorization', login.body.data)
                 .send()
 
             expect(getResponse.status).to.equal(200)
@@ -192,7 +192,7 @@ module.exports = (chai, httpServer, expect) => {
 
             const res = await chai.request(httpServer)
                 .post('/api/v1/permit/action')
-                .set('authorization', login.body.data.token)
+                .set('authorization', login.body.data)
                 .send(requestBody);
 
             expect(res.status).to.equal(200)
@@ -214,7 +214,7 @@ module.exports = (chai, httpServer, expect) => {
 
             let getResponse = await chai.request(httpServer)
                 .get(`/api/v1/permit/${id}`)
-                .set('authorization', login.body.data.token)
+                .set('authorization', login.body.data)
                 .send()
 
             expect(getResponse.status).to.equal(200)
@@ -222,7 +222,7 @@ module.exports = (chai, httpServer, expect) => {
 
             const res = await chai.request(httpServer)
                 .delete(`/api/v1/permit/${id}`)
-                .set('authorization', login.body.data.token)
+                .set('authorization', login.body.data)
                 .send()
 
             expect(res.status).to.equal(200)
@@ -230,7 +230,7 @@ module.exports = (chai, httpServer, expect) => {
 
             getResponse = await chai.request(httpServer)
                 .get(`/api/v1/permit/${id}`)
-                .set('authorization', login.body.data.token)
+                .set('authorization', login.body.data)
                 .send()
 
             expect(getResponse.status).to.equal(404)
