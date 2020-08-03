@@ -10,7 +10,7 @@ module.exports = (chai, httpServer, expect) => {
   
         const res = await chai.request(httpServer)
         .post('/api/v1/announcement')
-        .set('authorization', login.body.data.token)
+        .set('authorization', login.body.data)
         .send({
             announcementTitle: 'Nawakara project',
             announcementContent: 'Nawakara first project',
@@ -33,7 +33,7 @@ module.exports = (chai, httpServer, expect) => {
   
         const res = await chai.request(httpServer)
         .get('/api/v1/announcement/1')
-        .set('authorization', login.body.data.token)
+        .set('authorization', login.body.data)
         .send();
   
         expect(res.status).to.equal(200);
@@ -52,7 +52,7 @@ module.exports = (chai, httpServer, expect) => {
     
           const res = await chai.request(httpServer)
           .get('/api/v1/announcement-list')
-          .set('authorization', login.body.data.token)
+          .set('authorization', login.body.data)
           .send();
     
           expect(res.status).to.equal(200);
@@ -71,7 +71,7 @@ module.exports = (chai, httpServer, expect) => {
   
         const res = await chai.request(httpServer)
         .put('/api/v1/announcement/1')
-        .set('authorization', login.body.data.token)
+        .set('authorization', login.body.data)
         .send({
           announcementTitle: 'test1',
           announcementContent: 'tes tes tes',
@@ -94,7 +94,7 @@ module.exports = (chai, httpServer, expect) => {
   
         const res = await chai.request(httpServer)
         .put('/api/v1/announcement-delete/1')
-        .set('authorization', login.body.data.token)
+        .set('authorization', login.body.data)
         .send();
   
         expect(res.status).to.equal(200);

@@ -1,6 +1,6 @@
 module.exports = (chai, httpServer, expect) => {
   
-  describe('GET /api/v1/user-list', () => {
+  describe('GET /api/v1/user', () => {
     it('Should return a list of users based on ecompany Id', async () => {
       const login = await chai.request(httpServer)
       .post('/api/v1/user-login')
@@ -10,8 +10,8 @@ module.exports = (chai, httpServer, expect) => {
       });
 
       const res = await chai.request(httpServer)
-      .get('/api/v1/user-list/1')
-      .set('authorization', login.body.data.token)
+      .get('/api/v1/user/1')
+      .set('authorization', login.body.data)
       .send();
       expect(res.status).to.equal(200);
       expect(res.body.data).to.not.be.undefined;
@@ -29,7 +29,6 @@ module.exports = (chai, httpServer, expect) => {
 
       expect(res.status).to.equal(200);
       expect(res.body.data).to.not.be.undefined;
-      expect(res.body.data).to.have.property('token');
     });
   });
 
@@ -45,7 +44,7 @@ module.exports = (chai, httpServer, expect) => {
     });
   });
 
-  describe('DEL /api/v1/user-delete', () => {
+  describe('DEL /api/v1/user', () => {
     it('Should return success message', async () => {
       const login = await chai.request(httpServer)
       .post('/api/v1/user-login')
@@ -55,8 +54,8 @@ module.exports = (chai, httpServer, expect) => {
       });
 
       const res = await chai.request(httpServer)
-      .delete('/api/v1/user-delete/1')
-      .set('authorization', login.body.data.token)
+      .delete('/api/v1/user/1')
+      .set('authorization', login.body.data)
       .send();
 
       expect(res.status).to.equal(200);
@@ -65,7 +64,7 @@ module.exports = (chai, httpServer, expect) => {
   });
 
   describe('PUT /api/v1/change-password', () => {
-    it('Should return isChanged true', async () => {
+    it('Should return success', async () => {
       const login = await chai.request(httpServer)
       .post('/api/v1/user-login')
       .send({
@@ -74,7 +73,7 @@ module.exports = (chai, httpServer, expect) => {
       });
       const res = await chai.request(httpServer)
       .put('/api/v1/user-change-password')
-      .set('authorization', login.body.data.token)
+      .set('authorization', login.body.data)
       .send({
         newPassword: 'nawakarauserpassword'
       });
@@ -86,11 +85,8 @@ module.exports = (chai, httpServer, expect) => {
       });
 
       expect(res.status).to.equal(200);
-      expect(res.body.data.isChanged).to.equal(true);
-      expect(res.body.data.message).to.equal('Password Successfully Changed!');
       expect(login2.status).to.equal(200);
       expect(login2.body.data).to.not.be.undefined;
-      expect(login2.body.data).to.have.property('token');
     });
   });
 
