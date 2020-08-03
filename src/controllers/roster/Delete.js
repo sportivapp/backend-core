@@ -1,28 +1,18 @@
 const rosterService = require('../../services/rosterService');
+const ResponseHelper = require('../../helper/ResponseHelper')
 
 module.exports = async (req, res, next) => {
 
+    const { rosterId } = req.params;
+    const user = req.user;
+
     try {
 
-        const rosterId = req.body.rosterId;
-        const user = req.user;
+        const result = await rosterService.deleteRosterById(rosterId, user);
 
-        if (user.permission !== 8) {
-            return res.status(401).json({
-                data: 'You cannot Delete roster'
-            })
-        }
-
-        const isDeleted = await rosterService.deleteRosterById(rosterId);
-
-        const data = {
-            isDeleted: (isDeleted) ? true : false,
-            message: (isDeleted) ? "Successfully delete roster!" : "Failed to delete roster!"
-        }
-
-        return res.status(200).json({
-            data: data
-        });
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch(e) {
         next(e);
