@@ -9,6 +9,7 @@ const rosterRoutes = require('./roster');
 const announcementRoutes = require('./announcement');
 const absenRoutes = require('./absen');
 const permitRoutes = require('./permit');
+const deviceRoutes = require('./device');
 
 router.use('/api/v1', [
     userRoutes,
@@ -17,7 +18,8 @@ router.use('/api/v1', [
     rosterRoutes,
     announcementRoutes,
     absenRoutes,
-    permitRoutes
+    permitRoutes,
+    deviceRoutes
 ]);
 
 module.exports = router;

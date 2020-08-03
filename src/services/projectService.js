@@ -1,4 +1,6 @@
 const Project = require('../models/Project');
+const ProjectDeviceMapping = require('../models/ProjectDeviceMapping')
+const ServiceHelper = require('../helper/ServiceHelper')
 
 const ProjectService = {};
 
@@ -34,6 +36,53 @@ ProjectService.deleteProject = async(projectId) => {
 
     return project;
 
+}
+
+ProjectService.getDevicesByProjectId = async (projectId, page, size) => {
+
+    const projectPage = await ProjectDeviceMapping.query()
+        .where('eprojectprojectid', projectId)
+        .page(page, size)
+    return ServiceHelper.toPageObj(page, size, projectPage)
+}
+
+ProjectService.saveDevicesIntoProject = async (projectId, deviceIds) => {
+
+    const existedRelations = await ProjectDeviceMapping.query()
+        .where('eprojectprojectid', projectId)
+
+    let sameRelations = []
+
+    const devices = deviceIds
+        .map(deviceId => ({
+            eprojectprojectid: parseInt(projectId),
+            edevicedeviceid: deviceId}))
+        .filter(device => {
+
+            let existed = existedRelations.indexOf(device)
+
+            //if device relation already exist in DB, push to sameRelations array
+
+            if(existed >= 0) {
+                sameRelations.push(device)
+                return false
+            }
+            return true
+        })
+
+    //search for device relations to be deleted
+    const removedDevices = existedRelations
+        .filter(relation => sameRelations.indexOf(relation) === -1)
+        .map(relation => relation.edevicedeviceid)
+
+    await ProjectDeviceMapping.query().delete()
+        .where('eprojectprojectid', projectId)
+        .whereIn('edevicedeviceid', removedDevices)
+
+    if(devices.length > 0)
+        return ProjectDeviceMapping.query().insert(devices)
+    else
+        return sameRelations
 }
 
 module.exports = ProjectService;

@@ -15,10 +15,9 @@ class Device extends Model {
       required: ['edeviceidinfo'],
       properties: {
         edeviceidinfo: { type: 'string', minLength: 1, maxLength: 256 },
-        edeviceimei: { type: 'string', minLength: 1, maxLength: 17 },
-        eprojecteprojectid: { type: 'integer'}
+        edeviceimei: { type: 'string', minLength: 1, maxLength: 17 }
       }
-    };
+    }
   }
 }
 

@@ -67,22 +67,74 @@ module.exports = (chai, httpServer, expect) => {
       });
     });
 
-    describe('DEL /api/v1/project', () => {
-      it('Should return single deleted project id', async () => {
-        const login = await chai.request(httpServer)
-        .post('/api/v1/user-login')
-        .send({
-          email: 'nawakarapm@nawakara.com',
-          password: 'emtivnawakarapm'
-        });
+  describe('POST /api/v1/project/id/devices', () => {
+    it('Should return device list of 1 project', async () => {
+      const login = await chai.request(httpServer)
+          .post('/api/v1/user-login')
+          .send({
+            email: 'nawakaraadmin@nawakara.com',
+            password: 'emtivnawakaraadmin'
+          })
 
-        const res = await chai.request(httpServer)
-        .delete('/api/v1/project/1')
-        .set('authorization', login.body.data.token)
-        .send();
-  
-        expect(res.status).to.equal(200);
-        expect(res.body.data).to.not.be.undefined;
-      });
+      let id = 1
+
+      const request = {
+        deviceIds: [1]
+      }
+
+      const res = await chai.request(httpServer)
+          .post(`/api/v1/project/${id}/devices`)
+          .set('authorization', login.body.data.token)
+          .send(request)
+
+      console.log(res.body.data)
+
+      expect(res.status).to.equal(200)
+      expect(res.body.data).to.not.be.undefined
+      expect(res.body.data.length).to.greaterThan(0)
     });
+  });
+
+  describe('GET /api/v1/project/id/devices', () => {
+    it('Should return device list of 1 project', async () => {
+      const login = await chai.request(httpServer)
+          .post('/api/v1/user-login')
+          .send({
+            email: 'nawakaraadmin@nawakara.com',
+            password: 'emtivnawakaraadmin'
+          })
+
+      let id = 1
+
+      let page = 0
+      let size = 10
+
+      const res = await chai.request(httpServer)
+          .get(`/api/v1/project/${id}/devices?page=${page}&size=${size}`)
+          .set('authorization', login.body.data.token)
+          .send()
+
+      expect(res.status).to.equal(200)
+      expect(res.body.data).to.not.be.undefined
+    });
+  });
+
+  describe('DEL /api/v1/project', () => {
+    it('Should return single deleted project id', async () => {
+      const login = await chai.request(httpServer)
+          .post('/api/v1/user-login')
+          .send({
+            email: 'nawakarapm@nawakara.com',
+            password: 'emtivnawakarapm'
+          });
+
+      const res = await chai.request(httpServer)
+          .delete('/api/v1/project/1')
+          .set('authorization', login.body.data.token)
+          .send();
+
+      expect(res.status).to.equal(200);
+      expect(res.body.data).to.not.be.undefined;
+    });
+  });
 }

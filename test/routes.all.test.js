@@ -14,6 +14,8 @@ const rosterTest = require('./roster');
 const announcementTest = require('./announcement');
 const absenTest = require('./absen');
 const permitTest = require('./permit')
+const deviceTest = require('./device')
+
 describe('Routes: ', () => {
   beforeEach(() => {
     return knex.migrate.rollback()
@@ -25,13 +27,14 @@ describe('Routes: ', () => {
     return knex.migrate.rollback();
   });
 
-  companyTest(chai, httpServer, expect);
-  userTest(chai, httpServer, expect);
+  // companyTest(chai, httpServer, expect);
+  // userTest(chai, httpServer, expect);
   projectTest(chai, httpServer, expect);
-  rosterTest(chai, httpServer, expect);
-  announcementTest(chai, httpServer, expect);
-  absenTest(chai, httpServer, expect);
-  permitTest(chai, httpServer, expect)
+  // rosterTest(chai, httpServer, expect);
+  // announcementTest(chai, httpServer, expect);
+  // absenTest(chai, httpServer, expect);
+  // permitTest(chai, httpServer, expect)
+  // deviceTest(chai, httpServer, expect)
 
 
 });
