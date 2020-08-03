@@ -10,7 +10,7 @@ module.exports = (chai, httpServer, expect) => {
 
         const res = await chai.request(httpServer)
         .post('/api/v1/project')
-        .set('authorization', login.body.data.token)
+        .set('authorization', login.body.data)
         .send({
           code: '1A',
           name: 'SatuA',
@@ -34,7 +34,7 @@ module.exports = (chai, httpServer, expect) => {
 
         const res = await chai.request(httpServer)
         .get('/api/v1/project')
-        .set('authorization', login.body.data.token)
+        .set('authorization', login.body.data)
         .send();
 
         expect(res.status).to.equal(200);
@@ -53,7 +53,7 @@ module.exports = (chai, httpServer, expect) => {
 
         const res = await chai.request(httpServer)
         .put('/api/v1/project/1')
-        .set('authorization', login.body.data.token)
+        .set('authorization', login.body.data)
         .send({
           code: '2A',
           name: 'DuaA',
@@ -126,13 +126,13 @@ module.exports = (chai, httpServer, expect) => {
             password: 'emtivnawakarapm'
           });
 
-      const res = await chai.request(httpServer)
-          .delete('/api/v1/project/1')
-          .set('authorization', login.body.data.token)
-          .send();
+        const res = await chai.request(httpServer)
+        .delete('/api/v1/project/2')
+        .set('authorization', login.body.data)
+        .send();
 
-      expect(res.status).to.equal(200);
-      expect(res.body.data).to.not.be.undefined;
+        expect(res.status).to.equal(200);
+        expect(res.body.data).to.not.be.undefined;
+      });
     });
-  });
 }

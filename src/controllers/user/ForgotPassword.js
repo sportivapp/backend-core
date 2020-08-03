@@ -1,20 +1,14 @@
 const userService = require('../../services/userService');
 
 module.exports = async (req, res, next) => {
+    
+    const email = req.body.email; 
 
     try {
 
-        const email = req.body.email; 
+        const result = await userService.sendForgotPasswordLink( email );
 
-        await userService.sendForgotPasswordLink( email );
-
-        const data = {
-            message: "Successfully Send Password"
-        }
-
-        return res.status(200).json({
-            data: data
-        });
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
         
     } catch (e) {
         next(e);
