@@ -84,7 +84,7 @@ module.exports = (chai, httpServer, expect) => {
 
       const res = await chai.request(httpServer)
           .post(`/api/v1/project/${id}/devices`)
-          .set('authorization', login.body.data.token)
+          .set('authorization', login.body.data)
           .send(request)
 
       expect(res.status).to.equal(200)
@@ -109,7 +109,7 @@ module.exports = (chai, httpServer, expect) => {
 
       const res = await chai.request(httpServer)
           .get(`/api/v1/project/${id}/devices?page=${page}&size=${size}`)
-          .set('authorization', login.body.data.token)
+          .set('authorization', login.body.data)
           .send()
 
       expect(res.status).to.equal(200)
