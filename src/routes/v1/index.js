@@ -10,6 +10,7 @@ const announcementRoutes = require('./announcement');
 const absenRoutes = require('./absen');
 const permitRoutes = require('./permit');
 const deviceRoutes = require('./device');
+const gradeRoutes = require('./grade')
 
 router.use('/api/v1', [
     userRoutes,
@@ -19,7 +20,8 @@ router.use('/api/v1', [
     announcementRoutes,
     absenRoutes,
     permitRoutes,
-    deviceRoutes
+    deviceRoutes,
+    gradeRoutes
 ]);
 
 module.exports = router;
