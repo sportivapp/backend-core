@@ -53,6 +53,7 @@ app.use((error, req, res, next) => {
 // const slackResponse = slackLoggingService.sendSlackMessage(webHookURL, slackLoggingService.setLogMessage(errorMsg));
 // console.log('Message response', slackResponse);
 
+require('dotenv').config();
 const httpPORT = process.env.PORT || 7000;
 const httpServer = app.listen(httpPORT, function() {
     console.log(`HTTP Server started on port ${httpPORT}`);
