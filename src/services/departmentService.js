@@ -37,11 +37,10 @@ departmentService.updateDepartment = async (departmentId, departmentDTO) => {
 
 departmentService.deleteDepartment = async (departmentId) => {
 
-    const result = await Department.query().where('edepartmentid', departmentId).delete()
-    if(!result){
-        return false
-    }
-    return true
+    return Department.query()
+    .where('edepartmentid', departmentId)
+    .delete()
+    .then(rowsAffected => rowsAffected === 1)
 }
 
 module.exports = departmentService
