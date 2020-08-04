@@ -2,7 +2,7 @@
 module.exports = (chai, httpServer, expect) => {
 
     describe('POST /api/v1/department', () => {
-        it('Should return single departmen', async () => {
+        it('Should return single department', async () => {
           const login = await chai.request(httpServer)
           .post('/api/v1/user-login')
           .send({
@@ -32,9 +32,9 @@ module.exports = (chai, httpServer, expect) => {
               email: 'nawakaraadmin@nawakara.com',
               password: 'emtivnawakaraadmin'
           });
-    
+
           const res = await chai.request(httpServer)
-          .get('/api/v1/department/1')
+          .get('/api/v1/department?page=0&size=2&companyId=1')
           .set('authorization', login.body.data)
           .send();
     
