@@ -10,7 +10,8 @@ exports.up = (knex, Promise) => knex.schema.createTable('egrade', t => {
     t.timestamp('egradedeletetime', false);
     t.integer('egradedeletestatus').defaultTo(0);
     t.integer('egradetablestatus').notNullable().defaultTo(1);
-    t.integer('ecompanyecompanyid').notNullable().references('ecompany.ecompanyid');
+    t.integer('ecompanycompanyid').notNullable().references('ecompany.ecompanyid').onDelete('CASCADE');
+    t.integer('egradesuperiorid').references('egrade.egradeid').onDelete('SET NULL');
   });
   
   exports.down = (knex, Promise) => knex.schema.dropTable('egrade');
