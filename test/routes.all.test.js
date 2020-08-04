@@ -25,7 +25,7 @@ describe('Routes: ', () => {
   });
 
   afterEach(() => {
-    // return knex.migrate.rollback();
+    return knex.migrate.rollback();
   });
 
   companyTest(chai, httpServer, expect);
