@@ -9,9 +9,6 @@ function isUserValid(user) {
 
 Controller.getModules = async (req, res, next) => {
 
-    if(!isUserValid(req.user))
-        return res.status(403).json(ResponseHelper.toErrorResponse(403))
-
     const { companyId } = req.params
 
     try {
