@@ -1,7 +1,7 @@
 exports.up = (knex, Promise) => knex.schema.createTable('ecompanymodulemapping', t => {
-    t.integer('ecompanymodulemappingid').primary().unsigned();
+    t.increments('ecompanymodulemappingid').primary().unsigned();
     t.string('ecompanymodulemappingname').notNullable();
-    t.bigInteger('ecompanymodulemappingcreatetime').notNullable().defaultTo(knex.fn.now());
+    t.bigInteger('ecompanymodulemappingcreatetime').notNullable().defaultTo(Date.now());
     t.integer('ecompanymodulemappingcreateby').notNullable().defaultTo(0);
     t.bigInteger('ecompanymodulemappingedittime');
     t.integer('ecompanymodulemappingeditby');
