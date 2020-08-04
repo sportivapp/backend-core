@@ -9,3 +9,5 @@ SettingService.getModulesByCompanyId = async ( companyId ) => {
     return modules;
 
 }
+
+module.exports = SettingService;
