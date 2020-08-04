@@ -15,6 +15,7 @@ const announcementTest = require('./announcement');
 const absenTest = require('./absen');
 const permitTest = require('./permit')
 const deviceTest = require('./device')
+const departmentTest = require('./department')
 
 describe('Routes: ', () => {
   beforeEach(() => {
@@ -35,6 +36,7 @@ describe('Routes: ', () => {
   absenTest(chai, httpServer, expect);
   permitTest(chai, httpServer, expect)
   deviceTest(chai, httpServer, expect)
+  departmentTest(chai, httpServer, expect)
 
 
 });
