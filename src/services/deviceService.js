@@ -115,7 +115,7 @@ deviceService.saveProjectsIntoDevice = async (deviceId, projectIds, user) => {
             })
             .then(arr => {
                 const undoDeletedProjects =  selectDeletedProjects
-                    .patch({ edeletestatus: false, eassigndate: assignDate })
+                    .patch({ edeletestatus: false })
                     .then(ignored => arr[0])
                 return Promise.all([undoDeletedProjects, insertNewProjects(arr[1])])
                     .then(resultArr => {

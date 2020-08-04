@@ -46,7 +46,7 @@ ProjectService.getDevicesByProjectId = async (projectId, page, size) => {
     return ServiceHelper.toPageObj(page, size, projectPage)
 }
 
-ProjectService.saveDevicesIntoProject = async (projectId, deviceIds) => {
+ProjectService.saveDevicesIntoProject = async (projectId, deviceIds, user) => {
 
     const existedRelations = await ProjectDeviceMapping.query()
         .where('eprojectprojectid', projectId)
@@ -54,8 +54,12 @@ ProjectService.saveDevicesIntoProject = async (projectId, deviceIds) => {
 
     let sameRelations = []
 
+    let assignDate = Date.now()
+
     const devices = deviceIds
         .map(deviceId => ({
+            eassigncreatetime: assignDate,
+            eassigncreateby: user.sub,
             eprojectprojectid: parseInt(projectId),
             edevicedeviceid: deviceId}))
         .filter(device => {
@@ -110,7 +114,7 @@ ProjectService.saveDevicesIntoProject = async (projectId, deviceIds) => {
             })
             .then(arr => {
                 const undoDeletedDevices =  selectDeletedDevices
-                    .patch({ edeletestatus: false, eassigndate: assignDate })
+                    .patch({ edeletestatus: false })
                     .then(ignored => arr[0])
                 return Promise.all([undoDeletedDevices, insertNewDevices(arr[1])])
                     .then(resultArr => {
