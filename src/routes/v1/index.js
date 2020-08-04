@@ -11,6 +11,7 @@ const absenRoutes = require('./absen');
 const permitRoutes = require('./permit');
 const deviceRoutes = require('./device');
 const settingRoutes = require('./setting');
+const gradeRoutes = require('./grade')
 
 router.use('/api/v1', [
     userRoutes,
@@ -21,7 +22,9 @@ router.use('/api/v1', [
     absenRoutes,
     permitRoutes,
     deviceRoutes,
-    settingRoutes
+    settingRoutes,
+    deviceRoutes,
+    gradeRoutes
 ]);
 
 module.exports = router;

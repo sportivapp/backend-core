@@ -21,6 +21,8 @@ function toErrorResponse(code) {
         case 400:
             status = "BAD_REQUEST"
             break
+        case 403:
+            status = "FORBIDDEN"
         case 404:
             status = "NOT_FOUND"
             break
