@@ -1,5 +1,5 @@
 const Grade = require('../models/Grades')
-const companyService = require('./companyService')
+const Company = require('../models/Company')
 const ServiceHelper = require('../helper/ServiceHelper')
 
 const gradeService = {}
@@ -16,20 +16,26 @@ gradeService.getGradeById = async (gradeId) => {
 
 gradeService.createGrade = async (gradeDTO) => {
 
-    // if (gradeDTO.egradesuperiorid) {
-    //     const grade = await gradeService.getGradeById(gradeDTO.egradesuperiorid)
-    //     if (!grade) return
-    // }
-    //
-    // if (gradeDTO.ecompanycompanyid) {
-    //     const company = await companyService.getCompanyById(gradeDTO.ecompanycompanyid)
-    //     if (!company) return
-    // }
+    if (gradeDTO.egradesuperiorid) {
+        const superior = await gradeService.getGradeById(gradeDTO.egradesuperiorid)
+        if (!superior) return
+    }
+
+    const company = await Company.query().findById(gradeDTO.ecompanycompanyid)
+    if (!company) return
 
     return Grade.query().insert(gradeDTO)
 }
 
 gradeService.updateGradeById = async (gradeId, gradeDTO) => {
+
+    if (gradeDTO.egradesuperiorid) {
+        const superior = await gradeService.getGradeById(gradeDTO.egradesuperiorid)
+        if (!superior) return
+    }
+
+    const company = await Company.query().findById(gradeDTO.ecompanycompanyid)
+    if (!company) return
     const grade = await gradeService.getGradeById(gradeId)
     return grade.$query().patchAndFetch(gradeDTO)
 }
@@ -38,9 +44,6 @@ gradeService.deleteGradeById = async (gradeId) => {
     const grade = await gradeService.getGradeById(gradeId)
 
     if (!grade)
-        return false
-
-    if (grade.epermitstatus > 1)
         return false
 
     const rowsAffected = await Grade.query().delete().where('egradeid', gradeId)

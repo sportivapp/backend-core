@@ -35,6 +35,9 @@ controller.createGrade = async (req, res, next) => {
 
     const user = req.user
 
+    if (!isUserAdmin(user))
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     let gradeDTO = {
         egradename: request.name,
         egradecreateby: user.sub,
@@ -65,6 +68,9 @@ controller.updateGradeById = async (req, res, next) => {
 
     const user = req.user
 
+    if (!isUserAdmin(user))
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     const gradeDTO = {
         egradename: request.name,
         egradecreateby: user.sub,
@@ -86,6 +92,9 @@ controller.deleteGradeById = async (req, res, next) => {
 
     const { gradeId } = req.params
 
+    if (!isUserAdmin(req.user))
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     try {
         const result = await gradeService.deleteGradeById(gradeId)
         if (!result)
@@ -94,6 +103,10 @@ controller.deleteGradeById = async (req, res, next) => {
     } catch (e) {
         next(e)
     }
+}
+
+function isUserAdmin(user) {
+    return user.permission === 10
 }
 
 module.exports = controller
