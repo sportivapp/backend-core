@@ -1,23 +1,19 @@
 const RosterService = require('../../services/rosterService');
+const ResponseHelper = require('../../helper/ResponseHelper')
 
 module.exports = async (req, res, next) => {
 
+    const { page, size } = req.query
+    const { rosterId } = req.params;
+    const user = req.user;
+
     try {
 
-        const user = req.user;
-        const rosterId = req.body.rosterId;
+        const pageObj = await RosterService.getAllMemberById(parseInt(page), parseInt(size), rosterId, user);
 
-        if (user.permission !== 8) {
-            return res.status(401).json({
-                data: 'You cannot see roster members'
-            })
-        }
-
-        const members = await RosterService.getAllMemberById( rosterId );
-
-        return res.status(200).json({
-            data: members
-        });
+        if(!pageObj)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400))
+        return res.status(200).json(ResponseHelper.toBaseResponse(pageObj.data, pageObj.paging))
         
     } catch (e) {
         next(e);

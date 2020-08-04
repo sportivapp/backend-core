@@ -1,17 +1,13 @@
 const RosterService = require('../../services/rosterService');
+const ResponseHelper = require('../../helper/ResponseHelper')
 
 module.exports = async (req, res, next) => {
 
+    const { rosterId } = req.params
+    const user = req.user;
+    const { rosterName, rosterDescription , projectId, supervisorId, headUserId, userIds } = req.body;
+
     try {
-
-        const user = req.user;
-        const { rosterId, rosterName, rosterDescription , projectId, supervisorId, headUserId, userIds } = req.body;
-
-        if (user.permission !== 8) {
-            return res.status(401).json({
-                data: 'You cannot update roster'
-            })
-        }
 
         const rosterDTO = { 
             erostername: rosterName, 
@@ -21,17 +17,11 @@ module.exports = async (req, res, next) => {
             erosterheaduserid: headUserId
         }
 
-        // return 1 for true , 0 for false
-        const updateRoster = await RosterService.updateRosterById( rosterId, rosterDTO, userIds );
+        const result = await RosterService.updateRosterById( parseInt(rosterId) , rosterDTO, userIds , user);
 
-        const data = {
-            isUpdated: (updateRoster) ? true : false,
-            message: (updateRoster) ? "Roster Successfully Change!" : "Failed to Change Roster!"
-        }
-
-        return res.status(200).json({
-            data: data
-        });
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
         
     } catch (e) {
         next(e);

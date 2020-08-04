@@ -4,9 +4,10 @@ const   express     = require('express'),
 
 const app = express();
 const routes = require('./routes/v1');
-// const slackLoggingService = require('./helper/slackLoggingService');
-// const webHookURL = 'https://hooks.slack.com/services/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';
-// let errorMsg = {};
+const slackLoggingService = require('./helper/slackLoggingService');
+
+const webHookURL = 'https://hooks.slack.com/services/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';
+let errorMsg = {};
 
 app.use(cors());
 app.use((_, res, next) => {
@@ -39,11 +40,20 @@ app.use((error, req, res, next) => {
             message: error.message || 'Internal Server Error',
         },
     });
+    
+    errorMsg = {
+        status: status,
+        message: error.message || 'Internal Server Error',
+        errStack: error.stack
+    }
+
+    slackLoggingService.sendSlackMessage(webHookURL, slackLoggingService.setLogMessage(errorMsg));
 });
 
 // const slackResponse = slackLoggingService.sendSlackMessage(webHookURL, slackLoggingService.setLogMessage(errorMsg));
 // console.log('Message response', slackResponse);
 
+require('dotenv').config();
 const httpPORT = process.env.PORT || 7000;
 const httpServer = app.listen(httpPORT, function() {
     console.log(`HTTP Server started on port ${httpPORT}`);
