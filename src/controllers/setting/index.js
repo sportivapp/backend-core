@@ -7,12 +7,12 @@ function isUserValid(user) {
     return user.permission === 10
 }
 
-Controller.getModules = async (req, res, next) => {
+Controller.getModulesByCompanyId = async (req, res, next) => {
 
     const { companyId } = req.params
 
     try {
-        const result = await SettingService.getModules(companyId);
+        const result = await SettingService.getModulesByCompanyId(companyId);
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)

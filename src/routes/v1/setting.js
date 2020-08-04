@@ -3,6 +3,6 @@ const router = express.Router();
 const controller = require('../../controllers/setting');
 // const auth = require('../../middlewares/authentication');
 
-router.get('/setting/company-module/:companyId', controller.getModules);
+router.get('/setting/company-module/:companyId', controller.getModulesByCompanyId);
 
 module.exports = router;
