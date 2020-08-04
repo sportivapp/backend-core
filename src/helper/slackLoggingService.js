@@ -40,7 +40,7 @@ Messages = {};
 //   };
 
 Messages.setLogMessage = ( error ) => {
-    userAccountNotification = {
+    return userAccountNotification = {
         'username': 'ERROR BOT', // This will appear as user name who posts the message
         'text': 'ERROR OCCURED!', // text
         'icon_emoji': ':japanese_goblin:', // User icon, you can also use custom icons here
@@ -49,14 +49,16 @@ Messages.setLogMessage = ( error ) => {
             'color': '#eed140', // color of the attachments sidebar.
             'fields': [ // actual fields
                 {
-                    'title': error.status, // Custom field
-                    'value': error.message, // Custom value
+                    'title': error.status,
+                    'value': error.message 
+                    // + '\n ROUTES: ' + error.routes
+                    + ' \n\n\n\n DETAILS:\n\n' 
+                    + error.errStack,
                     'short': true // long fields will be full width
                 },
             ],
         }]
     };
-    return userAccountNotification;
 }
 
 
