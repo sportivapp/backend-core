@@ -3,7 +3,7 @@ const ResponseHelper = require('../../helper/ResponseHelper')
 
 const controller = {}
 
-function isUserValid( user ) {
+function isUserNotValid( user ) {
     return user.permission !== 10
 }
 
@@ -11,11 +11,10 @@ controller.getAllDepartmentbyCompanyId = async (req, res, next) => {
     
     const user = req.user
 
-    if (isUserValid(user)) 
+    if (isUserNotValid(user)) 
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
-    const { companyId } = req.params
-    const { page, size } = req.query
+    const { page, size, companyId } = req.query
 
     try {
         const pageObj = await departmentService.getAllDepartmentbyCompanyId(parseInt(page), parseInt(size), companyId)
@@ -32,7 +31,7 @@ controller.createDepartment = async (req, res, next) => {
     
     const user = req.user
 
-    if (isUserValid(user)) 
+    if (isUserNotValid(user)) 
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { departmentName, departmentDescription, departmentSuperiorId, companyId } = req.body
@@ -62,7 +61,7 @@ controller.updateDepartment = async (req, res, next) => {
     
     const user = req.user
 
-    if (isUserValid(user)) 
+    if (isUserNotValid(user)) 
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { departmentId } = req.params
@@ -92,7 +91,7 @@ controller.deleteDepartment = async (req, res, next) => {
     
     const user = req.user
 
-    if (isUserValid(user)) 
+    if (isUserNotValid(user)) 
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { departmentId } = req.params
