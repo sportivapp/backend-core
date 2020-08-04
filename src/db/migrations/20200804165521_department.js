@@ -8,7 +8,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('edepartment', t => {
     t.bigInteger('edepartmentchangetime', false);
     t.integer('edepartmenttablestatus').notNullable().defaultTo(1);
     t.integer('edepartmentsuperiorid').references('edepartment.edepartmentid')
-    t.integer('ecompanyecompanyid').notNullable().references('ecompany.ecompanyid')
+    t.integer('ecompanyecompanyid').notNullable().references('ecompany.ecompanyid').onDelete('CASCADE')
 });
 
 exports.down = (knex, Promise) => knex.schema.dropTable('edepartment');
