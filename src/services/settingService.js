@@ -4,7 +4,9 @@ const SettingService = {};
 
 SettingService.getModulesByCompanyId = async ( companyId ) => {
     
-    const modules = await CompanyModuleMapping.query().where('ecompanyecompanyid', companyId);
+    const modules = await CompanyModuleMapping.query()
+    .select('ecompanymodulemappingname', 'emoduleemoduleid')
+    .where('ecompanyecompanyid', companyId);
  
     return modules;
 
