@@ -48,7 +48,7 @@ deviceService.getProjectsByDeviceId = async (deviceId, page, size) => {
     return ServiceHelper.toPageObj(page, size, projectPage)
 }
 
-deviceService.saveProjectsIntoDevice = async (deviceId, projectIds) => {
+deviceService.saveProjectsIntoDevice = async (deviceId, projectIds, user) => {
 
     const existedRelations = await ProjectDeviceMapping.query()
         .where('edevicedeviceid', deviceId)
@@ -61,7 +61,8 @@ deviceService.saveProjectsIntoDevice = async (deviceId, projectIds) => {
     const projects = projectIds
         .map(projectId => ({
             eprojectprojectid: projectId,
-            eassigndate: assignDate,
+            eassigncreatetime: assignDate,
+            eassigncreateby: user.sub,
             edevicedeviceid: parseInt(deviceId)}))
         .filter(project => {
             let existed = existedRelations
@@ -78,7 +79,11 @@ deviceService.saveProjectsIntoDevice = async (deviceId, projectIds) => {
 
     //Create query to delete items from removedProjects array
     const deleteExistingProjects = ProjectDeviceMapping.query()
-        .patch({ edeletestatus: true })
+        .patch({
+            edeletestatus: true,
+            eassigndeletetime: assignDate,
+            eassigndeleteby: user.sub
+        })
         .where('edevicedeviceid', deviceId)
         .whereIn('eprojectprojectid', removedProjects)
 
