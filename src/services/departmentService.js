@@ -38,8 +38,10 @@ departmentService.updateDepartment = async (departmentId, departmentDTO) => {
 departmentService.deleteDepartment = async (departmentId) => {
 
     const result = await Department.query().where('edepartmentid', departmentId).delete()
-
-    return result
+    if(!result){
+        return false
+    }
+    return true
 }
 
 module.exports = departmentService
