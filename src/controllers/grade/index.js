@@ -84,6 +84,7 @@ controller.updateGradeById = async (req, res, next) => {
             return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(grade))
     } catch (e) {
+        console.log(e)
         next(e)
     }
 }

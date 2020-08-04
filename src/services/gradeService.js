@@ -34,20 +34,20 @@ gradeService.updateGradeById = async (gradeId, gradeDTO) => {
         if (!superior) return
     }
 
-    const company = await Company.query().findById(gradeDTO.ecompanycompanyid)
-    if (!company) return
+    if (gradeDTO.ecompanycompanyid) {
+        const company = await Company.query().findById(gradeDTO.ecompanycompanyid)
+        if (!company) return
+    }
     const grade = await gradeService.getGradeById(gradeId)
     return grade.$query().patchAndFetch(gradeDTO)
 }
 
 gradeService.deleteGradeById = async (gradeId) => {
-    const grade = await gradeService.getGradeById(gradeId)
 
-    if (!grade)
-        return false
-
-    const rowsAffected = await Grade.query().delete().where('egradeid', gradeId)
-    return rowsAffected === 1
+    return Grade.query()
+        .delete()
+        .where('egradeid', gradeId)
+        .then(rowsAffected => rowsAffected === 1)
 }
 
 module.exports = gradeService
