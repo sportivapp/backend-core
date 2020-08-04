@@ -120,12 +120,15 @@ controller.saveProjectsIntoDevice = async (req, res, next) => {
 
     const { deviceId } = req.params
 
+    const user = req.user
+
     try {
-        const savedIds = await deviceService.saveProjectsIntoDevice(deviceId, projectIds)
+        const savedIds = await deviceService.saveProjectsIntoDevice(deviceId, projectIds, user)
         if (savedIds.length != projectIds.length)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(savedIds))
     } catch (e) {
+        console.log(e)
         next(e)
     }
 }
