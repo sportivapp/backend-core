@@ -1,13 +1,13 @@
 const SettingService = require('../../services/settingService');
 const ResponseHelper = require('../../helper/ResponseHelper');
 
-const controller = {}
+const Controller = {}
 
 function isUserValid(user) {
     return user.permission === 10
 }
 
-controller.getModules = async (req, res, next) => {
+Controller.getModules = async (req, res, next) => {
 
     if(!isUserValid(req.user))
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
@@ -22,3 +22,5 @@ controller.getModules = async (req, res, next) => {
     }
 
 }
+
+module.exports = Controller;
