@@ -51,39 +51,83 @@ deviceService.getProjectsByDeviceId = async (deviceId, page, size) => {
 deviceService.saveProjectsIntoDevice = async (deviceId, projectIds) => {
 
     const existedRelations = await ProjectDeviceMapping.query()
-    .where('edevicedeviceid', deviceId)
+        .where('edevicedeviceid', deviceId)
+        .where('edeletestatus', false)
 
     let sameRelations = []
+
+    let assignDate = Date.now()
 
     const projects = projectIds
         .map(projectId => ({
             eprojectprojectid: projectId,
+            eassigndate: assignDate,
             edevicedeviceid: parseInt(deviceId)}))
         .filter(project => {
-
-            let existed = existedRelations.indexOf(project)
-
+            let existed = existedRelations
+                .find(pr => findByProjectIdAndDeviceId(pr, project))
             //if project relation already exist in DB, push to sameRelations array
-            if(existed >= 0) {
-                sameRelations.push(project)
-                return false
-            }
-            return true
+            if(existed) sameRelations.push(project)
+            return !existed
     })
 
     //search for project relations to be deleted
     const removedProjects = existedRelations
-        .filter(relation => sameRelations.indexOf(relation) === -1)
+        .filter(relation => !(sameRelations.find(pr => findByProjectIdAndDeviceId(pr, relation))))
         .map(relation => relation.eprojectprojectid)
 
-    await ProjectDeviceMapping.query().delete()
+    //Create query to delete items from removedProjects array
+    const deleteExistingProjects = ProjectDeviceMapping.query()
+        .patch({ edeletestatus: true })
         .where('edevicedeviceid', deviceId)
         .whereIn('eprojectprojectid', removedProjects)
 
-    if(projects.length > 0)
-        return ProjectDeviceMapping.query().insert(projects)
-    else
-        return sameRelations
+    //If there are new projects to be inserted
+    if(projects.length > 0) {
+
+        //create query to search the database for deleted projects with the same projectId and deviceId
+        const selectDeletedProjects = ProjectDeviceMapping.query()
+            .where('edevicedeviceid', deviceId)
+            .where('edeletestatus', true)
+            .whereIn('eprojectprojectid', projects.map(obj => obj.eprojectprojectid))
+
+        //Create query to insert projects
+        const insertNewProjects = (projects) => ProjectDeviceMapping.query().insert(projects)
+
+        //Run deleteExistingProjects query and selectDeletedProjects query asynchronously
+        //After those 2 query is done, will take the result of selectDeletedProjects query
+        //The result of selectDeletedProjects query is deletedProjects array which will be used for filtering new projects to be inserted
+        //Then create new query for undo deletion and insertion of the new projects
+        //The result of undo deletion query will be rowsAffected and so, map the result to return deletedProjects array
+        //Run those queries asynchronously again and then add both results to existedRelations array
+        //Addition to existedRelations array is to return all of the projects that was requested -> projectIds.length == returnedProjects.length
+        return Promise.all([deleteExistingProjects, selectDeletedProjects])
+            .then(resultArr => resultArr[1])
+            .then(deletedProjects => {
+                const filteredProjects = projects
+                    .filter(project => !(deletedProjects.find(pr => findByProjectIdAndDeviceId(pr, project))))
+                return [deletedProjects, filteredProjects]
+            })
+            .then(arr => {
+                const undoDeletedProjects =  selectDeletedProjects
+                    .patch({ edeletestatus: false, eassigndate: assignDate })
+                    .then(ignored => arr[0])
+                return Promise.all([undoDeletedProjects, insertNewProjects(arr[1])])
+                    .then(resultArr => {
+                        existedRelations.push(...resultArr[0])
+                        existedRelations.push(...resultArr[1])
+                        return existedRelations
+                    })
+            })
+
+    } else {
+        return deleteExistingProjects
+            .then(ignored => sameRelations)
+    }
+}
+
+function findByProjectIdAndDeviceId(pr, project) {
+    return pr.eprojectprojectid === project.eprojectprojectid && pr.edevicedeviceid === project.edevicedeviceid
 }
 
 module.exports = deviceService
