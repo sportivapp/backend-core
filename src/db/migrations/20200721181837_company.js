@@ -10,7 +10,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('ecompany', t => {
     t.timestamp('ecompanyedittime', true);
     t.integer('ecompanydeleteby');
     t.timestamp('ecompanydeletetime', true);
-    t.integer('ecompanydeletestatus');
+    t.integer('ecompanydeletestatus').notNullable().defaultTo(0);
     t.integer('ecompanytablestatus').notNullable().defaultTo(1);
     t.integer('eaddresseaddressid').notNullable().references('eaddress.eaddressid');
     t.integer('ecompanyparentid');
