@@ -1,8 +1,17 @@
 module.exports = (chai, httpServer, expect) => {
     describe('POST /api/v1/company', () => {
         it('Should return single result of user, company and address after insert', async () => {
+
+          const login = await chai.request(httpServer)
+              .post('/api/v1/user-login')
+              .send({
+                email: 'nawakaraadmin@nawakara.com',
+                password: 'emtivnawakaraadmin'
+              })
+
           const res = await chai.request(httpServer)
           .post('/api/v1/company')
+          .set('authorization', login.body.data)
           .send({
             nik: 123456789,
             name: 'nawakaraadmin', 
@@ -19,4 +28,62 @@ module.exports = (chai, httpServer, expect) => {
           expect(res.body.data).to.not.be.undefined;
         });
       });
+
+    describe('POST /api/v1/company/id/users', () => {
+    it('Should return user list of 1 company', async () => {
+
+      const login = await chai.request(httpServer)
+          .post('/api/v1/user-login')
+          .send({
+            email: 'nawakaraadmin@nawakara.com',
+            password: 'emtivnawakaraadmin'
+          })
+
+      let id = 1
+
+      const request = {
+          users: [
+              {
+                  id: 5,
+                  deleted: false
+              }
+          ]
+      }
+
+      const res = await chai.request(httpServer)
+          .post(`/api/v1/company/${id}/users`)
+          .set('authorization', login.body.data)
+          .send(request)
+
+      expect(res.status).to.equal(200)
+      expect(res.body.data).to.not.be.undefined
+      expect(res.body.data.length).to.greaterThan(0)
+    });
+  });
+
+    describe('GET /api/v1/company/id/users', () => {
+    it('Should return user list of 1 company', async () => {
+
+      const login = await chai.request(httpServer)
+          .post('/api/v1/user-login')
+          .send({
+            email: 'nawakaraadmin@nawakara.com',
+            password: 'emtivnawakaraadmin'
+          })
+
+      let id = 1
+
+      let page = 0
+      let size = 10
+
+      const res = await chai.request(httpServer)
+          .get(`/api/v1/company/${id}/users?page=${page}&size=${size}`)
+          .set('authorization', login.body.data)
+          .send()
+
+      expect(res.status).to.equal(200)
+      expect(res.body.data).to.not.be.undefined
+      expect(res.body.paging).to.not.be.undefined
+    });
+  });
 }

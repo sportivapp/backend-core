@@ -2,6 +2,8 @@ const Company = require('../models/Company');
 const Address = require('../models/Address');
 const User = require('../models/User');
 const bcrypt = require('../helper/bcrypt');
+const CompanyUserMapping = require('../models/CompanyUserMapping')
+const ServiceHelper = require('../helper/ServiceHelper')
 
 const CompanyService = {};
 
@@ -23,6 +25,68 @@ CompanyService.createCompany = async(userDTO, companyDTO, addressDTO) => {
         company: company,
         address: address
     }
+
+}
+
+CompanyService.getUsersByCompanyId = async(companyId, page, size) => {
+
+    const pageObj = await CompanyUserMapping.query()
+        .where('ecompanyecompanyid', companyId)
+        .page(page, size)
+
+    return ServiceHelper.toPageObj(page, size, pageObj)
+
+}
+
+CompanyService.saveUsersToCompany = async(companyId, users, loggedInUser) => {
+
+    //accepting model [{'id': 1, 'deleted': false/true}]
+
+    const company = await Company.query().findById(companyId)
+
+    if(!company)
+        return
+
+    const deletedUserIds = users.filter(user => user.deleted)
+        .map(user => user.id)
+
+    const insertedUserIds = users.filter(user => !user.deleted)
+        .map(user => user.id)
+
+    const deleteRelations = CompanyUserMapping.query()
+        .patch({
+            edeletestatus: true,
+            eassigndeleteby: loggedInUser.sub,
+            eassigndeletetime: Date.now()
+        })
+        .where('ecompanyecompanyid', companyId)
+        .whereIn('eusereuserid', deletedUserIds)
+
+    const undoDeletedUsers = CompanyUserMapping.query()
+        .patch({ edeletestatus: false })
+        .where('edeletestatus', true)
+        .where('ecompanyecompanyid', companyId)
+        .whereIn('eusereuserid', insertedUserIds)
+        .returning('eusereuserid')
+
+    return Promise.all([deleteRelations, undoDeletedUsers])
+        .then(resultArr => {
+            console.log('passed')
+            return resultArr[1]
+        })
+        .then(existedRelations => {
+            console.log('passed')
+            return users
+                .filter(user => !existedRelations.find(relation => relation.eusereuserid === user.id))
+                .map(user => ({
+                    eusereuserid: user.id,
+                    ecompanyecompanyid: parseInt(companyId),
+                    eassigncreateby: loggedInUser.sub
+                }))
+        })
+        .then(freshRelations => {
+            return CompanyUserMapping.query().insert(freshRelations)
+        })
 
 }
 
