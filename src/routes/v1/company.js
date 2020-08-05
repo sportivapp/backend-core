@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { Create } = require('../../controllers/company');
+const companyController = require('../../controllers/company');
+const auth = require('../../middlewares/authentication');
 
-router.post('/company', Create);
+router.post('/company', auth.authenticateToken, companyController.create);
+router.post('/company/:companyId/users', auth.authenticateToken, companyController.saveUsersToCompany)
+router.get('/company/:companyId/users', auth.authenticateToken, companyController.getUsersByCompanyId)
 
 module.exports = router;
