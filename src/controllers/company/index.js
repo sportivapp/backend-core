@@ -14,7 +14,7 @@ companyController.create = async (req, res, next) => {
 
     try {
 
-        const { nik, name, password, mobileNumber, companyName, companyEmail, street, postalCode } = req.body;
+        const { nik, name, password, mobileNumber, companyName, companyEmail, street, postalCode, companyParentId } = req.body;
         const userDTO = {
             eusernik: nik,
             eusername: name,
@@ -24,7 +24,8 @@ companyController.create = async (req, res, next) => {
         }
         const companyDTO = {
             ecompanyname: companyName,
-            ecompanyemailaddress: companyEmail
+            ecompanyemailaddress: companyEmail,
+            ecompanyparentid: companyParentId
         }
         const addressDTO = {
             eaddressstreet: street,
@@ -42,6 +43,27 @@ companyController.create = async (req, res, next) => {
     }
 }
 
+companyController.getCompany = async (req, res, next) => {
+    
+    const user = req.user
+
+    if (isUserNotValid(user)) 
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
+    // type = company or type = branch
+    const { page, size, type, keyword } = req.query
+
+    try {
+        const pageObj = await companyService.getCompany(parseInt(page), parseInt(size), type, keyword)
+        if (!pageObj)
+            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+    } catch (e) {
+        next(e)
+    }
+
+}
+
 companyController.getUsersByCompanyId = async (req, res, next) => {
 
     const { page, size } = req.query
@@ -51,6 +73,63 @@ companyController.getUsersByCompanyId = async (req, res, next) => {
     try {
         const pageObj = await companyService.getUsersByCompanyId(companyId, parseInt(page), parseInt(size))
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+    } catch (e) {
+        next(e)
+    }
+}
+
+companyController.editCompany = async (req, res, next) => {
+    
+    const user = req.user
+
+    if (isUserNotValid(user)) 
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
+    const { companyId } = req.params
+    const { companyName, companyEmail, companyParentId } = req.body
+
+    try {
+
+        const companyDTO = {
+            ecompanyname: companyName,
+            ecompanyemailaddress: companyEmail,
+            ecompanyparentid: companyParentId,
+            ecompanyeditby: user.sub,
+            ecompanyedittime: new Date(Date.now())
+        }
+
+        const result = await companyService.editCompany(companyId, companyDTO)
+        if (!result)
+            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+
+    } catch (e) {
+        next(e)
+    }
+}
+
+companyController.deleteCompany = async (req, res, next) => {
+    
+    const user = req.user
+
+    if (isUserNotValid(user)) 
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
+    const { companyId } = req.params
+
+    try {
+
+        const companyDTO = {
+            ecompanydeleteby: user.sub,
+            ecompanydeletetime: new Date(Date.now()),
+            ecompanydeletestatus: 1
+        }
+
+        const result = await companyService.deleteCompany(companyId, companyDTO)
+        if (!result)
+            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+
     } catch (e) {
         next(e)
     }
