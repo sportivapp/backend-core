@@ -15,6 +15,8 @@ const announcementTest = require('./announcement');
 const absenTest = require('./absen');
 const permitTest = require('./permit')
 const deviceTest = require('./device')
+const departmentTest = require('./department')
+const settingTest = require('./setting');
 const gradeTest = require('./grade')
 
 describe('Routes: ', () => {
@@ -29,14 +31,16 @@ describe('Routes: ', () => {
   });
 
   companyTest(chai, httpServer, expect);
-  // userTest(chai, httpServer, expect);
-  // projectTest(chai, httpServer, expect);
-  // rosterTest(chai, httpServer, expect);
-  // announcementTest(chai, httpServer, expect);
-  // absenTest(chai, httpServer, expect);
-  // permitTest(chai, httpServer, expect)
-  // deviceTest(chai, httpServer, expect)
-  // gradeTest(chai, httpServer, expect)
+  userTest(chai, httpServer, expect);
+  projectTest(chai, httpServer, expect);
+  rosterTest(chai, httpServer, expect);
+  announcementTest(chai, httpServer, expect);
+  absenTest(chai, httpServer, expect);
+  permitTest(chai, httpServer, expect)
+  deviceTest(chai, httpServer, expect)
+  departmentTest(chai, httpServer, expect)
+  settingTest(chai, httpServer, expect);
+  gradeTest(chai, httpServer, expect)
 
 
 });
