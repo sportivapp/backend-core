@@ -3,6 +3,7 @@ const Address = require('../models/Address');
 const User = require('../models/User');
 const bcrypt = require('../helper/bcrypt');
 const CompanyUserMapping = require('../models/CompanyUserMapping')
+const { raw } = require('objection')
 const ServiceHelper = require('../helper/ServiceHelper')
 
 const CompanyService = {};
@@ -27,6 +28,42 @@ CompanyService.createCompany = async(userDTO, companyDTO, addressDTO) => {
     }
 
 }
+
+CompanyService.getCompany = async (page, size, type, keyword) => {
+    const newKeyword = keyword.toLowerCase()
+    let pageObj
+    if ( type === 'company') {
+        pageObj = await Company.query()
+            .select()
+            .where(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
+            .andWhere('ecompanyparentid', null)
+            .andWhere('ecompanydeletestatus', 0)
+            .page(page, size)
+        
+    } else if ( type === 'branch' ) {
+        pageObj = await Company.query()
+            .select()
+            .where(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
+            .whereNotNull('ecompanyparentid')
+            .andWhere('ecompanydeletestatus', 0)
+            .page(page, size)
+    }
+
+    return ServiceHelper.toPageObj(page, size, pageObj)
+
+}
+
+CompanyService.editCompany = async (companyId, companyDTO) => {
+
+    return Company.query().patchAndFetchById(companyId, companyDTO)
+}
+
+CompanyService.deleteCompany = async (companyId, companyDTO) => {
+
+    return Company.query().patchAndFetchById(companyId, companyDTO)
+
+}
+
 
 CompanyService.getUsersByCompanyId = async(companyId, page, size) => {
 
