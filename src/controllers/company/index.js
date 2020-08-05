@@ -12,8 +12,10 @@ companyController.create = async (req, res, next) => {
     if (isUserNotValid(req.user))
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
-    try {
+    const { hasAdmin } = req.query
 
+    try {
+        
         const { nik, name, password, mobileNumber, companyName, companyEmail, street, postalCode, companyParentId } = req.body;
         const userDTO = {
             eusernik: nik,
@@ -32,7 +34,7 @@ companyController.create = async (req, res, next) => {
             eaddresspostalcode: postalCode
         }
 
-        const data = await companyService.createCompany(userDTO, companyDTO, addressDTO);
+        const data = await companyService.createCompany(userDTO, companyDTO, addressDTO, hasAdmin);
 
         return res.status(200).json({
             data: data
