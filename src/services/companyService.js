@@ -8,21 +8,28 @@ const ServiceHelper = require('../helper/ServiceHelper')
 
 const CompanyService = {};
 
-CompanyService.createCompany = async(userDTO, companyDTO, addressDTO) => {
+CompanyService.createCompany = async(userDTO, companyDTO, addressDTO, hasAdmin) => {
 
     const address = await Address.query().insert(addressDTO);
 
     companyDTO.eaddresseaddressid = address.eaddressid;
     const company = await Company.query().insert(companyDTO);
 
-    // super user of the company
-    userDTO.euserpermission = 10;
-    userDTO.ecompanyecompanyid = company.ecompanyid;
-    userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
-    const user = await User.query().insert(userDTO);
+    if(hasAdmin.toLowerCase() === 'yes') {
+            // super user of the company
+        userDTO.euserpermission = 10;
+        userDTO.ecompanyecompanyid = company.ecompanyid;
+        userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
+        const user = await User.query().insert(userDTO);
+
+        return {
+            user: user,
+            company: company,
+            address: address
+        }
+    }
 
     return {
-        user: user,
         company: company,
         address: address
     }
@@ -31,23 +38,17 @@ CompanyService.createCompany = async(userDTO, companyDTO, addressDTO) => {
 
 CompanyService.getCompany = async (page, size, type, keyword) => {
     const newKeyword = keyword.toLowerCase()
-    let pageObj
-    if ( type === 'company') {
-        pageObj = await Company.query()
+    let query = Company.query()
             .select()
             .where(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
-            .andWhere('ecompanyparentid', null)
             .andWhere('ecompanydeletestatus', 0)
-            .page(page, size)
+    if ( type === 'company') 
+        query.whereNull('ecompanyparentid')
         
-    } else if ( type === 'branch' ) {
-        pageObj = await Company.query()
-            .select()
-            .where(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
-            .whereNotNull('ecompanyparentid')
-            .andWhere('ecompanydeletestatus', 0)
-            .page(page, size)
-    }
+    else
+        query.whereNotNull('ecompanyparentid')
+
+    const pageObj = await query.page(page, size)
 
     return ServiceHelper.toPageObj(page, size, pageObj)
 
