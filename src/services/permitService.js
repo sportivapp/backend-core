@@ -8,6 +8,7 @@ permitService.getPermitList = async (page, size, user) => {
 
     const permitPage = await Permit.query()
         .where('euseruserid', user.sub)
+        .modify('notDeleted')
         .page(page, size)
 
     return ServiceHelper.toPageObj(page, size, permitPage)
@@ -15,15 +16,20 @@ permitService.getPermitList = async (page, size, user) => {
 
 permitService.getSubordinatePermitList = async (page, size, user) => {
 
-    let permissionLevel = 0
+    let subordinatesQuery
 
-    if (user.permission === 7 || user.permission === 8) permissionLevel = 1
+    if (user.permission === 7)
+        subordinatesQuery = User.query().where('euserpermission', 1)
 
-    const subordinatesQuery = User.query().where('euserpermission', permissionLevel)
+    else
+        subordinatesQuery = User.query().whereIn('euserpermission', [1, 7])
+
+    subordinatesQuery.where('euserdeletestatus', 0)
 
     const permitPage = await User.relatedQuery('permits')
         .for(subordinatesQuery)
         .where('epermitstatus', 1)
+        .modify('notDeleted')
         .page(page, size)
 
     return ServiceHelper.toPageObj(page, size, permitPage)
@@ -31,30 +37,27 @@ permitService.getSubordinatePermitList = async (page, size, user) => {
 
 permitService.getPermitById = async (permitId, user) => {
 
-    const result = await Permit.query()
-        .select()
+    const permit = await Permit.query()
         .where('epermitid', permitId)
-        .first()
-        .withGraphFetched('user')
+        .modify('notDeleted')
+        .withGraphFetched('user(notDeleted)')
         .first()
 
-    if (result && result.user.euserpermission === user.permission && result.user.euserid !== user.sub)
-        return
-    return result
+    if(!permit || !permit.user) return
+    else if (permit.user.euserpermission === user.permission && permit.user.euserid !== user.sub) return
+    else return permit
 }
 
 permitService.requestApproval = async (permitId, user) => {
 
     const permit = await Permit.query()
-        .select()
         .where('epermitid', permitId)
+        .withGraphFetched('user(notDeleted)')
         .first()
-        .withGraphFetched('user')
 
-    if (!permit || permit.user.euserid != user.sub)
-        return
-
-    return permit.$query().patchAndFetch({ epermitstatus: 1 })
+    if (!permit || !permit.user) return
+    else if (permit.user.euserid != user.sub) return
+    else return permit.$query().patchAndFetch({ epermitstatus: 1 })
 }
 
 permitService.createPermit = async (permitDTO, user) => {
@@ -66,7 +69,14 @@ permitService.createPermit = async (permitDTO, user) => {
         else return
     }
     else {
-        const foundUser = await User.query().where("euserid", permitDTO.euseruserid).first()
+        const foundUser = await User.query()
+            .where("euserid", permitDTO.euseruserid)
+            .modify('notDeleted')
+            .first()
+
+        if (!foundUser)
+            return
+
         if (!isDanruPermitByPM(foundUser.euserpermission, user.permission)
             && !isStaffPermitByDanruOrPM(foundUser.euserpermission, user.permission))
             return
@@ -81,18 +91,27 @@ permitService.updatePermitStatusById = async (permitId, status, user) => {
 
     if(!isStaffPermitByDanruOrPM(permit.user.euserpermission, user.permission)
         && !isDanruPermitByPM(permit.user.euserpermission, user.permission)) return
-    else return permit.$query().patchAndFetch({ epermitstatus: status })
+    else return Permit.query()
+        .findById(permitId)
+        .patch({ epermitstatus: status })
+        .returning('*')
 }
 
 permitService.updatePermitById = async (permitId, permitDTO, user) => {
 
     const permit = await permitService.getPermitById(permitId, user)
 
-    return permit.$query().patchAndFetch({
-        epermitdescription: permitDTO.epermitdescription,
-        epermitstartdate: permitDTO.epermitstartdate,
-        epermitenddate: permitDTO.epermitenddate
-    })
+    if (!permit)
+        return
+
+    return Permit.query()
+        .findById(permitId)
+        .patch({
+            epermitdescription: permitDTO.epermitdescription,
+            epermitstartdate: permitDTO.epermitstartdate,
+            epermitenddate: permitDTO.epermitenddate
+        })
+        .returning('*')
 }
 
 permitService.deletePermitById = async (permitId, user) => {
@@ -100,7 +119,7 @@ permitService.deletePermitById = async (permitId, user) => {
     const permit = await permitService.getPermitById(permitId, user)
 
     if (!permit)
-        return false
+        return true
 
     if (permit.epermitstatus > 1)
         return false
@@ -108,19 +127,16 @@ permitService.deletePermitById = async (permitId, user) => {
     if(permit.user.euserid != user.sub && permit.user.euserpermission <= user.permission)
         return false
 
-    await Permit.query().deleteById(permitId)
-    return true
+    return Permit.query()
+        .findById(permitId)
+        .modify('delete', user.sub)
+        .then(rowsAffected => rowsAffected === 1)
 
 }
 
 function isDanruPermitByPM(permission, superiorPermission) {
 
     return permission === 7 && superiorPermission === 8
-}
-
-function isStaffPermitByDanru(permission, superiorPermission) {
-
-    return permission === 1 && superiorPermission === 7
 }
 
 function isStaffPermitByDanruOrPM(permission, superiorPermission) {

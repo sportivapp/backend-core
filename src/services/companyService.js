@@ -71,11 +71,9 @@ CompanyService.saveUsersToCompany = async(companyId, users, loggedInUser) => {
 
     return Promise.all([deleteRelations, undoDeletedUsers])
         .then(resultArr => {
-            console.log('passed')
             return resultArr[1]
         })
         .then(existedRelations => {
-            console.log('passed')
             return users
                 .filter(user => !existedRelations.find(relation => relation.eusereuserid === user.id))
                 .map(user => ({

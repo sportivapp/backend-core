@@ -13,7 +13,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('euser', t => {
     t.integer('eusercreateby').notNullable().defaultTo(0);
     t.timestamp('eusercreatetime', true).notNullable().defaultTo(knex.fn.now());
     t.integer('euserdeleteby');
-    t.integer('euserdeletestatus');
+    t.integer('euserdeletestatus').defaultTo(0);
     t.timestamp('euserdeletetime', true);
     t.integer('eusereditby');
     t.timestamp('euseredittime', true);
