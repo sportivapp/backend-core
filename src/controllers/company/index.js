@@ -7,7 +7,7 @@ function isUserNotValid(user) {
     return user.permission !== 10
 }
 
-companyController.create = async (req, res, next) => {
+companyController.registerCompany = async (req, res, next) => {
     
     const { nik, name, password, mobileNumber, companyName, companyEmail, street, postalCode } = req.body;
 
@@ -29,7 +29,40 @@ companyController.create = async (req, res, next) => {
             eaddresspostalcode: postalCode
         }
 
-        const data = await companyService.createCompany(userDTO, companyDTO, addressDTO);
+        const data = await companyService.registerCompany(userDTO, companyDTO, addressDTO);
+
+        return res.status(200).json({
+            data: data
+        });
+
+    } catch(e) {
+        next(e);
+    }
+}
+
+companyController.createCompany = async (req, res, next) => {
+
+    if (isUserNotValid(req.user))
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
+    const { userId } = req.query
+    const user = req.user
+
+    try {
+        
+        const { companyName, companyEmail, street, postalCode, companyParentId } = req.body;
+
+        const companyDTO = {
+            ecompanyname: companyName,
+            ecompanyemailaddress: companyEmail,
+            ecompanyparentid: companyParentId
+        }
+        const addressDTO = {
+            eaddressstreet: street,
+            eaddresspostalcode: postalCode
+        }
+
+        const data = await companyService.createCompany(parseInt(userId) , companyDTO, addressDTO, user);
 
         return res.status(200).json({
             data: data
