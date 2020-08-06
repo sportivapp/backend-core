@@ -8,7 +8,7 @@ const ServiceHelper = require('../helper/ServiceHelper')
 
 const CompanyService = {};
 
-CompanyService.createCompany = async(userDTO, companyDTO, addressDTO, hasAdmin) => {
+CompanyService.createCompany = async(userDTO, companyDTO, addressDTO) => {
 
     const address = await Address.query().insert(addressDTO);
 
