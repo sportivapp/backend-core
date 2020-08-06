@@ -8,7 +8,7 @@ const ServiceHelper = require('../helper/ServiceHelper')
 
 const CompanyService = {};
 
-CompanyService.createCompany = async(userDTO, companyDTO, addressDTO) => {
+CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
 
     const address = await Address.query().insert(addressDTO);
 
@@ -25,6 +25,44 @@ CompanyService.createCompany = async(userDTO, companyDTO, addressDTO) => {
         user: user,
         company: company,
         address: address
+    }
+
+}
+
+CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
+
+    const address = await Address.query().insert(addressDTO);
+
+    companyDTO.eaddresseaddressid = address.eaddressid;
+    const company = await Company.query().insert(companyDTO);
+
+    const id = ( isNaN(userId) ) ? parseInt(user.sub) : userId 
+
+    const companyUserMapping = await CompanyUserMapping.query().insert({
+        ecompanyecompanyid: company.ecompanyid,
+        eusereuserid: id,
+        eassigncreateby: user.sub
+    })
+
+
+    // super user of the company
+    const updateUser = await User.query()
+    .patchAndFetchById( id , isNaN(userId) ? 
+        { 
+            euserpermission: 10 
+        }
+        :
+        { 
+            euserpermission: 10,
+            ecompanyecompanyid: company.ecompanyid
+        }
+    );
+
+    return {
+        user: updateUser,
+        company: company,
+        address: address,
+        companyusermapping: companyUserMapping
     }
 
 }
