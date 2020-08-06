@@ -8,13 +8,11 @@ function isUserNotValid(user) {
 }
 
 companyController.create = async (req, res, next) => {
-
-    if (isUserNotValid(req.user))
-        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+    
+    const { nik, name, password, mobileNumber, companyName, companyEmail, street, postalCode, companyParentId } = req.body;
 
     try {
         
-        const { nik, name, password, mobileNumber, companyName, companyEmail, street, postalCode, companyParentId } = req.body;
         const userDTO = {
             eusernik: nik,
             eusername: name,
