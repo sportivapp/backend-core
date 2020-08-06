@@ -15,21 +15,14 @@ CompanyService.createCompany = async(userDTO, companyDTO, addressDTO, hasAdmin) 
     companyDTO.eaddresseaddressid = address.eaddressid;
     const company = await Company.query().insert(companyDTO);
 
-    if(hasAdmin.toLowerCase() === 'yes') {
-            // super user of the company
-        userDTO.euserpermission = 10;
-        userDTO.ecompanyecompanyid = company.ecompanyid;
-        userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
-        const user = await User.query().insert(userDTO);
-
-        return {
-            user: user,
-            company: company,
-            address: address
-        }
-    }
+    // super user of the company
+    userDTO.euserpermission = 10;
+    userDTO.ecompanyecompanyid = company.ecompanyid;
+    userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
+    const user = await User.query().insert(userDTO);
 
     return {
+        user: user,
         company: company,
         address: address
     }
