@@ -8,7 +8,7 @@ exports.up = (knex) => knex.schema.createTable('epermit', t => {
     t.integer('epermitcreateby').notNullable();
     t.timestamp('epermitcreatetime', true).notNullable().defaultTo(knex.fn.now());
     t.integer('epermitdeleteby');
-    t.timestamp('epermitdeletetime', true).defaultTo(knex.fn.now());
+    t.timestamp('epermitdeletetime', true);
     t.integer('epermitchangeby');
     t.timestamp('epermitchangetime', true);
     t.boolean('epermitdeletestatus').notNullable().defaultTo(false);
