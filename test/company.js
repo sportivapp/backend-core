@@ -9,10 +9,8 @@ module.exports = (chai, httpServer, expect) => {
                 password: 'emtivnawakaraadmin'
               })
 
-          let hasAdmin = 'yes'
-
           const res = await chai.request(httpServer)
-          .post(`/api/v1/company?hasAdmin=${hasAdmin}`)
+          .post(`/api/v1/company`)
           .set('authorization', login.body.data)
           .send({
             nik: '123456789',
