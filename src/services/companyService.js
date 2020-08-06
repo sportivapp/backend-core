@@ -3,11 +3,12 @@ const Address = require('../models/Address');
 const User = require('../models/User');
 const bcrypt = require('../helper/bcrypt');
 const CompanyUserMapping = require('../models/CompanyUserMapping')
+const { raw } = require('objection')
 const ServiceHelper = require('../helper/ServiceHelper')
 
 const CompanyService = {};
 
-CompanyService.createCompany = async(userDTO, companyDTO, addressDTO) => {
+CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
 
     const address = await Address.query().insert(addressDTO);
 
@@ -27,6 +28,74 @@ CompanyService.createCompany = async(userDTO, companyDTO, addressDTO) => {
     }
 
 }
+
+CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
+
+    const address = await Address.query().insert(addressDTO);
+
+    companyDTO.eaddresseaddressid = address.eaddressid;
+    const company = await Company.query().insert(companyDTO);
+
+    const id = ( isNaN(userId) ) ? parseInt(user.sub) : userId 
+
+    const companyUserMapping = await CompanyUserMapping.query().insert({
+        ecompanyecompanyid: company.ecompanyid,
+        eusereuserid: id,
+        eassigncreateby: user.sub
+    })
+
+
+    // super user of the company
+    const updateUser = await User.query()
+    .patchAndFetchById( id , isNaN(userId) ? 
+        { 
+            euserpermission: 10 
+        }
+        :
+        { 
+            euserpermission: 10,
+            ecompanyecompanyid: company.ecompanyid
+        }
+    );
+
+    return {
+        user: updateUser,
+        company: company,
+        address: address,
+        companyusermapping: companyUserMapping
+    }
+
+}
+
+CompanyService.getCompany = async (page, size, type, keyword) => {
+    const newKeyword = keyword.toLowerCase()
+    let query = Company.query()
+            .select()
+            .where(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
+            .andWhere('ecompanydeletestatus', 0)
+    if ( type === 'company') 
+        query.whereNull('ecompanyparentid')
+        
+    else
+        query.whereNotNull('ecompanyparentid')
+
+    const pageObj = await query.page(page, size)
+
+    return ServiceHelper.toPageObj(page, size, pageObj)
+
+}
+
+CompanyService.editCompany = async (companyId, companyDTO) => {
+
+    return Company.query().patchAndFetchById(companyId, companyDTO)
+}
+
+CompanyService.deleteCompany = async (companyId, companyDTO) => {
+
+    return Company.query().patchAndFetchById(companyId, companyDTO)
+
+}
+
 
 CompanyService.getUsersByCompanyId = async(companyId, page, size) => {
 
