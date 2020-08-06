@@ -3,7 +3,8 @@ const router = express.Router();
 const companyController = require('../../controllers/company');
 const auth = require('../../middlewares/authentication');
 
-router.post('/company', auth.authenticateToken, companyController.create);
+router.post('/company-register', companyController.registerCompany);
+router.post('/company', auth.authenticateToken, companyController.createCompany);
 router.post('/company/:companyId/users', auth.authenticateToken, companyController.saveUsersToCompany)
 router.put('/company/:companyId', auth.authenticateToken, companyController.editCompany)
 router.delete('/company/:companyId', auth.authenticateToken, companyController.deleteCompany)
