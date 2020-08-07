@@ -6,7 +6,7 @@ const ServiceHelper = require('../helper/ServiceHelper')
 const AnnouncementService = {};
 
 AnnouncementService.getAllAnnouncement = async (page, size, user) => {
-    const announcementPage = await Announcement.query().select().where('eannouncementdeletestatus', 0).page( page, size);
+    const announcementPage = await Announcement.query().select().where('eannouncementdeletestatus', false).page( page, size);
 
     if (announcementPage && user.permission !== 1) return
 

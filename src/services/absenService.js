@@ -15,13 +15,13 @@ AbsenService.createAbsenByPOS = async ( absenDTO, imageDTO ) => {
 }
 
 AbsenService.listAbsenById = async ( page, size, userId ) => {
-    const absenPage = await Absen.query().select().where('eusereuserid', userId).andWhere('eabsendeletestatus', 0).orderBy('eabsencreatetime', 'asc').page(page, size);
+    const absenPage = await Absen.query().select().where('eusereuserid', userId).andWhere('eabsendeletestatus', false).orderBy('eabsencreatetime', 'asc').page(page, size);
 
     return ServiceHelper.toPageObj(page, size, absenPage);
 }
 
 AbsenService.listAbsen = async ( page, size ) => {
-    const absenPage = await Absen.query().select().where('eabsendeletestatus', 0).orderBy('eabsencreatetime').page(page, size);
+    const absenPage = await Absen.query().select().where('eabsendeletestatus', false).orderBy('eabsencreatetime').page(page, size);
 
     return ServiceHelper.toPageObj(page, size, absenPage);
 }

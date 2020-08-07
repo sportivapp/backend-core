@@ -1,4 +1,4 @@
-const Model = require('./Model')
+const Model = require('./Model');
 
 class Permit extends Model {
     static get tableName() {
