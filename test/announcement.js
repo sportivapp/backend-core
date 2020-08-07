@@ -83,7 +83,7 @@ module.exports = (chai, httpServer, expect) => {
       });
     });
   
-    describe('PUT /api/v1/announcement-delete', () => {
+    describe('DEL /api/v1/announcement-delete', () => {
       it('Should return success delete message', async () => {
         const login = await chai.request(httpServer)
         .post('/api/v1/user-login')
@@ -93,7 +93,7 @@ module.exports = (chai, httpServer, expect) => {
         });
   
         const res = await chai.request(httpServer)
-        .put('/api/v1/announcement-delete/1')
+        .delete('/api/v1/announcement-delete/1')
         .set('authorization', login.body.data)
         .send();
   

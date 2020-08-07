@@ -51,7 +51,7 @@ AnnouncementService.updateAnnouncement = async (announcementId, announcementDTO,
     // remove user that has the announcement
     await AnnouncementUserMapping.query().delete().where('eannouncementeannouncementid', announcementId);
 
-    const result = await Announcement.query().where('eannouncementid', announcementId).update(announcementDTO);
+    const result = await Announcement.query().patchAndFetchById(announcementId, announcementDTO);
 
     // Insert user that get the announcement
     await AnnouncementService.addUser(parseInt(announcementId, 10) , userIds);
@@ -64,7 +64,7 @@ AnnouncementService.deleteAnnouncement = async (announcementId, user) => {
 
     if (user.permission === 1) return
 
-    const result = await AnnouncementDelete.query().where('eannouncementid', announcementId).update({
+    const result = await AnnouncementDelete.query().patchAndFetchById(announcementId, {
         eannouncementdeletestatus: true,
         eannouncementdeleteby: user.sub,
         eannouncementdeletetime: Date.now()
