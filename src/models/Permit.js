@@ -50,7 +50,7 @@ class Permit extends Model {
                 builder.patch({
                     epermitdeletestatus: true,
                     epermitdeleteby: userId,
-                    epermitdeletetime: new Date()
+                    epermitdeletetime: Date.now()
                 })
             }
         }

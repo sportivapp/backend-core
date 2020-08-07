@@ -39,8 +39,6 @@ module.exports = (chai, httpServer, expect) => {
                 password: 'emtivnawakaraadmin'
               })
 
-
-
           const res = await chai.request(httpServer)
           .post(`/api/v1/company`)
           .set('authorization', login.body.data)

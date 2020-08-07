@@ -1,4 +1,3 @@
-const express = require('express');
 const router = require('../router')
 const companyController = require('../../controllers/company');
 const auth = require('../../middlewares/authentication');
