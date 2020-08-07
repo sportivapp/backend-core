@@ -124,8 +124,8 @@ UsersService.deleteUserById = async ( userId, user ) => {
 
     const result = await User.query().where('euserid', userId).patch({
         euserdeleteby: user.sub,
-        euserdeletetime: new Date(Date.now()),
-        euserdeletestatus: 1
+        euserdeletetime: Date.now(),
+        euserdeletestatus: true
     });
 
     return result;

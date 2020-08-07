@@ -7,6 +7,6 @@ router.post('/absen', Create);
 router.get('/absen-list/:userId', ListById);
 router.get('/absen-list', List);
 router.put('/absen/:absenId', auth.authenticateToken, Update);
-router.put('/absen-delete/:absenId', auth.authenticateToken, Delete);
+router.delete('/absen-delete/:absenId', auth.authenticateToken, Delete);
 
 module.exports = router;

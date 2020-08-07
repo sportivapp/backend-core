@@ -3,9 +3,9 @@ exports.up = (knex, Promise) => knex.schema.createTable('eroster', t => {
     t.string('erostername', 256).notNullable();
     t.string('erosterdescription', 256);
     t.boolean('erosterisactive').notNullable().defaultTo(true);
-    t.timestamp('erostercreatetime', true).notNullable().defaultTo(knex.fn.now());
+    t.bigInteger('erostercreatetime', true).notNullable().defaultTo(Date.now());
     t.integer('erostercreateby').notNullable().defaultTo(0);
-    t.timestamp('erosteredittime', true);
+    t.bigInteger('erosteredittime', true);
     t.integer('erostereditby');
     t.integer('eprojecttablestatus').notNullable().defaultTo(1);
     t.integer('eprojecteprojectid').references('eproject.eprojectid').onDelete('CASCADE');

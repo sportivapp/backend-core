@@ -14,7 +14,7 @@ module.exports = async (req, res, next) => {
             eabsenstatus: absenStatus,
             eabsendescription: absenDescription,
             eabseneditby: user.sub,
-            eabsenedittime: new Date(Date.now())
+            eabsenedittime: Date.now()
         }
 
         const result = await absenService.editAbsen(absenId, absenDTO, user);

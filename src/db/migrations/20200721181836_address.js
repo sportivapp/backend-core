@@ -5,9 +5,9 @@ exports.up = (knex, Promise) => knex.schema.createTable('eaddress', t => {
     t.string('eaddresslongitude');
     t.string('eaddresslatitude');
     t.integer('eaddresscreateby').notNullable().defaultTo(0);
-    t.timestamp('eaddresscreatetime', true).notNullable().defaultTo(knex.fn.now());
+    t.bigInteger('eaddresscreatetime', true).notNullable().defaultTo(Date.now());
     t.integer('eaddresschangeby');
-    t.timestamp('eaddresschangetime', true);
+    t.bigInteger('eaddresschangetime', true);
     t.integer('eaddresstablestatus').notNullable().defaultTo(1);
     // t.integer('ecountryecountryid').notNullable().references('ecountry.ecountryid');
     // t.integer('estateestateid').notNullable().references('estate.estateid');
