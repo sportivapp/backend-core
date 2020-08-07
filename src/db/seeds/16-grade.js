@@ -7,6 +7,18 @@ exports.seed = (knex) => knex('egrade').del()
                     egradename: 'Position A',
                     ecompanycompanyid: 1,
                     egradecreateby: 1
+                },
+                {
+                    egradedescription: 'grade position B',
+                    egradename: 'Position B',
+                    ecompanycompanyid: 1,
+                    egradecreateby: 1
+                },
+                {
+                    egradedescription: 'grade position C',
+                    egradename: 'Position C',
+                    ecompanycompanyid: 1,
+                    egradecreateby: 1
                 }
             ]
         ));
