@@ -28,9 +28,9 @@ departmentService.createDepartment = async (departmentDTO) => {
     return result
 }
 
-departmentService.updateDepartment = async (departmentId, departmentDTO) => {
+departmentService.updateDepartment = async (departmentId, departmentDTO, user) => {
 
-    const result = await Department.query().patchAndFetchById(departmentId, departmentDTO)
+    const result = await Department.query().findById(departmentId).updateByUserId(departmentDTO, user.sub).returning('*')
 
     return result
 }

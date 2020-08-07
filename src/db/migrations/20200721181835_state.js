@@ -3,9 +3,12 @@ exports.up = (knex, Promise) => knex.schema.createTable('estate', t => {
     t.string('estatename').notNullable();
     t.string('estatecode');
     t.integer('estatecreateby').notNullable().defaultTo(0);
-    t.timestamp('estatecreatetime', true).notNullable().defaultTo(knex.fn.now());
+    t.bigInteger('estatecreatetime').notNullable().defaultTo(Date.now());
     t.integer('estatechangeby');
-    t.timestamp('estatechangetime', true);
+    t.bigInteger('estatechangetime');
+    t.integer('estatedeleteby');
+    t.bigInteger('estatedeletetime');
+    t.boolean('estatedeletestatus').defaultTo(false);
     t.integer('estatetablestatus').notNullable().defaultTo(1);
     t.integer('ecountryecountryid').notNullable().references('ecountry.ecountryid');
   });

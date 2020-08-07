@@ -72,12 +72,10 @@ controller.updateDepartment = async (req, res, next) => {
         const departmentDTO = {
             edepartmentname: departmentName,
             edepartmentdescription: departmentDescription,
-            edepartmentchangeby: user.sub,
-            edepartmentchangetime: Date.now(),
             edepartmentsuperiorid: departmentSuperiorId
         }
 
-        const result = await departmentService.updateDepartment(departmentId, departmentDTO)
+        const result = await departmentService.updateDepartment(departmentId, departmentDTO, user)
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))

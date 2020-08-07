@@ -1,10 +1,13 @@
 exports.up = (knex, Promise) => knex.schema.createTable('ecompanyusermapping', t => {
     t.integer('ecompanyecompanyid').notNullable().references('ecompany.ecompanyid')
     t.integer('eusereuserid').notNullable().references('euser.euserid')
-    t.bigInteger('eassigncreatetime').notNullable().defaultTo(Date.now())
-    t.integer('eassigncreateby').notNullable()
-    t.bigInteger('eassigndeletetime')
-    t.integer('eassigndeleteby')
+    t.integer('ecompanyusermappingcreateby').notNullable();
+    t.bigInteger('ecompanyusermappingcreatetime').notNullable().defaultTo(Date.now());
+    t.integer('ecompanyusermappingchangeby');
+    t.bigInteger('ecompanyusermappingchangetime');
+    t.integer('ecompanyusermappingdeleteby');
+    t.boolean('ecompanyusermappingdeletestatus').defaultTo(false);
+    t.bigInteger('ecompanyusermappingdeletetime');
     t.boolean('edeletestatus').defaultTo(false)
 });
 

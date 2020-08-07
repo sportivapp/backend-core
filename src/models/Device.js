@@ -19,6 +19,38 @@ class Device extends Model {
       }
     }
   }
+
+  static get relationMappings() {
+
+    const Project = require('./Project')
+
+    return {
+      projects: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Project,
+        join: {
+          from: 'edevice.edeviceid',
+          through: {
+            from: 'eprojectdevicemapping.edevicedeviceid',
+            to: 'eprojectdevicemapping.eprojectprojectid'
+          },
+          to: 'eproject.eprojectid'
+        }
+      }
+    }
+  }
+
+  static get modifiers() {
+    return {
+      notDeleted(builder) {
+        builder.where('edevicedeletestatus', 0)
+      },
+      deleted(builder) {
+        builder.where('edevicedeletestatus', 1)
+      }
+    }
+  }
+
 }
 
 module.exports = Device;

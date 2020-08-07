@@ -12,9 +12,7 @@ module.exports = async (req, res, next) => {
         const absenDTO = {
             eabsenlocationdistanceaccuracy: locationAccuracy,
             eabsenstatus: absenStatus,
-            eabsendescription: absenDescription,
-            eabseneditby: user.sub,
-            eabsenedittime: new Date(Date.now())
+            eabsendescription: absenDescription
         }
 
         const result = await absenService.editAbsen(absenId, absenDTO, user);

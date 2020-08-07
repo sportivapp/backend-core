@@ -15,12 +15,7 @@ class ProjectDeviceMapping extends Model {
             required: [],
             properties: {
                 eprojectprojectid: { type: 'integer' },
-                edevicedeviceid: { type: 'integer' },
-                eassigncreatetime: { type: 'bigint' },
-                eassigncreateby: { type: 'integer' },
-                eassigndeletetime: { type: 'bigint' },
-                eassigndeleteby: { type: 'integer' },
-                edeletestatus: { type: 'boolean' }
+                edevicedeviceid: { type: 'integer' }
             }
         };
     }

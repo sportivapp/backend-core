@@ -40,11 +40,9 @@ class User extends Model {
 
   static get modifiers() {
     return {
-      notDeleted(builder) {
-        builder.where('euserdeletestatus', 0)
-      },
-      deleted(builder) {
-        builder.where('euserdeletestatus', 1)
+      findByDeleteStatus(query, deleteStatus) {
+        if (!deleteStatus) query.where('euserdeletestatus', 0)
+        else query.where('euserdeletestatus', deleteStatus)
       }
     }
   }

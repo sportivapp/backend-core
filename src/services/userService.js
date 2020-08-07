@@ -122,11 +122,10 @@ UsersService.deleteUserById = async ( userId, user ) => {
     
     if (user.permission < 9) return
 
-    const result = await User.query().where('euserid', userId).patch({
-        euserdeleteby: user.sub,
-        euserdeletetime: new Date(Date.now()),
-        euserdeletestatus: 1
-    });
+    const result = await User.query()
+        .deleteByUserId(user.sub)
+        .where('euserid', userId)
+        .returning('*');
 
     return result;
 

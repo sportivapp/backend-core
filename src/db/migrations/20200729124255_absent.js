@@ -6,12 +6,12 @@ exports.up = (knex, Promise) => knex.schema.createTable('eabsen', t => {
     t.timestamp('eabsentime', false).notNullable();
     t.integer('eabsensyncstatus');
     t.integer('eabsencreateby').notNullable();
-    t.timestamp('eabsencreatetime', false).notNullable().defaultTo(knex.fn.now());
-    t.integer('eabseneditby');
-    t.timestamp('eabsenedittime', false);
+    t.bigInteger('eabsencreatetime').notNullable().defaultTo(Date.now());
+    t.integer('eabsenchangeby');
+    t.bigInteger('eabsenchangetime');
     t.integer('eabsendeleteby');
-    t.timestamp('eabsendeletetime', false);
-    t.integer('eabsendeletestatus').defaultTo(0);
+    t.boolean('eabsendeletestatus').defaultTo(false);
+    t.bigInteger('eabsendeletetime');
     t.integer('eabsentablestatus').notNullable().defaultTo(1);
     t.integer('eusereuserid').references('euser.euserid');
     t.integer('elocationelocationid').notNullable().references('elocation.elocationid');

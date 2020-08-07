@@ -7,8 +7,8 @@ const permitService = {}
 permitService.getPermitList = async (page, size, user) => {
 
     const permitPage = await Permit.query()
-        .where('euseruserid', user.sub)
-        .modify('notDeleted')
+        .modify('findByUserId', user.sub)
+        .modify('findByDeleteStatus', false)
         .page(page, size)
 
     return ServiceHelper.toPageObj(page, size, permitPage)
@@ -24,12 +24,12 @@ permitService.getSubordinatePermitList = async (page, size, user) => {
     else
         subordinatesQuery = User.query().whereIn('euserpermission', [1, 7])
 
-    subordinatesQuery.where('euserdeletestatus', 0)
+    subordinatesQuery.modify('findByDeleteStatus', 0)
 
     const permitPage = await User.relatedQuery('permits')
         .for(subordinatesQuery)
         .where('epermitstatus', 1)
-        .modify('notDeleted')
+        .modify('findByDeleteStatus', false)
         .page(page, size)
 
     return ServiceHelper.toPageObj(page, size, permitPage)
@@ -38,9 +38,9 @@ permitService.getSubordinatePermitList = async (page, size, user) => {
 permitService.getPermitById = async (permitId, user) => {
 
     const permit = await Permit.query()
-        .where('epermitid', permitId)
-        .modify('notDeleted')
-        .withGraphFetched('user(notDeleted)')
+        .findById(permitId)
+        .modify('findByDeleteStatus', false)
+        .withGraphFetched('user(findByDeleteStatus)')
         .first()
 
     if(!permit || !permit.user) return
@@ -51,8 +51,9 @@ permitService.getPermitById = async (permitId, user) => {
 permitService.requestApproval = async (permitId, user) => {
 
     const permit = await Permit.query()
-        .where('epermitid', permitId)
-        .withGraphFetched('user(notDeleted)')
+        .findById(permitId)
+        .modify('findByDeleteStatus', false)
+        .withGraphFetched('user(findByDeleteStatus)')
         .first()
 
     if (!permit || !permit.user) return
@@ -71,7 +72,7 @@ permitService.createPermit = async (permitDTO, user) => {
     else {
         const foundUser = await User.query()
             .where("euserid", permitDTO.euseruserid)
-            .modify('notDeleted')
+            .where('euserdeletestatus', false)
             .first()
 
         if (!foundUser)
@@ -93,7 +94,7 @@ permitService.updatePermitStatusById = async (permitId, status, user) => {
         && !isDanruPermitByPM(permit.user.euserpermission, user.permission)) return
     else return Permit.query()
         .findById(permitId)
-        .patch({ epermitstatus: status })
+        .updateByUserId({ epermitstatus: status }, user.sub)
         .returning('*')
 }
 
@@ -106,11 +107,11 @@ permitService.updatePermitById = async (permitId, permitDTO, user) => {
 
     return Permit.query()
         .findById(permitId)
-        .patch({
+        .updateByUserId({
             epermitdescription: permitDTO.epermitdescription,
             epermitstartdate: permitDTO.epermitstartdate,
             epermitenddate: permitDTO.epermitenddate
-        })
+        }, user.sub)
         .returning('*')
 }
 
@@ -129,7 +130,7 @@ permitService.deletePermitById = async (permitId, user) => {
 
     return Permit.query()
         .findById(permitId)
-        .modify('delete', user.sub)
+        .deleteByUserId(user.sub)
         .then(rowsAffected => rowsAffected === 1)
 
 }

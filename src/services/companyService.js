@@ -54,17 +54,13 @@ CompanyService.saveUsersToCompany = async(companyId, users, loggedInUser) => {
         .map(user => user.id)
 
     const deleteRelations = CompanyUserMapping.query()
-        .patch({
-            edeletestatus: true,
-            eassigndeleteby: loggedInUser.sub,
-            eassigndeletetime: Date.now()
-        })
         .where('ecompanyecompanyid', companyId)
         .whereIn('eusereuserid', deletedUserIds)
+        .deleteByUserId(loggedInUser.sub)
 
-    const undoDeletedUsers = CompanyUserMapping.query()
-        .patch({ edeletestatus: false })
-        .where('edeletestatus', true)
+    const undoDeletedUsers = await CompanyUserMapping.query()
+        .unDeleteByUserId(loggedInUser.sub)
+        .where('ecompanyusermappingdeletestatus', true)
         .where('ecompanyecompanyid', companyId)
         .whereIn('eusereuserid', insertedUserIds)
         .returning('eusereuserid')
@@ -79,7 +75,7 @@ CompanyService.saveUsersToCompany = async(companyId, users, loggedInUser) => {
                 .map(user => ({
                     eusereuserid: user.id,
                     ecompanyecompanyid: parseInt(companyId),
-                    eassigncreateby: loggedInUser.sub
+                    ecompanyusermappingcreateby: loggedInUser.sub
                 }))
         })
         .then(freshRelations => {

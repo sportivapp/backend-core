@@ -3,13 +3,13 @@ exports.up = (knex, Promise) => knex.schema.createTable('edevice', t => {
     // edeviceidinfo temporarily set to nullable
     t.string('edeviceidinfo', 256);
     t.string('edeviceimei', 17);
-    t.integer('edevicecreateby').notNullable();
-    t.timestamp('edevicecreatetime', false).notNullable().defaultTo(knex.fn.now());
-    t.integer('edeviceeditby');
-    t.timestamp('edeviceedittime', false);
+    t.integer('edevicecreateby').notNullable().defaultTo(0);
+    t.bigInteger('edevicecreatetime').notNullable().defaultTo(Date.now());
+    t.integer('edevicechangeby');
+    t.bigInteger('edevicechangetime');
     t.integer('edevicedeleteby');
-    t.timestamp('edevicedeletetime', false);
-    t.integer('edevicedeletestatus').defaultTo(0);
+    t.boolean('edevicedeletestatus').defaultTo(false);
+    t.bigInteger('edevicedeletetime');
     t.integer('edevicetablestatus').notNullable().defaultTo(1);
   });
   
