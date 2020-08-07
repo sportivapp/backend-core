@@ -7,6 +7,6 @@ router.post('/announcement', auth.authenticateToken, Create);
 router.get('/announcement/:announcementId', auth.authenticateToken, View);
 router.get('/announcement-list', auth.authenticateToken, List);
 router.put('/announcement/:announcementId', auth.authenticateToken, Update);
-router.put('/announcement-delete/:announcementId', auth.authenticateToken, Delete);
+router.delete('/announcement-delete/:announcementId', auth.authenticateToken, Delete);
 
 module.exports = router;

@@ -12,7 +12,7 @@ module.exports = async (req, res, next) => {
             eannouncementtitle: announcementTitle,
             eannouncementcontent: announcementContent,
             eannouncementeditby: user.sub,
-            eannouncementedittime: new Date(Date.now())
+            eannouncementedittime: Date.now()
         }
 
         const result = await announcementService.updateAnnouncement(announcementId, announcementDTO, userIds, user);
