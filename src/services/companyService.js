@@ -53,10 +53,12 @@ CompanyService.saveUsersToCompany = async(companyId, users, loggedInUser) => {
     const insertedUserIds = users.filter(user => !user.deleted)
         .map(user => user.id)
 
+    console.log(insertedUserIds)
+
     const deleteRelations = CompanyUserMapping.query()
+        .deleteByUserId(loggedInUser.sub)
         .where('ecompanyecompanyid', companyId)
         .whereIn('eusereuserid', deletedUserIds)
-        .deleteByUserId(loggedInUser.sub)
 
     const undoDeletedUsers = await CompanyUserMapping.query()
         .unDeleteByUserId(loggedInUser.sub)
@@ -66,20 +68,25 @@ CompanyService.saveUsersToCompany = async(companyId, users, loggedInUser) => {
         .returning('eusereuserid')
 
     return Promise.all([deleteRelations, undoDeletedUsers])
-        .then(resultArr => {
-            return resultArr[1]
-        })
+        .then(resultArr => resultArr[1])
         .then(existedRelations => {
-            return users
-                .filter(user => !existedRelations.find(relation => relation.eusereuserid === user.id))
-                .map(user => ({
-                    eusereuserid: user.id,
+            const freshRelations = insertedUserIds
+                .filter(userId => !existedRelations.find(relation => relation.eusereuserid === userId))
+                .map(userId => ({
+                    eusereuserid: userId,
                     ecompanyecompanyid: parseInt(companyId),
                     ecompanyusermappingcreateby: loggedInUser.sub
                 }))
+            return [freshRelations, existedRelations]
         })
-        .then(freshRelations => {
-            return CompanyUserMapping.query().insert(freshRelations)
+        .then(relationArr => {
+            return CompanyUserMapping.query().insert(relationArr[0])
+                .then(freshRelations => {
+                    let resultArr = []
+                    resultArr.push(...relationArr[1])
+                    resultArr.push(...freshRelations)
+                    return resultArr
+                })
         })
 
 }
