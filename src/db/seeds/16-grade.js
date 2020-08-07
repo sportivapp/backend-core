@@ -1,4 +1,4 @@
-exports.seed = (knex) => knex('egrade').del()
+exports.seed = (knex) => knex('epermit').del()
     .then(() =>
         knex('egrade').insert(
             [
