@@ -15,13 +15,13 @@ AbsenService.createAbsenByPOS = async ( absenDTO, imageDTO ) => {
 }
 
 AbsenService.listAbsenById = async ( page, size, userId ) => {
-    const absenPage = await Absen.query().select().where('eusereuserid', userId).andWhere('eabsendeletestatus', 0).orderBy('eabsencreatetime', 'asc').page(page, size);
+    const absenPage = await Absen.query().select().where('eusereuserid', userId).andWhere('eabsendeletestatus', false).orderBy('eabsencreatetime', 'asc').page(page, size);
 
     return ServiceHelper.toPageObj(page, size, absenPage);
 }
 
 AbsenService.listAbsen = async ( page, size ) => {
-    const absenPage = await Absen.query().select().where('eabsendeletestatus', 0).orderBy('eabsencreatetime').page(page, size);
+    const absenPage = await Absen.query().select().where('eabsendeletestatus', false).orderBy('eabsencreatetime').page(page, size);
 
     return ServiceHelper.toPageObj(page, size, absenPage);
 }
@@ -38,8 +38,8 @@ AbsenService.editAbsen = async ( absenId, absenDTO, user ) => {
 AbsenService.deleteAbsen = async ( absenId, user ) => {
     const absen = await Absen.query().where('eabsenid', absenId).andWhere('eusereuserid', user.sub).update({
         eabsendeleteby: user.sub,
-        eabsendeletetime: new Date(Date.now()),
-        eabsendeletestatus: 1
+        eabsendeletetime: Date.now(),
+        eabsendeletestatus: true
     });
 
     if (user.permission !== 1 && absen) return

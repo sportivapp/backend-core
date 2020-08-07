@@ -125,7 +125,7 @@ companyController.editCompany = async (req, res, next) => {
             ecompanyemailaddress: companyEmail,
             ecompanyparentid: companyParentId,
             ecompanyeditby: user.sub,
-            ecompanyedittime: new Date(Date.now())
+            ecompanyedittime: Date.now()
         }
 
         const result = await companyService.editCompany(companyId, companyDTO)
@@ -151,8 +151,8 @@ companyController.deleteCompany = async (req, res, next) => {
 
         const companyDTO = {
             ecompanydeleteby: user.sub,
-            ecompanydeletetime: new Date(Date.now()),
-            ecompanydeletestatus: 1
+            ecompanydeletetime: Date.now(),
+            ecompanydeletestatus: true
         }
 
         const result = await companyService.deleteCompany(companyId, companyDTO)

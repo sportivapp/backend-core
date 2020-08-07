@@ -6,7 +6,7 @@ const ServiceHelper = require('../helper/ServiceHelper')
 const AnnouncementService = {};
 
 AnnouncementService.getAllAnnouncement = async (page, size, user) => {
-    const announcementPage = await Announcement.query().select().where('eannouncementdeletestatus', 0).page( page, size);
+    const announcementPage = await Announcement.query().select().where('eannouncementdeletestatus', false).page( page, size);
 
     if (announcementPage && user.permission !== 1) return
 
@@ -65,9 +65,9 @@ AnnouncementService.deleteAnnouncement = async (announcementId, user) => {
     if (user.permission === 1) return
 
     const result = await AnnouncementDelete.query().where('eannouncementid', announcementId).update({
-        eannouncementdeletestatus: 1,
+        eannouncementdeletestatus: true,
         eannouncementdeleteby: user.sub,
-        eannouncementdeletetime: new Date( Date.now() )
+        eannouncementdeletetime: Date.now()
     });
 
     return result;

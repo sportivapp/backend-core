@@ -10,9 +10,9 @@ exports.up = (knex, Promise) => knex.schema.createTable('eproject', t => {
     t.string('eprojectaddress');
     t.boolean('eprojectisactive').notNullable().defaultTo(true);
     t.integer('eprojectcreateby').notNullable();
-    t.timestamp('eprojectcreatetime', true).notNullable().defaultTo(knex.fn.now());
+    t.bigInteger('eprojectcreatetime', true).notNullable().defaultTo(Date.now());
     t.integer('eprojectchangeby');
-    t.timestamp('eprojectchangetime', true);
+    t.bigInteger('eprojectchangetime', true);
     t.integer('eprojecttablestatus').notNullable().defaultTo(1);
   });
   

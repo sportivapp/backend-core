@@ -72,7 +72,7 @@ CompanyService.getCompany = async (page, size, type, keyword) => {
     let query = Company.query()
             .select()
             .where(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
-            .andWhere('ecompanydeletestatus', 0)
+            .andWhere('ecompanydeletestatus', false)
     if ( type === 'company') 
         query.whereNull('ecompanyparentid')
         
