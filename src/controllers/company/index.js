@@ -67,7 +67,6 @@ companyController.createCompany = async (req, res, next) => {
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
 
     } catch(e) {
-        console.log(e)
         next(e);
     }
 }
@@ -181,7 +180,6 @@ companyController.saveUsersToCompany = async (req, res, next) => {
         const result = await companyService.saveUsersToCompany(companyId, users, user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
-        console.log(e)
         next(e)
     }
 }
