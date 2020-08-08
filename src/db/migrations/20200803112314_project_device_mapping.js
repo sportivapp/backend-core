@@ -1,11 +1,13 @@
 exports.up = (knex, Promise) => knex.schema.createTable('eprojectdevicemapping', t => {
     t.integer('eprojectprojectid').notNullable().references('eproject.eprojectid')
     t.integer('edevicedeviceid').notNullable().references('edevice.edeviceid')
-    t.bigInteger('eassigncreatetime').notNullable()
-    t.integer('eassigncreateby').notNullable()
-    t.bigInteger('eassigndeletetime')
-    t.integer('eassigndeleteby')
-    t.boolean('edeletestatus').defaultTo(false)
+    t.integer('eprojectdevicemappingcreateby').notNullable();
+    t.bigInteger('eprojectdevicemappingcreatetime').notNullable().defaultTo(Date.now());
+    t.integer('eprojectdevicemappingchangeby');
+    t.bigInteger('eprojectdevicemappingchangetime');
+    t.integer('eprojectdevicemappingdeleteby');
+    t.boolean('eprojectdevicemappingdeletestatus').defaultTo(false);
+    t.bigInteger('eprojectdevicemappingdeletetime');
 });
 
 exports.down = (knex, Promise) => knex.schema.dropTable('eprojectdevicemapping');

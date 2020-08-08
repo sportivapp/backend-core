@@ -40,18 +40,11 @@ class Permit extends Model {
 
     static get modifiers() {
         return {
-            notDeleted(builder) {
-                builder.where('epermitdeletestatus', false)
+            findByUserId(query, userId) {
+                query.where('euseruserid', userId)
             },
-            deleted(builder) {
-                builder.where('epermitdeletestatus', true)
-            },
-            delete(builder, userId) {
-                builder.patch({
-                    epermitdeletestatus: true,
-                    epermitdeleteby: userId,
-                    epermitdeletetime: Date.now()
-                })
+            findByDeleteStatus(query, deleteStatus) {
+                query.where('epermitdeletestatus', deleteStatus)
             }
         }
     }

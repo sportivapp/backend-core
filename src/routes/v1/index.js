@@ -25,7 +25,7 @@ router.use('/api/v1', [
     deviceRoutes,
     departmentRoutes,
     settingRoutes,
-    gradeRoutes
+    gradeRoutes,
 ]);
 
 module.exports = router;

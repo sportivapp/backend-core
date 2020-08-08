@@ -10,9 +10,7 @@ module.exports = async (req, res, next) => {
 
         const announcementDTO = {
             eannouncementtitle: announcementTitle,
-            eannouncementcontent: announcementContent,
-            eannouncementeditby: user.sub,
-            eannouncementedittime: Date.now()
+            eannouncementcontent: announcementContent
         }
 
         const result = await announcementService.updateAnnouncement(announcementId, announcementDTO, userIds, user);

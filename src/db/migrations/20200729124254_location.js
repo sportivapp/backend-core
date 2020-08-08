@@ -10,12 +10,12 @@ exports.up = (knex, Promise) => knex.schema.createTable('elocation', t => {
     t.time('elocationtimeout', false);
     t.string('elocationtotaltime', 256);
     t.integer('elocationcreateby').notNullable();
-    t.bigInteger('elocationcreatetime', false).notNullable().defaultTo(Date.now());
-    t.integer('elocationeditby');
-    t.bigInteger('elocationedittime', false);
+    t.bigInteger('elocationcreatetime').notNullable().defaultTo(Date.now());
+    t.integer('elocationchangeby');
+    t.bigInteger('elocationchangetime');
     t.integer('elocationdeleteby');
-    t.bigInteger('elocationdeletetime', false);
     t.boolean('elocationdeletestatus').defaultTo(false);
+    t.bigInteger('elocationdeletetime');
     t.integer('elocationtablestatus').notNullable().defaultTo(1);
     t.integer('edeviceedeviceid').references('edevice.edeviceid').onDelete('SET NULL');
   });

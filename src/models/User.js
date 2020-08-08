@@ -26,6 +26,8 @@ class User extends Model {
   static get relationMappings() {
 
     const Permit = require('./Permit')
+    const Company = require('./Company')
+
     return {
       permits: {
         relation: Model.HasManyRelation,
@@ -34,17 +36,27 @@ class User extends Model {
           from: 'euser.euserid',
           to: 'epermit.euseruserid'
         }
+      },
+      companies: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Company,
+        join: {
+          from: 'euser.euserid',
+          through: {
+            from: 'ecompanyusermapping.eusereuserid',
+            to: 'ecompanyusermapping.ecompanyecompanyid'
+          },
+          to: 'ecompany.ecompanyid'
+        }
       }
     }
   }
 
   static get modifiers() {
     return {
-      notDeleted(builder) {
-        builder.where('euserdeletestatus', 0)
-      },
-      deleted(builder) {
-        builder.where('euserdeletestatus', 1)
+      findByDeleteStatus(query, deleteStatus) {
+        if (!deleteStatus) query.where('euserdeletestatus', 0)
+        else query.where('euserdeletestatus', deleteStatus)
       }
     }
   }

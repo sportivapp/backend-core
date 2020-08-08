@@ -15,8 +15,8 @@ exports.up = (knex, Promise) => knex.schema.createTable('euser', t => {
     t.integer('euserdeleteby');
     t.boolean('euserdeletestatus').defaultTo(false);
     t.bigInteger('euserdeletetime');
-    t.integer('eusereditby');
-    t.bigInteger('euseredittime');
+    t.integer('euserchangeby');
+    t.bigInteger('euserchangetime');
     t.integer('eusertablestatus').notNullable().defaultTo(1);
     t.integer('ecompanyecompanyid').notNullable().references('ecompany.ecompanyid');
   });
