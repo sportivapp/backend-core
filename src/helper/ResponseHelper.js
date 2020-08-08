@@ -15,7 +15,7 @@ function toPageResponse(data, paging) {
     }
 }
 
-function toErrorResponse(code) {
+function toErrorResponse(code, error) {
     let status
     switch (code) {
         case 400:
@@ -33,10 +33,12 @@ function toErrorResponse(code) {
             status = "INTERNAL_ERROR"
     }
 
-    return {
+    const response = {
         code: code,
         status: status
     }
+
+    return error ? { ...response, errors: error } : response
 }
 
 module.exports = { toBaseResponse, toPageResponse, toErrorResponse }

@@ -24,13 +24,15 @@ class Roster extends Model {
     };
   }
 
-  static relationMappings = {
-    project: {
-      relation: Model.BelongsToOneRelation,
-      modelClass: Project,
-      join: {
-        from: 'eroster.eprojecteprojectid',
-        to: 'eproject.eprojectid'
+  static get relationMappings() {
+    return {
+      project: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Project,
+        join: {
+          from: 'eroster.eprojecteprojectid',
+          to: 'eproject.eprojectid'
+        }
       }
     }
   }

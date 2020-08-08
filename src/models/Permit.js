@@ -37,6 +37,24 @@ class Permit extends Model {
             }
         }
     }
+
+    static get modifiers() {
+        return {
+            notDeleted(builder) {
+                builder.where('epermitdeletestatus', false)
+            },
+            deleted(builder) {
+                builder.where('epermitdeletestatus', true)
+            },
+            delete(builder, userId) {
+                builder.patch({
+                    epermitdeletestatus: true,
+                    epermitdeleteby: userId,
+                    epermitdeletetime: Date.now()
+                })
+            }
+        }
+    }
 }
 
 module.exports = Permit;
