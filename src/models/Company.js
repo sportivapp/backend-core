@@ -18,6 +18,26 @@ class Company extends Model {
       }
     };
   }
+
+  static get relationMappings() {
+
+    const User = require('./User')
+
+    return {
+      users: {
+        relation: Model.ManyToManyRelation,
+        modelClass: User,
+        join: {
+          from: 'ecompany.ecompanyid',
+          through: {
+            from: 'ecompanyusermapping.ecompanyecompanyid',
+            to: 'ecompanyusermapping.eusereuserid'
+          },
+          to: 'euser.euserid'
+        }
+      }
+    }
+  }
 }
 
 module.exports = Company;
