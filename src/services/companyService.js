@@ -29,74 +29,6 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
 
 }
 
-CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
-
-    const address = await Address.query().insert(addressDTO);
-
-    companyDTO.eaddresseaddressid = address.eaddressid;
-    const company = await Company.query().insert(companyDTO);
-
-    const id = ( isNaN(userId) ) ? parseInt(user.sub) : userId 
-
-    const companyUserMapping = await CompanyUserMapping.query().insert({
-        ecompanyecompanyid: company.ecompanyid,
-        eusereuserid: id,
-        eassigncreateby: user.sub
-    })
-
-
-    // super user of the company
-    const updateUser = await User.query()
-    .patchAndFetchById( id , isNaN(userId) ? 
-        { 
-            euserpermission: 10 
-        }
-        :
-        { 
-            euserpermission: 10,
-            ecompanyecompanyid: company.ecompanyid
-        }
-    );
-
-    return {
-        user: updateUser,
-        company: company,
-        address: address,
-        companyusermapping: companyUserMapping
-    }
-
-}
-
-CompanyService.getCompany = async (page, size, type, keyword) => {
-    const newKeyword = keyword.toLowerCase()
-    let query = Company.query()
-            .select()
-            .where(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
-            .andWhere('ecompanydeletestatus', false)
-    if ( type === 'company') 
-        query.whereNull('ecompanyparentid')
-        
-    else
-        query.whereNotNull('ecompanyparentid')
-
-    const pageObj = await query.page(page, size)
-
-    return ServiceHelper.toPageObj(page, size, pageObj)
-
-}
-
-CompanyService.editCompany = async (companyId, companyDTO) => {
-
-    return Company.query().patchAndFetchById(companyId, companyDTO)
-}
-
-CompanyService.deleteCompany = async (companyId, companyDTO) => {
-
-    return Company.query().patchAndFetchById(companyId, companyDTO)
-
-}
-
-
 CompanyService.getUsersByCompanyId = async(companyId, page, size) => {
 
     const pageObj = await CompanyUserMapping.query()
@@ -122,40 +54,105 @@ CompanyService.saveUsersToCompany = async(companyId, users, loggedInUser) => {
     const insertedUserIds = users.filter(user => !user.deleted)
         .map(user => user.id)
 
-    const deleteRelations = CompanyUserMapping.query()
-        .patch({
-            edeletestatus: true,
-            eassigndeleteby: loggedInUser.sub,
-            eassigndeletetime: Date.now()
-        })
+    const deleteRelationsQuery = CompanyUserMapping.query()
+        .deleteByUserId(loggedInUser.sub)
         .where('ecompanyecompanyid', companyId)
         .whereIn('eusereuserid', deletedUserIds)
 
-    const undoDeletedUsers = CompanyUserMapping.query()
-        .patch({ edeletestatus: false })
-        .where('edeletestatus', true)
+    const selectUserIdsByDeleteStatusQuery = (status) => CompanyUserMapping.query()
+        .where('ecompanyusermappingdeletestatus', status)
         .where('ecompanyecompanyid', companyId)
         .whereIn('eusereuserid', insertedUserIds)
-        .returning('eusereuserid')
 
-    return Promise.all([deleteRelations, undoDeletedUsers])
-        .then(resultArr => {
-            console.log('passed')
-            return resultArr[1]
-        })
-        .then(existedRelations => {
-            console.log('passed')
-            return users
-                .filter(user => !existedRelations.find(relation => relation.eusereuserid === user.id))
-                .map(user => ({
-                    eusereuserid: user.id,
-                    ecompanyecompanyid: parseInt(companyId),
-                    eassigncreateby: loggedInUser.sub
-                }))
-        })
-        .then(freshRelations => {
-            return CompanyUserMapping.query().insert(freshRelations)
-        })
+    const undoDeleteQuery = selectUserIdsByDeleteStatusQuery(true)
+        .unDeleteByUserId(loggedInUser.sub)
+
+    const filterNewUserIds = (existedIds) => {
+        return insertedUserIds
+            .filter(userId => !existedIds.find(id => id === userId))
+            .map(userId => ({
+                eusereuserid: userId,
+                ecompanyecompanyid: parseInt(companyId),
+                ecompanyusermappingcreateby: loggedInUser.sub
+            }))
+    }
+
+    const getAllUsersDataByCompany = () => Company.relatedQuery('users')
+        .for(companyId)
+        .modify({ ecompanyusermappingdeletestatus: false })
+
+    return Promise.all([deleteRelationsQuery, undoDeleteQuery])
+        .then(ignored => selectUserIdsByDeleteStatusQuery(false))
+        .then(existedRelations => existedRelations.map(relation => relation.eusereuserid))
+        .then(existedIds => filterNewUserIds(existedIds))
+        .then(freshRelations => CompanyUserMapping.query().insert(freshRelations))
+        .then(ignored => getAllUsersDataByCompany())
+
+}
+
+CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
+
+    const address = await Address.query().insert(addressDTO);
+
+    companyDTO.eaddresseaddressid = address.eaddressid;
+    const company = await Company.query().insert(companyDTO);
+
+    const id = ( isNaN(userId) ) ? parseInt(user.sub) : userId
+
+    const companyUserMapping = await CompanyUserMapping.query().insert({
+        ecompanyecompanyid: company.ecompanyid,
+        eusereuserid: id,
+        ecompanyusermappingcreateby: user.sub
+    })
+
+    const patchDTO = isNaN(userId) ? { euserpermission: 10 } :
+        {
+            euserpermission: 10,
+            ecompanyecompanyid: company.ecompanyid
+        }
+
+
+    // super user of the company
+    const updateUser = await User.query()
+        .findById(id)
+        .updateByUserId(patchDTO, user.sub)
+        .returning('*');
+
+    return {
+        user: updateUser,
+        company: company,
+        address: address,
+        companyusermapping: companyUserMapping
+    }
+
+}
+
+CompanyService.getCompany = async (page, size, type, keyword) => {
+    const newKeyword = keyword.toLowerCase()
+    let query = Company.query()
+            .select()
+            .where(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
+            .andWhere('ecompanydeletestatus', false)
+    if ( type === 'company')
+        query.whereNull('ecompanyparentid')
+
+    else
+        query.whereNotNull('ecompanyparentid')
+
+    const pageObj = await query.page(page, size)
+
+    return ServiceHelper.toPageObj(page, size, pageObj)
+
+}
+
+CompanyService.editCompany = async (companyId, companyDTO, user) => {
+
+    return Company.query().findById(companyId).updateByUserId(companyDTO, user.sub).returning('*')
+}
+
+CompanyService.deleteCompany = async (companyId, companyDTO) => {
+
+    return Company.query().patchAndFetchById(companyId, companyDTO)
 
 }
 

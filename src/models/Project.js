@@ -23,6 +23,37 @@ class Project extends Model {
       }
     }
   }
+
+  static get relationMappings() {
+
+    const Device = require('./Device')
+
+    return {
+      devices: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Device,
+        join: {
+          from: 'eproject.eprojectid',
+          through: {
+            from: 'eprojectdevicemapping.eprojectprojectid',
+            to: 'eprojectdevicemapping.edevicedeviceid'
+          },
+          to: 'edevice.edeviceid'
+        }
+      }
+    }
+  }
+
+  static get modifiers() {
+    return {
+      notDeleted(builder) {
+        builder.where('eprojectdeletestatus', false)
+      },
+      deleted(builder) {
+        builder.where('eprojectdeletestatus', true)
+      }
+    }
+  }
 }
 
 module.exports = Project;

@@ -5,12 +5,12 @@ exports.up = (knex, Promise) => knex.schema.createTable('ecompany', t => {
     t.binary('ecompanylogo');
     t.integer('ecompanypremiumstatus').notNullable().defaultTo(1);
     t.integer('ecompanycreateby').notNullable().defaultTo(0);
-    t.bigInteger('ecompanycreatedate', true).notNullable().defaultTo(Date.now());
-    t.integer('ecompanyeditby');
-    t.bigInteger('ecompanyedittime', true);
+    t.bigInteger('ecompanycreatetime').notNullable().defaultTo(Date.now());
+    t.integer('ecompanychangeby');
+    t.bigInteger('ecompanychangetime');
     t.integer('ecompanydeleteby');
-    t.bigInteger('ecompanydeletetime', true);
-    t.boolean('ecompanydeletestatus').notNullable().defaultTo(false);
+    t.bigInteger('ecompanydeletetime');
+    t.boolean('ecompanydeletestatus').defaultTo(false);
     t.integer('ecompanytablestatus').notNullable().defaultTo(1);
     t.integer('eaddresseaddressid').notNullable().references('eaddress.eaddressid');
     t.integer('ecompanyparentid');

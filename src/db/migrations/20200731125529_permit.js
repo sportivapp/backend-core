@@ -1,4 +1,3 @@
-
 exports.up = (knex) => knex.schema.createTable('epermit', t => {
     t.increments('epermitid').primary().unsigned();
     t.integer('epermitstatus').notNullable();
@@ -6,9 +5,12 @@ exports.up = (knex) => knex.schema.createTable('epermit', t => {
     t.date('epermitstartdate', true).notNullable();
     t.date('epermitenddate', true).notNullable();
     t.integer('epermitcreateby').notNullable();
-    t.bigInteger('epermitcreatetime', true).notNullable().defaultTo(Date.now());
+    t.bigInteger('epermitcreatetime').notNullable().defaultTo(Date.now());
+    t.integer('epermitdeleteby');
+    t.bigInteger('epermitdeletetime');
     t.integer('epermitchangeby');
-    t.bigInteger('epermitchangetime', true);
+    t.bigInteger('epermitchangetime');
+    t.boolean('epermitdeletestatus').notNullable().defaultTo(false);
     t.integer('epermittablestatus').notNullable().defaultTo(1);
     t.integer('euseruserid').references('euser.euserid').onDelete('CASCADE');
 })

@@ -27,7 +27,7 @@ AbsenService.listAbsen = async ( page, size ) => {
 }
 
 AbsenService.editAbsen = async ( absenId, absenDTO, user ) => {
-    const absen = await Absen.query().where('eabsenid', absenId).andWhere('eusereuserid', user.sub).update(absenDTO);
+    const absen = await Absen.query().updateByUserId(absenDTO, user.sub).where('eabsenid', absenId).andWhere('eusereuserid', user.sub);
 
     if (user.permission !== 1 && absen) return
 
@@ -36,11 +36,11 @@ AbsenService.editAbsen = async ( absenId, absenDTO, user ) => {
 
 // soft delete absen
 AbsenService.deleteAbsen = async ( absenId, user ) => {
-    const absen = await Absen.query().where('eabsenid', absenId).andWhere('eusereuserid', user.sub).update({
-        eabsendeleteby: user.sub,
-        eabsendeletetime: Date.now(),
-        eabsendeletestatus: true
-    });
+    const absen = await Absen.query().
+    where('eabsenid', absenId)
+        .andWhere('eusereuserid', user.sub)
+        .deleteByUserId(user.sub)
+        .returning('*');
 
     if (user.permission !== 1 && absen) return
 

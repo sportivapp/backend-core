@@ -8,7 +8,7 @@ function isUserNotValid(user) {
 }
 
 companyController.registerCompany = async (req, res, next) => {
-    
+
     const { nik, name, password, mobileNumber, companyName, companyEmail, street, postalCode } = req.body;
 
     try {
@@ -49,7 +49,7 @@ companyController.createCompany = async (req, res, next) => {
     const user = req.user
 
     try {
-        
+
         const { companyName, companyEmail, street, postalCode, companyParentId } = req.body;
 
         const companyDTO = {
@@ -64,9 +64,7 @@ companyController.createCompany = async (req, res, next) => {
 
         const data = await companyService.createCompany(parseInt(userId) , companyDTO, addressDTO, user);
 
-        return res.status(200).json({
-            data: data
-        });
+        return res.status(200).json(ResponseHelper.toBaseResponse(data));
 
     } catch(e) {
         next(e);
@@ -74,10 +72,10 @@ companyController.createCompany = async (req, res, next) => {
 }
 
 companyController.getCompany = async (req, res, next) => {
-    
+
     const user = req.user
 
-    if (isUserNotValid(user)) 
+    if (isUserNotValid(user))
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     // type = company or type = branch
@@ -109,10 +107,10 @@ companyController.getUsersByCompanyId = async (req, res, next) => {
 }
 
 companyController.editCompany = async (req, res, next) => {
-    
+
     const user = req.user
 
-    if (isUserNotValid(user)) 
+    if (isUserNotValid(user))
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { companyId } = req.params
@@ -123,12 +121,10 @@ companyController.editCompany = async (req, res, next) => {
         const companyDTO = {
             ecompanyname: companyName,
             ecompanyemailaddress: companyEmail,
-            ecompanyparentid: companyParentId,
-            ecompanyeditby: user.sub,
-            ecompanyedittime: Date.now()
+            ecompanyparentid: companyParentId
         }
 
-        const result = await companyService.editCompany(companyId, companyDTO)
+        const result = await companyService.editCompany(companyId, companyDTO, user)
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
@@ -139,10 +135,10 @@ companyController.editCompany = async (req, res, next) => {
 }
 
 companyController.deleteCompany = async (req, res, next) => {
-    
+
     const user = req.user
 
-    if (isUserNotValid(user)) 
+    if (isUserNotValid(user))
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { companyId } = req.params
@@ -184,7 +180,6 @@ companyController.saveUsersToCompany = async (req, res, next) => {
         const result = await companyService.saveUsersToCompany(companyId, users, user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
-        console.log(e)
         next(e)
     }
 }

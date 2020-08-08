@@ -50,9 +50,7 @@ module.exports = (chai, httpServer, expect) => {
         .send({
             eabsenlocationdistanceaccuracy: '95',
             eabsenstatus: 'Hadir',
-            eabsendescription: 'Hadir dengan sehat',
-            eabseneditby: 5,
-            eabsenedittime: Date.now()
+            eabsendescription: 'Hadir dengan sehat'
         });
   
         expect(res.status).to.equal(200);

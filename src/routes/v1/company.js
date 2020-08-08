@@ -1,14 +1,14 @@
-const express = require('express');
-const router = express.Router();
+const router = require('../router')
 const companyController = require('../../controllers/company');
 const auth = require('../../middlewares/authentication');
+const { routes } = require('../../constant');
 
 router.post('/company-register', companyController.registerCompany);
-router.post('/company', auth.authenticateToken, companyController.createCompany);
-router.post('/company/:companyId/users', auth.authenticateToken, companyController.saveUsersToCompany)
+router.post(routes.company.list, auth.authenticateToken, companyController.createCompany);
 router.put('/company/:companyId', auth.authenticateToken, companyController.editCompany)
 router.delete('/company/:companyId', auth.authenticateToken, companyController.deleteCompany)
-router.get('/company/:companyId/users', auth.authenticateToken, companyController.getUsersByCompanyId)
-router.get('/company', auth.authenticateToken, companyController.getCompany)
+router.get(routes.company.list, auth.authenticateToken, companyController.getCompany)
+router.post(routes.company.users, auth.authenticateToken, companyController.saveUsersToCompany)
+router.get(routes.company.users, auth.authenticateToken, companyController.getUsersByCompanyId)
 
-module.exports = router;
+module.exports = router.expressRouter

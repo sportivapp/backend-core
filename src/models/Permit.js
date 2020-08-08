@@ -37,6 +37,17 @@ class Permit extends Model {
             }
         }
     }
+
+    static get modifiers() {
+        return {
+            findByUserId(query, userId) {
+                query.where('euseruserid', userId)
+            },
+            findByDeleteStatus(query, deleteStatus) {
+                query.where('epermitdeletestatus', deleteStatus)
+            }
+        }
+    }
 }
 
 module.exports = Permit;

@@ -3,12 +3,12 @@ exports.up = (knex, Promise) => knex.schema.createTable('eannouncement', t => {
     t.string('eannouncementtitle', 256).notNullable();
     t.string('eannouncementcontent', 4097).notNullable();
     t.integer('eannouncementcreateby').notNullable();
-    t.bigInteger('eannouncementcreatedate', false).notNullable().defaultTo(Date.now());
-    t.integer('eannouncementeditby');
-    t.bigInteger('eannouncementedittime', false);
+    t.bigInteger('eannouncementcreatetime').notNullable().defaultTo(Date.now());
+    t.integer('eannouncementchangeby');
+    t.bigInteger('eannouncementchangetime');
     t.integer('eannouncementdeleteby');
-    t.bigInteger('eannouncementdeletetime', false);
     t.boolean('eannouncementdeletestatus').defaultTo(false);
+    t.bigInteger('eannouncementdeletetime');
     t.integer('eannouncementtablestatus').notNullable().defaultTo(1);
   });
   

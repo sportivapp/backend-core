@@ -52,17 +52,14 @@ deviceService.saveProjectsIntoDevice = async (deviceId, projectIds, user) => {
 
     const existedRelations = await ProjectDeviceMapping.query()
         .where('edevicedeviceid', deviceId)
-        .where('edeletestatus', false)
+        .where('eprojectdevicemappingdeletestatus', false)
 
     let sameRelations = []
-
-    let assignDate = Date.now()
 
     const projects = projectIds
         .map(projectId => ({
             eprojectprojectid: projectId,
-            eassigncreatetime: assignDate,
-            eassigncreateby: user.sub,
+            eprojectdevicemappingcreateby: user.sub,
             edevicedeviceid: parseInt(deviceId)}))
         .filter(project => {
             let existed = existedRelations
@@ -79,11 +76,7 @@ deviceService.saveProjectsIntoDevice = async (deviceId, projectIds, user) => {
 
     //Create query to delete items from removedProjects array
     const deleteExistingProjects = ProjectDeviceMapping.query()
-        .patch({
-            edeletestatus: true,
-            eassigndeletetime: assignDate,
-            eassigndeleteby: user.sub
-        })
+        .deleteByUserId(user.sub)
         .where('edevicedeviceid', deviceId)
         .whereIn('eprojectprojectid', removedProjects)
 
@@ -93,7 +86,7 @@ deviceService.saveProjectsIntoDevice = async (deviceId, projectIds, user) => {
         //create query to search the database for deleted projects with the same projectId and deviceId
         const selectDeletedProjects = ProjectDeviceMapping.query()
             .where('edevicedeviceid', deviceId)
-            .where('edeletestatus', true)
+            .where('eprojectdevicemappingdeletestatus', false)
             .whereIn('eprojectprojectid', projects.map(obj => obj.eprojectprojectid))
 
         //Create query to insert projects

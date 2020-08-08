@@ -117,7 +117,7 @@ module.exports = (chai, httpServer, expect) => {
             let size = 10
 
             const res = await chai.request(httpServer)
-                .get(`/api/v1/permit?page=${page}&size=${size}`)
+                .get(`/api/v1/permit/subordinate?page=${page}&size=${size}`)
                 .set('authorization', login.body.data)
                 .send()
 
