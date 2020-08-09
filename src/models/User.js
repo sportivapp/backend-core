@@ -27,6 +27,7 @@ class User extends Model {
 
     const Permit = require('./Permit')
     const Company = require('./Company')
+    const Grade = require('./Grades')
 
     return {
       permits: {
@@ -47,6 +48,18 @@ class User extends Model {
             to: 'ecompanyusermapping.ecompanyecompanyid'
           },
           to: 'ecompany.ecompanyid'
+        }
+      },
+      grades: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Grade,
+        join: {
+          from: 'euser.euserid',
+          through: {
+            from: 'euserpositionmapping.eusereuserid',
+            to: 'euserpositionmapping.egradeegradeid'
+          },
+          to: 'egrade.egradeid'
         }
       }
     }
