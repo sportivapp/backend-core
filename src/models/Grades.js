@@ -23,6 +23,7 @@ class Grade extends Model {
   static get relationMappings() {
 
     const Company = require('./Company')
+    const User = require('./User')
 
     return {
       superior: {
@@ -48,6 +49,27 @@ class Grade extends Model {
           from: 'egrade.ecompanycompanyid',
           to: 'ecompany.ecompanyid'
         }
+      },
+      users: {
+        relation: Model.ManyToManyRelation,
+        modelClass: User,
+        join: {
+          from: 'egrade.egradeid',
+          through: {
+            from: 'euserpositionmapping.eusereuserid',
+            to: 'euserpositionmapping.egradeegradeid'
+          },
+          to: 'egrade.egradeid'
+        }
+      }
+    }
+  }
+  
+  static get modifiers() {
+    return {
+      findByDeleteStatus(query, deleteStatus) {
+        if (!deleteStatus) query.where('egradedeletestatus', 0)
+        else query.where('egradedeletestatus', deleteStatus)
       }
     }
   }
