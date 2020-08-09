@@ -21,7 +21,6 @@ module.exports = async (req, res, next) => {
         });
 
     } catch(e) {
-        console.log(e.stack);
         next(e);
     }
 
