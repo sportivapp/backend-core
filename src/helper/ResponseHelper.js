@@ -23,6 +23,7 @@ function toErrorResponse(code, error) {
             break
         case 403:
             status = "FORBIDDEN"
+            break
         case 404:
             status = "NOT_FOUND"
             break

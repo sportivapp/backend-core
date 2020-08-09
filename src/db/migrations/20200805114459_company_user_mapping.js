@@ -8,7 +8,6 @@ exports.up = (knex, Promise) => knex.schema.createTable('ecompanyusermapping', t
     t.integer('ecompanyusermappingdeleteby');
     t.boolean('ecompanyusermappingdeletestatus').defaultTo(false);
     t.bigInteger('ecompanyusermappingdeletetime');
-    t.boolean('edeletestatus').defaultTo(false)
 });
 
 exports.down = (knex, Promise) => knex.schema.dropTable('ecompanyusermapping');
