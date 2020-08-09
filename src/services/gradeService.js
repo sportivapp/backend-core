@@ -67,53 +67,41 @@ gradeService.saveUserPositions = async (userId, positionIds, loggedInUser) => {
     const insertedPositionIds = positionIds.filter(position => !position.deleted)
         .map(position => position.id)
 
-    const deleteRelations = UserPositionMapping.query()
-        .patch({
-            edeletestatus: true,
-            eassigndeleteby: loggedInUser.sub,
-            eassigndeletetime: Date.now()
-        })
+
+    
+    const deleteRelationsQuery = UserPositionMapping.query()
+        .deleteByUserId(loggedInUser.sub)
         .where('eusereuserid', userId)
         .whereIn('egradeegradeid', deletedPositionIds)
 
-    const undoDeletedPositions = UserPositionMapping.query()
-        .patch({ edeletestatus: false })
-        .where('edeletestatus', true)
+    const selectPositionIdsByDeleteStatusQuery = (status) => UserPositionMapping.query()
+        .where('euserpositionmappingdeletestatus', status)
         .where('eusereuserid', userId)
         .whereIn('egradeegradeid', insertedPositionIds)
-        .returning('egradeegradeid')
 
-    const existedPositions = UserPositionMapping.query()
-        .select()
-        .where('eusereuserid', userId)
-        .returning('egradeegradeid')
+    const undoDeleteQuery = selectPositionIdsByDeleteStatusQuery(true)
+        .unDeleteByUserId(loggedInUser.sub)
 
-    return Promise.all([deleteRelations, undoDeletedPositions, existedPositions])
-        .then(resultArr => {
-            console.log('passed')
-            return resultArr[2]
-        })
-        .then(existedRelations => {
-            console.log('passed')
-            const freshRelations = insertedPositionIds
-            .filter(positionId => !existedRelations.find(relation => relation.egradeegradeid === positionId))
+    const filterNewPositionIds = (existedIds) => {
+        return insertedPositionIds
+            .filter(positionId => !existedIds.find(id => id === positionId))
             .map(positionId => ({
-                eusereuserid: parseInt(userId),
                 egradeegradeid: positionId,
-                eassigncreateby: loggedInUser.sub
+                eusereuserid: parseInt(userId),
+                euserpositionmappingcreateby: loggedInUser.sub
             }))
-            return [freshRelations, existedRelations]
-        })
-        .then(relationArr => {
+    }
 
-            return UserPositionMapping.query().insert(relationArr[0])
-            .then(freshRelations => {
-                let resultArr = []
-                resultArr.push(...relationArr[1])
-                resultArr.push(...freshRelations)
-                return resultArr
-            })
-        })
+    const getAllPositionsDataByUser = () => User.relatedQuery('grades')
+    .for(userId)
+    .modify({ euserpositionmappingdeletestatus: false })
+
+    return Promise.all([deleteRelationsQuery, undoDeleteQuery])
+    .then(ignored => selectPositionIdsByDeleteStatusQuery(false))
+    .then(existedRelations => existedRelations.map(relation => relation.egradeegradeid))
+    .then(existedIds => filterNewPositionIds(existedIds))
+    .then(freshRelations => UserPositionMapping.query().insert(freshRelations))
+    .then(ignored => getAllPositionsDataByUser())
 
 }
 
