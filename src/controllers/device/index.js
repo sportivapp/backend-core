@@ -128,7 +128,6 @@ controller.saveProjectsIntoDevice = async (req, res, next) => {
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(savedIds))
     } catch (e) {
-        console.log(e)
         next(e)
     }
 }

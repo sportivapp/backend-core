@@ -5,7 +5,8 @@ exports.seed = (knex, Promise) => knex('ecompany').del()
         {
           ecompanyname: 'PT. Nawakara Perkasa Nusantara',
           ecompanyemailaddress: '@nawakara.com',
-          eaddresseaddressid: 1
+          eaddresseaddressid: 1,
+          ecompanycreateby: 0
         },
       ]
     ));
