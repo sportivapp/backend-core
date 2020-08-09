@@ -23,8 +23,6 @@ module.exports = (chai, httpServer, expect) => {
                 .set('authorization', login.body.data)
                 .send(requestBody)
 
-            console.log(res.body)
-
             expect(res.status).to.equal(200)
             expect(res.body.data).to.not.be.undefined
             expect(res.body.data.egradeid).to.not.be.undefined
@@ -73,8 +71,6 @@ module.exports = (chai, httpServer, expect) => {
                 .get(`/api/v1/grades/${id}`)
                 .set('authorization', login.body.data)
                 .send()
-
-            console.log(res.body.data)
 
             expect(res.status).to.equal(200)
             expect(res.body.data).to.not.be.undefined
@@ -179,8 +175,6 @@ module.exports = (chai, httpServer, expect) => {
                 .post('/api/v1/grades')
                 .set('authorization', login.body.data)
                 .send(requestBody)
-
-            console.log(res.body)
 
             expect(res.status).to.equal(200)
             expect(res.body.data).to.not.be.undefined

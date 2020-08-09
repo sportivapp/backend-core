@@ -13,6 +13,7 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
     const address = await Address.query().insert(addressDTO);
 
     companyDTO.eaddresseaddressid = address.eaddressid;
+    companyDTO.ecompanycreateby = 0;
     const company = await Company.query().insert(companyDTO);
 
     // super user of the company
@@ -95,6 +96,7 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
     const address = await Address.query().insert(addressDTO);
 
     companyDTO.eaddresseaddressid = address.eaddressid;
+    companyDTO.ecompanycreateby = user.sub;
     const company = await Company.query().insert(companyDTO);
 
     const id = ( isNaN(userId) ) ? parseInt(user.sub) : userId

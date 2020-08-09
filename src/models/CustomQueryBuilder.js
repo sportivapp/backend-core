@@ -13,7 +13,6 @@ class CustomQueryBuilder extends QueryBuilder {
     }
 
     updateByUserId(patchObj, userId) {
-        console.log(patchObj)
         const tableName = this.tableNameFor(this._modelClass)
         const patchedAttributes = { ...patchObj }
         //patch operation
