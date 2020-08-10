@@ -94,9 +94,9 @@ CompanyService.saveUsersToCompany = async(companyId, users, loggedInUser) => {
             return unDeleteRelationPromises
         })
 
-    const filterNewUserIds = (existedIds) => {
+    const filterNewUserIds = (existedRelations) => {
         return insertedUsers
-            .filter(user => !existedIds.find(id => id === user.id))
+            .filter(user => !existedRelations.find(relation => filterRelationsByIdAndPermission(relation, user)))
             .map(user => ({
                 eusereuserid: user.id,
                 ecompanyecompanyid: parseInt(companyId),
@@ -112,7 +112,6 @@ CompanyService.saveUsersToCompany = async(companyId, users, loggedInUser) => {
     return Promise.all([selectDeleteRelations, selectUnDeletedRelations])
         .then(arrayOfPromises => Promise.all([...arrayOfPromises[0], ...arrayOfPromises[1]]))
         .then(ignored => selectRelationsByDeleteStatusQuery(false))
-        .then(existedRelations => existedRelations.map(relation => relation.eusereuserid))
         .then(existedIds => filterNewUserIds(existedIds))
         .then(freshRelations => CompanyUserMapping.query().insert(freshRelations))
         .then(ignored => getAllUsersDataByCompany)

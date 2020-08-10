@@ -58,8 +58,7 @@ module.exports = (chai, httpServer, expect) => {
           .send({
               departmentName: 'Sub Sales Department',
               departmentDescription: 'Consist of Sales T0',
-              departmentSuperiorId: 1,
-              companyId: 1
+              departmentSuperiorId: 1
           });
     
           expect(res.status).to.equal(200);
@@ -77,7 +76,7 @@ module.exports = (chai, httpServer, expect) => {
           });
     
           const res = await chai.request(httpServer)
-          .del('/api/v1/department/4?companyId=1')
+          .del('/api/v1/department/4')
           .set('authorization', login.body.data)
           .send();
     
