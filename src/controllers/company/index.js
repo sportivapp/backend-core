@@ -106,6 +106,18 @@ companyController.getUsersByCompanyId = async (req, res, next) => {
     }
 }
 
+companyController.getAllCompanyByUserId = async (req, res, next) => {
+
+    const user = req.user
+
+    try {
+        const result = await companyService.getAllCompanyByUserId(user.sub)
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+    } catch (e) {
+        next(e)
+    }
+}
+
 companyController.editCompany = async (req, res, next) => {
 
     const user = req.user

@@ -40,6 +40,18 @@ CompanyService.getUsersByCompanyId = async(companyId, page, size) => {
 
 }
 
+CompanyService.getAllCompanyByUserId = async(userId) => {
+
+    const result = await User.relatedQuery('companies')
+    .for(userId)
+    .modify({ ecompanyusermappingdeletestatus: false })
+    .where('ecompanyparentid', null)
+    .orderBy('ecompanyusermappingcreatetime', 'ASC')
+
+    return result
+
+}
+
 CompanyService.saveUsersToCompany = async(companyId, users, loggedInUser) => {
 
     //accepting model [{'id': 1, 'deleted': false/true}]
