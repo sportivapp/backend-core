@@ -108,13 +108,11 @@ companyController.getUsersByCompanyId = async (req, res, next) => {
 
 companyController.getAllCompanyByUserId = async (req, res, next) => {
 
-    const { page, size } = req.query
-
     const user = req.user
 
     try {
-        const pageObj = await companyService.getAllCompanyByUserId(user.sub, parseInt(page), parseInt(size))
-        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+        const result = await companyService.getAllCompanyByUserId(user.sub)
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)
     }

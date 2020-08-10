@@ -42,14 +42,13 @@ CompanyService.getUsersByCompanyId = async(companyId, page, size) => {
 
 CompanyService.getAllCompanyByUserId = async(userId, page, size) => {
 
-    const pageObj = await User.relatedQuery('companies')
+    const result = await User.relatedQuery('companies')
     .for(userId)
     .modify({ ecompanyusermappingdeletestatus: false })
     .where('ecompanyparentid', null)
     .orderBy('ecompanyusermappingcreatetime', 'ASC')
-    .page(page, size)
 
-    return ServiceHelper.toPageObj(page, size, pageObj)
+    return result
 
 }
 
