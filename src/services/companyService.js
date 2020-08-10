@@ -45,6 +45,7 @@ CompanyService.getAllCompanyByUserId = async(userId, page, size) => {
     const pageObj = await User.relatedQuery('companies')
     .for(userId)
     .modify({ ecompanyusermappingdeletestatus: false })
+    .where('ecompanyparentid', null)
     .orderBy('ecompanyusermappingcreatetime', 'ASC')
     .page(page, size)
 
