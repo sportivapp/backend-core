@@ -34,7 +34,7 @@ controller.createDepartment = async (req, res, next) => {
     if (isUserNotValid(user)) 
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
-    const { departmentName, departmentDescription, departmentSuperiorId, companyId } = req.body
+    const { departmentName, departmentDescription, departmentSuperiorId } = req.body
 
     try {
 
@@ -43,7 +43,7 @@ controller.createDepartment = async (req, res, next) => {
             edepartmentdescription: departmentDescription,
             edepartmentcreateby: user.sub,
             edepartmentsuperiorid: departmentSuperiorId,
-            ecompanyecompanyid: companyId
+            ecompanyecompanyid: user.companyId
         }
 
         const result = await departmentService.createDepartment(departmentDTO)

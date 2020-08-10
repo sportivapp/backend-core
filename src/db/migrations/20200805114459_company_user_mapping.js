@@ -1,6 +1,7 @@
 exports.up = (knex, Promise) => knex.schema.createTable('ecompanyusermapping', t => {
     t.integer('ecompanyecompanyid').notNullable().references('ecompany.ecompanyid')
     t.integer('eusereuserid').notNullable().references('euser.euserid')
+    t.integer('ecompanyusermappingpermission').notNullable();
     t.integer('ecompanyusermappingcreateby').notNullable();
     t.bigInteger('ecompanyusermappingcreatetime').notNullable().defaultTo(Date.now());
     t.integer('ecompanyusermappingchangeby');
