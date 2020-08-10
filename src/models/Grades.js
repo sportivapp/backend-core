@@ -56,10 +56,10 @@ class Grade extends Model {
         join: {
           from: 'egrade.egradeid',
           through: {
-            from: 'euserpositionmapping.eusereuserid',
-            to: 'euserpositionmapping.egradeegradeid'
+            from: 'euserpositionmapping.egradeegradeid',
+            to: 'euserpositionmapping.eusereuserid'
           },
-          to: 'egrade.egradeid'
+          to: 'euser.euserid'
         }
       }
     }
@@ -68,7 +68,7 @@ class Grade extends Model {
   static get modifiers() {
     return {
       findByDeleteStatus(query, deleteStatus) {
-        if (!deleteStatus) query.where('egradedeletestatus', 0)
+        if (!deleteStatus) query.where('egradedeletestatus', false)
         else query.where('egradedeletestatus', deleteStatus)
       }
     }
