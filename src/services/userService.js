@@ -66,6 +66,11 @@ UsersService.registerEmployees = async (user, path) => {
 
 }
 
+UsersService.createUser = async (userDTO) => {
+    userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
+    return User.query().insert(userDTO)
+}
+
 async function generateJWTToken(user) {
 
     const config = {
