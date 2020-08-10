@@ -147,6 +147,37 @@ CompanyService.getCompany = async (page, size, type, keyword) => {
 
 }
 
+async function generateJWTToken(user, companyId) {
+
+    const config = {
+        sub: user.euserid,
+        iat: Date.now() / 1000.0,
+        email: user.euseremail,
+        name: user.eusername,
+        mobileNumber: user.eusermobilenumber,
+        permission: user.euserpermission,
+        companyId: companyId
+    }
+    const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' });
+
+    return token;
+
+}
+
+CompanyService.changeCompany = async (companyId, user) => {
+
+    // const user = await User.query()
+    const success = await bcrypt.compare(loginDTO.euserpassword, user.euserpassword);
+
+    let token = null;
+
+    if (success === true) {
+        token = await generateJWTToken(user);
+    }
+
+    return token;
+}
+
 CompanyService.editCompany = async (companyId, companyDTO, user) => {
 
     return Company.query().findById(companyId).updateByUserId(companyDTO, user.sub).returning('*')
