@@ -109,4 +109,23 @@ function isUserAdmin(user) {
     return user.permission === 10
 }
 
+controller.saveUserPositions = async (req, res, next) => {
+
+    const user = req.user
+
+    const { userId } = req.query
+
+    const positionIds = req.body.positionIds
+
+    if ( isNaN(userId) ) return res.status(400).json(ResponseHelper.toErrorResponse(400))
+
+    try {
+        const result = await gradeService.saveUserPositions(userId, positionIds, user)
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+    } catch (e) {
+        console.log(e)
+        next(e)
+    }
+}
+
 module.exports = controller

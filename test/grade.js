@@ -31,6 +31,44 @@ module.exports = (chai, httpServer, expect) => {
         });
     });
 
+    describe('POST /api/v1/grades-user-mapping', () => {
+        it('Should return list of new grades data', async () => {
+            const login = await chai.request(httpServer)
+                .post('/api/v1/user-login')
+                .send({
+                    email: 'nawakaraadmin@nawakara.com',
+                    password: 'emtivnawakaraadmin'
+                })
+
+            expect(login.status).to.equal(200)
+            expect(login.body).to.not.be.undefined
+
+            const requestBody = {
+                positionIds: 
+                [
+                    {
+                        id: 1,
+                        deleted: false
+                    },
+                    {
+                        id: 2,
+                        deleted: false
+                    }
+                ]
+            }
+
+            const id = 5
+
+            const res = await chai.request(httpServer)
+                .post(`/api/v1/grades-user-mapping?userId=${id}`)
+                .set('authorization', login.body.data)
+                .send(requestBody)
+
+            expect(res.status).to.equal(200)
+            expect(res.body.data).to.not.be.undefined
+        });
+    });
+
     describe('GET /api/v1/grades', () => {
         it('Should return grade list', async () => {
             const login = await chai.request(httpServer)
