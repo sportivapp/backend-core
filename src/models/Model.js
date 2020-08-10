@@ -35,6 +35,18 @@ class Model extends objection.Model {
     schema[tableName.concat('deletestatus')] = { type: 'boolean' }
     return schema
   }
+
+  static baseModifiers() {
+    const tableName = this.tableName
+    return {
+      notDeleted(builder) {
+        builder.where(tableName.concat('deletestatus'), false)
+      },
+      deleted(builder) {
+        builder.where(tableName.concat('deletestatus'), true)
+      }
+    }
+  }
 }
 
 module.exports = Model;

@@ -54,10 +54,7 @@ class User extends Model {
 
   static get modifiers() {
     return {
-      findByDeleteStatus(query, deleteStatus) {
-        if (!deleteStatus) query.where('euserdeletestatus', 0)
-        else query.where('euserdeletestatus', deleteStatus)
-      }
+      ...this.baseModifiers()
     }
   }
 }

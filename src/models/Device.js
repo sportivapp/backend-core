@@ -42,12 +42,7 @@ class Device extends Model {
 
   static get modifiers() {
     return {
-      notDeleted(builder) {
-        builder.where('edevicedeletestatus', 0)
-      },
-      deleted(builder) {
-        builder.where('edevicedeletestatus', 1)
-      }
+      ...this.baseModifiers()
     }
   }
 

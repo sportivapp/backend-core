@@ -46,12 +46,7 @@ class Project extends Model {
 
   static get modifiers() {
     return {
-      notDeleted(builder) {
-        builder.where('eprojectdeletestatus', false)
-      },
-      deleted(builder) {
-        builder.where('eprojectdeletestatus', true)
-      }
+      ...this.baseModifiers()
     }
   }
 }

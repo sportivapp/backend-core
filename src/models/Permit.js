@@ -43,9 +43,7 @@ class Permit extends Model {
             findByUserId(query, userId) {
                 query.where('euseruserid', userId)
             },
-            findByDeleteStatus(query, deleteStatus) {
-                query.where('epermitdeletestatus', deleteStatus)
-            }
+            ...this.baseModifiers()
         }
     }
 }
