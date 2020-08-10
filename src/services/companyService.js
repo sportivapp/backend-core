@@ -40,7 +40,7 @@ CompanyService.getUsersByCompanyId = async(companyId, page, size) => {
 
 }
 
-CompanyService.getAllCompanyByUserId = async(userId, page, size) => {
+CompanyService.getAllCompanyByUserId = async(userId) => {
 
     const result = await User.relatedQuery('companies')
     .for(userId)
