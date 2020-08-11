@@ -1,4 +1,5 @@
 const projectService = require('../../services/projectService');
+const ResponseHelper = require('../../helper/ResponseHelper');
 
 const projectController = {};
 
@@ -80,7 +81,7 @@ projectController.updateProjectById = async (req, res, next) => {
 
         if (!project)
             return res.status(404).json(ResponseHelper.toErrorResponse(404))
-        return res.status(200).json(ResponseHelper.toBaseResponse(grade))
+        return res.status(200).json(ResponseHelper.toBaseResponse(project))
 
     } catch(e) {
         next(e);
@@ -98,9 +99,9 @@ projectController.getProjects = async (req, res, next) => {
         const { page, size } = req.query
         const userId = user.sub;
 
-        const projects = await projectService.getProjects(userId, page, size);
+        const pageObj = await projectService.getProjects(userId, parseInt(page), parseInt(size));
 
-        return res.status(200).json(ResponseHelper.toBaseResponse(projects))
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
 
     } catch(e) {
         next(e);

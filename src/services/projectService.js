@@ -17,8 +17,8 @@ ProjectService.getProjectById = async (projectId) => {
 }
 
 ProjectService.getProjects = async(userId, page, size) => {
-
-    const projectPage = Project.query()
+    
+    const projectPage = await Project.query()
     .select('eprojectid', 'eprojectname', 'eprojectcode', 'eprojectstartdate', 'eprojectenddate', 'eprojectaddress')
     .where('eprojectcreateby', userId)
     .page(page, size);
