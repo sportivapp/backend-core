@@ -32,6 +32,35 @@ module.exports = (chai, httpServer, expect) => {
     });
   });
 
+  describe('POST /api/v1/user-create', () => {
+    it('Should return single user data', async () => {
+      const login = await chai.request(httpServer)
+      .post('/api/v1/user-login')
+      .send({ 
+        email: 'nawakarahrd@nawakara.com', 
+        password: 'emtivnawakarahrd'
+      });
+
+      const requestBody = {
+        userNik: 'E10',
+        username: 'nawakarauser10',
+        userEmail: 'user10@nawakara.com',
+        userMobileNumber: '0987654321',
+        userPassword: 'emtivnawakarauser'
+      }
+
+      const companyId = 1
+
+      const res = await chai.request(httpServer)
+      .post(`/api/v1/user-create?companyId=${companyId}`)
+      .set('authorization', login.body.data)
+      .send(requestBody);
+
+      expect(res.status).to.equal(200);
+      expect(res.body.data).to.not.be.undefined;
+    });
+  });
+
   describe('GET /api/v1/user-import-template', () => {
     it('Should return file with correct content', async () => {
       const res = await chai.request(httpServer)
