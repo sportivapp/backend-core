@@ -8,9 +8,13 @@ module.exports = {
         },
         user: {
             login: '/user-login',
+            register: '/user',
             forgot: '/user-forgot-password',
             create: '/user-create',
-            password: '/user-change-password'
+            password: '/user-change-password',
+            list: '/user/:companyId',
+            import: '/user-import-template',
+            remove: '/user/:userId'
         }
     }
 }
