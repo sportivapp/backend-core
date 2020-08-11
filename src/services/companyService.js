@@ -4,6 +4,7 @@ const User = require('../models/User');
 const bcrypt = require('../helper/bcrypt');
 const CompanyUserMapping = require('../models/CompanyUserMapping')
 const { raw } = require('objection')
+const jwt = require('jsonwebtoken')
 const ServiceHelper = require('../helper/ServiceHelper')
 
 const CompanyService = {};
@@ -147,21 +148,7 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
         ecompanyusermappingpermission: 10
     })
 
-    const patchDTO = isNaN(userId) ? { euserpermission: 10 } :
-        {
-            euserpermission: 10,
-            ecompanyecompanyid: company.ecompanyid
-        }
-
-
-    // super user of the company
-    const updateUser = await User.query()
-        .findById(id)
-        .updateByUserId(patchDTO, user.sub)
-        .returning('*');
-
     return {
-        user: updateUser,
         company: company,
         address: address,
         companyusermapping: companyUserMapping
@@ -187,7 +174,7 @@ CompanyService.getCompany = async (page, size, type, keyword) => {
 
 }
 
-async function generateJWTToken(user, companyId) {
+async function generateJWTToken(user, companyId, userPermission) {
 
     const config = {
         sub: user.euserid,
@@ -195,7 +182,7 @@ async function generateJWTToken(user, companyId) {
         email: user.euseremail,
         name: user.eusername,
         mobileNumber: user.eusermobilenumber,
-        permission: user.euserpermission,
+        permission: userPermission,
         companyId: companyId
     }
     const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' });
@@ -206,14 +193,16 @@ async function generateJWTToken(user, companyId) {
 
 CompanyService.changeCompany = async (companyId, user) => {
 
-    // const user = await User.query()
-    const success = await bcrypt.compare(loginDTO.euserpassword, user.euserpassword);
+    const userCompany = await CompanyUserMapping.query().select()
+    .where('ecompanyecompanyid', companyId)
+    .andWhere('eusereuserid', user.sub)
+    .first() 
+
+    if(!userCompany)
+        return
 
     let token = null;
-
-    if (success === true) {
-        token = await generateJWTToken(user);
-    }
+    token = await generateJWTToken(user, companyId, userCompany.ecompanyusermappingpermission);
 
     return token;
 }
