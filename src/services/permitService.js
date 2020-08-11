@@ -1,6 +1,10 @@
 const Permit = require('../models/Permit')
 const User = require('../models/User')
 const ServiceHelper = require('../helper/ServiceHelper')
+const CompanyUserMapping = require('../models/CompanyUserMapping')
+const Roster = require('../models/Roster')
+const RosterUserMapping = require('../models/RosterUserMapping')
+const Project = require('../models/Project')
 
 const permitService = {}
 
@@ -16,20 +20,29 @@ permitService.getPermitList = async (page, size, user) => {
 
 permitService.getSubordinatePermitList = async (page, size, user) => {
 
-    let subordinatesQuery
+    let permissionList = []
 
-    if (user.permission === 7)
-        subordinatesQuery = User.query().where('euserpermission', 1)
+    if (user.permission === 7) {
+        permissionList.push(1)
+    } else {
+        permissionList.push(1)
+        permissionList.push(7)
+    }
 
-    else
-        subordinatesQuery = User.query().whereIn('euserpermission', [1, 7])
+    const subordinateIds = await CompanyUserMapping.query()
+        .select('eusereuserid')
+        .where('ecompanyecompanyid', user.companyId)
+        .whereIn('ecompanyusermappingpermission', permissionList)
+        .modify('notDeleted')
 
-    subordinatesQuery.modify('notDeleted')
+    const getSubordinatesQuery = User.query().whereIn('euserid', subordinateIds)
 
     const permitPage = await User.relatedQuery('permits')
-        .for(subordinatesQuery)
+        .for(getSubordinatesQuery)
         .where('epermitstatus', 1)
+        .where('ecompanyecompanyid', user.companyId)
         .modify('notDeleted')
+        .withGraphFetched('user(notDeleted)')
         .page(page, size)
 
     return ServiceHelper.toPageObj(page, size, permitPage)
@@ -58,26 +71,58 @@ permitService.requestApproval = async (permitId, user) => {
 
     if (!permit || !permit.user) return
     else if (permit.user.euserid != user.sub) return
-    else return permit.$query().patchAndFetch({ epermitstatus: 1 })
+
+    let supervisorId
+
+    const rosterId = await RosterUserMapping.query()
+        .select('erostererosterid')
+        .where('eusereuserid', user.sub)
+
+    if (rosterId) {
+        supervisorId = Roster.relatedQuery('supervisor')
+            .for(rosterId)
+            .select('euserid')
+    }
+
+    if (!supervisorId) {
+        const projectId = permit.eprojecteprojectid
+        supervisorId = await Project.query()
+            .findById(projectId)
+            .modify('notDeleted')
+            .withGraphFetched('manager(notDeleted)')
+            .then(project => project.manager.euserid)
+    }
+
+    if (!supervisorId) {
+        //implemented later when position and user relation is developed
+        return
+    }
+
+
+     return Permit.query()
+         .findById(permitId)
+         .updateByUserId({ epermitstatus: 1, epermitapprovaluserid: supervisorId }, user.sub)
+         .returning('*')
 }
 
 permitService.createPermit = async (permitDTO, user) => {
 
     permitDTO.epermitstatus = 0
 
-    if(!permitDTO.euseruserid) {
-        if(user.permission == 8 || user.permission == 7) permitDTO.euseruserid = user.sub
+    if(!permitDTO.eusereuserid) {
+        if(user.permission == 8 || user.permission == 7) permitDTO.eusereuserid = user.sub
         else return
     }
     else {
         const foundUser = await User.query()
-            .where("euserid", permitDTO.euseruserid)
+            .where("euserid", permitDTO.eusereuserid)
             .modify('notDeleted')
             .first()
 
         if (!foundUser)
             return
 
+        //is permit created for staff by pm / danru or permit created for danru by pm
         if (!isDanruPermitByPM(foundUser.euserpermission, user.permission)
             && !isStaffPermitByDanruOrPM(foundUser.euserpermission, user.permission))
             return

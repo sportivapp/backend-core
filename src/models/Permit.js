@@ -25,6 +25,7 @@ class Permit extends Model {
     static get relationMappings() {
 
         const User = require('./User')
+        const Company = require('./Company')
 
         return {
             user: {
@@ -33,6 +34,14 @@ class Permit extends Model {
                 join: {
                     from: 'epermit.euseruserid',
                     to: 'euser.euserid'
+                }
+            },
+            company: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Company,
+                join: {
+                    from: 'epermit.ecompanycompanyid',
+                    to: 'ecompany.ecompanyid'
                 }
             }
         }

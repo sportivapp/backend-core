@@ -1,5 +1,6 @@
 const Model = require('./Model');
 const Project = require('./Project');
+const User = require('./User')
 
 class Roster extends Model {
   static get tableName() {
@@ -25,6 +26,7 @@ class Roster extends Model {
   }
 
   static get relationMappings() {
+
     return {
       project: {
         relation: Model.BelongsToOneRelation,
@@ -33,7 +35,22 @@ class Roster extends Model {
           from: 'eroster.eprojecteprojectid',
           to: 'eproject.eprojectid'
         }
+      },
+      //nullable supervisor
+      supervisor: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: 'eroster.erostersupervisorid',
+          to: 'euser.euserid'
+        }
       }
+    }
+  }
+
+  static get modifiers() {
+    return {
+      ...this.baseModifiers()
     }
   }
 }

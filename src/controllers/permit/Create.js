@@ -8,7 +8,7 @@ module.exports = async (req, res, next) => {
     const user = req.user
 
     const permitDTO = {
-        euseruserid: permitRequest.userId,
+        eusereuserid: permitRequest.userId,
         epermitdescription: permitRequest.description,
         epermitstartdate: permitRequest.startDate,
         epermitenddate: permitRequest.endDate,
