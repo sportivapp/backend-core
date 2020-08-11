@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router();
+const router = require('../router');
 const userController = require('../../controllers/user');
 const auth = require('../../middlewares/authentication');
 const uploadPath = require('../../../uploads');
@@ -13,14 +12,15 @@ const storage = multer.diskStorage({
     }
 });
 const upload = multer({ storage: storage })
+const { routes } = require('../../constant')
 
 router.post('/user', auth.authenticateToken, upload.single('employee'), userController.registerEmployees);
-router.post('/user-create', auth.authenticateToken, userController.createUser);
-router.post('/user-login', userController.login);
-router.post('/user-forgot-password', userController.forgotPassword);
+router.post( routes.user.create, auth.authenticateToken, userController.createUser);
+router.post(routes.user.login, userController.login);
+router.post(routes.user.forgot, userController.forgotPassword);
 router.get('/user/:companyId', auth.authenticateToken, userController.getAllUserByCompanyId);
 router.get('/user-import-template', userController.importTemplate);
-router.put('/user-change-password', auth.authenticateToken, userController.changePassword);
+router.put( routes.user.password, auth.authenticateToken, userController.changePassword);
 router.delete('/user/:userId', auth.authenticateToken, userController.deleteUserById);
 
-module.exports = router;
+module.exports = router.expressRouter;
