@@ -5,6 +5,7 @@ const { routes } = require('../../constant');
 
 router.post('/company-register', companyController.registerCompany);
 router.post(routes.company.list, auth.authenticateToken, companyController.createCompany);
+router.post('/company-change/:companyId', auth.authenticateToken, companyController.changeCompany);
 router.put('/company/:companyId', auth.authenticateToken, companyController.editCompany)
 router.delete('/company/:companyId', auth.authenticateToken, companyController.deleteCompany)
 router.get(routes.company.list, auth.authenticateToken, companyController.getCompany)
