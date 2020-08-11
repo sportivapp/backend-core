@@ -58,6 +58,8 @@ module.exports = (chai, httpServer, expect) => {
 
           expect(res.status).to.equal(200);
           expect(res.body.data).to.not.be.undefined;
+          expect(res.body.data.companymodulemapping).to.not.be.undefined
+          expect(res.body.data.companymodulemapping.length).to.greaterThan(0)
         });
       });
 
@@ -102,6 +104,7 @@ module.exports = (chai, httpServer, expect) => {
 
       expect(res.status).to.equal(200)
       expect(res.body.data).to.not.be.undefined
+      expect(res.body.data).to.equal(true)
     });
   });
 
@@ -227,7 +230,7 @@ module.exports = (chai, httpServer, expect) => {
         });
     });
 
-    describe('POST /api/v1/company/id/users with deleted true and then undelete user', () => {
+  describe('POST /api/v1/company/id/users with deleted true and then undelete user', () => {
         it('Should return user list consists of 3 data because of deleting 1 user then undelete 1 user within 1 company', async () => {
 
             const login = await chai.request(httpServer)
