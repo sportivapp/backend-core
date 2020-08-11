@@ -2,6 +2,16 @@ const { QueryBuilder } = require('objection');
 
 class CustomQueryBuilder extends QueryBuilder {
 
+    insertToTable(data, userId) {
+        const tableName = this.tableNameFor(this._modelClass)
+        const addedData = {
+            ...data
+        }
+        addedData[tableName.concat('createtime')] = Date.now()
+        addedData[tableName.concat('createby')] = userId
+        return this.insert(addedData)
+    }
+
     deleteByUserId(userId) {
         const tableName = this.tableNameFor(this._modelClass)
         const patchedAttributes = {}
