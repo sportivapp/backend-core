@@ -15,6 +15,11 @@ module.exports = {
             list: '/user/:companyId',
             import: '/user-import-template',
             remove: '/user/:userId'
+        },
+        grade: {
+            grades: '/grades',
+            id: '/grades/:gradeId',
+            mapping: '/grades-user-mapping'
         }
     }
 }
