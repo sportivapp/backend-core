@@ -132,8 +132,28 @@ module.exports = (chai, httpServer, expect) => {
     });
   });
 
+  describe('GET /api/v1/company/user', () => {
+    it('Should return list of company by logged in userId', async () => {
+
+      const login = await chai.request(httpServer)
+          .post('/api/v1/user-login')
+          .send({
+            email: 'nawakaraadmin@nawakara.com',
+            password: 'emtivnawakaraadmin'
+          })
+
+      const res = await chai.request(httpServer)
+          .get(`/api/v1/company/user`)
+          .set('authorization', login.body.data)
+          .send()
+
+      expect(res.status).to.equal(200)
+      expect(res.body.data).to.not.be.undefined
+    });
+  });
+
   describe('POST /api/v1/company/id/users', () => {
-    it('Should return user list consists of 3 data within 1 company', async () => {
+    it('Should return user list consists of 8 data within 1 company', async () => {
 
       const login = await chai.request(httpServer)
           .post('/api/v1/user-login')
@@ -148,11 +168,13 @@ module.exports = (chai, httpServer, expect) => {
           users: [
               {
                   id: 5,
-                  deleted: false
+                  deleted: false,
+                  permission: 7
               },
               {
                   id: 4,
-                  deleted: false
+                  deleted: false,
+                  permission: 9
               }
           ]
       }
@@ -164,7 +186,7 @@ module.exports = (chai, httpServer, expect) => {
 
       expect(res.status).to.equal(200)
       expect(res.body.data).to.not.be.undefined
-      expect(res.body.data.length).to.equal(3)
+      expect(res.body.data.length).to.equal(8)
     });
   });
 
@@ -184,11 +206,8 @@ module.exports = (chai, httpServer, expect) => {
                 users: [
                     {
                         id: 5,
-                        deleted: false
-                    },
-                    {
-                        id: 4,
-                        deleted: false
+                        deleted: false,
+                        permission: 7
                     }
                 ]
             }
@@ -200,17 +219,19 @@ module.exports = (chai, httpServer, expect) => {
 
             expect(res.status).to.equal(200)
             expect(res.body.data).to.not.be.undefined
-            expect(res.body.data.length).to.equal(3)
+            expect(res.body.data.length).to.equal(7)
 
             const newRequest = {
                 users: [
                     {
                         id: 5,
-                        deleted: false
+                        deleted: false,
+                        permission: 7
                     },
                     {
                         id: 4,
-                        deleted: true
+                        deleted: true,
+                        permission: 1
                     }
                 ]
             }
@@ -222,7 +243,93 @@ module.exports = (chai, httpServer, expect) => {
 
             expect(newRes.status).to.equal(200)
             expect(newRes.body.data).to.not.be.undefined
-            expect(newRes.body.data.length).to.equal(2)
+            expect(newRes.body.data.length).to.equal(6)
+        });
+    });
+
+    describe('POST /api/v1/company/id/users with deleted true and then undelete user', () => {
+        it('Should return user list consists of 3 data because of deleting 1 user then undelete 1 user within 1 company', async () => {
+
+            const login = await chai.request(httpServer)
+                .post('/api/v1/user-login')
+                .send({
+                    email: 'nawakaraadmin@nawakara.com',
+                    password: 'emtivnawakaraadmin'
+                })
+
+            let id = 1
+
+            const request = {
+                users: [
+                    {
+                        id: 5,
+                        deleted: false,
+                        permission: 7
+                    },
+                    {
+                        id: 4,
+                        deleted: false,
+                        permission: 9
+                    }
+                ]
+            }
+
+            const res = await chai.request(httpServer)
+                .post(`/api/v1/company/${id}/users`)
+                .set('authorization', login.body.data)
+                .send(request)
+
+            expect(res.status).to.equal(200)
+            expect(res.body.data).to.not.be.undefined
+            expect(res.body.data.length).to.equal(8)
+
+            const newRequest = {
+                users: [
+                    {
+                        id: 5,
+                        deleted: false,
+                        permission: 7
+                    },
+                    {
+                        id: 4,
+                        deleted: true,
+                        permission: 9
+                    }
+                ]
+            }
+
+            const newRes = await chai.request(httpServer)
+                .post(`/api/v1/company/${id}/users`)
+                .set('authorization', login.body.data)
+                .send(newRequest)
+
+            expect(newRes.status).to.equal(200)
+            expect(newRes.body.data).to.not.be.undefined
+            expect(newRes.body.data.length).to.equal(7)
+
+            const anotherRequest = {
+                users: [
+                    {
+                        id: 5,
+                        deleted: false,
+                        permission: 7
+                    },
+                    {
+                        id: 4,
+                        deleted: false,
+                        permission: 9
+                    }
+                ]
+            }
+
+            const anotherRes = await chai.request(httpServer)
+                .post(`/api/v1/company/${id}/users`)
+                .set('authorization', login.body.data)
+                .send(anotherRequest)
+
+            expect(anotherRes.status).to.equal(200)
+            expect(anotherRes.body.data).to.not.be.undefined
+            expect(anotherRes.body.data.length).to.equal(8)
         });
     });
 

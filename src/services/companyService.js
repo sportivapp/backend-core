@@ -40,54 +40,93 @@ CompanyService.getUsersByCompanyId = async(companyId, page, size) => {
 
 }
 
+CompanyService.getAllCompanyByUserId = async(userId) => {
+
+    const result = await User.relatedQuery('companies')
+    .for(userId)
+    .modify({ ecompanyusermappingdeletestatus: false })
+    .where('ecompanyparentid', null)
+    .orderBy('ecompanyusermappingcreatetime', 'ASC')
+
+    return result
+
+}
+
 CompanyService.saveUsersToCompany = async(companyId, users, loggedInUser) => {
 
-    //accepting model [{'id': 1, 'deleted': false/true}]
+    //accepting model [{'id': 1, 'deleted': false/true, 'permission': 10}]
 
     const company = await Company.query().findById(companyId)
 
     if(!company)
         return
 
-    const deletedUserIds = users.filter(user => user.deleted)
-        .map(user => user.id)
+    let deleteRelationPromises = []
 
-    const insertedUserIds = users.filter(user => !user.deleted)
-        .map(user => user.id)
+    let unDeleteRelationPromises = []
 
-    const deleteRelationsQuery = CompanyUserMapping.query()
+    const deletedUsers = users.filter(user => user.deleted)
+
+    const insertedUsers = users.filter(user => !user.deleted)
+
+    const filterRelationsByIdAndPermission = (relation, user) => {
+        return user.id === relation.eusereuserid && user.permission === relation.ecompanyusermappingpermission
+    }
+
+    const deleteRelation = (userId, permission) => CompanyUserMapping.query()
+        .where('eusereuserid', userId)
+        .where('ecompanyusermappingpermission', permission)
         .deleteByUserId(loggedInUser.sub)
-        .where('ecompanyecompanyid', companyId)
-        .whereIn('eusereuserid', deletedUserIds)
 
-    const selectUserIdsByDeleteStatusQuery = (status) => CompanyUserMapping.query()
-        .where('ecompanyusermappingdeletestatus', status)
-        .where('ecompanyecompanyid', companyId)
-        .whereIn('eusereuserid', insertedUserIds)
-
-    const undoDeleteQuery = selectUserIdsByDeleteStatusQuery(true)
+    const unDeleteRelation = (userId, permission) => CompanyUserMapping.query()
+        .where('eusereuserid', userId)
+        .where('ecompanyusermappingpermission', permission)
         .unDeleteByUserId(loggedInUser.sub)
 
-    const filterNewUserIds = (existedIds) => {
-        return insertedUserIds
-            .filter(userId => !existedIds.find(id => id === userId))
-            .map(userId => ({
-                eusereuserid: userId,
+    const selectRelationsByDeleteStatusQuery = (status) => CompanyUserMapping.query()
+        .where('ecompanyusermappingdeletestatus', status)
+        .where('ecompanyecompanyid', companyId)
+        .whereIn('eusereuserid', insertedUsers.map(user => user.id))
+
+    const selectDeleteRelations = CompanyUserMapping.query()
+        .where('ecompanyecompanyid', companyId)
+        .whereIn('eusereuserid', deletedUsers.map(user => user.id))
+        .then(relations => {
+            relations
+                .filter(relation => !!deletedUsers.find(user => filterRelationsByIdAndPermission(relation, user)))
+                .forEach(relation => deleteRelationPromises.push(deleteRelation(relation.eusereuserid, relation.ecompanyusermappingpermission)))
+            return deleteRelationPromises
+        })
+
+    const selectUnDeletedRelations = selectRelationsByDeleteStatusQuery(true)
+        .then(relations => {
+            relations
+                .filter(relation => !!insertedUsers.find(user => filterRelationsByIdAndPermission(relation, user)))
+                .forEach(relation => unDeleteRelationPromises.push(unDeleteRelation(relation.eusereuserid, relation.ecompanyusermappingpermission)))
+            return unDeleteRelationPromises
+        })
+
+    const filterNewUserIds = (existedRelations) => {
+        return insertedUsers
+            .filter(user => !existedRelations.find(relation => filterRelationsByIdAndPermission(relation, user)))
+            .map(user => ({
+                eusereuserid: user.id,
                 ecompanyecompanyid: parseInt(companyId),
-                ecompanyusermappingcreateby: loggedInUser.sub
+                ecompanyusermappingcreateby: loggedInUser.sub,
+                ecompanyusermappingpermission: user.permission
             }))
     }
 
-    const getAllUsersDataByCompany = () => Company.relatedQuery('users')
+    const getAllUsersDataByCompany = Company.relatedQuery('users')
         .for(companyId)
         .modify({ ecompanyusermappingdeletestatus: false })
 
-    return Promise.all([deleteRelationsQuery, undoDeleteQuery])
-        .then(ignored => selectUserIdsByDeleteStatusQuery(false))
-        .then(existedRelations => existedRelations.map(relation => relation.eusereuserid))
+    return Promise.all([selectDeleteRelations, selectUnDeletedRelations])
+        .then(arrayOfPromises => Promise.all([...arrayOfPromises[0], ...arrayOfPromises[1]]))
+        .then(ignored => selectRelationsByDeleteStatusQuery(false))
         .then(existedIds => filterNewUserIds(existedIds))
         .then(freshRelations => CompanyUserMapping.query().insert(freshRelations))
-        .then(ignored => getAllUsersDataByCompany())
+        .then(ignored => getAllUsersDataByCompany)
 
 }
 
@@ -104,7 +143,8 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
     const companyUserMapping = await CompanyUserMapping.query().insert({
         ecompanyecompanyid: company.ecompanyid,
         eusereuserid: id,
-        ecompanyusermappingcreateby: user.sub
+        ecompanyusermappingcreateby: user.sub,
+        ecompanyusermappingpermission: 10
     })
 
     const patchDTO = isNaN(userId) ? { euserpermission: 10 } :
