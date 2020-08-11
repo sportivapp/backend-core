@@ -19,6 +19,12 @@ class CompanyUserMapping extends Model {
             }
         };
     }
+
+    static get modifiers() {
+        return {
+            ...this.baseModifiers()
+        }
+    }
 }
 
 module.exports = CompanyUserMapping;
