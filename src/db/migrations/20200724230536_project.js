@@ -17,6 +17,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('eproject', t => {
     t.boolean('eprojectdeletestatus').defaultTo(false);
     t.bigInteger('eprojectdeletetime');
     t.integer('eprojecttablestatus').notNullable().defaultTo(1);
+    t.integer('eusereuserid').references('euser.euserid');
   });
   
   exports.down = (knex, Promise) => knex.schema.dropTable('eproject');
