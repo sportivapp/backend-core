@@ -36,6 +36,11 @@ module.exports = {
         department: {
             department: '/department',
             id: '/department/:departmentId'
+        },
+        device: {
+            device: '/devices',
+            deviceId: '/devices/:deviceId',
+            deviceProjectId: '/devices/:deviceId/projects'
         }
     }
 }
