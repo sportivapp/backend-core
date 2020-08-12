@@ -113,9 +113,7 @@ controller.saveUserPositions = async (req, res, next) => {
 
     const user = req.user
 
-    const { userId } = req.query
-
-    const positionIds = req.body.positionIds
+    const { positionIds, userId } = req.body
 
     if ( isNaN(userId) ) return res.status(400).json(ResponseHelper.toErrorResponse(400))
 
