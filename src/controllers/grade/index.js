@@ -121,7 +121,6 @@ controller.saveUserPositions = async (req, res, next) => {
         const result = await gradeService.saveUserPositions(userId, positionIds, user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
-        console.log(e)
         next(e)
     }
 }
