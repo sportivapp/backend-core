@@ -1,6 +1,5 @@
 exports.up = (knex, Promise) => knex.schema.createTable('euser', t => {
     t.increments('euserid').primary().unsigned();
-    t.integer('euserpermission').notNullable().defaultTo(1);
     t.integer('euseruserstatus').notNullable().defaultTo(1);
     t.string('eusernik');
     t.bigInteger('euserlastlogout');
@@ -18,7 +17,6 @@ exports.up = (knex, Promise) => knex.schema.createTable('euser', t => {
     t.integer('euserchangeby');
     t.bigInteger('euserchangetime');
     t.integer('eusertablestatus').notNullable().defaultTo(1);
-    t.integer('ecompanyecompanyid').notNullable().references('ecompany.ecompanyid');
   });
   
   exports.down = (knex, Promise) => knex.schema.dropTable('euser');
