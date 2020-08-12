@@ -15,6 +15,8 @@ module.exports = (chai, httpServer, expect) => {
             rosterName: 'test1',
             rosterDescription: 'this is test1',
             projectId: 1,
+            supervisorId: 2,
+            headUserId: 3,
             userIds: [1,2,3]
         });
   
