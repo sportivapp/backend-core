@@ -4,6 +4,7 @@ const gradeSchemas = require('./grade')
 const absenSchemas = require('./absen')
 const announcementSchemas = require('./announcement')
 const departmentSchemas = require('./department')
+const deviceSchemas = require('./device')
 
 module.exports = {
     ...companySchemas,
@@ -11,5 +12,6 @@ module.exports = {
     ...gradeSchemas,
     ...absenSchemas,
     ...announcementSchemas,
-    ...departmentSchemas
+    ...departmentSchemas,
+    ...deviceSchemas
 }
