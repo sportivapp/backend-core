@@ -27,11 +27,11 @@ ProjectService.getProjects = async(userId, page, size) => {
 
 }
 
-ProjectService.updateProjectById = async(projectId, projectDTO) => {
+ProjectService.updateProjectById = async(projectId, projectDTO, user) => {
 
     const project = await ProjectService.getProjectById(projectId);
 
-    return project.$query().patchAndFetch(projectDTO);
+    return project.$query().patchAndFetch(projectDTO, user.sub);
 
 }
 

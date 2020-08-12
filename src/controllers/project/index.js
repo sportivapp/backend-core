@@ -71,14 +71,12 @@ projectController.updateProjectById = async (req, res, next) => {
         eprojectcode: code, 
         eprojectname: name,
         eprojectstartdate: startDate, 
-        eprojectenddate: endDate, 
-        eprojectchangeby: user.sub,
-        eprojectchangetime: Date.now(),
+        eprojectenddate: endDate,
         eprojectaddress: address
     }
 
     try {
-        const project = await projectService.updateProjectById(projectId, projectDTO);
+        const project = await projectService.updateProjectById(projectId, projectDTO, user);
 
         if (!project)
             return res.status(404).json(ResponseHelper.toErrorResponse(404))
