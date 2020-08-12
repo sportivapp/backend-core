@@ -53,7 +53,7 @@ userController.registerEmployees = async (req, res, next) => {
 userController.createUser = async (req, res, next) => {
 
     if (isUserNotValid(req.user))
-    return res.status(403).json(ResponseHelper.toErrorResponse(403))
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const user = req.user
     const { userNik, username, userEmail, userMobileNumber, userPassword} = req.body
@@ -114,6 +114,9 @@ userController.forgotPassword = async (req, res, next) => {
 }
 
 userController.getAllUserByCompanyId = async (req, res, next) => {
+
+    if (isUserNotValid(req.user))
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { page, size } = req.query
     const user = req.user
