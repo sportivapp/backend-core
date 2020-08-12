@@ -31,7 +31,7 @@ ProjectService.updateProjectById = async(projectId, projectDTO, user) => {
 
     const project = await ProjectService.getProjectById(projectId);
 
-    return project.$query().patchAndFetch(projectDTO, user.sub);
+    return project.$query().updateByUserId(projectDTO, user.sub);
 
 }
 
