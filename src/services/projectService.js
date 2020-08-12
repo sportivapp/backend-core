@@ -35,12 +35,11 @@ ProjectService.updateProjectById = async(projectId, projectDTO, user) => {
 
 }
 
-ProjectService.deleteProjectById = async(projectId) => {
+ProjectService.deleteProjectById = async(projectId, user) => {
 
-    return Project.query()
-        .delete()
-        .where('eprojectid', projectId)
-        .then(rowsAffected => rowsAffected === 1);
+    await ProjectDeviceMapping.query().delete().where('eprojecteprojectid', projectId)
+    const affectedRow = await Project.query().deleteByUserId(user.sub)
+    return affectedRow === 1
 
 }
 

@@ -43,11 +43,12 @@ projectController.deleteProjectById = async (req, res, next) => {
     if (isUserNotValid(req.user))
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
+    const user = req.user;
     const { projectId } = req.params;
 
     try {
 
-        const result = await projectService.deleteProjectById(projectId);
+        const result = await projectService.deleteProjectById(projectId, user);
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
