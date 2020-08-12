@@ -119,12 +119,11 @@ userController.getAllUserByCompanyId = async (req, res, next) => {
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { page, size } = req.query
-    const user = req.user
     const { companyId } = req.params
 
     try {
 
-        const pageObj = await userService.getAllUserByCompanyId(parseInt(page), parseInt(size), companyId, user)
+        const pageObj = await userService.getAllUserByCompanyId(parseInt(page), parseInt(size), companyId)
 
         if(!pageObj)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
