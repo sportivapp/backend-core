@@ -1,12 +1,13 @@
-const express = require('express');
-const router = express.Router();
-const { Create, List, ListById, Update, Delete } = require('../../controllers/absen')
+const router = require('../router')
+const absenController = require('../../controllers/absen')
 const auth = require('../../middlewares/authentication');
+const { routes } = require('../../constant')
 
-router.post('/absen', Create);
-router.get('/absen-list/:userId', ListById);
-router.get('/absen-list', List);
-router.put('/absen/:absenId', auth.authenticateToken, Update);
-router.delete('/absen-delete/:absenId', auth.authenticateToken, Delete);
+router.post( routes.absen.create, absenController.createAbsenByPOS );
+// PLEASE REFACTOR THE GET listId CALL LATER ( CHANGE USERID TO QUERY NOT PARAMS)
+router.get( routes.absen.listId, absenController.listAbsenById);
+router.get( routes.absen.list, absenController.listAbsen);
+router.put( routes.absen.update, auth.authenticateToken, absenController.editAbsen);
+router.delete( routes.absen.remove, auth.authenticateToken, absenController.deleteAbsen);
 
-module.exports = router;
+module.exports = router.expressRouter;
