@@ -20,6 +20,13 @@ module.exports = {
             grades: '/grades',
             id: '/grades/:gradeId',
             mapping: '/grades-user-mapping'
+        },
+        absen: {
+            create: '/absen',
+            listId: '/absen-list/:userId',
+            list: '/absen-list',
+            update: '/absen/:absenId',
+            remove: '/absen-delete/:absenId'
         }
     }
 }
