@@ -50,13 +50,12 @@ controller.createDevice = async (req, res, next) => {
     const deviceDTO = {
         edeviceidinfo: info,
         edeviceimei: imei,
-        edevicecreateby: req.user.sub,
         ecompanyecompanyid: companyId
     }
 
     try {
 
-        const device = await deviceService.createDevice(deviceDTO)
+        const device = await deviceService.createDevice(deviceDTO, user)
         if (!device)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(device))

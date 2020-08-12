@@ -15,19 +15,17 @@ projectController.createProject = async (req, res, next) => {
     try {
 
         const { code, name, startDate, endDate, address } = req.body;
-        const user = req.user;
 
         const projectDTO = { 
             eprojectcode: code, 
             eprojectname: name,
             eprojectstartdate: startDate, 
-            eprojectenddate: endDate, 
-            eprojectcreateby: user.sub,
+            eprojectenddate: endDate,
             eprojectaddress: address,
-            eprojectsupervisorid: user.sub
+            eprojectsupervisorid: req.user.sub
         }
 
-        const project = await projectService.createProject(projectDTO);
+        const project = await projectService.createProject(projectDTO, req.user);
 
         return res.status(200).json({
             data: project

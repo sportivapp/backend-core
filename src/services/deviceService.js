@@ -18,19 +18,19 @@ deviceService.getDeviceById = async (deviceId) => {
         .first()
 }
 
-deviceService.createDevice = async (deviceDTO) => {
+deviceService.createDevice = async (deviceDTO, user) => {
 
-    return Device.query().insert(deviceDTO)
+    return Device.query().insertToTable(deviceDTO, user.sub);
 }
 
-deviceService.updateDevice = async (deviceId, deviceDTO) => {
+deviceService.updateDevice = async (deviceId, deviceDTO, user) => {
 
     const device = await deviceService.getDeviceById(deviceId)
 
     if (!device)
         return
     else
-        return device.$query().patchAndFetch(deviceDTO)
+        return device.$query().updateByUserId(deviceDTO, user.sub);
 }
 
 deviceService.deleteDevice = async (deviceId) => {

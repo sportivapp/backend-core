@@ -6,12 +6,14 @@ exports.seed = (knex, Promise) => knex('edevice').del()
                     edeviceidinfo: 'Mesin Absen 1 PT. Nawakara Perkasa Nusantara',
                     edeviceimei: '11111',
                     edevicecreateby: 0,
+                    edevicecreatetime: Date.now(),
                     ecompanyecompanyid: 1
                 },
                 {
                     edeviceidinfo: 'Mesin Absen 2 PT. Nawakara Perkasa Nusantara',
                     edeviceimei: '22222',
                     edevicecreateby: 0,
+                    edevicecreatetime: Date.now(),
                     ecompanyecompanyid: 1
                 },
             ]

@@ -4,9 +4,9 @@ const ServiceHelper = require('../helper/ServiceHelper')
 
 const ProjectService = {};
 
-ProjectService.createProject = async(projectDTO) => {
+ProjectService.createProject = async(projectDTO, user) => {
 
-    return Project.query().insert(projectDTO);
+    return Project.query().insertToTable(projectDTO, user.sub);
 
 }
 
@@ -27,20 +27,27 @@ ProjectService.getProjects = async(userId, page, size) => {
 
 }
 
-ProjectService.updateProjectById = async(projectId, projectDTO) => {
+ProjectService.updateProjectById = async(projectId, projectDTO, user) => {
 
     const project = await ProjectService.getProjectById(projectId);
 
     if (!project)
         return
 
-    return Project.query().patchAndFetchById(projectId, projectDTO);
+    return project.$query().updateByUserId(projectDTO, user.sub);
 
 }
 
-ProjectService.deleteProjectById = async(projectId, user) => {
+ProjectService.deleteProjectById = async(projectId) => {
 
-    return Project.query().deleteById(projectId);
+    const project = await ProjectService.getProjectById(projectId);
+
+    if (!project)
+        return
+    else {
+        const affectedRow = await Project.query().deleteById(projectId);
+        return affectedRow === 1
+    }
 
 }
 
