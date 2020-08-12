@@ -8,18 +8,22 @@ module.exports = (chai, httpServer, expect) => {
           password: 'emtivnawakarapm'
         });
 
-        const res = await chai.request(httpServer)
-        .post('/api/v1/project')
-        .set('authorization', login.body.data)
-        .send({
+        const requestBody = {
           code: '1A',
           name: 'SatuA',
           startDate: '2020-07-24',
           endDate: '2020-12-24'
-        });
+        }
+
+        const res = await chai.request(httpServer)
+        .post('/api/v1/project')
+        .set('authorization', login.body.data)
+        .send(requestBody);
   
         expect(res.status).to.equal(200);
         expect(res.body.data).to.not.be.undefined;
+        expect(res.body.data.eprojectcode).to.equal(requestBody.code);
+        expect(res.body.data.eprojectname).to.equal(requestBody.name);
       });
     });
 
@@ -32,13 +36,19 @@ module.exports = (chai, httpServer, expect) => {
           password: 'emtivnawakarapm'
         });
 
+        let page = 0
+        let size = 10
+
         const res = await chai.request(httpServer)
-        .get('/api/v1/project')
+        .get(`/api/v1/project?page=${page}&size=${size}`)
         .set('authorization', login.body.data)
         .send();
 
         expect(res.status).to.equal(200);
         expect(res.body.data).to.not.be.undefined;
+        expect(res.body.paging).to.not.be.undefined;
+        expect(res.body.paging.page).to.equal(page);
+        expect(res.body.paging.size).to.equal(size);
       });
     });
 
@@ -51,19 +61,24 @@ module.exports = (chai, httpServer, expect) => {
           password: 'emtivnawakarapm'
         });
 
-        const res = await chai.request(httpServer)
-        .put('/api/v1/project/1')
-        .set('authorization', login.body.data)
-        .send({
+        const requestBody = {
           code: '2A',
           name: 'DuaA',
           startDate: '2021-07-24',
           endDate: '2021-12-24',
           address: 'Test dua'
-        });
+        };
+
+        const res = await chai.request(httpServer)
+        .put('/api/v1/project/1')
+        .set('authorization', login.body.data)
+        .send(requestBody);
   
         expect(res.status).to.equal(200);
         expect(res.body.data).to.not.be.undefined;
+        expect(res.body.data.eprojectid).to.not.be.undefined
+        expect(res.body.data.eprojectcode).to.equal(requestBody.code)
+        expect(res.body.data.eprojectname).to.equal(requestBody.name)
       });
     });
 
