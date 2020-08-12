@@ -13,8 +13,9 @@ module.exports = (chai, httpServer, expect) => {
             expect(login.body).to.not.be.undefined
 
             const requestBody = {
-                info: 'New Device for Project A',
-                imei: '201020102010'
+                info: 'New Device',
+                imei: '201020102010',
+                companyId: 1,
             }
 
             const res = await chai.request(httpServer)

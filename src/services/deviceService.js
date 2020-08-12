@@ -35,9 +35,19 @@ deviceService.updateDevice = async (deviceId, deviceDTO) => {
 
 deviceService.deleteDevice = async (deviceId) => {
 
-    await ProjectDeviceMapping.query().delete().where('edevicedeviceid', deviceId)
-    const affectedRow = await Device.query().deleteById(deviceId)
-    return affectedRow === 1
+    // await ProjectDeviceMapping.query().delete().where('edevicedeviceid', deviceId)
+    // const affectedRow = await Device.query().deleteById(deviceId)
+    // return affectedRow === 1
+
+    const device = await deviceService.getDeviceById(deviceId)
+
+    if (!device)
+        return
+    else {
+        const affectedRow = await Device.query().deleteById(deviceId);
+        return affectedRow === 1
+    }
+
 }
 
 deviceService.getProjectsByDeviceId = async (deviceId, page, size) => {

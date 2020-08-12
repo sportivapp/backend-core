@@ -23,7 +23,8 @@ projectController.createProject = async (req, res, next) => {
             eprojectstartdate: startDate, 
             eprojectenddate: endDate, 
             eprojectcreateby: user.sub,
-            eprojectaddress: address
+            eprojectaddress: address,
+            eprojectsupervisorid: user.sub
         }
 
         const project = await projectService.createProject(projectDTO);

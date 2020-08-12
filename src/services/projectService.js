@@ -27,19 +27,20 @@ ProjectService.getProjects = async(userId, page, size) => {
 
 }
 
-ProjectService.updateProjectById = async(projectId, projectDTO, user) => {
+ProjectService.updateProjectById = async(projectId, projectDTO) => {
 
     const project = await ProjectService.getProjectById(projectId);
 
-    return project.$query().updateByUserId(projectDTO, user.sub);
+    if (!project)
+        return
+
+    return Project.query().patchAndFetchById(projectId, projectDTO);
 
 }
 
 ProjectService.deleteProjectById = async(projectId, user) => {
 
-    await ProjectDeviceMapping.query().delete().where('eprojecteprojectid', projectId)
-    const affectedRow = await Project.query().deleteByUserId(user.sub)
-    return affectedRow === 1
+    return Project.query().deleteById(projectId);
 
 }
 

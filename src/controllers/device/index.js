@@ -4,10 +4,13 @@ const ResponseHelper = require('../../helper/ResponseHelper')
 const controller = {}
 
 function isUserValid(user) {
-    return user.permission === 10 || user.permission === 9
+    return user.permission > 1
 }
 
 controller.getDevices = async (req, res, next) => {
+
+    if(!isUserValid(req.user))
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { page, size } = req.query
 
@@ -21,6 +24,9 @@ controller.getDevices = async (req, res, next) => {
 }
 
 controller.getDeviceById = async (req, res, next) => {
+
+    if(!isUserValid(req.user))
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { deviceId } = req.params
 
@@ -39,12 +45,13 @@ controller.createDevice = async (req, res, next) => {
     if(!isUserValid(req.user))
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
-    const { info, imei } = req.body
+    const { info, imei, companyId } = req.body
 
     const deviceDTO = {
         edeviceidinfo: info,
         edeviceimei: imei,
-        edevicecreateby: req.user.sub
+        edevicecreateby: req.user.sub,
+        ecompanyecompanyid: companyId
     }
 
     try {
