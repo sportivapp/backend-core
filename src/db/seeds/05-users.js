@@ -3,7 +3,6 @@ exports.seed = (knex, Promise) => knex('euser').del()
     knex('euser').insert(
       [
         {
-          euserpermission: 10,
           eusernik: 'E1',
           eusername: 'nawakaraadmin',
           euseremail: 'nawakaraadmin@nawakara.com',
@@ -12,7 +11,6 @@ exports.seed = (knex, Promise) => knex('euser').del()
           ecompanyecompanyid: 1
         },
         {
-          euserpermission: 9,
           eusernik: 'E2',
           eusername: 'nawakarahrd',
           euseremail: 'nawakarahrd@nawakara.com',
@@ -21,7 +19,6 @@ exports.seed = (knex, Promise) => knex('euser').del()
           ecompanyecompanyid: 1
         },
         {
-          euserpermission: 8,
           eusernik: 'E3',
           eusername: 'nawakarapm',
           euseremail: 'nawakarapm@nawakara.com',
@@ -30,7 +27,6 @@ exports.seed = (knex, Promise) => knex('euser').del()
           ecompanyecompanyid: 1
         },
         {
-          euserpermission: 1,
           eusernik: 'E4',
           eusername: 'nawakarauser1',
           euseremail: 'nawakarauser1@nawakara.com',
@@ -39,7 +35,6 @@ exports.seed = (knex, Promise) => knex('euser').del()
           ecompanyecompanyid: 1
         },
         {
-          euserpermission: 1,
           eusernik: 'E5',
           eusername: 'nawakarauser2',
           euseremail: 'nawakarauser2@nawakara.com',
@@ -48,7 +43,6 @@ exports.seed = (knex, Promise) => knex('euser').del()
           ecompanyecompanyid: 1
         },
         {
-          euserpermission: 1,
           eusernik: 'E6',
           eusername: 'nawakarauser3',
           euseremail: 'nawakarauser3@nawakara.com',
