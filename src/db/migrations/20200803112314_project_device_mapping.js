@@ -1,6 +1,6 @@
 exports.up = (knex, Promise) => knex.schema.createTable('eprojectdevicemapping', t => {
-    t.integer('eprojectprojectid').notNullable().references('eproject.eprojectid')
-    t.integer('edevicedeviceid').notNullable().references('edevice.edeviceid')
+    t.integer('eprojectprojectid').notNullable().references('eproject.eprojectid').onDelete('CASCADE');
+    t.integer('edevicedeviceid').notNullable().references('edevice.edeviceid').onDelete('CASCADE');
     t.integer('eprojectdevicemappingcreateby').notNullable();
     t.bigInteger('eprojectdevicemappingcreatetime').notNullable().defaultTo(Date.now());
     t.integer('eprojectdevicemappingchangeby');
