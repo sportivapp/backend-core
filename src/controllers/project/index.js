@@ -72,7 +72,8 @@ projectController.updateProjectById = async (req, res, next) => {
         eprojectname: name,
         eprojectstartdate: startDate, 
         eprojectenddate: endDate, 
-        eprojectcreateby: user.sub,
+        eprojectchangeby: user.sub,
+        eprojectchangetime: Date.now(),
         eprojectaddress: address
     }
 
