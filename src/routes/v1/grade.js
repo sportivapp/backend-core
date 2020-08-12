@@ -1,13 +1,13 @@
-const express = require('express');
-const router = express.Router();
+const { routes } = require('../../constant')
+const router = require('../router');
 const gradeController = require('../../controllers/grade')
 const auth = require('../../middlewares/authentication');
 
-router.get('/grades', auth.authenticateToken, gradeController.getGrades)
-router.post('/grades', auth.authenticateToken, gradeController.createGrade)
-router.get('/grades/:gradeId', auth.authenticateToken, gradeController.getGradeById)
-router.put('/grades/:gradeId', auth.authenticateToken, gradeController.updateGradeById)
-router.post('/grades-user-mapping', auth.authenticateToken, gradeController.saveUserPositions)
-router.delete('/grades/:gradeId', auth.authenticateToken, gradeController.deleteGradeById)
+router.get( routes.grade.grades, auth.authenticateToken, gradeController.getGrades)
+router.post( routes.grade.grades, auth.authenticateToken, gradeController.createGrade)
+router.get( routes.grade.id, auth.authenticateToken, gradeController.getGradeById)
+router.put( routes.grade.id, auth.authenticateToken, gradeController.updateGradeById)
+router.post( routes.grade.mapping, auth.authenticateToken, gradeController.saveUserPositions)
+router.delete( routes.grade.id, auth.authenticateToken, gradeController.deleteGradeById)
 
-module.exports = router
+module.exports = router.expressRouter
