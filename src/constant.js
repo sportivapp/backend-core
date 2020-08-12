@@ -41,6 +41,12 @@ module.exports = {
             device: '/devices',
             deviceId: '/devices/:deviceId',
             deviceProjectId: '/devices/:deviceId/projects'
+        },
+        roster: {
+            roster: '/roster',
+            rosterId: '/roster/:rosterId',
+            shift: '/roster-shift',
+            rosterMemberId: '/roster-members/:rosterId'
         }
     }
 }
