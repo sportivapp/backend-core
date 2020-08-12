@@ -13,11 +13,11 @@ exports.up = (knex, Promise) => knex.schema.createTable('eproject', t => {
     t.bigInteger('eprojectcreatetime').notNullable().defaultTo(Date.now());
     t.integer('eprojectchangeby');
     t.bigInteger('eprojectchangetime');
+    t.integer('eprojecttablestatus').notNullable().defaultTo(1);
+    t.integer('eprojectsupervisorid').notNullable().references('euser.euserid');
     t.integer('eprojectdeleteby');
     t.boolean('eprojectdeletestatus').defaultTo(false);
     t.bigInteger('eprojectdeletetime');
-    t.integer('eprojecttablestatus').notNullable().defaultTo(1);
-    t.integer('eprojectsupervisorid').notNullable().references('euser.euserid');
   });
   
   exports.down = (knex, Promise) => knex.schema.dropTable('eproject');
