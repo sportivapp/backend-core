@@ -44,7 +44,35 @@ gradeService.updateGradeById = async (gradeId, gradeDTO) => {
     return grade.$query().patchAndFetch(gradeDTO)
 }
 
-gradeService.deleteGradeById = async (gradeId) => {
+gradeService.deleteGradeById = async (gradeId, user) => {
+
+    const grade = await Grade.query().select().where('egradeid', gradeId).first()
+    
+    if(!grade)
+        return false
+
+    const superior = await Grade.query().select()
+    .where('egradeid', grade.egradesuperiorid)
+    .andWhere('ecompanycompanyid', grade.ecompanycompanyid)
+    .first()
+
+    const subordinates = await Grade.query().select().where('egradesuperiorid', grade.egradeid)
+
+    if ( grade.egradesuperiorid !== null) {
+
+        for( subordinate in subordinates){
+            await Grade.query()
+            .where('egradeid', subordinates[subordinate].egradeid)
+            .updateByUserId({egradesuperiorid: superior.egradeid}, user.sub)
+        }
+
+    } else {
+        for( subordinate in subordinates){
+            await Grade.query()
+            .where('egradeid', subordinates[subordinate].egradeid)
+            .updateByUserId({egradesuperiorid: null}, user.sub)
+        }
+    }
 
     return Grade.query()
         .delete()
@@ -52,56 +80,19 @@ gradeService.deleteGradeById = async (gradeId) => {
         .then(rowsAffected => rowsAffected === 1)
 }
 
-gradeService.saveUserPositions = async (userId, positionIds, loggedInUser) => {
+gradeService.saveUserPositions = async (userId, positionIds, user) => {
 
-    //accepting model [{'id': 1, 'deleted': false/true}]
-    
-    const user = await User.query().findById(userId)
+    await UserPositionMapping.query()
+    .where('eusereuserid', userId).delete()
 
-    if(!user)
-        return
+    const positions = positionIds.map(position => 
+        ({ 
+            eusereuserid: userId,
+            egradeegradeid: position
+        }));  
 
-    const deletedPositionIds = positionIds.filter(position => position.deleted)
-        .map(position => position.id)
-
-    const insertedPositionIds = positionIds.filter(position => !position.deleted)
-        .map(position => position.id)
-
-
-    
-    const deleteRelationsQuery = UserPositionMapping.query()
-        .deleteByUserId(loggedInUser.sub)
-        .where('eusereuserid', userId)
-        .whereIn('egradeegradeid', deletedPositionIds)
-
-    const selectPositionIdsByDeleteStatusQuery = (status) => UserPositionMapping.query()
-        .where('euserpositionmappingdeletestatus', status)
-        .where('eusereuserid', userId)
-        .whereIn('egradeegradeid', insertedPositionIds)
-
-    const undoDeleteQuery = selectPositionIdsByDeleteStatusQuery(true)
-        .unDeleteByUserId(loggedInUser.sub)
-
-    const filterNewPositionIds = (existedIds) => {
-        return insertedPositionIds
-            .filter(positionId => !existedIds.find(id => id === positionId))
-            .map(positionId => ({
-                egradeegradeid: positionId,
-                eusereuserid: parseInt(userId),
-                euserpositionmappingcreateby: loggedInUser.sub
-            }))
-    }
-
-    const getAllPositionsDataByUser = () => User.relatedQuery('grades')
-    .for(userId)
-    .modify({ euserpositionmappingdeletestatus: false })
-
-    return Promise.all([deleteRelationsQuery, undoDeleteQuery])
-    .then(ignored => selectPositionIdsByDeleteStatusQuery(false))
-    .then(existedRelations => existedRelations.map(relation => relation.egradeegradeid))
-    .then(existedIds => filterNewPositionIds(existedIds))
-    .then(freshRelations => UserPositionMapping.query().insert(freshRelations))
-    .then(ignored => getAllPositionsDataByUser())
+    return UserPositionMapping.query()
+    .insertToTable(positions, user.sub)
 
 }
 
