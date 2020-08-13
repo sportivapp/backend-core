@@ -3,28 +3,31 @@ exports.seed = (knex) => knex('epermit').del()
         knex('epermit').insert(
             [
                 {
-                    epermitdescription: 'nawakara permit staff',
-                    epermitstartdate: '2020-12-12',
-                    epermitenddate: '2020-12-24',
-                    epermitstatus: 0,
+                    epermitdescription: 'nawakara permit user2',
+                    epermitstartdate: 1597189478546,
+                    epermitenddate: 1597489478546,
+                    epermitstatus: 1,
                     euseruserid: 5,
-                    epermitcreateby: 4
+                    epermitcreateby: 4,
+                    epermitcreatetime: Date.now()
                 },
                 {
-                    epermitdescription: 'nawakara permit danru',
-                    epermitstartdate: '2020-12-12',
-                    epermitenddate: '2020-12-24',
-                    epermitstatus: 1,
+                    epermitdescription: 'nawakara permit user1',
+                    epermitstartdate: 1597189478546,
+                    epermitenddate: 1597489478546,
+                    epermitstatus: 0,
                     euseruserid: 4,
-                    epermitcreateby: 4
+                    epermitcreateby: 4,
+                    epermitcreatetime: Date.now()
                 },
                 {
                     epermitdescription: 'nawakara permit pm',
-                    epermitstartdate: '2020-12-12',
-                    epermitenddate: '2020-12-24',
+                    epermitstartdate: 1597189478546,
+                    epermitenddate: 1597489478546,
                     epermitstatus: 1,
                     euseruserid: 3,
-                    epermitcreateby: 4
+                    epermitcreateby: 4,
+                    epermitcreatetime: Date.now()
                 }
             ]
         ));

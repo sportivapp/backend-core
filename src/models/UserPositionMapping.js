@@ -19,6 +19,22 @@ class UserPositionMapping extends Model {
             }
         };
     }
+
+    static get relationMappings() {
+
+        const User = require('./User')
+
+        return {
+            users: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: User,
+                join: {
+                    from: 'euserpositionmapping.eusereuserid',
+                    to: 'euserpositionmapping.egradeegradeid'
+                }
+            }
+        }
+    }
 }
 
 module.exports = UserPositionMapping;

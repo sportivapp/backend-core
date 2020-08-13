@@ -16,8 +16,8 @@ class Permit extends Model {
             properties: {
                 epermitstatus: { type: 'integer' },
                 epermitdescription: { type: 'string', minLength: 1, maxLength: 256 },
-                epermitstartdate: { type: 'string', format: 'date' },
-                epermitenddate: { type: 'string', format: 'date' }
+                epermitstartdate: { type: 'bigint' },
+                epermitenddate: { type: 'bigint' }
             }
         };
     }

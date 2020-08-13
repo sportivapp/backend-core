@@ -19,7 +19,7 @@ class Roster extends Model {
         erostername: { type: 'string', minLength: 1, maxLength: 256 },
         erosterdescription: { type: 'string', minLength: 1, maxLength: 256 },
         eprojecteprojectid: {type: 'integer' },
-        erostersupervisorid: {type: 'integer' },
+        erostersupervisoruserid: {type: 'integer' },
         erosterheaduserid: {type: 'integer' }
       }
     };
@@ -41,7 +41,7 @@ class Roster extends Model {
         relation: Model.BelongsToOneRelation,
         modelClass: User,
         join: {
-          from: 'eroster.erostersupervisorid',
+          from: 'eroster.erostersupervisoruserid',
           to: 'euser.euserid'
         }
       }

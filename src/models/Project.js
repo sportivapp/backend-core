@@ -47,8 +47,8 @@ class Project extends Model {
         relation: Model.BelongsToOneRelation,
         modelClass: User,
         join: {
-          from: 'eproject.eusereuserid',
-          to: 'euser.eusereuserid'
+          from: 'eproject.eprojectsupervisorid',
+          to: 'euser.euserid'
         }
       },
       units: {

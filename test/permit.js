@@ -13,8 +13,8 @@ module.exports = (chai, httpServer, expect) => {
 
             const requestBody = {
                 description: 'Nawakara Permit PM',
-                startDate: '2020-12-24',
-                endDate: '2020-12-24'
+                startDate: 1597189478546,
+                endDate: 1597489478546
             }
 
             const res = await chai.request(httpServer)
@@ -78,11 +78,11 @@ module.exports = (chai, httpServer, expect) => {
             const login = await chai.request(httpServer)
                 .post('/api/v1/user-login')
                 .send({
-                    email: 'nawakarauser2@nawakara.com',
+                    email: 'nawakarauser1@nawakara.com',
                     password: 'emtivnawakarauser'
                 })
 
-            let id = 1
+            let id = 2
 
             const getResponse = await chai.request(httpServer)
                 .get(`/api/v1/permit/${id}`)
@@ -123,6 +123,7 @@ module.exports = (chai, httpServer, expect) => {
 
             expect(res.status).to.equal(200)
             expect(res.body.data).to.not.be.undefined
+            expect(res.body.data.length).to.equal(1)
             expect(res.body.paging).to.not.be.undefined
             expect(res.body.paging.page).to.equal(page)
             expect(res.body.paging.size).to.equal(size)
@@ -150,8 +151,8 @@ module.exports = (chai, httpServer, expect) => {
 
             const requestBody = {
                 description: `${getResponse.body.data.epermitdescription} Edited`,
-                startDate: '2020-12-24',
-                endDate: '2020-12-24'
+                startDate: 1597189478546,
+                endDate: 1597489478546
             }
 
             const res = await chai.request(httpServer)
