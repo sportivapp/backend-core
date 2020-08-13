@@ -62,7 +62,6 @@ async function getProjectManagerIdQuery(rosterId) {
         .first()
         .withGraphFetched('manager(notDeleted)')
         .then(project => {
-            console.log(project)
             if (!project || !project.manager) return
             return project.manager.euserid
         });
@@ -86,11 +85,11 @@ function toGetSuperiorPositionUserListPromises(supervisorPositionIds) {
     return supervisorPositionIds.map(positionId => Grades.relatedQuery('users').for(positionId))
 }
 
-function toInsertPermitApprovalMappingListPromises(supervisorIds, permitId, user) {
-    return supervisorIds.map(supervisorId => {
-        return PermitApprovalMapping.query()
-            .insertToTable({eusereuserid: supervisorId, epermitepermitid: permitId}, user.sub)
-    })
+function toPermitApprovalMappingList(supervisorIds, permitId, user) {
+    return supervisorIds.map(supervisorId => ({
+        eusereuserid: supervisorId,
+        epermitepermitid: permitId
+    }))
 }
 
 permitService.requestApproval = async (permitId, user) => {
@@ -139,21 +138,22 @@ permitService.requestApproval = async (permitId, user) => {
 
         let promises = toGetSuperiorPositionPromises(userPositions)
 
-        let supervisorPositionIds = await Promise.all(promises)
+        const supervisorPositionIds = await Promise.all(promises)
             .then(positions => positions.filter(position => position).map(position => position.egradeid))
 
         promises = toGetSuperiorPositionUserListPromises(supervisorPositionIds)
 
-        let supervisorIds = await Promise.all(promises)
+        const supervisorIds = await Promise.all(promises)
             .then(users => users.filter(user => user).map(user => user.euserid))
 
-        promises = toInsertPermitApprovalMappingListPromises(supervisorIds, permitId, user)
+        const permitApprovalMappingList = toPermitApprovalMappingList(supervisorIds, permitId, user)
 
-        if (promises.length !== 0) {
+        if (permitApprovalMappingList.length > 0) {
 
-            promises.push(updatePermit)
+            const insertPermitApprovalMapping = PermitApprovalMapping.query()
+                .insertToTable(permitApprovalMappingList, user.sub)
 
-            return Promise.all(promises)
+            return Promise.all([insertPermitApprovalMapping, updatePermit])
                 .then(resultArr => resultArr[resultArr.length - 1])
 
         } else {
@@ -170,34 +170,24 @@ permitService.requestApproval = async (permitId, user) => {
 permitService.createPermit = async (permitDTO, user) => {
 
     permitDTO.epermitstatus = 0
+    permitDTO.eusereuserid = user.sub
 
-    if(!permitDTO.eusereuserid) {
-        if(user.permission == 8 || user.permission == 7) permitDTO.eusereuserid = user.sub
-        else return
-    }
-    else {
-        const foundUser = await User.query()
-            .where("euserid", permitDTO.eusereuserid)
-            .modify('notDeleted')
-            .first()
+    const foundUser = await User.query()
+        .where("euserid", permitDTO.eusereuserid)
+        .modify('notDeleted')
+        .first()
 
-        if (!foundUser)
-            return
+    if (!foundUser)
+        return
 
-        // //is permit created for staff by pm / danru or permit created for danru by pm
-        // if (!isDanruPermitByPM(foundUser.euserpermission, user.permission)
-        //     && !isStaffPermitByDanruOrPM(foundUser.euserpermission, user.permission))
-        //     return
-    }
-
-    return Permit.query().insert(permitDTO)
+    return Permit.query().insertToTable(permitDTO, user.sub)
 }
 
 permitService.updatePermitStatusById = async (permitId, status, user) => {
 
     let permit = await permitService.getPermitById(permitId, user)
 
-    console.log(permit)
+    if (!permit) return
 
     const approval = await PermitApprovalMapping.query()
         .where('epermitepermitid', permitId)
