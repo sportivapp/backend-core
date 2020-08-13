@@ -91,12 +91,13 @@ controller.updateGradeById = async (req, res, next) => {
 controller.deleteGradeById = async (req, res, next) => {
 
     const { gradeId } = req.params
+    const user = req.user
 
     if (!isUserAdmin(req.user))
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
-        const result = await gradeService.deleteGradeById(gradeId)
+        const result = await gradeService.deleteGradeById(gradeId, user)
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
