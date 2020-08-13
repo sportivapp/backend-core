@@ -15,7 +15,8 @@ module.exports = (chai, httpServer, expect) => {
             const requestBody = {
                 description: 'New Device for Project A',
                 name: '201020102010',
-                companyId: 1
+                companyId: 1,
+                superiorId: 2
             }
 
             const res = await chai.request(httpServer)
@@ -44,23 +45,13 @@ module.exports = (chai, httpServer, expect) => {
             expect(login.body).to.not.be.undefined
 
             const requestBody = {
-                positionIds: 
-                [
-                    {
-                        id: 1,
-                        deleted: false
-                    },
-                    {
-                        id: 2,
-                        deleted: false
-                    }
-                ]
+                userId: 5,
+                positionIds: [2,3]
             }
 
-            const id = 5
 
             const res = await chai.request(httpServer)
-                .post(`/api/v1/grades-user-mapping?userId=${id}`)
+                .post(`/api/v1/grades-user-mapping`)
                 .set('authorization', login.body.data)
                 .send(requestBody)
 
