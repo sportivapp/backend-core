@@ -12,13 +12,15 @@ exports.seed = (knex) => knex('egrade').del()
                     egradedescription: 'grade position B',
                     egradename: 'Position B',
                     ecompanycompanyid: 1,
-                    egradecreateby: 1
+                    egradecreateby: 1,
+                    egradesuperiorid: 1,
                 },
                 {
                     egradedescription: 'grade position C',
                     egradename: 'Position C',
                     ecompanycompanyid: 1,
-                    egradecreateby: 1
+                    egradecreateby: 1,
+                    egradesuperiorid: 2,
                 }
             ]
         ));
