@@ -42,7 +42,8 @@ controller.createGrade = async (req, res, next) => {
         egradename: request.name,
         egradecreateby: user.sub,
         egradedescription: request.description,
-        ecompanycompanyid: request.companyId
+        ecompanyecompanyid: request.companyId,
+        edepartmentedepartmentid: request.departmentId
     }
 
     request.superiorId ? gradeDTO = {
