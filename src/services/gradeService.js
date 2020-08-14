@@ -1,5 +1,6 @@
 const Grade = require('../models/Grades')
 const User = require('../models/User')
+const Department = require('../models/Department')
 const Company = require('../models/Company')
 const UserPositionMapping = require('../models/UserPositionMapping')
 const ServiceHelper = require('../helper/ServiceHelper')
@@ -16,7 +17,7 @@ gradeService.getGradeById = async (gradeId) => {
     return Grade.query().findById(gradeId)
 }
 
-gradeService.createGrade = async (gradeDTO) => {
+gradeService.createGrade = async (gradeDTO, userId) => {
 
     if (gradeDTO.egradesuperiorid) {
         const superior = await gradeService.getGradeById(gradeDTO.egradesuperiorid)
@@ -26,7 +27,10 @@ gradeService.createGrade = async (gradeDTO) => {
     const company = await Company.query().findById(gradeDTO.ecompanyecompanyid)
     if (!company) return
 
-    return Grade.query().insert(gradeDTO)
+    const department = await Department.query().findById(gradeDTO.edepartmentedepartmentid)
+    if (!department) return
+
+    return Grade.query().insertToTable(gradeDTO, userId)
 }
 
 gradeService.updateGradeById = async (gradeId, gradeDTO) => {
