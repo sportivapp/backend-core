@@ -16,7 +16,8 @@ module.exports = (chai, httpServer, expect) => {
                 description: 'New Device for Project A',
                 name: '201020102010',
                 companyId: 1,
-                superiorId: 2
+                superiorId: 2,
+                departmentId: 1
             }
 
             const res = await chai.request(httpServer)
