@@ -40,7 +40,6 @@ controller.createGrade = async (req, res, next) => {
 
     let gradeDTO = {
         egradename: request.name,
-        egradecreateby: user.sub,
         egradedescription: request.description,
         ecompanyecompanyid: request.companyId,
         edepartmentedepartmentid: request.departmentId
@@ -52,7 +51,7 @@ controller.createGrade = async (req, res, next) => {
     } : gradeDTO
 
     try {
-        const grade = await gradeService.createGrade(gradeDTO)
+        const grade = await gradeService.createGrade(gradeDTO, user.sub)
         if (!grade)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(grade))
@@ -76,7 +75,8 @@ controller.updateGradeById = async (req, res, next) => {
         egradename: request.name,
         egradecreateby: user.sub,
         egradedescription: request.description,
-        egradesuperiorid: request.superiorId
+        egradesuperiorid: request.superiorId,
+        edepartmentedepartmentid: request.departmentId
     }
 
     try {
