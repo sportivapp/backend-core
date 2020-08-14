@@ -23,7 +23,7 @@ gradeService.createGrade = async (gradeDTO) => {
         if (!superior) return
     }
 
-    const company = await Company.query().findById(gradeDTO.ecompanycompanyid)
+    const company = await Company.query().findById(gradeDTO.ecompanyecompanyid)
     if (!company) return
 
     return Grade.query().insert(gradeDTO)
@@ -36,8 +36,8 @@ gradeService.updateGradeById = async (gradeId, gradeDTO) => {
         if (!superior) return
     }
 
-    if (gradeDTO.ecompanycompanyid) {
-        const company = await Company.query().findById(gradeDTO.ecompanycompanyid)
+    if (gradeDTO.ecompanyecompanyid) {
+        const company = await Company.query().findById(gradeDTO.ecompanyecompanyid)
         if (!company) return
     }
     const grade = await gradeService.getGradeById(gradeId)
@@ -53,7 +53,7 @@ gradeService.deleteGradeById = async (gradeId, user) => {
 
     const superior = await Grade.query().select()
     .where('egradeid', grade.egradesuperiorid)
-    .andWhere('ecompanycompanyid', grade.ecompanycompanyid)
+    .andWhere('ecompanyecompanyid', grade.ecompanyecompanyid)
     .first()
 
     const subordinates = await Grade.query().select().where('egradesuperiorid', grade.egradeid)
