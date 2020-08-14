@@ -55,27 +55,30 @@ gradeService.deleteGradeById = async (gradeId, user) => {
     if(!grade)
         return false
 
-    const superior = await Grade.query().select()
-    .where('egradeid', grade.egradesuperiorid)
-    .andWhere('ecompanyecompanyid', grade.ecompanyecompanyid)
-    .first()
+    if( grade.egradesuperiorid !== null) {
+        const superior = await Grade.query().select()
+            .where('egradeid', grade.egradesuperiorid)
+            .first()
 
-    const subordinates = await Grade.query().select().where('egradesuperiorid', grade.egradeid)
+        const subordinates = await Grade.relatedQuery('subordinates')
+        .for(grade.egradeid)
 
-    if ( grade.egradesuperiorid !== null) {
+        const gradeIds = subordinates
+                .map(subordinate => subordinate.egradeid)
+        if ( grade.egradesuperiorid !== null) {
 
-        for( subordinate in subordinates){
             await Grade.query()
-            .where('egradeid', subordinates[subordinate].egradeid)
+            .whereIn('egradeid', gradeIds)
             .updateByUserId({egradesuperiorid: superior.egradeid}, user.sub)
+
+        } else {
+
+            await Grade.query()
+            .whereIn('egradeid', gradeIds)
+            .updateByUserId({egradesuperiorid: null}, user.sub)
+
         }
 
-    } else {
-        for( subordinate in subordinates){
-            await Grade.query()
-            .where('egradeid', subordinates[subordinate].egradeid)
-            .updateByUserId({egradesuperiorid: null}, user.sub)
-        }
     }
 
     return Grade.query()
