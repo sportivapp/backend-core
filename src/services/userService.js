@@ -67,9 +67,9 @@ UsersService.registerEmployees = async (user, path) => {
 
 }
 
-UsersService.createUser = async (userDTO) => {
+UsersService.createUser = async (userDTO, user) => {
     userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
-    return User.query().insert(userDTO)
+    return User.query().insertToTable(userDTO, user.sub)
 }
 
 async function generateJWTToken(user, companyId, permission) {
