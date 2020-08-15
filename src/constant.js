@@ -39,7 +39,7 @@ module.exports = {
             id: '/department/:departmentId'
         },
         device: {
-            device: '/devices',
+            list: '/devices',
             deviceId: '/devices/:deviceId',
             deviceProjectId: '/devices/:deviceId/projects'
         }
