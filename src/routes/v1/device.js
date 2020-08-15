@@ -3,8 +3,8 @@ const controller = require('../../controllers/device')
 const auth = require('../../middlewares/authentication')
 const { routes } = require('../../constant')
 
-router.get( routes.device.device, auth.authenticateToken, controller.getDevices);
-router.post( routes.device.device, auth.authenticateToken, controller.createDevice);
+router.get( routes.device.list, auth.authenticateToken, controller.getDevices);
+router.post( routes.device.list, auth.authenticateToken, controller.createDevice);
 router.get( routes.device.deviceId, auth.authenticateToken, controller.getDeviceById);
 router.put( routes.device.deviceId, auth.authenticateToken, controller.updateDevice);
 router.delete( routes.device.deviceId, auth.authenticateToken, controller.deleteDevice);
