@@ -235,39 +235,6 @@ CompanyService.getCompany = async (page, size, type, keyword) => {
 
 }
 
-async function generateJWTToken(user, companyId, userPermission) {
-
-    const config = {
-        sub: user.euserid,
-        iat: Date.now() / 1000.0,
-        email: user.euseremail,
-        name: user.eusername,
-        mobileNumber: user.eusermobilenumber,
-        permission: userPermission,
-        companyId: companyId
-    }
-    const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' });
-
-    return token;
-
-}
-
-CompanyService.changeCompany = async (companyId, user) => {
-
-    const userCompany = await CompanyUserMapping.query().select()
-    .where('ecompanyecompanyid', companyId)
-    .andWhere('eusereuserid', user.sub)
-    .first() 
-
-    if(!userCompany)
-        return
-
-    let token = null;
-    token = await generateJWTToken(user, companyId, userCompany.ecompanyusermappingpermission);
-
-    return token;
-}
-
 CompanyService.editCompany = async (companyId, companyDTO, user) => {
 
     return Company.query().findById(companyId).updateByUserId(companyDTO, user.sub).returning('*')
