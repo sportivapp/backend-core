@@ -35,7 +35,7 @@ module.exports = {
             list: '/announcement-list'
         },
         department: {
-            department: '/department',
+            list: '/department',
             id: '/department/:departmentId'
         },
         device: {
