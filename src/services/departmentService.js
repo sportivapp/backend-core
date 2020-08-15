@@ -1,5 +1,6 @@
 const Department = require('../models/Department')
 const Company = require('../models/Company')
+const Grade = require('../models/Grades')
 const ServiceHelper = require('../helper/ServiceHelper')
 
 const departmentService = {}
@@ -21,11 +22,20 @@ departmentService.getCompanyByCompanyId = async (companyId) => {
     return Company.query().select().where('ecompanyid', companyId).first()
 }
 
-departmentService.createDepartment = async (departmentDTO) => {
+departmentService.createDepartment = async (departmentDTO, user) => {
 
-    const result = await Department.query().insert(departmentDTO)
+    const result = await Department.query().insertToTable(departmentDTO, user.sub)
 
-    return result
+    const headDepartmentDTO = {
+        egradename: 'Head of '  + departmentDTO.edepartmentname,
+        egradedescription: 'The Head of ' + departmentDTO.edepartmentname,
+        ecompanyecompanyid: user.companyId,
+        edepartmentedepartmentid: result.edepartmentid
+    }
+
+    const newHead = await Grade.query().insertToTable(headDepartmentDTO, user.sub)
+
+    return { result, newHead }
 }
 
 departmentService.updateDepartment = async (departmentId, departmentDTO, user) => {

@@ -1,36 +1,5 @@
 module.exports = (chai, httpServer, expect) => {
 
-    describe('POST /api/v1/grades', () => {
-        it('Should return single grade', async () => {
-            const login = await chai.request(httpServer)
-                .post('/api/v1/user-login')
-                .send({
-                    email: 'nawakaraadmin@nawakara.com',
-                    password: 'emtivnawakaraadmin'
-                })
-
-            expect(login.status).to.equal(200)
-            expect(login.body).to.not.be.undefined
-
-            const requestBody = {
-                description: 'New Device for Project A',
-                name: '201020102010',
-                companyId: 1
-            }
-
-            const res = await chai.request(httpServer)
-                .post('/api/v1/grades')
-                .set('authorization', login.body.data)
-                .send(requestBody)
-
-            expect(res.status).to.equal(200)
-            expect(res.body.data).to.not.be.undefined
-            expect(res.body.data.egradeid).to.not.be.undefined
-            expect(res.body.data.egradedescription).to.equal(requestBody.description)
-            expect(res.body.data.egradename).to.equal(requestBody.name)
-        });
-    });
-
     describe('POST /api/v1/grades-user-mapping', () => {
         it('Should return list of new grades data', async () => {
             const login = await chai.request(httpServer)
@@ -44,23 +13,13 @@ module.exports = (chai, httpServer, expect) => {
             expect(login.body).to.not.be.undefined
 
             const requestBody = {
-                positionIds: 
-                [
-                    {
-                        id: 1,
-                        deleted: false
-                    },
-                    {
-                        id: 2,
-                        deleted: false
-                    }
-                ]
+                userId: 5,
+                positionIds: [2,3]
             }
 
-            const id = 5
 
             const res = await chai.request(httpServer)
-                .post(`/api/v1/grades-user-mapping?userId=${id}`)
+                .post(`/api/v1/grades-user-mapping`)
                 .set('authorization', login.body.data)
                 .send(requestBody)
 
@@ -206,7 +165,8 @@ module.exports = (chai, httpServer, expect) => {
                 description: 'New Device for Project A',
                 name: '201020102010',
                 companyId: 1,
-                superiorId: 1
+                superiorId: 1,
+                departmentId: 1
             }
 
             const res = await chai.request(httpServer)

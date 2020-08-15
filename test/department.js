@@ -2,7 +2,7 @@
 module.exports = (chai, httpServer, expect) => {
 
     describe('POST /api/v1/department', () => {
-        it('Should return single department', async () => {
+        it('Should return single department and single head department position', async () => {
           const login = await chai.request(httpServer)
           .post('/api/v1/user-login')
           .send({

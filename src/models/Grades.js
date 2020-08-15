@@ -12,7 +12,7 @@ class Grade extends Model {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['egradename', 'egradedescription', 'ecompanycompanyid'],
+      required: ['egradename', 'egradedescription', 'ecompanyecompanyid'],
       properties: {
         egradename: { type: 'string', minLength: 1, maxLength: 256 },
         egradedescription: { type: 'string', minLength: 1, maxLength: 256 }
@@ -46,7 +46,7 @@ class Grade extends Model {
         relation: Model.BelongsToOneRelation,
         modelClass: Company,
         join: {
-          from: 'egrade.ecompanycompanyid',
+          from: 'egrade.ecompanyecompanyid',
           to: 'ecompany.ecompanyid'
         }
       },

@@ -53,7 +53,7 @@ userController.registerEmployees = async (req, res, next) => {
 userController.createUser = async (req, res, next) => {
 
     if (isUserNotValid(req.user))
-    return res.status(403).json(ResponseHelper.toErrorResponse(403))
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const user = req.user
     const { userNik, username, userEmail, userMobileNumber, userPassword} = req.body
@@ -65,15 +65,30 @@ userController.createUser = async (req, res, next) => {
             eusername: username,
             euseremail: userEmail,
             eusermobilenumber: userMobileNumber,
-            euserpassword: userPassword,
-            eusercreateby: user.sub,
-            ecompanyecompanyid: user.companyId
+            euserpassword: userPassword
         }
 
-        const data = await userService.createUser(userDTO)
+        const data = await userService.createUser(userDTO, user)
 
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
 
+    } catch (e) {
+        next(e)
+    }
+}
+
+userController.changeUserCompany = async (req, res, next) => {
+
+    const user = req.user
+    const { companyId } = req.query
+
+    try {
+
+        const result = await userService.changeUserCompany(companyId, user)
+        if (!result)
+            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+        
     } catch (e) {
         next(e)
     }
@@ -115,13 +130,15 @@ userController.forgotPassword = async (req, res, next) => {
 
 userController.getAllUserByCompanyId = async (req, res, next) => {
 
+    if (isUserNotValid(req.user))
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     const { page, size } = req.query
-    const user = req.user
     const { companyId } = req.params
 
     try {
 
-        const pageObj = await userService.getAllUserByCompanyId(parseInt(page), parseInt(size), companyId, user)
+        const pageObj = await userService.getAllUserByCompanyId(parseInt(page), parseInt(size), companyId)
 
         if(!pageObj)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))

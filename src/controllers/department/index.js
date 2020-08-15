@@ -46,7 +46,7 @@ controller.createDepartment = async (req, res, next) => {
             ecompanyecompanyid: user.companyId
         }
 
-        const result = await departmentService.createDepartment(departmentDTO)
+        const result = await departmentService.createDepartment(departmentDTO, user)
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
