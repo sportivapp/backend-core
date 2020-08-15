@@ -29,7 +29,7 @@ departmentService.createDepartment = async (departmentDTO, user) => {
     const headDepartmentDTO = {
         egradename: 'Head of '  + departmentDTO.edepartmentname,
         egradedescription: 'The Head of ' + departmentDTO.edepartmentname,
-        ecompanyecompanyid: user.companyId,
+        ecompanyecompanyid: departmentDTO.companyId,
         edepartmentedepartmentid: result.edepartmentid
     }
 
