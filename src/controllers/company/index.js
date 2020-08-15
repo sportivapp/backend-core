@@ -174,13 +174,7 @@ companyController.deleteCompany = async (req, res, next) => {
 
     try {
 
-        const companyDTO = {
-            ecompanydeleteby: user.sub,
-            ecompanydeletetime: Date.now(),
-            ecompanydeletestatus: true
-        }
-
-        const result = await companyService.deleteCompany(companyId, companyDTO)
+        const result = await companyService.deleteCompany(companyId, user)
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))

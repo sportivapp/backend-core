@@ -40,9 +40,9 @@ controller.createGrade = async (req, res, next) => {
 
     let gradeDTO = {
         egradename: request.name,
-        egradecreateby: user.sub,
         egradedescription: request.description,
-        ecompanycompanyid: request.companyId
+        ecompanyecompanyid: request.companyId,
+        edepartmentedepartmentid: request.departmentId
     }
 
     request.superiorId ? gradeDTO = {
@@ -51,7 +51,7 @@ controller.createGrade = async (req, res, next) => {
     } : gradeDTO
 
     try {
-        const grade = await gradeService.createGrade(gradeDTO)
+        const grade = await gradeService.createGrade(gradeDTO, user.sub)
         if (!grade)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(grade))
@@ -75,7 +75,8 @@ controller.updateGradeById = async (req, res, next) => {
         egradename: request.name,
         egradecreateby: user.sub,
         egradedescription: request.description,
-        egradesuperiorid: request.superiorId
+        egradesuperiorid: request.superiorId,
+        edepartmentedepartmentid: request.departmentId
     }
 
     try {
@@ -91,12 +92,13 @@ controller.updateGradeById = async (req, res, next) => {
 controller.deleteGradeById = async (req, res, next) => {
 
     const { gradeId } = req.params
+    const user = req.user
 
     if (!isUserAdmin(req.user))
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
-        const result = await gradeService.deleteGradeById(gradeId)
+        const result = await gradeService.deleteGradeById(gradeId, user)
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
@@ -113,9 +115,7 @@ controller.saveUserPositions = async (req, res, next) => {
 
     const user = req.user
 
-    const { userId } = req.query
-
-    const positionIds = req.body.positionIds
+    const { positionIds, userId } = req.body
 
     if ( isNaN(userId) ) return res.status(400).json(ResponseHelper.toErrorResponse(400))
 
@@ -123,7 +123,6 @@ controller.saveUserPositions = async (req, res, next) => {
         const result = await gradeService.saveUserPositions(userId, positionIds, user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
-        console.log(e)
         next(e)
     }
 }

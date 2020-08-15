@@ -1,4 +1,4 @@
-const Joi = require('@hapi/joi')
+const Joi = require('joi')
 
 const schema = Joi.object({
     users: Joi.array().required().min(1).items(

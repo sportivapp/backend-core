@@ -8,13 +8,17 @@ exports.seed = (knex, Promise) => knex('eproject').del()
                     eprojectstartdate: '2020-07-24',
                     eprojectenddate: '2020-12-24',
                     eprojectcreateby: 1,
+                    eprojectcreatetime: Date.now(),
+                    eprojectsupervisorid: 1
                 },
                 {
                     eprojectcode: '1B',
                     eprojectname: 'SatuB',
                     eprojectstartdate: '2020-07-24',
                     eprojectenddate: '2020-12-24',
-                    eprojectcreateby: 1,
+                    eprojectcreateby: 3,
+                    eprojectcreatetime: Date.now(),
+                    eprojectsupervisorid: 3
                 },
             ]
         ));

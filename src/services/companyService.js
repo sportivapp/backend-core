@@ -3,6 +3,8 @@ const Address = require('../models/Address');
 const User = require('../models/User');
 const bcrypt = require('../helper/bcrypt');
 const CompanyUserMapping = require('../models/CompanyUserMapping')
+const CompanyModuleMapping = require('../models/CompanyModuleMapping')
+const Module = require('../models/Module')
 const { raw } = require('objection')
 const jwt = require('jsonwebtoken')
 const ServiceHelper = require('../helper/ServiceHelper')
@@ -18,27 +20,59 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
     const company = await Company.query().insert(companyDTO);
 
     // super user of the company
-    userDTO.euserpermission = 10;
     userDTO.ecompanyecompanyid = company.ecompanyid;
     userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
     const user = await User.query().insert(userDTO);
 
-    return {
-        user: user,
-        company: company,
-        address: address
+    const companyUserDTO = {
+        eusereuserid: user.euserid,
+        ecompanyecompanyid: company.ecompanyid,
+        ecompanyusermappingpermission: 10,
+        ecompanyusermappingcreateby: 0
     }
+
+    const insertCompanyModuleMappingQuery = Module.query()
+        .then(modules => {
+            return modules.map(module => ({
+                ecompanymodulemappingname: module.emodulename,
+                ecompanyecompanyid: company.ecompanyid,
+                emoduleemoduleid: module.emoduleid
+            }))
+        })
+        .then(modules => CompanyModuleMapping.query().insert(modules))
+
+
+    const insertCompanyUserMappingQuery = CompanyUserMapping.query().insert(companyUserDTO)
+
+    return Promise.all([insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery])
+        .then(ignored => ({
+            user: user,
+            company: company,
+            address: address
+        }))
 
 }
 
-CompanyService.getUsersByCompanyId = async(companyId, page, size) => {
+CompanyService.getUsersByCompanyId = async(companyId, page, size, deleteStatus) => {
 
-    const pageObj = await CompanyUserMapping.query()
+    let query = CompanyUserMapping.query()
         .where('ecompanyecompanyid', companyId)
-        .page(page, size)
 
-    return ServiceHelper.toPageObj(page, size, pageObj)
+    if (deleteStatus) query = query.modify('deleted')
+    else query = query.modify('notDeleted')
 
+    const relationPage = await query.page(page, size)
+
+    const total = relationPage.total
+    const userIds = relationPage.results
+        .map(relation => relation.eusereuserid)
+
+    return User.query().whereIn('euserid', userIds)
+        .then(users => ({
+            results: users,
+            total: total
+        }))
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
 
 CompanyService.getAllCompanyByUserId = async(userId) => {
@@ -141,18 +175,45 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
 
     const id = ( isNaN(userId) ) ? parseInt(user.sub) : userId
 
-    const companyUserMapping = await CompanyUserMapping.query().insert({
+    const companyUserMappingDTO = {
         ecompanyecompanyid: company.ecompanyid,
         eusereuserid: id,
         ecompanyusermappingcreateby: user.sub,
         ecompanyusermappingpermission: 10
-    })
-
-    return {
-        company: company,
-        address: address,
-        companyusermapping: companyUserMapping
     }
+
+    const patchDTO = isNaN(userId) ? { euserpermission: 10 } :
+        {
+            euserpermission: 10,
+            ecompanyecompanyid: company.ecompanyid
+        }
+
+    const insertCompanyModuleMappingQuery = Module.query()
+        .then(modules => {
+            return modules.map(module => ({
+                ecompanymodulemappingname: module.emodulename,
+                ecompanyecompanyid: company.ecompanyid,
+                emoduleemoduleid: module.emoduleid
+            }))
+        })
+        .then(modules => CompanyModuleMapping.query().insert(modules))
+
+    const insertCompanyUserMappingQuery = CompanyUserMapping.query().insert(companyUserMappingDTO)
+
+    // super user of the company
+    const updateUserQuery = User.query()
+        .findById(id)
+        .updateByUserId(patchDTO, user.sub)
+        .returning('*');
+
+    return Promise.all([insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery, updateUserQuery])
+        .then(resultArr => ({
+            company: company,
+            address: address,
+            companymodulemapping: resultArr[0],
+            user: resultArr[2],
+            companyusermapping: resultArr[1]
+        }))
 
 }
 
@@ -212,10 +273,23 @@ CompanyService.editCompany = async (companyId, companyDTO, user) => {
     return Company.query().findById(companyId).updateByUserId(companyDTO, user.sub).returning('*')
 }
 
-CompanyService.deleteCompany = async (companyId, companyDTO) => {
+CompanyService.deleteCompany = async (companyId, user) => {
 
-    return Company.query().patchAndFetchById(companyId, companyDTO)
+    const deleteCompany = Company.query()
+        .findById(companyId)
+        .deleteByUserId(user.sub)
 
+    const deleteUserMapping = CompanyUserMapping.query()
+        .where('ecompanyecompanyid', companyId)
+        .deleteByUserId(user.sub)
+
+    const deleteModuleMapping = CompanyModuleMapping.query()
+        .where('ecompanyecompanyid', companyId)
+        .deleteByUserId(user.sub)
+
+    return Promise.all([deleteCompany, deleteUserMapping, deleteModuleMapping])
+        .then(resultArr => resultArr[0])
+        .then(rowsAffected => rowsAffected === 1)
 }
 
 module.exports = CompanyService;

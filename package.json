@@ -14,7 +14,6 @@
   "author": "Surya",
   "license": "ISC",
   "dependencies": {
-    "@hapi/joi": "^17.1.1",
     "bcryptjs": "^2.4.3",
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
@@ -24,6 +23,7 @@
     "fs": "0.0.1-security",
     "https": "^1.0.0",
     "jest": "^26.1.0",
+    "joi": "github:sideway/joi",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.21.2",
     "lodash": "^4.17.19",

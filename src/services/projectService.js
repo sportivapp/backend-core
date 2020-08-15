@@ -4,37 +4,50 @@ const ServiceHelper = require('../helper/ServiceHelper')
 
 const ProjectService = {};
 
-ProjectService.createProject = async(projectDTO) => {
+ProjectService.createProject = async(projectDTO, user) => {
 
-    const project = await Project.query().insert(projectDTO);
-
-    return project;
+    return Project.query().insertToTable(projectDTO, user.sub);
 
 }
 
-ProjectService.getProjects = async(userId) => {
+ProjectService.getProjectById = async (projectId) => {
 
-    const projects = await Project.query()
+    return Project.query().findById(projectId)
+
+}
+
+ProjectService.getProjects = async(userId, page, size) => {
+    
+    const projectPage = await Project.query()
     .select('eprojectid', 'eprojectname', 'eprojectcode', 'eprojectstartdate', 'eprojectenddate', 'eprojectaddress')
-    .where('eprojectcreateby', userId);
+    .where('eprojectcreateby', userId)
+    .page(page, size);
 
-    return projects;
-
-}
-
-ProjectService.editProject = async(projectId, projectDTO) => {
-
-    const project = await Project.query().update(projectDTO).where('eprojectid', projectId);
-
-    return project;
+    return ServiceHelper.toPageObj(page, size, projectPage);
 
 }
 
-ProjectService.deleteProject = async(projectId) => {
+ProjectService.updateProjectById = async(projectId, projectDTO, user) => {
 
-    const project = await Project.query().delete().where('eprojectid', projectId);
+    const project = await ProjectService.getProjectById(projectId);
 
-    return project;
+    if (!project)
+        return
+
+    return project.$query().updateByUserId(projectDTO, user.sub);
+
+}
+
+ProjectService.deleteProjectById = async(projectId) => {
+
+    const project = await ProjectService.getProjectById(projectId);
+
+    if (!project)
+        return
+    else {
+        const affectedRow = await Project.query().deleteById(projectId);
+        return affectedRow === 1
+    }
 
 }
 
