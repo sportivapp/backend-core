@@ -65,12 +65,10 @@ userController.createUser = async (req, res, next) => {
             eusername: username,
             euseremail: userEmail,
             eusermobilenumber: userMobileNumber,
-            euserpassword: userPassword,
-            eusercreateby: user.sub,
-            ecompanyecompanyid: user.companyId
+            euserpassword: userPassword
         }
 
-        const data = await userService.createUser(userDTO)
+        const data = await userService.createUser(userDTO, user)
 
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
 
