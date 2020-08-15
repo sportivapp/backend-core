@@ -28,6 +28,11 @@ module.exports = {
             list: '/absen-list',
             update: '/absen/:absenId',
             remove: '/absen-delete/:absenId'
+        },
+        announcement: {
+            create: '/announcement',
+            id: '/announcement/:announcementId',
+            list: '/announcement-list'
         }
     }
 }

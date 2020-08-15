@@ -93,7 +93,7 @@ module.exports = (chai, httpServer, expect) => {
         });
   
         const res = await chai.request(httpServer)
-        .delete('/api/v1/announcement-delete/1')
+        .delete('/api/v1/announcement/1')
         .set('authorization', login.body.data)
         .send();
   
