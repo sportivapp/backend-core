@@ -211,7 +211,7 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
         ecompanyecompanyid: company.ecompanyid
     }
 
-    const createDefaultDepartment = departmentService.createDepartment(departmentDTO, user.sub)
+    const createDefaultDepartment = departmentService.createDepartment(departmentDTO, user)
 
     // super user of the company
     const findUserQuery = User.query()
