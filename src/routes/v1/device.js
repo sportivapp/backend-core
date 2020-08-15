@@ -1,14 +1,14 @@
-const express = require('express');
-const router = express.Router();
+const router = require('../router')
 const controller = require('../../controllers/device')
-const auth = require('../../middlewares/authentication');
+const auth = require('../../middlewares/authentication')
+const { routes } = require('../../constant')
 
-router.get('/devices', auth.authenticateToken, controller.getDevices);
-router.post('/devices', auth.authenticateToken, controller.createDevice);
-router.get('/devices/:deviceId', auth.authenticateToken, controller.getDeviceById);
-router.put('/devices/:deviceId', auth.authenticateToken, controller.updateDevice);
-router.delete('/devices/:deviceId', auth.authenticateToken, controller.deleteDevice);
-router.get('/devices/:deviceId/projects', auth.authenticateToken, controller.getProjectsByDeviceId);
-router.post('/devices/:deviceId/projects', auth.authenticateToken, controller.saveProjectsIntoDevice);
+router.get( routes.device.list, auth.authenticateToken, controller.getDevices);
+router.post( routes.device.list, auth.authenticateToken, controller.createDevice);
+router.get( routes.device.deviceId, auth.authenticateToken, controller.getDeviceById);
+router.put( routes.device.deviceId, auth.authenticateToken, controller.updateDevice);
+router.delete( routes.device.deviceId, auth.authenticateToken, controller.deleteDevice);
+router.get( routes.device.deviceProjectId, auth.authenticateToken, controller.getProjectsByDeviceId);
+router.post( routes.device.deviceProjectId, auth.authenticateToken, controller.saveProjectsIntoDevice);
 
-module.exports = router;
+module.exports = router.expressRouter;

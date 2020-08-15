@@ -16,7 +16,7 @@ module.exports = (chai, httpServer, expect) => {
           .send({
               departmentName: 'Sales Department',
               departmentDescription: 'Consist of Sales',
-              companyId: 1
+              departmentSuperiorId: 1
           });
     
           expect(res.status).to.equal(200);

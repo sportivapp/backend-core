@@ -33,6 +33,15 @@ module.exports = {
             create: '/announcement',
             id: '/announcement/:announcementId',
             list: '/announcement-list'
+        },
+        department: {
+            department: '/department',
+            id: '/department/:departmentId'
+        },
+        device: {
+            list: '/devices',
+            deviceId: '/devices/:deviceId',
+            deviceProjectId: '/devices/:deviceId/projects'
         }
     }
 }

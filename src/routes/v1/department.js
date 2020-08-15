@@ -1,11 +1,11 @@
-const express = require('express');
-const router = express.Router();
+const router = require('../router')
 const controller = require('../../controllers/department')
 const auth = require('../../middlewares/authentication');
+const { routes } = require('../../constant')
 
-router.get('/department', auth.authenticateToken, controller.getAllDepartmentbyCompanyId);
-router.post('/department', auth.authenticateToken, controller.createDepartment);
-router.put('/department/:departmentId', auth.authenticateToken, controller.updateDepartment);
-router.delete('/department/:departmentId', auth.authenticateToken, controller.deleteDepartment);
+router.get( routes.department.department, auth.authenticateToken, controller.getAllDepartmentbyCompanyId);
+router.post( routes.department.department, auth.authenticateToken, controller.createDepartment);
+router.put( routes.department.id, auth.authenticateToken, controller.updateDepartment);
+router.delete( routes.department.id, auth.authenticateToken, controller.deleteDepartment);
 
-module.exports = router;
+module.exports = router.expressRouter;
