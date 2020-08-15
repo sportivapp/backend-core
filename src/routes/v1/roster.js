@@ -1,14 +1,14 @@
-const express = require('express');
-const router = express.Router();
-const { Create, List, ListMember, View, Update, Delete, GenerateShift } = require('../../controllers/roster');
+const router = require('../router')
+const rosterController = require('../../controllers/roster');
 const auth = require('../../middlewares/authentication');
+const { routes } = require('../../constant')
 
-router.post('/roster', auth.authenticateToken, Create);
-router.get('/roster-members/:rosterId', auth.authenticateToken, ListMember);
-router.get('/roster', auth.authenticateToken, List);
-router.get('/roster/:rosterId', auth.authenticateToken, View)
-router.put('/roster/:rosterId', auth.authenticateToken, Update)
-router.delete('/roster/:rosterId', auth.authenticateToken, Delete);
-router.post('/roster-shift', auth.authenticateToken, GenerateShift);
+router.post( routes.roster.list, auth.authenticateToken, rosterController.createRoster );
+router.get( routes.roster.rosterMemberId, auth.authenticateToken, rosterController.getAllMemberById);
+router.get( routes.roster.list, auth.authenticateToken, rosterController.getAllRosters);
+router.get( routes.roster.rosterId, auth.authenticateToken, rosterController.viewRosterById)
+router.put( routes.roster.rosterId, auth.authenticateToken, rosterController.updateRosterById)
+router.delete( routes.roster.rosterId, auth.authenticateToken, rosterController.deleteRosterById);
+router.post( routes.roster.shift, auth.authenticateToken, rosterController.generateRosterShiftForDate);
 
-module.exports = router;
+module.exports = router.expressRouter;

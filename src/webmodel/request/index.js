@@ -5,6 +5,7 @@ const absenSchemas = require('./absen')
 const announcementSchemas = require('./announcement')
 const departmentSchemas = require('./department')
 const deviceSchemas = require('./device')
+const rosterSchemas = require('./roster')
 
 module.exports = {
     ...companySchemas,
@@ -13,5 +14,6 @@ module.exports = {
     ...absenSchemas,
     ...announcementSchemas,
     ...departmentSchemas,
-    ...deviceSchemas
+    ...deviceSchemas,
+    ...rosterSchemas
 }
