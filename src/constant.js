@@ -15,7 +15,9 @@ module.exports = {
             password: '/user-change-password',
             list: '/user/:companyId',
             import: '/user-import-template',
-            remove: '/user/:userId'
+            id: '/user/:userId',
+            approval: '/user/approval',
+            changeCompany: '/user/change-company'
         },
         grade: {
             grades: '/grades',
@@ -28,6 +30,11 @@ module.exports = {
             list: '/absen-list',
             update: '/absen/:absenId',
             remove: '/absen-delete/:absenId'
+        },
+        announcement: {
+            create: '/announcement',
+            id: '/announcement/:announcementId',
+            list: '/announcement-list'
         }
     }
 }

@@ -56,7 +56,7 @@ userController.createUser = async (req, res, next) => {
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const user = req.user
-    const { userNik, username, userEmail, userMobileNumber, userPassword} = req.body
+    const { userNik, username, userEmail, userMobileNumber, userPassword, isMultiApproval, permission } = req.body
 
     try {
         
@@ -66,13 +66,53 @@ userController.createUser = async (req, res, next) => {
             euseremail: userEmail,
             eusermobilenumber: userMobileNumber,
             euserpassword: userPassword,
-            eusercreateby: user.sub,
-            ecompanyecompanyid: user.companyId
+            eusermultiapproval: isMultiApproval
         }
 
-        const data = await userService.createUser(userDTO)
+        const data = await userService.createUser(userDTO, permission, user)
 
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
+
+    } catch (e) {
+        next(e)
+    }
+}
+
+userController.updateUserById = async (req, res, next) => {
+
+    const user = req.user
+    const { userNik, username, userMobileNumber, isMultiApproval, permission } = req.body
+    const { userId } = req.params
+
+    try {
+
+        const userDTO = {
+            eusernik: userNik,
+            eusername: username,
+            eusermobilenumber: userMobileNumber,
+            eusermultiapproval: isMultiApproval
+        }
+
+        const data = await userService.updateUserById(userId, userDTO, permission, user)
+        if (!data) return res.status(400).json(ResponseHelper.toErrorResponse(400))
+        return res.status(200).json(ResponseHelper.toBaseResponse(data));
+
+    } catch (e) {
+        next(e)
+    }
+}
+
+userController.changeUserCompany = async (req, res, next) => {
+
+    const user = req.user
+    const { companyId } = req.query
+
+    try {
+
+        const result = await userService.changeUserCompany(companyId, user)
+        if (!result)
+            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch (e) {
         next(e)
@@ -170,6 +210,20 @@ userController.importTemplate = async (req, res, next) => {
         next(e);
     }
 
+}
+
+userController.addApprovalUsers = async (req, res, next) => {
+
+    try {
+        const {userId, approvalUserIds} = req.body
+
+        const result = userService.addApprovalUsers(userId, approvalUserIds, req.user)
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+    } catch (e) {
+        next(e)
+    }
 }
 
 module.exports = userController

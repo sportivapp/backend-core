@@ -7,6 +7,7 @@ const CompanyUserMapping = require('../models/CompanyUserMapping')
 const CompanyModuleMapping = require('../models/CompanyModuleMapping')
 const Module = require('../models/Module')
 const { raw } = require('objection')
+const jwt = require('jsonwebtoken')
 const ServiceHelper = require('../helper/ServiceHelper')
 
 const CompanyService = {};
