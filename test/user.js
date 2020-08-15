@@ -62,7 +62,7 @@ module.exports = (chai, httpServer, expect) => {
   });
 
   describe('POST /api/v1/user/change-company', () => {
-    it('Should return single user data', async () => {
+    it('Should return token', async () => {
       const login = await chai.request(httpServer)
       .post('/api/v1/user-login')
       .send({ 
