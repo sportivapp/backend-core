@@ -16,6 +16,7 @@ const { routes } = require('../../constant')
 
 router.post( routes.user.register, auth.authenticateToken, upload.single('employee'), userController.registerEmployees);
 router.post( routes.user.create, auth.authenticateToken, userController.createUser);
+router.post( routes.user.changeCompany, auth.authenticateToken, userController.changeUserCompany);
 router.post( routes.user.login, userController.login);
 router.post( routes.user.forgot, userController.forgotPassword);
 router.get( routes.user.list, auth.authenticateToken, userController.getAllUserByCompanyId);

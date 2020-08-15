@@ -96,6 +96,24 @@ userController.updateUserById = async (req, res, next) => {
         const data = await userService.updateUserById(userId, userDTO, permission, user)
         if (!data) return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
+
+    } catch (e) {
+        next(e)
+    }
+}
+
+userController.changeUserCompany = async (req, res, next) => {
+
+    const user = req.user
+    const { companyId } = req.query
+
+    try {
+
+        const result = await userService.changeUserCompany(companyId, user)
+        if (!result)
+            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+
     } catch (e) {
         next(e)
     }

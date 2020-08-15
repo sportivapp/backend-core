@@ -1,12 +1,12 @@
-const express = require('express');
-const router = express.Router();
-const { Create, List, View, Update, Delete } = require('../../controllers/announcement')
+const router = require('../router');
+const announcementController = require('../../controllers/announcement')
 const auth = require('../../middlewares/authentication');
+const { routes } = require('../../constant')
 
-router.post('/announcement', auth.authenticateToken, Create);
-router.get('/announcement/:announcementId', auth.authenticateToken, View);
-router.get('/announcement-list', auth.authenticateToken, List);
-router.put('/announcement/:announcementId', auth.authenticateToken, Update);
-router.delete('/announcement-delete/:announcementId', auth.authenticateToken, Delete);
+router.post( routes.announcement.create, auth.authenticateToken, announcementController.createAnnouncement);
+router.get( routes.announcement.id, auth.authenticateToken, announcementController.getAnnouncementById);
+router.get( routes.announcement.list, auth.authenticateToken, announcementController.getAllAnnouncement);
+router.put( routes.announcement.id, auth.authenticateToken, announcementController.updateAnnouncement);
+router.delete( routes.announcement.id, auth.authenticateToken, announcementController.deleteAnnouncement);
 
-module.exports = router;
+module.exports = router.expressRouter;

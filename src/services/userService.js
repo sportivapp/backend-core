@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const CompanyUserMapping = require('../models/CompanyUserMapping')
 const Grade = require('../models/Grades');
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
@@ -6,7 +7,6 @@ require('dotenv').config();
 const readXlsxFile = require("read-excel-file/node");
 const emailService = require('../helper/emailService');
 const ServiceHelper = require('../helper/ServiceHelper')
-const CompanyUserMapping = require('../models/CompanyUserMapping')
 
 const UsersService = {};
 
@@ -187,6 +187,7 @@ UsersService.login = async (loginDTO) => {
         .select('ecompanyecompanyid', 'ecompanyusermappingpermission')
         .joinRelated('companies')
         .where('eusereuserid', user.euserid)
+        .orderBy('ecompanyusermappingcreatetime', 'ASC')
         .first();
 
         token = await generateJWTToken(user, result.ecompanyecompanyid, result.ecompanyusermappingpermission);
@@ -205,6 +206,25 @@ UsersService.changeUserPassword = async ( user , newPassword) => {
 
     return newData;
 }
+
+UsersService.changeUserCompany = async (companyId, user) => {
+
+    const loggedInUser = await User.query().select().where('euseremail', user.email).first();
+
+    const userCompany = await CompanyUserMapping.query().select()
+    .where('ecompanyecompanyid', companyId)
+    .where('eusereuserid', user.sub)
+    .first()
+
+    if(!userCompany)
+        return
+
+    let token = null;
+    token = await generateJWTToken(loggedInUser, companyId, userCompany.ecompanyusermappingpermission);
+
+    return token;
+}
+
 
 UsersService.deleteUserById = async ( userId, user ) => {
     
