@@ -1,6 +1,6 @@
 exports.up = (knex, Promise) => knex.schema.createTable('euserpositionmapping', t => {
-    t.integer('eusereuserid').notNullable().references('euser.euserid')
-    t.integer('egradeegradeid').notNullable().references('egrade.egradeid')
+    t.integer('eusereuserid').notNullable().references('euser.euserid').onDelete('CASCADE')
+    t.integer('egradeegradeid').notNullable().references('egrade.egradeid').onDelete('CASCADE')
     t.bigInteger('euserpositionmappingcreatetime').notNullable().defaultTo(Date.now())
     t.integer('euserpositionmappingcreateby').notNullable()
     t.integer('euserpositionmappingchangeby');

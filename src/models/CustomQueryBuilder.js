@@ -4,10 +4,19 @@ class CustomQueryBuilder extends QueryBuilder {
 
     insertToTable(data, userId) {
         const tableName = this.tableNameFor(this._modelClass)
-        const addedData = { ...data }
-        addedData[tableName.concat('createtime')] = Date.now()
-        addedData[tableName.concat('createby')] = userId
-        return this.insert(addedData)
+        if (data.length) {
+            const addedDataList = data.map(obj => {
+                obj[tableName.concat('createtime')] = Date.now()
+                obj[tableName.concat('createby')] = userId
+                return obj
+            })
+            return this.insert(addedDataList)
+        } else {
+            const addedData = { ...data }
+            addedData[tableName.concat('createtime')] = Date.now()
+            addedData[tableName.concat('createby')] = userId
+            return this.insert(addedData)
+        }
     }
 
     deleteByUserId(userId) {

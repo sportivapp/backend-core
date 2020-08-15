@@ -15,17 +15,17 @@ exports.seed = (knex) => knex('edepartment').del()
                   ecompanyecompanyid: 1
                 },
                 {
-                  edepartmentname: 'Sub Sales Department',
+                  edepartmentname: 'Sub Sales Department T1',
                   edepartmentdescription: 'Consist of Sub Sales T1',
                   edepartmentcreateby: 1,
                   edepartmentsuperiorid: 1,
                   ecompanyecompanyid: 1
                 },
                 {
-                  edepartmentname: 'Sub Sales Department',
-                  edepartmentdescription: 'Consist of Sub Sales T2',
+                  edepartmentname: 'Sub IT Department T1',
+                  edepartmentdescription: 'Consist of Sub IT T1',
                   edepartmentcreateby: 1,
-                  edepartmentsuperiorid: 1,
+                  edepartmentsuperiorid: 2,
                   ecompanyecompanyid: 1
                 },
             ]

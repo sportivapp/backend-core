@@ -14,7 +14,8 @@ module.exports = {
             password: '/user-change-password',
             list: '/user/:companyId',
             import: '/user-import-template',
-            remove: '/user/:userId'
+            remove: '/user/:userId',
+            changeCompany: '/user/change-company'
         },
         grade: {
             grades: '/grades',
