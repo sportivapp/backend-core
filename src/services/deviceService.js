@@ -18,26 +18,36 @@ deviceService.getDeviceById = async (deviceId) => {
         .first()
 }
 
-deviceService.createDevice = async (deviceDTO) => {
+deviceService.createDevice = async (deviceDTO, user) => {
 
-    return Device.query().insert(deviceDTO)
+    return Device.query().insertToTable(deviceDTO, user.sub);
 }
 
-deviceService.updateDevice = async (deviceId, deviceDTO) => {
+deviceService.updateDevice = async (deviceId, deviceDTO, user) => {
 
     const device = await deviceService.getDeviceById(deviceId)
 
     if (!device)
         return
     else
-        return device.$query().patchAndFetch(deviceDTO)
+        return device.$query().updateByUserId(deviceDTO, user.sub);
 }
 
 deviceService.deleteDevice = async (deviceId) => {
 
-    await ProjectDeviceMapping.query().delete().where('edevicedeviceid', deviceId)
-    const affectedRow = await Device.query().deleteById(deviceId)
-    return affectedRow === 1
+    // await ProjectDeviceMapping.query().delete().where('edevicedeviceid', deviceId)
+    // const affectedRow = await Device.query().deleteById(deviceId)
+    // return affectedRow === 1
+
+    const device = await deviceService.getDeviceById(deviceId)
+
+    if (!device)
+        return
+    else {
+        const affectedRow = await Device.query().deleteById(deviceId);
+        return affectedRow === 1
+    }
+
 }
 
 deviceService.getProjectsByDeviceId = async (deviceId, page, size) => {
