@@ -18,7 +18,7 @@ module.exports = {
             changeCompany: '/user/change-company'
         },
         grade: {
-            grades: '/grades',
+            list: '/grades',
             id: '/grades/:gradeId',
             mapping: '/grades-user-mapping'
         },
