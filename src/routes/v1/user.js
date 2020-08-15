@@ -21,6 +21,8 @@ router.post( routes.user.forgot, userController.forgotPassword);
 router.get( routes.user.list, auth.authenticateToken, userController.getAllUserByCompanyId);
 router.get( routes.user.import, userController.importTemplate);
 router.put( routes.user.password, auth.authenticateToken, userController.changePassword);
-router.delete( routes.user.remove , auth.authenticateToken, userController.deleteUserById);
+router.put( routes.user.id , auth.authenticateToken, userController.updateUserById);
+router.delete( routes.user.id , auth.authenticateToken, userController.deleteUserById);
+router.delete( routes.user.approval , auth.authenticateToken, userController.addApprovalUsers);
 
 module.exports = router.expressRouter;

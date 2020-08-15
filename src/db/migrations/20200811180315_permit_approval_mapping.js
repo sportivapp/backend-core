@@ -1,7 +1,7 @@
 exports.up = (knex, Promise) => knex.schema.createTable('epermitapprovalmapping', t => {
     t.integer('eusereuserid').notNullable().references('euser.euserid')
     t.integer('epermitepermitid').notNullable().references('epermit.epermitid')
-    t.boolean('epermitapprovalmappingstatus').notNullable().defaultTo(false)
+    t.integer('epermitapprovalmappingstatus').notNullable().defaultTo(1)
     t.bigInteger('epermitapprovalmappingcreatetime').notNullable()
     t.integer('epermitapprovalmappingcreateby').notNullable()
     t.integer('epermitapprovalmappingchangeby');

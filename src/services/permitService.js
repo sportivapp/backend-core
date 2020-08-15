@@ -22,7 +22,7 @@ permitService.getPermitList = async (page, size, user) => {
 permitService.getSubordinatePermitList = async (page, size, user) => {
 
     const mappingSubQuery = PermitApprovalMapping.query().where('eusereuserid', user.sub)
-        .where('epermitapprovalmappingstatus', false)
+        .where('epermitapprovalmappingstatus', 1)
 
     const permitApprovalPage = await PermitApprovalMapping.relatedQuery('permits')
         .for(mappingSubQuery)
@@ -39,7 +39,7 @@ permitService.getPermitById = async (permitId, user) => {
         .withGraphFetched('user(notDeleted)')
         .first()
 
-    if(!permit || !permit.user) return
+    if (!permit || !permit.user) return
     else if (permit.user.euserpermission === user.permission && permit.user.euserid !== user.sub) return
     else return permit
 }
@@ -67,25 +67,7 @@ async function getProjectManagerIdQuery(rosterId) {
         });
 }
 
-async function getUserPositionsQuery(permit) {
-    return await UserPositionMapping.query()
-        .where('eusereuserid', permit.user.euserid)
-        .then(mappingList => mappingList.map(mapping => mapping.egradeegradeid));
-}
-
-function toGetSuperiorPositionPromises(userPositions) {
-    return userPositions.map(positionId => {
-        return Grades.relatedQuery('superior')
-            .for(positionId)
-            .first()
-    })
-}
-
-function toGetSuperiorPositionUserListPromises(supervisorPositionIds) {
-    return supervisorPositionIds.map(positionId => Grades.relatedQuery('users').for(positionId))
-}
-
-function toPermitApprovalMappingList(supervisorIds, permitId, user) {
+function toPermitApprovalMappingList(supervisorIds, permitId) {
     return supervisorIds.map(supervisorId => ({
         eusereuserid: supervisorId,
         epermitepermitid: permitId
@@ -102,69 +84,57 @@ permitService.requestApproval = async (permitId, user) => {
 
     const updatePermit = Permit.query()
         .findById(permitId)
-        .updateByUserId({ epermitstatus: 1 }, user.sub)
+        .updateByUserId({epermitstatus: 1}, user.sub)
         .returning('*')
 
     if (!permit || !permit.user) return
     else if (permit.user.euserid != user.sub) return
 
-    let supervisorId
+    // let supervisorId
+    //
+    // const rosterId = await RosterUserMapping.query()
+    //     .where('eusereuserid', user.sub)
+    //     .first()
+    //     .then(mapping => mapping.erostererosterid)
+    //
+    // if (rosterId) {
+    //     supervisorId = await getRosterSupervisorIdQuery(rosterId)
+    // }
+    //
+    // if (!supervisorId && rosterId) {
+    //     supervisorId = await getProjectManagerIdQuery(rosterId)
+    // }
+    //
+    // //if user is in a project
+    // if (supervisorId) {
+    //
+    //     const addApprovalPermitMapping = PermitApprovalMapping.query()
+    //         .insertToTable({eusereuserid: supervisorId, epermitepermitid: permitId}, user.sub)
+    //
+    //     return Promise.all([addApprovalPermitMapping, updatePermit])
+    //         .then(resultArr => resultArr[1])
+    //
+    // } else {
 
-    const rosterId = await RosterUserMapping.query()
-        .where('eusereuserid', user.sub)
-        .first()
-        .then(mapping => mapping.erostererosterid)
+    const approvalUserIds = await User.query().findById(permit.user.euserid)
+        .withGraphFetched('[approvalUser1, approvalUser2, approvalUser3]')
+        .then(foundUser => {
+            let userIds = []
+            if (foundUser.approvalUser1) userIds.push(foundUser.approvalUser1.euserid)
+            if (foundUser.approvalUser2) userIds.push(foundUser.approvalUser2.euserid)
+            if (foundUser.approvalUser3) userIds.push(foundUser.approvalUser3.euserid)
+            return userIds
+        })
 
-    if (rosterId) {
-        supervisorId = await getRosterSupervisorIdQuery(rosterId)
-    }
+    if (approvalUserIds.length === 0) return
 
-    if (!supervisorId && rosterId) {
-        supervisorId = await getProjectManagerIdQuery(rosterId)
-    }
+    const insertPermitApprovalMapping = PermitApprovalMapping.query()
+        .insertToTable(toPermitApprovalMappingList(approvalUserIds, permitId), user.sub)
 
-    //if user is in a project
-    if (supervisorId) {
+    return Promise.all([insertPermitApprovalMapping, updatePermit])
+        .then(resultArr => resultArr[resultArr.length - 1])
 
-        const addApprovalPermitMapping = PermitApprovalMapping.query()
-            .insertToTable({eusereuserid: supervisorId, epermitepermitid: permitId}, user.sub)
-
-        return Promise.all([addApprovalPermitMapping, updatePermit])
-            .then(resultArr => resultArr[1])
-
-    } else {
-
-        const userPositions = await getUserPositionsQuery(permit)
-
-        let promises = toGetSuperiorPositionPromises(userPositions)
-
-        const supervisorPositionIds = await Promise.all(promises)
-            .then(positions => positions.filter(position => position).map(position => position.egradeid))
-
-        promises = toGetSuperiorPositionUserListPromises(supervisorPositionIds)
-
-        const supervisorIds = await Promise.all(promises)
-            .then(users => users.filter(user => user).map(user => user.euserid))
-
-        const permitApprovalMappingList = toPermitApprovalMappingList(supervisorIds, permitId, user)
-
-        if (permitApprovalMappingList.length > 0) {
-
-            const insertPermitApprovalMapping = PermitApprovalMapping.query()
-                .insertToTable(permitApprovalMappingList, user.sub)
-
-            return Promise.all([insertPermitApprovalMapping, updatePermit])
-                .then(resultArr => resultArr[resultArr.length - 1])
-
-        } else {
-
-            return Permit.query()
-                .findById(permitId)
-                .updateByUserId({ epermitstatus: 2 }, user.sub)
-                .returning('*')
-        }
-
-    }
+    // }
 }
 
 permitService.createPermit = async (permitDTO, user) => {
@@ -195,25 +165,51 @@ permitService.updatePermitStatusById = async (permitId, status, user) => {
         .first()
 
     if (!approval) return
+
     else {
 
-        const changeMappingStatusQuery = PermitApprovalMapping.query()
+        await PermitApprovalMapping.query()
             .where('epermitepermitid', permitId)
             .where('eusereuserid', user.sub)
-            .updateByUserId({ epermitapprovalmappingstatus: true }, user.sub)
+            .updateByUserId({epermitapprovalmappingstatus: status}, user.sub)
 
-        const deleteOtherMappingQuery = PermitApprovalMapping.query()
-            .where('epermitepermitid', permitId)
-            .whereNot({ eusereuserid: user.sub })
-            .delete()
+        if (permit.user.eusermultiapproval) {
 
-        const updatePermitStatus = Permit.query()
-            .findById(permitId)
-            .updateByUserId({ epermitstatus: status }, user.sub)
-            .returning('*')
+            const permitStatusChangedMappings = await PermitApprovalMapping.query()
+                .where('epermitepermitid', permitId)
+                .whereNot({ epermitapprovalmappingstatus: 1 })
 
-        return Promise.all([changeMappingStatusQuery, deleteOtherMappingQuery, updatePermitStatus])
-            .then(resultArr => resultArr[2])
+            const approvedList = permitStatusChangedMappings
+                .map(mapping => mapping.epermitapprovalmappingstatus)
+                .filter(status => status === 2)
+
+            let realStatus
+
+            if (approvedList.length === permitStatusChangedMappings.length) realStatus = 2
+            else if (approvedList.length === 0) realStatus = 3
+
+            return Permit.query()
+                .findById(permitId)
+                .updateByUserId({epermitstatus: realStatus}, user.sub)
+                .returning('*')
+
+        } else {
+
+            const selectApprovedPermitMapping = await PermitApprovalMapping.query()
+                .where('epermitepermitid', permitId)
+                .where('epermitapprovalmappingstatus', 2)
+                .first()
+
+            let realStatus
+
+            if (selectApprovedPermitMapping) realStatus = 2
+            else realStatus = 3
+
+            return Permit.query()
+                .findById(permitId)
+                .updateByUserId({epermitstatus: realStatus}, user.sub)
+                .returning('*')
+        }
     }
 }
 
@@ -244,7 +240,7 @@ permitService.deletePermitById = async (permitId, user) => {
     if (permit.epermitstatus > 1)
         return false
 
-    if(permit.user.euserid != user.sub && permit.user.euserpermission <= user.permission)
+    if (permit.user.euserid != user.sub && permit.user.euserpermission <= user.permission)
         return false
 
     return Permit.query()
