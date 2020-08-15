@@ -4,6 +4,7 @@ class CustomQueryBuilder extends QueryBuilder {
 
     insertToTable(data, userId) {
         const tableName = this.tableNameFor(this._modelClass)
+        if (!userId) userId = 0
         if (data.length) {
             const addedDataList = data.map(obj => {
                 obj[tableName.concat('createtime')] = Date.now()

@@ -7,7 +7,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('edevice', t => {
     t.integer('edevicechangeby');
     t.bigInteger('edevicechangetime');
     t.integer('edevicetablestatus').notNullable().defaultTo(1);
-    t.integer('ecompanyecompanyid').notNullable().references('ecompany.ecompanyid');
+    t.integer('ecompanyecompanyid').notNullable().references('ecompany.ecompanyid').onDelete('CASCADE');
     t.integer('edevicedeleteby');
     t.boolean('edevicedeletestatus').defaultTo(false);
     t.bigInteger('edevicedeletetime');
