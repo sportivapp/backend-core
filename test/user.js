@@ -61,6 +61,27 @@ module.exports = (chai, httpServer, expect) => {
     });
   });
 
+  describe('POST /api/v1/user/change-company', () => {
+    it('Should return token', async () => {
+      const login = await chai.request(httpServer)
+      .post('/api/v1/user-login')
+      .send({ 
+        email: 'nawakarauser2@nawakara.com', 
+        password: 'emtivnawakarauser'
+      });
+
+      const companyId = 2
+
+      const res = await chai.request(httpServer)
+      .post(`/api/v1/user/change-company?companyId=${companyId}`)
+      .set('authorization', login.body.data)
+      .send();
+
+      expect(res.status).to.equal(200);
+      expect(res.body.data).to.not.be.undefined;
+    });
+  });
+
   describe('GET /api/v1/user-import-template', () => {
     it('Should return file with correct content', async () => {
       const res = await chai.request(httpServer)

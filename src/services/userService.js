@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const CompanyUserMapping = require('../models/CompanyUserMapping')
 const Grade = require('../models/Grades');
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
@@ -66,9 +67,9 @@ UsersService.registerEmployees = async (user, path) => {
 
 }
 
-UsersService.createUser = async (userDTO) => {
+UsersService.createUser = async (userDTO, user) => {
     userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
-    return User.query().insert(userDTO)
+    return User.query().insertToTable(userDTO, user.sub)
 }
 
 async function generateJWTToken(user, companyId, permission) {
@@ -133,6 +134,7 @@ UsersService.login = async (loginDTO) => {
         .select('ecompanyecompanyid', 'ecompanyusermappingpermission')
         .joinRelated('companies')
         .where('eusereuserid', user.euserid)
+        .orderBy('ecompanyusermappingcreatetime', 'ASC')
         .first();
 
         token = await generateJWTToken(user, result.ecompanyecompanyid, result.ecompanyusermappingpermission);
@@ -151,6 +153,25 @@ UsersService.changeUserPassword = async ( user , newPassword) => {
 
     return newData;
 }
+
+UsersService.changeUserCompany = async (companyId, user) => {
+
+    const loggedInUser = await User.query().select().where('euseremail', user.email).first();
+
+    const userCompany = await CompanyUserMapping.query().select()
+    .where('ecompanyecompanyid', companyId)
+    .where('eusereuserid', user.sub)
+    .first() 
+
+    if(!userCompany)
+        return
+
+    let token = null;
+    token = await generateJWTToken(loggedInUser, companyId, userCompany.ecompanyusermappingpermission);
+
+    return token;
+}
+
 
 UsersService.deleteUserById = async ( userId, user ) => {
     
