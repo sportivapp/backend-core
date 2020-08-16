@@ -44,22 +44,17 @@ module.exports = (chai, httpServer, expect) => {
           .post(`/api/v1/company`)
           .set('authorization', login.body.data)
           .send({
-            nik: '123456789',
-            name: 'nawakaraadmin',
-            email: 'nawakaraadmin@nawakara.com',
-            password: 'emtivnawakaraadmin',
-            mobileNumber: '987654321',
             companyName: 'PT. Nawakara Perkasa Nusantara',
             companyEmail: '@nawakara.com',
-            street: 'Kompleks Golden Plaza, Jl. RS. Fatmawati Raya No.15, RT.10/RW.6, Gandaria Utara, Kec. Cilandak, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12420',
+            street: 'Kompleks Golden Plaza, Jl. RS. Fatmawati Raya No.15, RT.10/RW.6, Gandaria Utara, ' +
+                'Kec. Cilandak, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12420',
             postalCode: 12420,
             companyParentId: 1
           });
 
           expect(res.status).to.equal(200);
           expect(res.body.data).to.not.be.undefined;
-          expect(res.body.data.companymodulemapping).to.not.be.undefined
-          expect(res.body.data.companymodulemapping.length).to.greaterThan(0)
+          expect(res.body.data.employeeCount).to.not.be.undefined
         });
       });
 
@@ -135,7 +130,7 @@ module.exports = (chai, httpServer, expect) => {
     });
   });
 
-  describe('GET /api/v1/company/user', () => {
+  describe('GET /api/v1/company of logged in user with keyword', () => {
     it('Should return list of company by logged in userId', async () => {
 
       const login = await chai.request(httpServer)
@@ -146,12 +141,15 @@ module.exports = (chai, httpServer, expect) => {
           })
 
       const res = await chai.request(httpServer)
-          .get(`/api/v1/company/user`)
+          .get('/api/v1/company?keyword=PT')
           .set('authorization', login.body.data)
           .send()
 
       expect(res.status).to.equal(200)
       expect(res.body.data).to.not.be.undefined
+      expect(res.body.data.length).to.greaterThan(0)
+      expect(res.body.data[0].branches.length).to.greaterThan(0)
+      expect(res.body.data[0].sisters.length).to.greaterThan(0)
     });
   });
 

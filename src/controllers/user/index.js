@@ -105,7 +105,7 @@ userController.updateUserById = async (req, res, next) => {
 userController.changeUserCompany = async (req, res, next) => {
 
     const user = req.user
-    const { companyId } = req.query
+    const { companyId } = req.body
 
     try {
 

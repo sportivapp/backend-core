@@ -1,5 +1,6 @@
 const Company = require('../models/Company');
 const Address = require('../models/Address');
+const departmentService = require('./departmentService')
 const User = require('../models/User');
 const bcrypt = require('../helper/bcrypt');
 const CompanyUserMapping = require('../models/CompanyUserMapping')
@@ -13,16 +14,16 @@ const CompanyService = {};
 
 CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
 
-    const address = await Address.query().insert(addressDTO);
+    userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
+    const user = await User.query().insertToTable(userDTO);
+
+    const address = await Address.query().insertToTable(addressDTO, user.euserid);
 
     companyDTO.eaddresseaddressid = address.eaddressid;
     companyDTO.ecompanycreateby = 0;
-    const company = await Company.query().insert(companyDTO);
+    const company = await Company.query().insertToTable(companyDTO, user.euserid);
 
     // super user of the company
-    userDTO.ecompanyecompanyid = company.ecompanyid;
-    userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
-    const user = await User.query().insert(userDTO);
 
     const companyUserDTO = {
         eusereuserid: user.euserid,
@@ -39,39 +40,37 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
                 emoduleemoduleid: module.emoduleid
             }))
         })
-        .then(modules => CompanyModuleMapping.query().insert(modules))
+        .then(modules => CompanyModuleMapping.query().insertToTable(modules, user.euserid))
 
 
-    const insertCompanyUserMappingQuery = CompanyUserMapping.query().insert(companyUserDTO)
+    const insertCompanyUserMappingQuery = CompanyUserMapping.query().insertToTable(companyUserDTO, user.euserid)
 
-    return Promise.all([insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery])
-        .then(ignored => ({
+    const departmentDTO = {
+        edepartmentname: 'DEFAULT DEPARTMENT',
+        edepartmentdescription: 'Defaut Deparment for Company',
+        ecompanyecompanyid: company.ecompanyid
+    }
+
+    const loggedInUser = { sub: user.euserid, companyId: company.ecompanyid }
+
+    const createDefaultDepartment = departmentService.createDepartment(departmentDTO, loggedInUser)
+
+    return Promise.all([insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery, createDefaultDepartment])
+        .then(resultArr => ({
             user: user,
             company: company,
-            address: address
+            address: address,
+            employeeCount: 1,
+            departmentCount: 1
         }))
 
 }
 
-CompanyService.getUsersByCompanyId = async(companyId, page, size, deleteStatus) => {
+CompanyService.getUsersByCompanyId = async(companyId, page, size) => {
 
-    let query = CompanyUserMapping.query()
-        .where('ecompanyecompanyid', companyId)
-
-    if (deleteStatus) query = query.modify('deleted')
-    else query = query.modify('notDeleted')
-
-    const relationPage = await query.page(page, size)
-
-    const total = relationPage.total
-    const userIds = relationPage.results
-        .map(relation => relation.eusereuserid)
-
-    return User.query().whereIn('euserid', userIds)
-        .then(users => ({
-            results: users,
-            total: total
-        }))
+    return Company.relatedQuery('users')
+        .for(companyId)
+        .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
 
@@ -82,6 +81,7 @@ CompanyService.getAllCompanyByUserId = async(userId) => {
     .modify({ ecompanyusermappingdeletestatus: false })
     .where('ecompanyparentid', null)
     .orderBy('ecompanyusermappingcreatetime', 'ASC')
+    .withGraphFetched('[branches, sisters]')
 
     return result
 
@@ -167,26 +167,30 @@ CompanyService.saveUsersToCompany = async(companyId, users, loggedInUser) => {
 
 CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
 
-    const address = await Address.query().insert(addressDTO);
+    const address = await Address.query().insertToTable(addressDTO, user.sub);
+
+    if (companyDTO.ecompanyolderid && companyDTO.ecompanyparentid) return
+
+    else if (companyDTO.ecompanyolderid) {
+        const olderSister = await Company.query().findById(companyDTO.ecompanyolderid)
+        if (!olderSister) return
+    }
+
+    else if (companyDTO.ecompanyparentid) {
+        const parent = await Company.query().findById(companyDTO.ecompanyparentid)
+        if (!parent) return
+    }
 
     companyDTO.eaddresseaddressid = address.eaddressid;
-    companyDTO.ecompanycreateby = user.sub;
-    const company = await Company.query().insert(companyDTO);
+    const company = await Company.query().insertToTable(companyDTO, user.sub);
 
     const id = ( isNaN(userId) ) ? parseInt(user.sub) : userId
 
     const companyUserMappingDTO = {
         ecompanyecompanyid: company.ecompanyid,
         eusereuserid: id,
-        ecompanyusermappingcreateby: user.sub,
         ecompanyusermappingpermission: 10
     }
-
-    const patchDTO = isNaN(userId) ? { euserpermission: 10 } :
-        {
-            euserpermission: 10,
-            ecompanyecompanyid: company.ecompanyid
-        }
 
     const insertCompanyModuleMappingQuery = Module.query()
         .then(modules => {
@@ -196,38 +200,69 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
                 emoduleemoduleid: module.emoduleid
             }))
         })
-        .then(modules => CompanyModuleMapping.query().insert(modules))
+        .then(modules => CompanyModuleMapping.query().insertToTable(modules, user.sub))
 
-    const insertCompanyUserMappingQuery = CompanyUserMapping.query().insert(companyUserMappingDTO)
+    const insertCompanyUserMappingQuery = CompanyUserMapping.query().insertToTable(companyUserMappingDTO, user.sub)
+
+    const departmentDTO = {
+        edepartmentname: 'DEFAULT DEPARTMENT',
+        edepartmentdescription: 'Defaut Deparment for Company',
+        ecompanyecompanyid: company.ecompanyid
+    }
+
+    const createDefaultDepartment = departmentService.createDepartment(departmentDTO, user)
 
     // super user of the company
-    const updateUserQuery = User.query()
+    const findUserQuery = User.query()
         .findById(id)
-        .updateByUserId(patchDTO, user.sub)
-        .returning('*');
 
-    return Promise.all([insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery, updateUserQuery])
+    return Promise.all([findUserQuery, insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery, createDefaultDepartment])
         .then(resultArr => ({
             company: company,
             address: address,
-            companymodulemapping: resultArr[0],
-            user: resultArr[2],
-            companyusermapping: resultArr[1]
+            user: resultArr[0],
+            employeeCount: 1,
+            departments: 1,
+            childrenCount: 0
         }))
 
 }
 
-CompanyService.getCompany = async (page, size, type, keyword) => {
-    const newKeyword = keyword.toLowerCase()
-    let query = Company.query()
-            .select()
-            .where(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
-            .andWhere('ecompanydeletestatus', false)
-    if ( type === 'company')
-        query.whereNull('ecompanyparentid')
+CompanyService.getCompanyList = async (page, size, type, keyword, companyId, user) => {
+
+    let newKeyword
+
+    if (keyword)
+        newKeyword = keyword.toLowerCase()
+    else
+        newKeyword = ''
+
+    let query = User.relatedQuery('companies')
+        .for(user.sub)
+        .modify({ ecompanyusermappingdeletestatus: false })
+        .where(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
+
+    if (type === 'BRANCH') {
+        if (!companyId) return ServiceHelper.toEmptyPage(page, size)
+        query = query.where('ecompanyparentid', companyId).whereNull('ecompanyolderid')
+    }
+
+    else if (type === 'SISTER') {
+        if (!companyId) return ServiceHelper.toEmptyPage(page, size)
+        query = query
+            .where('ecompanyolderid', companyId)
+            .whereNull('ecompanyparentid')
+            .withGraphFetched('[branches, sisters]')
+    }
 
     else
-        query.whereNotNull('ecompanyparentid')
+        query = query
+            .whereNull('ecompanyparentid')
+            .whereNull('ecompanyolderid')
+            .withGraphFetched('[branches, sisters]')
+
+    query = query
+        .orderBy('ecompanyusermappingcreatetime', 'ASC')
 
     const pageObj = await query.page(page, size)
 
@@ -235,27 +270,68 @@ CompanyService.getCompany = async (page, size, type, keyword) => {
 
 }
 
-CompanyService.editCompany = async (companyId, companyDTO, user) => {
+CompanyService.getCompanyById = async (companyId) => {
 
-    return Company.query().findById(companyId).updateByUserId(companyDTO, user.sub).returning('*')
+    const company = await Company.query().findById(companyId)
+
+    const employeeCount = CompanyUserMapping.query().where('ecompanyecompanyid', companyId).count()
+    const departmentCount = Company.relatedQuery('departments').for(companyId).count()
+    const branchCount = Company.relatedQuery('branches').for(companyId).count()
+
+    return Promise.all([company, employeeCount, departmentCount, branchCount])
+        .then(resultArr => ({
+            ...resultArr[0],
+            employeeCount: resultArr[1],
+            departmentCount: resultArr[2],
+            childrenCount: resultArr[3]
+        }))
 }
 
-CompanyService.deleteCompany = async (companyId, user) => {
+CompanyService.editCompany = async (companyId, companyDTO, user) => {
+
+    if (companyDTO.ecompanyolderid && companyDTO.ecompanyparentid) return
+
+    if (companyDTO.ecompanyolderid) {
+        const olderSister = await Company.query().findById(companyDTO.ecompanyolderid)
+        if (!olderSister) return
+    }
+
+    if (companyDTO.ecompanyparentid) {
+        const parent = await Company.query().findById(companyDTO.ecompanyparentid)
+        if (!parent) return
+    }
+
+    const company = Company.query().findById(companyId).updateByUserId(companyDTO, user.sub).returning('*')
+
+    const employeeCount = CompanyUserMapping.query().where('ecompanyecompanyid', companyId).count()
+    const departmentCount = Company.relatedQuery('departments').for(companyId).count()
+    const branchCount = Company.relatedQuery('branches').for(companyId).count()
+
+    return Promise.all([company, employeeCount, departmentCount, branchCount])
+        .then(resultArr => ({
+            ...resultArr[0],
+            employeeCount: resultArr[1],
+            departmentCount: resultArr[2],
+            childrenCount: resultArr[3]
+        }))
+}
+
+CompanyService.deleteCompany = async (companyId) => {
 
     const deleteCompany = Company.query()
         .findById(companyId)
-        .deleteByUserId(user.sub)
+        .delete()
 
     const deleteUserMapping = CompanyUserMapping.query()
         .where('ecompanyecompanyid', companyId)
-        .deleteByUserId(user.sub)
+        .delete()
 
     const deleteModuleMapping = CompanyModuleMapping.query()
         .where('ecompanyecompanyid', companyId)
-        .deleteByUserId(user.sub)
+        .delete()
 
-    return Promise.all([deleteCompany, deleteUserMapping, deleteModuleMapping])
-        .then(resultArr => resultArr[0])
+    return Promise.all([deleteUserMapping, deleteModuleMapping, deleteCompany])
+        .then(resultArr => resultArr[2])
         .then(rowsAffected => rowsAffected === 1)
 }
 
