@@ -31,7 +31,7 @@ class Company extends Model {
         relation: Model.BelongsToOneRelation,
         modelClass: Address,
         join: {
-            from: 'ecompany.ecompanyid',
+            from: 'ecompany.eaddresseaddressid',
             to: 'eaddress.eaddressid'
         }
       },
