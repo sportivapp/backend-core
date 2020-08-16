@@ -5,12 +5,13 @@ const controller = {}
 
 controller.getGrades = async (req, res, next) => {
 
-    const { page, size } = req.query
+    const { page, size, companyId } = req.query
 
     try {
-        const pageObj = await gradeService.getAllGrades(parseInt(page), parseInt(size))
+        const pageObj = await gradeService.getAllGrades(parseInt(page), parseInt(size), companyId)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
     } catch (e) {
+        console.log(e)
         next(e)
     }
 }

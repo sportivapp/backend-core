@@ -7,14 +7,16 @@ exports.seed = (knex) => knex('egrade').del()
                     egradename: 'Head Sales Department',
                     ecompanyecompanyid: 1,
                     egradecreateby: 1,
-                    edepartmentedepartmentid: 1
+                    edepartmentedepartmentid: 1,
+                    egradecreatetime: Date.now()
                 },
                 {
                     egradedescription: 'Head Department',
                     egradename: 'Head Department of IT',
                     ecompanyecompanyid: 1,
                     egradecreateby: 1,
-                    edepartmentedepartmentid: 2
+                    edepartmentedepartmentid: 2,
+                    egradecreatetime: Date.now()
                 },
                 {
                     egradedescription: 'Manager',
@@ -22,7 +24,8 @@ exports.seed = (knex) => knex('egrade').del()
                     ecompanyecompanyid: 1,
                     egradecreateby: 1,
                     egradesuperiorid: 1,
-                    edepartmentedepartmentid: 1
+                    edepartmentedepartmentid: 1,
+                    egradecreatetime: Date.now()
                 },
                 {
                     egradedescription: 'Manager',
@@ -30,7 +33,16 @@ exports.seed = (knex) => knex('egrade').del()
                     ecompanyecompanyid: 1,
                     egradecreateby: 1,
                     egradesuperiorid: 2,
-                    edepartmentedepartmentid: 2
-                }
+                    edepartmentedepartmentid: 2,
+                    egradecreatetime: Date.now()
+                },
+                {
+                    egradedescription: 'Head Department',
+                    egradename: 'Head Sales Department',
+                    ecompanyecompanyid: 2,
+                    egradecreateby: 1,
+                    edepartmentedepartmentid: 6,
+                    egradecreatetime: Date.now()
+                },
             ]
         ));

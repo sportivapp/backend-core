@@ -20,6 +20,19 @@ class Department extends Model {
       }
     };
   }
+
+  static get relationMappings() {
+    return {
+      parent: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Department,
+        join: {
+          from: 'edepartment.edepartmentsuperiorid',
+          to: 'edepartment.edepartmentid'
+        }
+      }
+    }
+  }
 }
 
 module.exports = Department;

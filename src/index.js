@@ -33,6 +33,7 @@ app.use((_, __, next) => {
 
 app.use((error, req, res, next) => {
     // errorMsg = error;
+    console.log(error)
     const status = error.status || 500;
     res.status(status).send({
         error: {
