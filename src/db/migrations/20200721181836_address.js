@@ -12,8 +12,8 @@ exports.up = (knex, Promise) => knex.schema.createTable('eaddress', t => {
     t.bigInteger('eaddressdeletetime');
     t.boolean('eaddressdeletestatus').defaultTo(false);
     t.integer('eaddresstablestatus').notNullable().defaultTo(1);
-    // t.integer('ecountryecountryid').notNullable().references('ecountry.ecountryid');
-    // t.integer('estateestateid').notNullable().references('estate.estateid');
+    t.integer('ecountryecountryid').notNullable().references('ecountry.ecountryid');
+    t.integer('estateestateid').notNullable().references('estate.estateid');
   });
   
   exports.down = (knex, Promise) => knex.schema.dropTable('eaddress');
