@@ -17,7 +17,8 @@ module.exports = {
             import: '/user-import-template',
             id: '/user/:userId',
             approval: '/user/approval',
-            changeCompany: '/user/change-company'
+            changeCompany: '/user/change-company',
+            currentCompany: '/user/current-company'
         },
         grade: {
             list: '/grades',

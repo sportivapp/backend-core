@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const CompanyUserMapping = require('../models/CompanyUserMapping')
+const Company = require('../models/Company')
 const Grade = require('../models/Grades');
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
@@ -101,6 +102,17 @@ UsersService.getUserById = async ( userId, user ) => {
     if (!mapping) return
 
     return result;
+
+}
+
+UsersService.getUserCurrentCompany = async ( user ) => {
+
+    const company = Company.query()
+        .select()
+        .where('ecompanyid', user.companyId)
+        .first()
+
+    return company
 
 }
 
