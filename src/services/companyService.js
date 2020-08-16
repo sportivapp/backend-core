@@ -1,6 +1,8 @@
 const Company = require('../models/Company');
 const Address = require('../models/Address');
 const Industry = require('../models/Industry')
+const Country = require('../models/Country')
+const State = require('../models/State')
 const departmentService = require('./departmentService')
 const User = require('../models/User');
 const bcrypt = require('../helper/bcrypt');
@@ -283,17 +285,23 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
 CompanyService.getCompanyById = async (companyId) => {
 
     const company = await Company.query().findById(companyId).withGraphFetched('industry')
+    const address = await Company.relatedQuery('address').for(companyId).findById(companyId)
+    const country = await Country.query().select().where('ecountryid', address.ecountryecountryid).first()
+    const state = await State.query().select().where('estateid', address.estateestateid).first()
 
     const employeeCount = CompanyUserMapping.query().where('ecompanyecompanyid', companyId).count()
     const departmentCount = Company.relatedQuery('departments').for(companyId).count()
     const branchCount = Company.relatedQuery('branches').for(companyId).count()
 
-    return Promise.all([company, employeeCount, departmentCount, branchCount])
+    return Promise.all([company, address, country, state, employeeCount, departmentCount, branchCount])
         .then(resultArr => ({
             ...resultArr[0],
-            employeeCount: resultArr[1],
-            departmentCount: resultArr[2],
-            childrenCount: resultArr[3]
+            companyAddress: resultArr[1],
+            companyCountry: resultArr[2],
+            companyState: resultArr[3],
+            employeeCount: resultArr[4],
+            departmentCount: resultArr[5],
+            childrenCount: resultArr[6]
         }))
 }
 
