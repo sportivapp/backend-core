@@ -290,9 +290,9 @@ CompanyService.getCompanyById = async (companyId) => {
     return Promise.all([company, employeeCount, departmentCount, branchCount])
         .then(resultArr => ({
             ...resultArr[0],
-            employeeCount: resultArr[1],
-            departmentCount: resultArr[2],
-            childrenCount: resultArr[3]
+            employeeCount: resultArr[1].count,
+            departmentCount: resultArr[2].count,
+            childrenCount: resultArr[3].count
         }))
 }
 
@@ -326,9 +326,9 @@ CompanyService.editCompany = async (companyId, companyDTO, user) => {
     return Promise.all([company, employeeCount, departmentCount, branchCount])
         .then(resultArr => ({
             ...resultArr[0],
-            employeeCount: resultArr[1],
-            departmentCount: resultArr[2],
-            childrenCount: resultArr[3]
+            employeeCount: resultArr[1].count,
+            departmentCount: resultArr[2].count,
+            childrenCount: resultArr[3].count
         }))
 }
 
