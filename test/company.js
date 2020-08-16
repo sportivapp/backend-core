@@ -132,6 +132,28 @@ module.exports = (chai, httpServer, expect) => {
     });
   });
 
+  describe('GET /api/v1/company/id', () => {
+        it('Should return 1 company', async () => {
+
+            const login = await chai.request(httpServer)
+                .post('/api/v1/user-login')
+                .send({
+                    email: 'nawakaraadmin@nawakara.com',
+                    password: 'emtivnawakaraadmin'
+                })
+
+            let companyId = 1
+
+            const res = await chai.request(httpServer)
+                .get(`/api/v1/company/${companyId}`)
+                .set('authorization', login.body.data)
+                .send()
+
+            expect(res.status).to.equal(200)
+            expect(res.body.data).to.not.be.undefined
+        });
+    });
+
   describe('GET /api/v1/company of logged in user with keyword', () => {
     it('Should return list of company by logged in userId', async () => {
 
