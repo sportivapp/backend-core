@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
+const ResponseHelper = require('../helper/ResponseHelper')
 
 exports.authenticateToken = async (req, res, next) => {
 
@@ -9,7 +10,7 @@ exports.authenticateToken = async (req, res, next) => {
 
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function(err, user) {
         if (err) { 
-            return res.status(403).json('Unauthorized access');
+            return res.status(401).json("You need to log in first.");
         }
         req.user = user;
         next();
