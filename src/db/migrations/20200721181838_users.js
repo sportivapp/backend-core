@@ -4,6 +4,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('euser', t => {
     t.string('eusernik');
     t.bigInteger('euserlastlogout');
     t.string('eusername', 256).notNullable();
+    t.string('euseridentitynumber', 17);
     t.string('euseremail', 256).notNullable();
     t.string('euserpassword', 256).notNullable();
     t.string('eusermobilenumber', 256).notNullable();
