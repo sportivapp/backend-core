@@ -296,7 +296,7 @@ CompanyService.getCompanyById = async (companyId) => {
         }))
 }
 
-CompanyService.editCompany = async (companyId, companyDTO, user) => {
+CompanyService.editCompany = async (companyId, supervisorId, companyDTO, user) => {
 
     if (companyDTO.ecompanyolderid && companyDTO.ecompanyparentid) return
 
@@ -313,6 +313,25 @@ CompanyService.editCompany = async (companyId, companyDTO, user) => {
     if (companyDTO.eindustryeindustryid) {
         const industry = await Industry.query().findById(companyDTO.eindustryeindustryid)
         if (!industry) return
+    }
+
+    if (supervisorId) {
+
+        const deleteCurrentHeadQuery = CompanyUserMapping.query()
+            .where('ecompanyecompanyid', companyId)
+            .where('ecompanyusermappingpermission', 10)
+            .delete()
+
+        const companyUserMappingDTO = {
+            ecompanyecompanyid: companyId,
+            eusereuserid: supervisorId,
+            ecompanyusermappingpermission: 10
+        }
+
+        const insertNewHeadQuery = CompanyUserMapping.query()
+            .insertToTable(companyUserMappingDTO, user.sub)
+
+        await Promise.all([deleteCurrentHeadQuery, insertNewHeadQuery])
     }
 
     await Company.query().findById(companyId).updateByUserId(companyDTO, user.sub)

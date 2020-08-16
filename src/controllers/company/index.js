@@ -45,13 +45,21 @@ companyController.createCompany = async (req, res, next) => {
 
     if (isUserNotValid(req.user))
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
-
-    const { userId } = req.query
     const user = req.user
 
     try {
 
-        const { companyName, companyEmail, street, postalCode, companyParentId, companyOlderId, industryId, companyPhoneNumber } = req.body;
+        const {
+            companyName,
+            companyEmail,
+            street,
+            postalCode,
+            companyParentId,
+            companyOlderId,
+            industryId,
+            companyPhoneNumber,
+            supervisorId
+        } = req.body;
 
         const companyDTO = {
             ecompanyname: companyName,
@@ -67,7 +75,7 @@ companyController.createCompany = async (req, res, next) => {
             eaddresspostalcode: postalCode
         }
 
-        const data = await companyService.createCompany(parseInt(userId) , companyDTO, addressDTO, user);
+        const data = await companyService.createCompany(supervisorId , companyDTO, addressDTO, user);
 
         if (!data) return res.status(400).json(ResponseHelper.toErrorResponse(400))
 
@@ -141,7 +149,7 @@ companyController.editCompany = async (req, res, next) => {
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { companyId } = req.params
-    const { companyName, companyEmail, companyParentId, companyOlderId, industryId } = req.body
+    const { companyName, companyEmail, companyParentId, companyOlderId, industryId, supervisorId } = req.body
 
     try {
 
@@ -153,7 +161,7 @@ companyController.editCompany = async (req, res, next) => {
             eindustryeindustryid: industryId
         }
 
-        const result = await companyService.editCompany(companyId, companyDTO, user)
+        const result = await companyService.editCompany(companyId, supervisorId, companyDTO, user)
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
