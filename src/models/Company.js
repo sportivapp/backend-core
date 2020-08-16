@@ -23,9 +23,18 @@ class Company extends Model {
 
     const User = require('./User')
     const Department = require('./Department')
+    const Address = require('./Address')
     const Industry = require('./Industry')
 
     return {
+      address: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Address,
+        join: {
+            from: 'ecompany.ecompanyid',
+            to: 'eaddress.eaddressid'
+        }
+      },
       users: {
         relation: Model.ManyToManyRelation,
         modelClass: User,
