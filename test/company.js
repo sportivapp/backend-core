@@ -113,19 +113,21 @@ module.exports = (chai, httpServer, expect) => {
             password: 'emtivnawakaraadmin'
           })
 
-      let type = 'company'
+      let type = 'SISTER'
+      let companyId = 1
       let keyword = ''
 
       let page = 0
       let size = 10
 
       const res = await chai.request(httpServer)
-          .get(`/api/v1/company?page=${page}&&size=${size}&type=${type}&keyword=${keyword}`)
+          .get(`/api/v1/company?page=${page}&&size=${size}&type=${type}&keyword=${keyword}&companyId=${companyId}`)
           .set('authorization', login.body.data)
           .send()
 
       expect(res.status).to.equal(200)
       expect(res.body.data).to.not.be.undefined
+      expect(res.body.data.length).to.equal(1)
       expect(res.body.paging).to.not.be.undefined
     });
   });
@@ -141,7 +143,7 @@ module.exports = (chai, httpServer, expect) => {
           })
 
       const res = await chai.request(httpServer)
-          .get('/api/v1/company?keyword=PT')
+          .get('/api/v1/company?keyword=PT&page=0&size=10')
           .set('authorization', login.body.data)
           .send()
 
