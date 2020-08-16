@@ -9,7 +9,7 @@ function isUserNotValid(user) {
 
 companyController.registerCompany = async (req, res, next) => {
 
-    const { nik, name, password, mobileNumber, companyName, companyEmail, street, postalCode, companyPhoneNumber } = req.body;
+    const { nik, name, password, mobileNumber, companyName, companyEmail, street, postalCode, countryId, stateId } = req.body;
 
     try {
 
@@ -23,11 +23,13 @@ companyController.registerCompany = async (req, res, next) => {
         const companyDTO = {
             ecompanyname: companyName,
             ecompanyemailaddress: companyEmail,
-            ecompanyphonenumber: companyPhoneNumber
+            ecompanyphonenumber: mobileNumber
         }
         const addressDTO = {
             eaddressstreet: street,
-            eaddresspostalcode: postalCode
+            eaddresspostalcode: postalCode,
+            ecountryecountryid: countryId,
+            estateestateid: stateId
         }
 
         const data = await companyService.registerCompany(userDTO, companyDTO, addressDTO);
@@ -58,7 +60,9 @@ companyController.createCompany = async (req, res, next) => {
             companyOlderId,
             industryId,
             companyPhoneNumber,
-            supervisorId
+            supervisorId,
+            countryId,
+            stateId
         } = req.body;
 
         const companyDTO = {
@@ -72,7 +76,9 @@ companyController.createCompany = async (req, res, next) => {
 
         const addressDTO = {
             eaddressstreet: street,
-            eaddresspostalcode: postalCode
+            eaddresspostalcode: postalCode,
+            ecountryecountryid: countryId,
+            estateestateid: stateId
         }
 
         const data = await companyService.createCompany(supervisorId , companyDTO, addressDTO, user);

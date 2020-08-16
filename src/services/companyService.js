@@ -1,5 +1,6 @@
 const Company = require('../models/Company');
 const Address = require('../models/Address');
+const Industry = require('../models/Industry')
 const departmentService = require('./departmentService')
 const User = require('../models/User');
 const bcrypt = require('../helper/bcrypt');
@@ -281,7 +282,7 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
 
 CompanyService.getCompanyById = async (companyId) => {
 
-    const company = await Company.query().findById(companyId).withGraphFetched('industry')
+    const company = await Company.query().findById(companyId).withGraphFetched('[industry,address.[country,state]]')
 
     const employeeCount = CompanyUserMapping.query().where('ecompanyecompanyid', companyId).count()
     const departmentCount = Company.relatedQuery('departments').for(companyId).count()

@@ -96,10 +96,30 @@ userController.getUserById = async (req, res, next) => {
 
 }
 
+userController.getUserCurrentCompany = async (req, res, next) => {
+
+    const user = req.user;
+
+    try {
+
+        const result = await userService.getUserCurrentCompany(user);
+
+        if (!result)
+            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        return res.status(200).json(ResponseHelper.toBaseResponse(
+            { 
+                ecompanyname: result.ecompanyname,
+                ecompanyid: result.ecompanyid
+        }))
+
+    } catch (e) {
+        next(e);
+    }
+}
 userController.updateUserById = async (req, res, next) => {
 
     const user = req.user
-    const { userNik, username, userMobileNumber, isMultiApproval, permission } = req.body
+    const { userNik, username, userMobileNumber, isMultiApproval, permission, identityNumber } = req.body
     const { userId } = req.params
 
     try {
@@ -108,7 +128,8 @@ userController.updateUserById = async (req, res, next) => {
             eusernik: userNik,
             eusername: username,
             eusermobilenumber: userMobileNumber,
-            eusermultiapproval: isMultiApproval
+            eusermultiapproval: isMultiApproval,
+            euseridentitynumber: identityNumber
         }
 
         const data = await userService.updateUserById(userId, userDTO, permission, user)
