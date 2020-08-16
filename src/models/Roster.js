@@ -1,5 +1,6 @@
 const Model = require('./Model');
 const Project = require('./Project');
+const User = require('./User')
 
 class Roster extends Model {
   static get tableName() {
@@ -18,13 +19,14 @@ class Roster extends Model {
         erostername: { type: 'string', minLength: 1, maxLength: 256 },
         erosterdescription: { type: 'string', minLength: 1, maxLength: 256 },
         eprojecteprojectid: {type: 'integer' },
-        erostersupervisorid: {type: 'integer' },
+        erostersupervisoruserid: {type: 'integer' },
         erosterheaduserid: {type: 'integer' }
       }
     };
   }
 
   static get relationMappings() {
+
     return {
       project: {
         relation: Model.BelongsToOneRelation,
@@ -33,7 +35,22 @@ class Roster extends Model {
           from: 'eroster.eprojecteprojectid',
           to: 'eproject.eprojectid'
         }
+      },
+      //nullable supervisor
+      supervisor: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: 'eroster.erostersupervisoruserid',
+          to: 'euser.euserid'
+        }
       }
+    }
+  }
+
+  static get modifiers() {
+    return {
+      ...this.baseModifiers()
     }
   }
 }

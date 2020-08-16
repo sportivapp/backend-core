@@ -16,8 +16,8 @@ class Permit extends Model {
             properties: {
                 epermitstatus: { type: 'integer' },
                 epermitdescription: { type: 'string', minLength: 1, maxLength: 256 },
-                epermitstartdate: { type: 'string', format: 'date' },
-                epermitenddate: { type: 'string', format: 'date' }
+                epermitstartdate: { type: 'bigint' },
+                epermitenddate: { type: 'bigint' }
             }
         };
     }
@@ -25,6 +25,7 @@ class Permit extends Model {
     static get relationMappings() {
 
         const User = require('./User')
+        const Company = require('./Company')
 
         return {
             user: {
@@ -33,6 +34,14 @@ class Permit extends Model {
                 join: {
                     from: 'epermit.euseruserid',
                     to: 'euser.euserid'
+                }
+            },
+            company: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Company,
+                join: {
+                    from: 'epermit.ecompanycompanyid',
+                    to: 'ecompany.ecompanyid'
                 }
             }
         }

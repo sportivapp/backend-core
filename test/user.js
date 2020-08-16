@@ -49,10 +49,8 @@ module.exports = (chai, httpServer, expect) => {
         userPassword: 'emtivnawakarauser'
       }
 
-      const companyId = 1
-
       const res = await chai.request(httpServer)
-      .post(`/api/v1/user-create?companyId=${companyId}`)
+      .post(`/api/v1/user-create`)
       .set('authorization', login.body.data)
       .send(requestBody);
 
@@ -137,6 +135,34 @@ module.exports = (chai, httpServer, expect) => {
       expect(res.status).to.equal(200);
       expect(login2.status).to.equal(200);
       expect(login2.body.data).to.not.be.undefined;
+    });
+  });
+
+  describe('PUT /api/v1/user/id', () => {
+    it('Should return single user data', async () => {
+      const login = await chai.request(httpServer)
+          .post('/api/v1/user-login')
+          .send({
+            email: 'nawakarahrd@nawakara.com',
+            password: 'emtivnawakarahrd'
+          });
+
+      let userId = 6
+
+      const requestBody = {
+        userNik: 'E10',
+        username: 'nawakarauser10',
+        userEmail: 'user10@nawakara.com',
+        userMobileNumber: '09876543211111',
+      }
+
+      const res = await chai.request(httpServer)
+          .put(`/api/v1/user/${userId}`)
+          .set('authorization', login.body.data)
+          .send(requestBody);
+
+      expect(res.status).to.equal(200);
+      expect(res.body.data).to.not.be.undefined;
     });
   });
 

@@ -7,6 +7,7 @@ exports.seed = (knex, Promise) => knex('eproject').del()
                     eprojectname: 'SatuA',
                     eprojectstartdate: '2020-07-24',
                     eprojectenddate: '2020-12-24',
+                    eprojectsupervisorid: 3,
                     eprojectcreateby: 1,
                     eprojectcreatetime: Date.now(),
                     eprojectsupervisorid: 1
@@ -16,6 +17,7 @@ exports.seed = (knex, Promise) => knex('eproject').del()
                     eprojectname: 'SatuB',
                     eprojectstartdate: '2020-07-24',
                     eprojectenddate: '2020-12-24',
+                    eprojectsupervisorid: 3,
                     eprojectcreateby: 3,
                     eprojectcreatetime: Date.now(),
                     eprojectsupervisorid: 3

@@ -27,6 +27,8 @@ class Project extends Model {
   static get relationMappings() {
 
     const Device = require('./Device')
+    const User = require('./User')
+    const Roster = require('./Roster')
 
     return {
       devices: {
@@ -39,6 +41,22 @@ class Project extends Model {
             to: 'eprojectdevicemapping.edevicedeviceid'
           },
           to: 'edevice.edeviceid'
+        }
+      },
+      manager: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: 'eproject.eprojectsupervisorid',
+          to: 'euser.euserid'
+        }
+      },
+      units: {
+        relation: Model.HasManyRelation,
+        modelClass: Roster,
+        join: {
+          from: 'eproject.eprojectid',
+          to: 'eroster.eprojecteprojectid'
         }
       }
     }

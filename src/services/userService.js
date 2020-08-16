@@ -67,9 +67,62 @@ UsersService.registerEmployees = async (user, path) => {
 
 }
 
-UsersService.createUser = async (userDTO, user) => {
+UsersService.createUser = async (userDTO, permission, user) => {
     userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
-    return User.query().insertToTable(userDTO, user.sub)
+
+    const createdUser = await User.query().insertToTable(userDTO, user.sub)
+
+    let realPermission
+
+    if (!permission) realPermission = 1
+    else realPermission = permission
+
+    await CompanyUserMapping.query()
+        .insertToTable({
+            ecompanyecompanyid: user.companyId,
+            eusereuserid: createdUser.euserid,
+            ecompanyusermappingpermission: realPermission
+        }, user.sub)
+
+    return createdUser
+}
+
+UsersService.updateUserById = async (userId, userDTO, permission, user) => {
+
+    if (user.permission != 9 && user.permission != 10) {
+        if (userId != user.sub) return
+    }
+
+    const userMapping = await CompanyUserMapping.query()
+        .where('ecompanyecompanyid', user.companyId)
+        .where('eusereuserid', userId)
+        .first()
+
+    console.log(userMapping)
+
+    const updateUserQuery = User.query().findById(userId)
+        .updateByUserId(userDTO, user.sub)
+        .returning('*')
+
+    let realPermission
+
+    if (!permission) realPermission = 1
+    else realPermission = permission
+
+    let additionalQuery
+
+    if (userMapping.ecompanyusermappingpermission != realPermission) {
+        additionalQuery = CompanyUserMapping.query()
+            .where('ecompanyecompanyid', user.companyId)
+            .where('eusereuserid', userId)
+            .updateByUserId({ ecompanyusermappingpermission: realPermission }, user.sub)
+    }
+
+    if (additionalQuery)
+        return Promise.all([additionalQuery, updateUserQuery])
+            .then(resultArr => resultArr[1])
+    else
+        return updateUserQuery
 }
 
 async function generateJWTToken(user, companyId, permission) {
@@ -161,7 +214,7 @@ UsersService.changeUserCompany = async (companyId, user) => {
     const userCompany = await CompanyUserMapping.query().select()
     .where('ecompanyecompanyid', companyId)
     .where('eusereuserid', user.sub)
-    .first() 
+    .first()
 
     if(!userCompany)
         return
@@ -195,6 +248,23 @@ UsersService.sendForgotPasswordLink = async ( email ) => {
     }
 
     return true;
+}
+
+UsersService.addApprovalUsers = async (userId, approverUserIds, user) => {
+    const users = await User.query()
+        .whereIn('euserid', approverUserIds)
+
+    if (users.length !== approvalUserIds.length) return
+
+    const patchDTO = {}
+    approverUserIds.forEach((value, index) => {
+        patchDTO['euserapprovaluserid'.concat(index)] = value
+    })
+
+    return User.query()
+        .findById(userId)
+        .updateByUserId(patchDTO, user.sub)
+        .returning('*')
 }
 
 module.exports = UsersService;
