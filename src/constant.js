@@ -13,7 +13,7 @@ module.exports = {
             forgot: '/user-forgot-password',
             create: '/user-create',
             password: '/user-change-password',
-            list: '/user/:companyId',
+            list: '/user/company/:companyId',
             import: '/user-import-template',
             id: '/user/:userId',
             approval: '/user/approval',

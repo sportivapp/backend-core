@@ -87,6 +87,23 @@ UsersService.createUser = async (userDTO, permission, user) => {
     return createdUser
 }
 
+UsersService.getUserById = async ( userId, user ) => {
+
+    const result = await User.query()
+        .findById(userId)
+
+    if (!result) return
+
+    const mapping = CompanyUserMapping.query()
+        .where('ecompanyecompanyid', user.companyId)
+        .where('eusereuserid', userId)
+
+    if (!mapping) return
+
+    return result;
+
+}
+
 UsersService.updateUserById = async (userId, userDTO, permission, user) => {
 
     if (user.permission != 9 && user.permission != 10) {
@@ -224,7 +241,6 @@ UsersService.changeUserCompany = async (companyId, user) => {
 
     return token;
 }
-
 
 UsersService.deleteUserById = async ( userId, user ) => {
     
