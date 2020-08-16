@@ -8,7 +8,6 @@ function isUserNotValid(user) {
     return user.permission !== 9 && user.permission !== 10
 }
 
-
 userController.changePassword = async (req, res, next) => {
 
     const user = req.user;

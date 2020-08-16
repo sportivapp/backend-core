@@ -18,6 +18,7 @@ const deviceTest = require('./device')
 const departmentTest = require('./department')
 const settingTest = require('./setting');
 const gradeTest = require('./grade')
+const industryTest = require('./industry')
 
 describe('Routes: ', () => {
   beforeEach(() => {
@@ -41,6 +42,7 @@ describe('Routes: ', () => {
   departmentTest(chai, httpServer, expect)
   settingTest(chai, httpServer, expect);
   gradeTest(chai, httpServer, expect)
+  industryTest(chai, httpServer, expect)
 
 
 });

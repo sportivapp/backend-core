@@ -7,7 +7,8 @@ exports.seed = (knex, Promise) => knex('ecompany').del()
               ecompanyemailaddress: '@nawakara.com',
               eaddresseaddressid: 1,
               ecompanycreateby: 0,
-              ecompanycreatetime: Date.now()
+              ecompanycreatetime: Date.now(),
+              eindustryeindustryid: 1
             },
             {
               ecompanyname: 'PT. Nawakara Perkasa Nusantara (BRANCH)',
@@ -15,7 +16,8 @@ exports.seed = (knex, Promise) => knex('ecompany').del()
               eaddresseaddressid: 1,
               ecompanyparentid: 1,
               ecompanycreateby: 0,
-              ecompanycreatetime: Date.now()
+              ecompanycreatetime: Date.now(),
+              eindustryeindustryid: 1
             },
             {
               ecompanyname: 'PT. Nawakara Perkasa Nusantara (SISTER)',
@@ -23,7 +25,8 @@ exports.seed = (knex, Promise) => knex('ecompany').del()
               eaddresseaddressid: 1,
               ecompanyolderid: 1,
               ecompanycreateby: 0,
-              ecompanycreatetime: Date.now()
+              ecompanycreatetime: Date.now(),
+              eindustryeindustryid: 1
             },
       ]
     ));

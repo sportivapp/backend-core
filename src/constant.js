@@ -50,6 +50,9 @@ module.exports = {
             rosterId: '/roster/:rosterId',
             shift: '/roster-shift',
             rosterMemberId: '/roster-members/:rosterId'
+        },
+        industry: {
+            list: '/industry'
         }
     }
 }
