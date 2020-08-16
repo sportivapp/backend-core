@@ -242,32 +242,36 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
     else
         newKeyword = ''
 
-    let query = User.relatedQuery('companies')
-        .for(user.sub)
-        .modify({ ecompanyusermappingdeletestatus: false })
-        .where(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
+    let query
 
-    if (type === 'BRANCH') {
-        if (!companyId) return ServiceHelper.toEmptyPage(page, size)
-        query = query.where('ecompanyparentid', companyId).whereNull('ecompanyolderid')
-    }
+    if (type === 'SISTER' || type === 'BRANCH') {
 
-    else if (type === 'SISTER') {
-        if (!companyId) return ServiceHelper.toEmptyPage(page, size)
-        query = query
-            .where('ecompanyolderid', companyId)
-            .whereNull('ecompanyparentid')
-            .withGraphFetched('[branches, sisters, industry]')
-    }
+        query = Company.query().orderBy('ecompanycreatetime', 'ASC')
 
-    else
-        query = query
+        if (type === 'BRANCH') {
+            if (!companyId) return ServiceHelper.toEmptyPage(page, size)
+            query = query.where('ecompanyparentid', companyId).whereNull('ecompanyolderid')
+        }
+
+        else if (type === 'SISTER') {
+            if (!companyId) return ServiceHelper.toEmptyPage(page, size)
+            query = query
+                .where('ecompanyolderid', companyId)
+                .whereNull('ecompanyparentid')
+                .withGraphFetched('[branches, sisters, industry]')
+        }
+
+    } else {
+
+        query = User.relatedQuery('companies')
+            .for(user.sub)
+            .modify({ ecompanyusermappingdeletestatus: false })
+            .where(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
             .whereNull('ecompanyparentid')
             .whereNull('ecompanyolderid')
             .withGraphFetched('[branches, sisters, industry]')
-
-    query = query
-        .orderBy('ecompanyusermappingcreatetime', 'ASC')
+            .orderBy('ecompanyusermappingcreatetime', 'ASC')
+    }
 
     const pageObj = await query.page(page, size)
 

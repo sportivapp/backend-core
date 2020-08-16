@@ -59,6 +59,7 @@ companyController.createCompany = async (req, res, next) => {
             ecompanyolderid: companyOlderId,
             eindustryeindustryid: industryId
         }
+
         const addressDTO = {
             eaddressstreet: street,
             eaddresspostalcode: postalCode
