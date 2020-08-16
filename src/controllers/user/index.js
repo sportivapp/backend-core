@@ -78,6 +78,25 @@ userController.createUser = async (req, res, next) => {
     }
 }
 
+userController.getUserById = async (req, res, next) => {
+
+    const user = req.user;
+    const { userId } = req.params;
+
+    try {
+
+        const result = await userService.getUserById(userId, user);
+
+        if (!result)
+            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+
+    } catch (e) {
+        next(e);
+    }
+
+}
+
 userController.updateUserById = async (req, res, next) => {
 
     const user = req.user
