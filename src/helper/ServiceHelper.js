@@ -11,4 +11,17 @@ function toPageObj(page, size, pageObj) {
     }
 }
 
-module.exports = { toPageObj }
+function toEmptyPage(page, size) {
+    const paging = {
+        page: page,
+        size: size,
+        totalSize: 0,
+        totalPage: 1
+    }
+    return {
+        data: [],
+        paging: paging
+    }
+}
+
+module.exports = { toPageObj, toEmptyPage }

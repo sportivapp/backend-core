@@ -60,9 +60,8 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
             user: user,
             company: company,
             address: address,
-            companymodulemapping: resultArr[0],
-            companyusermapping: resultArr[1],
-            departments: [resultArr[2]]
+            employeeCount: 1,
+            departmentCount: 1
         }))
 
 }
@@ -222,14 +221,14 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
             company: company,
             address: address,
             user: resultArr[0],
-            companymodulemapping: resultArr[1],
-            companyusermapping: resultArr[2],
-            departments: [resultArr[3]]
+            employeeCount: 1,
+            departments: 1,
+            childrenCount: 0
         }))
 
 }
 
-CompanyService.getCompanyList = async (page, size, type, keyword, user) => {
+CompanyService.getCompanyList = async (page, size, type, keyword, companyId, user) => {
 
     let newKeyword
 
@@ -243,18 +242,27 @@ CompanyService.getCompanyList = async (page, size, type, keyword, user) => {
         .modify({ ecompanyusermappingdeletestatus: false })
         .where(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
 
-    if (type === 'BRANCH')
-        query = query.whereNotNull('ecompanyparentid').whereNull('ecompanyolderid')
+    if (type === 'BRANCH') {
+        if (!companyId) return ServiceHelper.toEmptyPage(page, size)
+        query = query.where('ecompanyparentid', companyId).whereNull('ecompanyolderid')
+    }
 
-    else if (type === 'SISTER')
-        query = query.whereNull('ecompanyparentid').whereNotNull('ecompanyolderid')
+    else if (type === 'SISTER') {
+        if (!companyId) return ServiceHelper.toEmptyPage(page, size)
+        query = query
+            .where('ecompanyolderid', companyId)
+            .whereNull('ecompanyparentid')
+            .withGraphFetched('[branches, sisters]')
+    }
 
     else
-        query = query.whereNull('ecompanyparentid').whereNull('ecompanyolderid')
+        query = query
+            .whereNull('ecompanyparentid')
+            .whereNull('ecompanyolderid')
+            .withGraphFetched('[branches, sisters]')
 
     query = query
         .orderBy('ecompanyusermappingcreatetime', 'ASC')
-        .withGraphFetched('[branches, sisters]')
 
     const pageObj = await query.page(page, size)
 
@@ -264,7 +272,19 @@ CompanyService.getCompanyList = async (page, size, type, keyword, user) => {
 
 CompanyService.getCompanyById = async (companyId) => {
 
-    return Company.query().findById(companyId)
+    const company = await Company.query().findById(companyId)
+
+    const employeeCount = CompanyUserMapping.query().where('ecompanyecompanyid', companyId).count()
+    const departmentCount = Company.relatedQuery('departments').for(companyId).count()
+    const branchCount = Company.relatedQuery('branches').for(companyId).count()
+
+    return Promise.all([company, employeeCount, departmentCount, branchCount])
+        .then(resultArr => ({
+            ...resultArr[0],
+            employeeCount: resultArr[1],
+            departmentCount: resultArr[2],
+            childrenCount: resultArr[3]
+        }))
 }
 
 CompanyService.editCompany = async (companyId, companyDTO, user) => {
@@ -281,7 +301,19 @@ CompanyService.editCompany = async (companyId, companyDTO, user) => {
         if (!parent) return
     }
 
-    return Company.query().findById(companyId).updateByUserId(companyDTO, user.sub).returning('*')
+    const company = Company.query().findById(companyId).updateByUserId(companyDTO, user.sub).returning('*')
+
+    const employeeCount = CompanyUserMapping.query().where('ecompanyecompanyid', companyId).count()
+    const departmentCount = Company.relatedQuery('departments').for(companyId).count()
+    const branchCount = Company.relatedQuery('branches').for(companyId).count()
+
+    return Promise.all([company, employeeCount, departmentCount, branchCount])
+        .then(resultArr => ({
+            ...resultArr[0],
+            employeeCount: resultArr[1],
+            departmentCount: resultArr[2],
+            childrenCount: resultArr[3]
+        }))
 }
 
 CompanyService.deleteCompany = async (companyId) => {

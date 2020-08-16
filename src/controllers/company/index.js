@@ -82,10 +82,10 @@ companyController.getCompanyList = async (req, res, next) => {
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     // type = company or type = branch
-    const { page, size, type, keyword } = req.query
+    const { page, size, type, keyword, companyId } = req.query
 
     try {
-        const pageObj = await companyService.getCompanyList(parseInt(page), parseInt(size), type, keyword, user)
+        const pageObj = await companyService.getCompanyList(parseInt(page), parseInt(size), type, keyword, companyId, user)
         if (!pageObj)
             return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))

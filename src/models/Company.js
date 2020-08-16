@@ -22,6 +22,7 @@ class Company extends Model {
   static get relationMappings() {
 
     const User = require('./User')
+    const Department = require('./Department')
 
     return {
       users: {
@@ -66,6 +67,14 @@ class Company extends Model {
         join: {
           from: 'ecompany.ecompanyolderid',
           to: 'ecompany.ecompanyid'
+        }
+      },
+      departments: {
+        relation: Model.HasManyRelation,
+        modelClass: Department,
+        join: {
+          from: 'ecompany.ecompanyid',
+          to: 'edepartment.ecompanyecompanyid'
         }
       }
     }

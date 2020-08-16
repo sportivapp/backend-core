@@ -68,12 +68,14 @@ module.exports = (chai, httpServer, expect) => {
         password: 'emtivnawakarauser'
       });
 
-      const companyId = 2
+      const request = {
+        companyId: 2
+      }
 
       const res = await chai.request(httpServer)
-      .post(`/api/v1/user/change-company?companyId=${companyId}`)
+      .post(`/api/v1/user/change-company`)
       .set('authorization', login.body.data)
-      .send();
+      .send(request);
 
       expect(res.status).to.equal(200);
       expect(res.body.data).to.not.be.undefined;

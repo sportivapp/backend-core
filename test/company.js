@@ -54,8 +54,7 @@ module.exports = (chai, httpServer, expect) => {
 
           expect(res.status).to.equal(200);
           expect(res.body.data).to.not.be.undefined;
-          expect(res.body.data.companymodulemapping).to.not.be.undefined
-          expect(res.body.data.companymodulemapping.length).to.greaterThan(0)
+          expect(res.body.data.employeeCount).to.not.be.undefined
         });
       });
 
