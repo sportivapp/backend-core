@@ -187,4 +187,25 @@ module.exports = (chai, httpServer, expect) => {
     });
   });
 
+  describe('GET /api/v1/user/company', () => {
+    it('Should return success message', async () => {
+      const login = await chai.request(httpServer)
+          .post('/api/v1/user-login')
+          .send({
+            email: 'nawakaraadmin@nawakara.com',
+            password: 'emtivnawakaraadmin'
+          });
+
+      const res = await chai.request(httpServer)
+          .get('/api/v1/user/company/1?page=0&size=2')
+          .set('authorization', login.body.data)
+          .send();
+
+      console.log(res.body.data)
+
+      expect(res.status).to.equal(200);
+      expect(res.body.data).to.not.be.undefined;
+    });
+  });
+
 }

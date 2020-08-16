@@ -25,6 +25,22 @@ class CompanyUserMapping extends Model {
             ...this.baseModifiers()
         }
     }
+
+    static get relationMappings() {
+
+        const User = require('./User')
+
+        return {
+            users: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: User,
+                join: {
+                    from: 'ecompanyusermapping.eusereuserid',
+                    to: 'euser.euserid'
+                }
+            }
+        }
+    }
 }
 
 module.exports = CompanyUserMapping;
