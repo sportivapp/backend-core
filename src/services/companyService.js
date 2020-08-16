@@ -56,7 +56,7 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
     const createDefaultDepartment = departmentService.createDepartment(departmentDTO, loggedInUser)
 
     return Promise.all([insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery, createDefaultDepartment])
-        .then(resultArr => ({
+        .then(ignored => ({
             user: user,
             company: company,
             address: address,
@@ -181,6 +181,11 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
         if (!parent) return
     }
 
+    if (companyDTO.eindustryeindustryid) {
+        const industry = await Industry.query().findById(companyDTO.eindustryeindustryid)
+        if (!industry) return
+    }
+
     companyDTO.eaddresseaddressid = address.eaddressid;
     const company = await Company.query().insertToTable(companyDTO, user.sub);
 
@@ -252,14 +257,14 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
         query = query
             .where('ecompanyolderid', companyId)
             .whereNull('ecompanyparentid')
-            .withGraphFetched('[branches, sisters]')
+            .withGraphFetched('[branches, sisters, industry]')
     }
 
     else
         query = query
             .whereNull('ecompanyparentid')
             .whereNull('ecompanyolderid')
-            .withGraphFetched('[branches, sisters]')
+            .withGraphFetched('[branches, sisters, industry]')
 
     query = query
         .orderBy('ecompanyusermappingcreatetime', 'ASC')
@@ -272,7 +277,7 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
 
 CompanyService.getCompanyById = async (companyId) => {
 
-    const company = await Company.query().findById(companyId)
+    const company = await Company.query().findById(companyId).withGraphFetched('industry')
 
     const employeeCount = CompanyUserMapping.query().where('ecompanyecompanyid', companyId).count()
     const departmentCount = Company.relatedQuery('departments').for(companyId).count()
@@ -301,7 +306,14 @@ CompanyService.editCompany = async (companyId, companyDTO, user) => {
         if (!parent) return
     }
 
-    const company = Company.query().findById(companyId).updateByUserId(companyDTO, user.sub).returning('*')
+    if (companyDTO.eindustryeindustryid) {
+        const industry = await Industry.query().findById(companyDTO.eindustryeindustryid)
+        if (!industry) return
+    }
+
+    await Company.query().findById(companyId).updateByUserId(companyDTO, user.sub)
+
+    const company = Company.query().findById(companyId).withGraphFetched('industry')
 
     const employeeCount = CompanyUserMapping.query().where('ecompanyecompanyid', companyId).count()
     const departmentCount = Company.relatedQuery('departments').for(companyId).count()

@@ -23,6 +23,7 @@ class Company extends Model {
 
     const User = require('./User')
     const Department = require('./Department')
+    const Industry = require('./Industry')
 
     return {
       users: {
@@ -75,6 +76,14 @@ class Company extends Model {
         join: {
           from: 'ecompany.ecompanyid',
           to: 'edepartment.ecompanyecompanyid'
+        }
+      },
+      industry: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Industry,
+        join: {
+          from: 'ecompany.eindustryeindustryid',
+          to: 'eindustry.eindustryid'
         }
       }
     }

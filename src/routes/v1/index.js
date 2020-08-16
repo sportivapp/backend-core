@@ -13,6 +13,7 @@ const deviceRoutes = require('./device');
 const departmentRoutes = require('./department');
 const settingRoutes = require('./setting');
 const gradeRoutes = require('./grade')
+const industryRoutes = require('./industry')
 
 router.use('/api/v1', [
     userRoutes,
@@ -26,6 +27,7 @@ router.use('/api/v1', [
     departmentRoutes,
     settingRoutes,
     gradeRoutes,
+    industryRoutes
 ]);
 
 module.exports = router;
