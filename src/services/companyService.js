@@ -1,5 +1,6 @@
 const Company = require('../models/Company');
 const Address = require('../models/Address');
+const Industry = require('../models/Industry')
 const departmentService = require('./departmentService')
 const User = require('../models/User');
 const bcrypt = require('../helper/bcrypt');
