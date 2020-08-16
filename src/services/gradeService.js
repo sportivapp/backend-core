@@ -7,8 +7,27 @@ const ServiceHelper = require('../helper/ServiceHelper')
 
 const gradeService = {}
 
-gradeService.getAllGrades = async (page, size) => {
+gradeService.getAllGrades = async (page, size, companyId) => {
+
+    const branchIds = await Company.relatedQuery('branches')
+        .for(companyId)
+        .withGraphFetched('branches')
+        .then(companies => {
+            let ids = []
+            ids.push(companyId)
+            companies.forEach(company => {
+                ids.push(company.ecompanyid)
+                company.branches.forEach(branch => ids.push(branch.ecompanyid))
+            })
+            return ids
+        })
+
+
+    console.log(branchIds)
+
     const gradePage = await Grade.query()
+        .whereIn('ecompanyecompanyid', branchIds)
+        .withGraphFetched('[superior,department.parent.parent,company.parent.parent]')
         .page(page, size)
     return ServiceHelper.toPageObj(page, size, gradePage)
 }

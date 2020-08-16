@@ -39,9 +39,10 @@ module.exports = (chai, httpServer, expect) => {
 
             let page = 0
             let size = 10
+            let companyId = 2
 
             const res = await chai.request(httpServer)
-                .get(`/api/v1/grades?page=${page}&size=${size}`)
+                .get(`/api/v1/grades?page=${page}&size=${size}&companyId=${companyId}`)
                 .set('authorization', login.body.data)
                 .send()
 

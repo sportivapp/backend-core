@@ -24,6 +24,7 @@ class Grade extends Model {
 
     const Company = require('./Company')
     const User = require('./User')
+    const Department = require('./Department')
 
     return {
       superior: {
@@ -60,6 +61,14 @@ class Grade extends Model {
             to: 'euserpositionmapping.eusereuserid'
           },
           to: 'euser.euserid'
+        }
+      },
+      department: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Department,
+        join: {
+          from: 'egrade.edepartmentedepartmentid',
+          to: 'edepartment.edepartmentid'
         }
       }
     }
