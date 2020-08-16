@@ -161,10 +161,9 @@ async function generateJWTToken(user, companyId, permission) {
 
 UsersService.getAllUserByCompanyId = async ( page, size, companyId ) => {
 
-    const userPage = await User.query()
+    const userPage = await CompanyUserMapping.relatedQuery('users')
+    .for(CompanyUserMapping.query().where('ecompanyecompanyid', companyId))
     .select('euserid', 'eusername', 'euseremail', 'eusernik', 'eusermobilenumber')
-    .joinRelated('companies')
-    .where('ecompanyecompanyid', companyId)
     .page(page, size);
 
     const userIds = userPage.results.map(user => user.euserid);
