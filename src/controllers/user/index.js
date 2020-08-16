@@ -106,7 +106,11 @@ userController.getUserCurrentCompany = async (req, res, next) => {
 
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404))
-        return res.status(200).json(ResponseHelper.toBaseResponse({ ecompanyname: result.ecompanyname}))
+        return res.status(200).json(ResponseHelper.toBaseResponse(
+            { 
+                ecompanyname: result.ecompanyname,
+                ecompanyid: result.ecompanyid
+        }))
 
     } catch (e) {
         next(e);
