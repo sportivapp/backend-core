@@ -3,6 +3,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('ecompany', t => {
     t.string('ecompanyname').notNullable();
     t.string('ecompanyemailaddress');
     t.binary('ecompanylogo');
+    t.string('ecompanyphonenumber');
     t.integer('ecompanypremiumstatus').notNullable().defaultTo(1);
     t.integer('ecompanycreateby').notNullable();
     t.bigInteger('ecompanycreatetime').notNullable()
