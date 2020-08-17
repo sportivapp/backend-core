@@ -22,7 +22,9 @@ module.exports = (chai, httpServer, expect) => {
             companyName: 'PT. Nawakara Perkasa Nusantara',
             companyEmail: '@nawakara.com',
             street: 'Kompleks Golden Plaza, Jl. RS. Fatmawati Raya No.15, RT.10/RW.6, Gandaria Utara, Kec. Cilandak, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12420',
-            postalCode: 12420
+            postalCode: 12420,
+            countryId: 1,
+            stateId: 1
           });
 
           expect(res.status).to.equal(200);
@@ -44,12 +46,16 @@ module.exports = (chai, httpServer, expect) => {
           .post(`/api/v1/company`)
           .set('authorization', login.body.data)
           .send({
+            supervisorId: 5,
             companyName: 'PT. Nawakara Perkasa Nusantara',
             companyEmail: '@nawakara.com',
             street: 'Kompleks Golden Plaza, Jl. RS. Fatmawati Raya No.15, RT.10/RW.6, Gandaria Utara, ' +
                 'Kec. Cilandak, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12420',
             postalCode: 12420,
-            companyParentId: 1
+            companyParentId: 1,
+            industryId: 2,
+            countryId: 1,
+            stateId: 2
           });
 
           expect(res.status).to.equal(200);
