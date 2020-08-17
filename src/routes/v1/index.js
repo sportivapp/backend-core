@@ -37,11 +37,13 @@ router.use('/api/v1', [
 const mobileUserRoutes = require('./mobileUser');
 const mobileFileRoutes = require('./mobileFile');
 const mobileLicenseRoutes = require('./mobileLicense');
+const mobileCompanyRoutes = require('./mobileCompany');
 
 router.use('/api/v1/mobile', [
     mobileUserRoutes,
     mobileFileRoutes,
-    mobileLicenseRoutes
+    mobileLicenseRoutes,
+    mobileCompanyRoutes,
 ]);
 
 module.exports = router;
