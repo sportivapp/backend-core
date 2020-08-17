@@ -12,10 +12,10 @@ class License extends Model {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['elicenseacademicname', 'elicensegraduationdate', 'esporttypeesporttypeid', 'elicenselevel', 'efileefileid'],
+      required: ['elicenseacademicname', 'elicensegraduationdate', 'eindustryeindustryid', 'elicenselevel', 'efileefileid'],
       properties: {
         elicenseacademicname: { type: 'string', minLength: 1, maxLength: 256 },
-        esporttypeesporttypeid: { type: 'integer' },
+        eindustryeindustryid: { type: 'integer' },
         elicenselevel: { type: 'string', minLength: 1, maxLength: 256 },
         efileefileid: { type: 'integer' },
         elicenseadditionalinformation: { type: 'string', minLength: 0, maxLength: 256 }
@@ -26,15 +26,15 @@ class License extends Model {
   static get relationMappings() {
 
     const File = require('./File');
-    const SportType = require('./SportType');
+    const Industry = require('./Industry');
 
     return {
-      sporttype: {
+      industry: {
         relation: Model.BelongsToOneRelation,
-        modelClass: SportType,
+        modelClass: Industry,
         join: {
-          from: 'elicense.esporttypeesporttypeid',
-          to: 'esporttype.esporttypeid'
+          from: 'elicense.eindustryeindustryid',
+          to: 'eindustry.eindustryid'
         }
       },
       file: {

@@ -2,7 +2,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('elicense', t => {
     t.increments('elicenseid').primary().unsigned();
     t.string('elicenseacademicname').notNullable();
     t.bigInteger('elicensegraduationdate').notNullable();
-    t.integer('esporttypeesporttypeid').notNullable().references('esporttype.esporttypeid').onDelete('CASCADE');
+    t.integer('eindustryeindustryid').notNullable().references('eindustry.eindustryid').onDelete('CASCADE');
     t.string('elicenselevel').notNullable();
     t.string('elicenseadditionalinformation');
     t.integer('efileefileid').notNullable().references('efile.efileid').onDelete('CASCADE');

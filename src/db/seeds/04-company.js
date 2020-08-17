@@ -28,5 +28,13 @@ exports.seed = (knex, Promise) => knex('ecompany').del()
               ecompanycreatetime: Date.now(),
               eindustryeindustryid: 1
             },
+            {
+              ecompanyname: 'PT. APSSI',
+              ecompanyemailaddress: 'yeyen@apssi.com',
+              eaddresseaddressid: 2,
+              ecompanycreateby: 0,
+              ecompanycreatetime: Date.now(),
+              eindustryeindustryid: 1
+            },
       ]
     ));

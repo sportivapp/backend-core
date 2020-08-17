@@ -52,5 +52,13 @@ exports.seed = (knex, Promise) => knex('euser').del()
           eusermobilenumber: '11111111',
           euseridentitynumber: "3600312523341234"
         },
+        {
+          eusernik: 'A1',
+          eusername: 'yeyen',
+          euseremail: 'yeyen@apssi.com',
+          euserpassword: '$2y$10$qT1LlCeYbe5DLKtzYk/C.eK1gSFJjRg1xK9WfouFVjuTfwWFBBVE2',
+          eusermobilenumber: '11111111',
+          euseridentitynumber: "3600312523341234"
+        },
       ]
     ));
