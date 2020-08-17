@@ -53,4 +53,41 @@ departmentService.deleteDepartment = async (departmentId) => {
     .then(rowsAffected => rowsAffected === 1)
 }
 
+departmentService.getAllUsersWithinDepartment = async (page, size, departmentId) => {
+
+    if (!departmentId) return ServiceHelper.toEmptyPage(page, size)
+
+    const dataPage = await Grade.query()
+        .where('edepartmentedepartmentid', departmentId)
+        .withGraphJoined('[department, users]')
+        .page(page, size)
+
+    let users = []
+    let total = 0
+
+    dataPage.results.some((data, index) => {
+        total += data.users.length
+        const position = {
+            egradeid: data.egradeid,
+            egradename: data.egradename
+        }
+        const slicedUsers = page > 0 ? data.users.slice((page + 1) * size, (page + 2) * size) : data.users.slice(0, size)
+        slicedUsers.some((user, index) => {
+            if (users.length === size) return true
+            users.push({ ...user, position: position })
+        })
+        if (users.length === size) return true
+    })
+
+    const pageObj = {
+        results: users,
+        page: page,
+        size: size,
+        total: total
+    }
+
+    return ServiceHelper.toPageObj(page, size, pageObj)
+
+}
+
 module.exports = departmentService

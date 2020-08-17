@@ -39,7 +39,8 @@ module.exports = {
         },
         department: {
             list: '/department',
-            id: '/department/:departmentId'
+            id: '/department/:departmentId',
+            users: '/department/:departmentId/users'
         },
         device: {
             list: '/devices',

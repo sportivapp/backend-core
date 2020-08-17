@@ -7,5 +7,6 @@ router.get( routes.department.list, auth.authenticateToken, controller.getAllDep
 router.post( routes.department.list, auth.authenticateToken, controller.createDepartment);
 router.put( routes.department.id, auth.authenticateToken, controller.updateDepartment);
 router.delete( routes.department.id, auth.authenticateToken, controller.deleteDepartment);
+router.get( routes.department.users, auth.authenticateToken, controller.getAllUsersByDepartmentId);
 
 module.exports = router.expressRouter;
