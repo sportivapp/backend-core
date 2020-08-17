@@ -110,22 +110,41 @@ UsersService.getUserCurrentCompany = async ( user ) => {
     const companyData = await Company.query()
         .select()
         .where('ecompanyid', user.companyId)
-        .withGraphFetched('[sisters]')
+        .withGraphFetched('[older]')
         .first()
 
-    console.log(companyData);
-    let result 
-    if( companyData.sisters.length === 0 ){
+    console.log(companyData)
+
+    let result
+
+    if( companyData.older === null || companyData.older === undefined){
         result = {
-            currentCompanyId: companyData.ecompanyid,
-            currentCompanyName: companyData.ecompanyname
+            companyId: companyData.ecompanyid,
+            companyName: companyData.ecompanyname,
+            parent: null
         }
-    } else {
+    } else if( companyData.older.older === null  || companyData.older.older === undefined) {
         result = {
-            currentCompanyId: companyData.ecompanyid,
-            currentCompanyName: companyData.ecompanyname,
-            currentSisterId: companyData.sisters[0].ecompanyid,
-            companySisterName: companyData.sisters[0].ecompanyname
+            companyId: companyData.ecompanyid,
+            companyName: companyData.ecompanyname,
+            parent: {
+                companyId: companyData.older.ecompanyid,
+                companyName: companyData.older.ecompanyname,
+                parent: null
+            }
+        }
+    } else if( companyData.older.older !== null || companyData.older.older !== undefined) {
+        result = {
+            companyId: companyData.ecompanyid,
+            companyName: companyData.ecompanyname,
+            parent: {
+                companyId: companyData.older.ecompanyid,
+                companyName: companyData.older.ecompanyname,
+                parent: {
+                    companyId: companyData.older.older.ecompanyid,
+                    companyName: companyData.older.older.ecompanyname
+                }
+            }
         }
     }
 
