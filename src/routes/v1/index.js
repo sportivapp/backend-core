@@ -16,6 +16,7 @@ const gradeRoutes = require('./grade')
 const industryRoutes = require('./industry')
 const stateRoutes = require('./state')
 const countryRoutes = require('./country')
+const sportTypeRoutes = require('./sporttype');
 
 router.use('/api/v1', [
     userRoutes,
@@ -31,7 +32,18 @@ router.use('/api/v1', [
     gradeRoutes,
     industryRoutes,
     stateRoutes,
-    countryRoutes
+    countryRoutes,
+    sportTypeRoutes,
+]);
+
+const mobileUserRoutes = require('./mobileUser');
+const mobileFileRoutes = require('./mobileFile');
+const mobileLicenseRoutes = require('./mobileLicense');
+
+router.use('/api/v1/mobile', [
+    mobileUserRoutes,
+    mobileFileRoutes,
+    mobileLicenseRoutes
 ]);
 
 module.exports = router;

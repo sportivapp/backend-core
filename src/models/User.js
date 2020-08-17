@@ -28,6 +28,8 @@ class User extends Model {
     const Permit = require('./Permit')
     const Company = require('./Company')
     const Grade = require('./Grades')
+    const Country = require('./Country')
+    const File = require('./File')
 
     return {
       permits: {
@@ -60,6 +62,22 @@ class User extends Model {
             to: 'euserpositionmapping.egradeegradeid'
           },
           to: 'egrade.egradeid'
+        }
+      },
+      country: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Country,
+        join: {
+          from: 'euser.ecountryecountryid',
+          to: 'ecountry.ecountryid'
+        }
+      },
+      file: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: File,
+        join: {
+          from: 'euser.efileefileid',
+          to: 'efile.efileid'
         }
       },
       approvalUser1: {

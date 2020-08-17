@@ -8,6 +8,15 @@ exports.up = (knex, Promise) => knex.schema.createTable('euser', t => {
     t.string('euseremail', 256).notNullable();
     t.string('euserpassword', 256).notNullable();
     t.string('eusermobilenumber', 256).notNullable();
+    t.bigInteger('euserdob');
+    t.string('eusergender');
+    t.string('euserhobby');
+    t.string('euseraddress');
+    t.integer('ecountryecountryid').references('ecountry.ecountryid').onDelete('SET NULL');
+    t.integer('efileefileid').references('efile.efileid').onDelete('SET NULL');
+    t.string('euserfacebook');
+    t.string('euserinstagram');
+    t.string('euserlinkedin');
     t.bigInteger('euseractivationtime').defaultTo(Date.now());
     t.bigInteger('euserlastlogin').defaultTo(Date.now());
     t.integer('eusercreateby').notNullable().defaultTo(0);
