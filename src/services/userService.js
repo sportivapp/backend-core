@@ -69,7 +69,10 @@ UsersService.registerEmployees = async (user, path) => {
 }
 
 UsersService.createUser = async (userDTO, permission, user) => {
-    userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
+
+    const trimmedName = userDTO.eusername.replace(/\s+/g, '')
+
+    userDTO.euserpassword = await bcrypt.hash('qplay'.concat(trimmedName.toLowerCase()));
 
     const createdUser = await User.query().insertToTable(userDTO, user.sub)
 
