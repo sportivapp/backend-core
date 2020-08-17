@@ -55,7 +55,7 @@ userController.createUser = async (req, res, next) => {
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const user = req.user
-    const { userNik, username, userEmail, userMobileNumber, userPassword, isMultiApproval, permission } = req.body
+    const { userNik, username, userEmail, userMobileNumber, isMultiApproval, permission } = req.body
 
     try {
         
@@ -64,7 +64,6 @@ userController.createUser = async (req, res, next) => {
             eusername: username,
             euseremail: userEmail,
             eusermobilenumber: userMobileNumber,
-            euserpassword: userPassword,
             eusermultiapproval: isMultiApproval
         }
 
