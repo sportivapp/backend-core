@@ -285,6 +285,7 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
     const result = pageObj.results.map(company => ({
         ...company,
         childrenCount: company.branches.length,
+        eindustryname: company.industry.eindustryname
     }))
 
     const newPageObj = {
