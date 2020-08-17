@@ -113,8 +113,6 @@ UsersService.getUserCurrentCompany = async ( user ) => {
         .withGraphFetched('[older]')
         .first()
 
-    console.log(companyData)
-
     let result
 
     if( companyData.older === null || companyData.older === undefined){
