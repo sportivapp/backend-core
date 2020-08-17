@@ -1,6 +1,8 @@
 const   express     = require('express'),
         cors        = require('cors'),
-        morgan      = require('morgan')
+        morgan      = require('morgan'),
+        fs          = require('fs'),
+        https       = require('https')
 
 const app = express();
 const routes = require('./routes/v1');
