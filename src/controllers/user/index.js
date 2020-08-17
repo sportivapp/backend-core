@@ -55,7 +55,18 @@ userController.createUser = async (req, res, next) => {
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const user = req.user
-    const { userNik, username, userEmail, userMobileNumber, isMultiApproval, permission } = req.body
+    const {
+        userNik,
+        username,
+        userEmail,
+        userMobileNumber,
+        gender,
+        hobby,
+        address,
+        isMultiApproval,
+        permission,
+        identityNumber
+    } = req.body
 
     try {
         
@@ -64,7 +75,11 @@ userController.createUser = async (req, res, next) => {
             eusername: username,
             euseremail: userEmail,
             eusermobilenumber: userMobileNumber,
-            eusermultiapproval: isMultiApproval
+            eusermultiapproval: isMultiApproval,
+            eusergender: gender,
+            euserhobby: hobby,
+            euseridentitynumber: identityNumber,
+            euseraddress: address
         }
 
         const data = await userService.createUser(userDTO, permission, user)
@@ -115,7 +130,17 @@ userController.getUserCurrentCompany = async (req, res, next) => {
 userController.updateUserById = async (req, res, next) => {
 
     const user = req.user
-    const { userNik, username, userMobileNumber, isMultiApproval, permission, identityNumber } = req.body
+    const {
+        userNik,
+        username,
+        userMobileNumber,
+        gender,
+        hobby,
+        address,
+        isMultiApproval,
+        permission,
+        identityNumber
+    } = req.body
     const { userId } = req.params
 
     try {
@@ -125,7 +150,10 @@ userController.updateUserById = async (req, res, next) => {
             eusername: username,
             eusermobilenumber: userMobileNumber,
             eusermultiapproval: isMultiApproval,
-            euseridentitynumber: identityNumber
+            eusergender: gender,
+            euserhobby: hobby,
+            euseridentitynumber: identityNumber,
+            euseraddress: address
         }
 
         const data = await userService.updateUserById(userId, userDTO, permission, user)
