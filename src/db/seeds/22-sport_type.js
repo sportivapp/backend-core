@@ -20,8 +20,5 @@ exports.seed = (knex, Promise) => knex('esporttype').del()
         {
           esporttypename: 'Tennis',
         },
-        {
-          esporttypename: 'Soccer',
-        },
       ]
     ));
