@@ -1,28 +1,45 @@
 const Company = require('../models/Company')
 const { raw } = require('objection');
-const Department = require('../models/Department');
 
 const companyService = {}
 
 companyService.getCompany = async (companyId) => {
-    
-    return
-    
-    // const companyPromise = Company.query()
-    // .select('ecompanyname', 'eindustryname', 'eaddressstreet', 'ecompanyemailaddress', 'ecompanymobilenumber')
-    // .joinRelated('address')
-    // .joinRelated('industry')
-    // .where('ecompanyid', companyId);
 
-    // const departmentPromise = Department.query()
-
-    // const department = await departmentPromise
-    // console.log(department);
-
-    // if (!company)
-    //     return
+    const companyDetailPromise = Company.query()
+    .select('ecompanylogo', 'ecompanyname', 'eindustryname', 'eaddressstreet', 'ecompanyphonenumber', 'ecompanyemailaddress')
+    .joinRelated('address')
+    .joinRelated('industry')
+    .where('ecompanyid', companyId);
     
-    // return company
+    const departmentWithHeadPromise = Company.query()
+    .select('edepartmentname', 'eusername')
+    .withGraphJoined('departments.positions.users')
+    .where('ecompany.ecompanyid', companyId)
+    .andWhere('egradesuperiorid', null);
+
+    const branchesPromise = Company.query()
+    .select('branches.ecompanyid', 'branches.ecompanyname')
+    .joinRelated('branches')
+    .where('ecompany.ecompanyid', companyId);
+
+    const result = await Promise.all([companyDetailPromise, departmentWithHeadPromise, branchesPromise])
+        .then();
+
+    let departmentWithHead = [];
+    for (let i=0; i<result[1].length; i++) {
+        departmentWithHead.push({
+            edepartmentname: result[1][i].edepartmentname,
+            eusername: result[1][i].eusername
+        })
+    }
+
+    returnedData = {
+        company: result[0],
+        departments: departmentWithHead,
+        branches: result[2]
+    }
+
+    return returnedData;
 
 }
 
@@ -39,6 +56,14 @@ companyService.getCompanies = async (keyword) => {
         .where('ecompanyolderid', null)
         .andWhere('ecompanyparentid', null)
         .andWhere(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
+}
+
+companyService.getCompanyEmployees = async (companyId) => {
+
+    companyEmployees = Company.query()
+    .withGraphJoined('departments.positions.users')
+    .where('ecompanyid', companyId);
+
 }
 
 module.exports = companyService

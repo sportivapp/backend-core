@@ -16,6 +16,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('ecompany', t => {
     t.integer('eaddresseaddressid').notNullable().references('eaddress.eaddressid');
     t.integer('ecompanyparentid').references('ecompany.ecompanyid').onDelete('CASCADE')
     t.integer('ecompanyolderid').references('ecompany.ecompanyid').onDelete('SET NULL')
+    t.integer('efileefileid').references('efile.efileid').onDelete('SET NULL');
     t.integer('eindustryeindustryid').references('eindustry.eindustryid').onDelete('SET NULL')
   });
   

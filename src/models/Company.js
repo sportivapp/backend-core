@@ -94,6 +94,14 @@ class Company extends Model {
           from: 'ecompany.eindustryeindustryid',
           to: 'eindustry.eindustryid'
         }
+      },
+      file: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: File,
+        join: {
+          from: 'ecompany.efileefileid',
+          to: 'efile.efileid'
+        }
       }
     }
   }
