@@ -15,6 +15,7 @@ const settingRoutes = require('./setting');
 const gradeRoutes = require('./grade')
 const industryRoutes = require('./industry')
 const stateRoutes = require('./state')
+const countryRoutes = require('./country')
 const sportTypeRoutes = require('./sporttype');
 
 router.use('/api/v1', [
@@ -31,6 +32,7 @@ router.use('/api/v1', [
     gradeRoutes,
     industryRoutes,
     stateRoutes,
+    countryRoutes,
     sportTypeRoutes,
 ]);
 
