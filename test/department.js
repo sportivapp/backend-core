@@ -1,4 +1,3 @@
-
 module.exports = (chai, httpServer, expect) => {
 
     describe('POST /api/v1/department', () => {
@@ -85,4 +84,27 @@ module.exports = (chai, httpServer, expect) => {
           expect(res.body.data).to.not.be.undefined;
         });
       });
+
+    describe('GET /api/v1/department/users', () => {
+        it('Should return user list of department by id', async () => {
+            const login = await chai.request(httpServer)
+                .post('/api/v1/user-login')
+                .send({
+                    email: 'nawakaraadmin@nawakara.com',
+                    password: 'emtivnawakaraadmin'
+                });
+
+            let id = 1
+
+            const res = await chai.request(httpServer)
+                .get(`/api/v1/department/${id}/users?page=0&size=10`)
+                .set('authorization', login.body.data)
+                .send();
+
+            console.log(res.body.data)
+
+            expect(res.status).to.equal(200);
+            expect(res.body.data).to.not.be.undefined;
+        });
+    });
 }

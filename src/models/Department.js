@@ -22,6 +22,9 @@ class Department extends Model {
   }
 
   static get relationMappings() {
+
+    const Grades = require('./Grades')
+
     return {
       parent: {
         relation: Model.BelongsToOneRelation,
@@ -29,6 +32,14 @@ class Department extends Model {
         join: {
           from: 'edepartment.edepartmentsuperiorid',
           to: 'edepartment.edepartmentid'
+        }
+      },
+      positions: {
+        relation: Model.HasManyRelation,
+        modelClass: Grades,
+        join: {
+          from: 'edepartment.edepartmentid',
+          to: 'egrade.edepartmentedepartmentid'
         }
       }
     }

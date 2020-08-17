@@ -107,4 +107,26 @@ controller.deleteDepartment = async (req, res, next) => {
 
 }
 
+controller.getAllUsersByDepartmentId = async (req, res, next) => {
+
+    const user = req.user
+
+    if (isUserNotValid(user))
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
+    const { page, size } = req.query
+
+    const { departmentId } = req.params
+
+    try {
+        const pageObj = await departmentService.getAllUsersWithinDepartment(parseInt(page), parseInt(size), departmentId)
+        if (!pageObj)
+            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+    } catch (e) {
+        next(e)
+    }
+
+}
+
 module.exports = controller
