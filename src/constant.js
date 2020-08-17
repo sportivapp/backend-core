@@ -54,6 +54,9 @@ module.exports = {
         },
         industry: {
             list: '/industry'
+        },
+        state: {
+            list: '/state'
         }
     }
 }
