@@ -47,17 +47,7 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
 
     const insertCompanyUserMappingQuery = CompanyUserMapping.query().insertToTable(companyUserDTO, user.euserid)
 
-    const departmentDTO = {
-        edepartmentname: 'DEFAULT DEPARTMENT',
-        edepartmentdescription: 'Defaut Deparment for Company',
-        ecompanyecompanyid: company.ecompanyid
-    }
-
-    const loggedInUser = { sub: user.euserid, companyId: company.ecompanyid }
-
-    const createDefaultDepartment = departmentService.createDepartment(departmentDTO, loggedInUser)
-
-    return Promise.all([insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery, createDefaultDepartment])
+    return Promise.all([insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery])
         .then(ignored => ({
             user: user,
             company: company,
@@ -211,19 +201,11 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
 
     const insertCompanyUserMappingQuery = CompanyUserMapping.query().insertToTable(companyUserMappingDTO, user.sub)
 
-    const departmentDTO = {
-        edepartmentname: 'DEFAULT DEPARTMENT',
-        edepartmentdescription: 'Defaut Deparment for Company',
-        ecompanyecompanyid: company.ecompanyid
-    }
-
-    const createDefaultDepartment = departmentService.createDepartment(departmentDTO, user)
-
     // super user of the company
     const findUserQuery = User.query()
         .findById(id)
 
-    return Promise.all([findUserQuery, insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery, createDefaultDepartment])
+    return Promise.all([findUserQuery, insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery])
         .then(resultArr => ({
             company: company,
             address: address,
@@ -266,7 +248,7 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
             query = query
                 .where('ecompanyolderid', companyId)
                 .whereNull('ecompanyparentid')
-                .withGraphFetched('[branches, sisters, industry, address.[state, country]]')
+                .withGraphFetched('[branches, sisters.industry, industry, address.[state, country]]')
         }
 
     } else {
@@ -277,7 +259,7 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
             .where(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
             .whereNull('ecompanyparentid')
             .whereNull('ecompanyolderid')
-            .withGraphFetched('[branches, sisters, industry, address.[state, country]]')
+            .withGraphFetched('[branches, sisters.industry, industry, address.[state, country]]')
             .orderBy('ecompanyusermappingcreatetime', 'ASC')
     }
 
