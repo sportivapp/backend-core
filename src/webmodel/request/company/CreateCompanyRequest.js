@@ -5,8 +5,8 @@ const schema = Joi.object({
     companyEmail: Joi.string().required(),
     street: Joi.string().required(),
     postalCode: Joi.number().positive().required(),
-    companyParentId: Joi.number().positive(),
-    companyOlderId: Joi.number().positive()
+    companyParentId: Joi.number().positive().allow(null),
+    companyOlderId: Joi.number().positive().allow(null)
 })
 
 module.exports = schema

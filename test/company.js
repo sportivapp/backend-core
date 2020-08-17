@@ -53,6 +53,7 @@ module.exports = (chai, httpServer, expect) => {
                 'Kec. Cilandak, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12420',
             postalCode: 12420,
             companyParentId: 1,
+            companyOlderId: null,
             industryId: 2,
             countryId: 1,
             stateId: 2
