@@ -5,8 +5,7 @@ const ResponseHelper = require('../../helper/ResponseHelper');
 const controller = {};
 
 controller.login = async (req, res, next) => {
-
-    console.log('yes')
+    
     const { email, password } = req.body;
 
     const loginDTO = {
