@@ -25,6 +25,7 @@ class Company extends Model {
     const Department = require('./Department')
     const Address = require('./Address')
     const Industry = require('./Industry')
+    const File = require('./File')
 
     return {
       address: {
