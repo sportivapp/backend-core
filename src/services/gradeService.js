@@ -22,9 +22,6 @@ gradeService.getAllGrades = async (page, size, companyId) => {
             return ids
         })
 
-
-    console.log(branchIds)
-
     const gradePage = await Grade.query()
         .whereIn('ecompanyecompanyid', branchIds)
         .withGraphFetched('[superior,department.parent.parent,company.parent.parent]')
@@ -34,6 +31,7 @@ gradeService.getAllGrades = async (page, size, companyId) => {
 
 gradeService.getGradeById = async (gradeId) => {
     return Grade.query().findById(gradeId)
+        .withGraphFetched('[superior,department.parent.parent,company.parent.parent]')
 }
 
 gradeService.createGrade = async (gradeDTO, userId) => {
