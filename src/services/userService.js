@@ -107,12 +107,29 @@ UsersService.getUserById = async ( userId, user ) => {
 
 UsersService.getUserCurrentCompany = async ( user ) => {
 
-    const company = Company.query()
+    const companyData = await Company.query()
         .select()
         .where('ecompanyid', user.companyId)
+        .withGraphFetched('[sisters]')
         .first()
 
-    return company
+    console.log(companyData);
+    let result 
+    if( companyData.sisters.length === 0 ){
+        result = {
+            currentCompanyId: companyData.ecompanyid,
+            currentCompanyName: companyData.ecompanyname
+        }
+    } else {
+        result = {
+            currentCompanyId: companyData.ecompanyid,
+            currentCompanyName: companyData.ecompanyname,
+            currentSisterId: companyData.sisters[0].ecompanyid,
+            companySisterName: companyData.sisters[0].ecompanyname
+        }
+    }
+
+    return result
 
 }
 
