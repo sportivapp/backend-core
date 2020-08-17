@@ -6,9 +6,10 @@ const LicenseService = {};
 LicenseService.getLicense = async (licenseId) => {
 
     return License.query()
-    .select('elicenseid', 'elicenseacademicname', 'efileefileid', 'elicensegraduationdate', 'esporttypename', 'elicenselevel', 
+    .select('elicenseid', 'elicenseacademicname', 'efileid', 'efilename', 'elicensegraduationdate', 'esporttypename', 'elicenselevel', 
     'elicenseadditionalinformation')
-    .leftJoinRelated('esporttype')
+    .leftJoinRelated('sporttype')
+    .joinRelated('file')
     .where('elicenseid', licenseId)
     .first();
 
@@ -18,7 +19,7 @@ LicenseService.getLicenses = async (user) => {
 
     return License.query()
     .select('elicenseid', 'elicenseacademicname', 'elicensegraduationdate', 'elicenselevel', 'esporttypename')
-    .joinRelated('esporttype')
+    .joinRelated('sporttype')
     .where('elicensecreateby', user.sub);
 
 }
@@ -67,13 +68,12 @@ LicenseService.updateLicense = async (licenseDTO, licenseId, user) => {
 
 LicenseService.deleteLicenses = async (licenseIds, user) => {
 
-    const licenseIdsInteger = licenseIds.split`,`.map(x=>+x);
-    const licenses = await LicenseService.getLicensesByIdsAndCreateBy(licenseIdsInteger, user.sub);
+    const licenses = await LicenseService.getLicensesByIdsAndCreateBy(licenseIds, user.sub);
 
     if (licenses.length === 0 || licenses.length !== licenseIds.length)
         return
 
-    return License.query().whereIn('elicenseid', licenseIdsInteger).del()
+    return License.query().whereIn('elicenseid', licenseIds).del()
     .then(rowsAffected => rowsAffected === licenseIds.length);
 
 }

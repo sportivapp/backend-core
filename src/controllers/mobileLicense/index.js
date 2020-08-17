@@ -42,7 +42,7 @@ controller.createLicense = async (req, res, next) => {
     const licenseDTO = {
         elicenseacademicname: academicName,
         elicensegraduationdate: graduationDate,
-        elicensesporttypeid: sportTypeId,
+        esporttypeesporttypeid: sportTypeId,
         elicenselevel: level,
         elicenseadditionalinformation: additionalInformation,
         efileefileid: fileId
@@ -68,7 +68,7 @@ controller.updateLicense = async (req, res, next) => {
     const licenseDTO = {
         elicenseacademicname: academicName,
         elicensegraduationdate: graduationDate,
-        elicensesporttypeid: sportTypeId,
+        esporttypeesporttypeid: sportTypeId,
         elicenselevel: level,
         elicenseadditionalinformation: additionalInformation,
         efileefileid: fileId
@@ -89,7 +89,7 @@ controller.updateLicense = async (req, res, next) => {
 
 controller.deleteLicenses = async (req, res, next) => {
 
-    const { licenseIds } = req.query;
+    const { licenseIds } = req.body;
 
     try {
 
