@@ -51,15 +51,24 @@ app.use((error, req, res, next) => {
     slackLoggingService.sendSlackMessage(webHookURL, slackLoggingService.setLogMessage(errorMsg));
 });
 
-// const slackResponse = slackLoggingService.sendSlackMessage(webHookURL, slackLoggingService.setLogMessage(errorMsg));
-// console.log('Message response', slackResponse);
-
 require('dotenv').config();
-const httpPORT = process.env.PORT || 7000;
+const httpPORT = process.env.PORT || 5000;
 const httpServer = app.listen(httpPORT, function() {
     console.log(`HTTP Server started on port ${httpPORT}`);
 })
 
+// configuration for https
+const options = {
+    key: fs.readFileSync('../../../etc/ssl/private/quickplay.key', 'utf8'),
+    cert: fs.readFileSync('../../../etc/ssl/certs/quickplay.crt', 'utf8')
+};
+const httpsServer = https.createServer(options, app);
+const httpsPORT = process.env.HTTPS_PORT || 5001;
+httpsServer.listen(httpsPORT, function() {
+    console.log(`HTTPS Server started on port ${httpsPORT}.`);
+});
+
 module.exports = {
-    httpServer: httpServer
+    httpServer: httpServer,
+    httpsServer: httpsServer
 }
