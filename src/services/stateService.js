@@ -3,9 +3,12 @@ const ServiceHelper = require('../helper/ServiceHelper')
 
 const stateService = {};
 
-stateService.getAllStates = async ( page, size ) => {
+stateService.getAllStates = async ( page, size, countryId ) => {
     
-    const statePage = await State.query().select().page(page, size)
+    if(!countryId)
+        return ServiceHelper.toEmptyPage(page, size)
+        
+    const statePage = await State.query().select().where('ecountryecountryid', countryId ).page(page, size)
 
     return ServiceHelper.toPageObj(page, size, statePage)
 }

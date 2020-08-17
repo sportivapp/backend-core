@@ -5,10 +5,10 @@ const stateController = {}
 
 stateController.getAllStates = async (req, res, next) => {
 
-    const { page, size } = req.query
+    const { page, size, countryId } = req.query
 
     try {
-        const pageObj = await stateService.getAllStates(parseInt(page), parseInt(size))
+        const pageObj = await stateService.getAllStates(parseInt(page), parseInt(size), countryId)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
     } catch (e) {
         next(e)
