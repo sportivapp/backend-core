@@ -228,7 +228,7 @@ userController.login = async (req, res, next) => {
         const result = await userService.login(loginDTO);
 
         if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
+            return res.status(401).json(ResponseHelper.toErrorResponse(401))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch(e) {

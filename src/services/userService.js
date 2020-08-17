@@ -205,6 +205,10 @@ UsersService.getAllUserByCompanyId = async ( page, size, companyId ) => {
 UsersService.login = async (loginDTO) => {
 
     const user = await User.query().select().where('euseremail', loginDTO.euseremail).first();
+
+    if (!user)
+        return
+
     const success = await bcrypt.compare(loginDTO.euserpassword, user.euserpassword);
 
     let token = null;
@@ -217,6 +221,8 @@ UsersService.login = async (loginDTO) => {
         .where('eusereuserid', user.euserid)
         .orderBy('ecompanyusermappingcreatetime', 'ASC')
         .first();
+
+        if (!result || !result.ecompanyecompanyid) return
 
         token = await generateJWTToken(user, result.ecompanyecompanyid, result.ecompanyusermappingpermission);
 
