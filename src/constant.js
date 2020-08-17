@@ -58,6 +58,9 @@ module.exports = {
         },
         state: {
             list: '/state'
+        },
+        country: {
+            list: '/country'
         }
     }
 }

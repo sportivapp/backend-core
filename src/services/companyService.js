@@ -247,11 +247,17 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
 
     if (type === 'SISTER' || type === 'BRANCH') {
 
-        query = Company.query().orderBy('ecompanycreatetime', 'ASC')
+        query = Company.query()
+        .orderBy('ecompanycreatetime', 'ASC')
+
 
         if (type === 'BRANCH') {
             if (!companyId) return ServiceHelper.toEmptyPage(page, size)
-            query = query.where('ecompanyparentid', companyId).whereNull('ecompanyolderid')
+            query = query
+            .where('ecompanyparentid', companyId)
+            .whereNull('ecompanyolderid')
+            .withGraphFetched('[branches, industry, address.[state, country]]')
+
         }
 
         else if (type === 'SISTER') {
@@ -259,7 +265,7 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
             query = query
                 .where('ecompanyolderid', companyId)
                 .whereNull('ecompanyparentid')
-                .withGraphFetched('[branches, sisters, industry]')
+                .withGraphFetched('[branches, sisters, industry, address.[state, country]]')
         }
 
     } else {
@@ -270,13 +276,25 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
             .where(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
             .whereNull('ecompanyparentid')
             .whereNull('ecompanyolderid')
-            .withGraphFetched('[branches, sisters, industry]')
+            .withGraphFetched('[branches, sisters, industry, address.[state, country]]')
             .orderBy('ecompanyusermappingcreatetime', 'ASC')
     }
 
     const pageObj = await query.page(page, size)
+    
+    const result = pageObj.results.map(company => ({
+        ...company,
+        childrenCount: company.branches.length,
+    }))
 
-    return ServiceHelper.toPageObj(page, size, pageObj)
+    const newPageObj = {
+        results: result,
+        page: page,
+        size: size,
+        totalSize: pageObj.total
+    }
+
+    return ServiceHelper.toPageObj(page, size, newPageObj)
 
 }
 
