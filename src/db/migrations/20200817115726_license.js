@@ -1,0 +1,15 @@
+exports.up = (knex, Promise) => knex.schema.createTable('elicense', t => {
+    t.increments('elicenseid').primary().unsigned();
+    t.string('elicenseacademicname').notNullable();
+    t.bigInteger('elicensegraduationdate').notNullable();
+    t.integer('esporttypeesporttypeid').notNullable().references('esporttype.esporttypeid').onDelete('CASCADE');
+    t.string('elicenselevel').notNullable();
+    t.string('elicenseadditionalinformation');
+    t.integer('efileefileid').notNullable().references('efile.efileid').onDelete('CASCADE');
+    t.integer('elicensecreateby').notNullable();
+    t.bigInteger('elicensecreatetime').notNullable();
+    t.integer('elicensechangeby');
+    t.bigInteger('elicensechangetime');
+});
+
+exports.down = (knex, Promise) => knex.schema.dropTable('elicense');
