@@ -55,7 +55,19 @@ userController.createUser = async (req, res, next) => {
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const user = req.user
-    const { userNik, username, userEmail, userMobileNumber, userPassword, gender, hobby, address, isMultiApproval, permission, identityNumber } = req.body
+    const { 
+        userNik, 
+        username, 
+        userEmail, 
+        userMobileNumber, 
+        userPassword, 
+        gender, 
+        hobby, 
+        address, 
+        isMultiApproval, 
+        permission, 
+        identityNumber 
+    } = req.body
 
     try {
         
@@ -120,7 +132,17 @@ userController.getUserCurrentCompany = async (req, res, next) => {
 userController.updateUserById = async (req, res, next) => {
 
     const user = req.user
-    const { userNik, username, userMobileNumber, gender, hobby, address, isMultiApproval, permission, identityNumber } = req.body
+    const { 
+        userNik, 
+        username, 
+        userMobileNumber, 
+        gender, 
+        hobby, 
+        address, 
+        isMultiApproval, 
+        permission, 
+        identityNumber 
+    } = req.body
     const { userId } = req.params
 
     try {
