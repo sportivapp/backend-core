@@ -6,6 +6,7 @@ const companyService = {}
 companyService.getCompany = async (companyId) => {
 
     const company = await Company.query()
+    
     .where('ecompanyid', companyId);
 
     if (!company)
@@ -22,6 +23,7 @@ companyService.getCompanies = async (keyword) => {
     if (keyword) newKeyword = keyword.toLowerCase()
 
     return Company.query()
+        .select('ecompanyid', 'ecompanyname', 'ecompanyaddress', 'ecompanylogo')
         .where('ecompanyolderid', null)
         .andWhere('ecompanyparentid', null)
         .andWhere(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)

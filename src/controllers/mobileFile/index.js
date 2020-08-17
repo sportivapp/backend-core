@@ -26,7 +26,7 @@ controller.previewFile = async (req, res, next) => {
         
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
-        return res.status(200).sendFile(result.path);        
+        return res.status(200).sendFile(result.efilepath);        
     } catch(e) {
         next(e);
     }
@@ -42,7 +42,7 @@ controller.previewFileRestricted = async (req, res, next) => {
         
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
-        return res.status(200).sendFile(result.path);        
+        return res.status(200).sendFile(result.efilepath);        
     } catch(e) {
         next(e);
     }
