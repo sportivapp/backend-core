@@ -107,12 +107,46 @@ UsersService.getUserById = async ( userId, user ) => {
 
 UsersService.getUserCurrentCompany = async ( user ) => {
 
-    const company = Company.query()
+    const companyData = await Company.query()
         .select()
         .where('ecompanyid', user.companyId)
+        .withGraphFetched('[older]')
         .first()
 
-    return company
+    let result
+
+    if( companyData.older === null || companyData.older === undefined){
+        result = {
+            companyId: companyData.ecompanyid,
+            companyName: companyData.ecompanyname,
+            parent: null
+        }
+    } else if( companyData.older.older === null  || companyData.older.older === undefined) {
+        result = {
+            companyId: companyData.ecompanyid,
+            companyName: companyData.ecompanyname,
+            parent: {
+                companyId: companyData.older.ecompanyid,
+                companyName: companyData.older.ecompanyname,
+                parent: null
+            }
+        }
+    } else if( companyData.older.older !== null || companyData.older.older !== undefined) {
+        result = {
+            companyId: companyData.ecompanyid,
+            companyName: companyData.ecompanyname,
+            parent: {
+                companyId: companyData.older.ecompanyid,
+                companyName: companyData.older.ecompanyname,
+                parent: {
+                    companyId: companyData.older.older.ecompanyid,
+                    companyName: companyData.older.older.ecompanyname
+                }
+            }
+        }
+    }
+
+    return result
 
 }
 
