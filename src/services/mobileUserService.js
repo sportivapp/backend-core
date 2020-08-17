@@ -100,12 +100,17 @@ UserService.updateUser = async (userDTO, user) => {
 
 }
 
-UserService.changePassword = async (newPassword, user) => {
+UserService.changePassword = async (oldPassword, newPassword, user) => {
 
     const userFromDB = await User.query().where('euserid', user.sub).first();
 
     if (!userFromDB)
-        return
+        return 'no user'
+
+    const checkOldPassword = await bcrypt.compare(oldPassword, userFromDB.euserpassword);
+
+    if (!checkOldPassword)
+        return 'wrong password'
     
     const hashedNewPassword = await bcrypt.hash(newPassword);
 

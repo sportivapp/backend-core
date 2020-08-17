@@ -47,5 +47,12 @@ exports.seed = (knex) => knex('edepartment').del()
                     ecompanyecompanyid: 2,
                     edepartmentcreatetime: Date.now()
                 },
+                {
+                    edepartmentname: 'DEFAULT DEPARTMENT APSSI',
+                    edepartmentdescription: 'di paksa bikin...',
+                    edepartmentcreateby: 7,
+                    ecompanyecompanyid: 4,
+                    edepartmentcreatetime: Date.now()
+                },
             ]
         ));

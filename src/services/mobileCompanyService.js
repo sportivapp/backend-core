@@ -1,18 +1,28 @@
 const Company = require('../models/Company')
-const { raw } = require('objection')
+const { raw } = require('objection');
+const Department = require('../models/Department');
 
 const companyService = {}
 
 companyService.getCompany = async (companyId) => {
-
-    const company = await Company.query()
     
-    .where('ecompanyid', companyId);
-
-    if (!company)
-        return
+    return
     
-    return company
+    // const companyPromise = Company.query()
+    // .select('ecompanyname', 'eindustryname', 'eaddressstreet', 'ecompanyemailaddress', 'ecompanymobilenumber')
+    // .joinRelated('address')
+    // .joinRelated('industry')
+    // .where('ecompanyid', companyId);
+
+    // const departmentPromise = Department.query()
+
+    // const department = await departmentPromise
+    // console.log(department);
+
+    // if (!company)
+    //     return
+    
+    // return company
 
 }
 
@@ -23,7 +33,9 @@ companyService.getCompanies = async (keyword) => {
     if (keyword) newKeyword = keyword.toLowerCase()
 
     return Company.query()
-        .select('ecompanyid', 'ecompanyname', 'ecompanyaddress', 'ecompanylogo')
+        .select('ecompanyid', 'ecompanyname', 'eindustryname', 'eaddressstreet', 'ecompanylogo')
+        .joinRelated('address')
+        .joinRelated('industry')
         .where('ecompanyolderid', null)
         .andWhere('ecompanyparentid', null)
         .andWhere(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)

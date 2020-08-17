@@ -44,5 +44,13 @@ exports.seed = (knex) => knex('egrade').del()
                     edepartmentedepartmentid: 6,
                     egradecreatetime: Date.now()
                 },
+                {
+                    egradedescription: 'aiya..',
+                    egradename: 'DEFAULT DEPARTMENT OWNER',
+                    ecompanyecompanyid: 4,
+                    edepartmentedepartmentid: 7,
+                    egradecreateby: 7,
+                    egradecreatetime: Date.now()
+                },
             ]
         ));

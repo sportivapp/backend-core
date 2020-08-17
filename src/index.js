@@ -54,7 +54,7 @@ app.use((error, req, res, next) => {
 });
 
 require('dotenv').config();
-const httpPORT = process.env.PORT || 5000;
+const httpPORT = process.env.PORT || 5100;
 const httpServer = app.listen(httpPORT, function() {
     console.log(`HTTP Server started on port ${httpPORT}`);
 })
@@ -65,7 +65,7 @@ const options = {
     cert: fs.readFileSync('../../../etc/ssl/certs/quickplay.crt', 'utf8')
 };
 const httpsServer = https.createServer(options, app);
-const httpsPORT = process.env.HTTPS_PORT || 5001;
+const httpsPORT = process.env.HTTPS_PORT || 5101;
 httpsServer.listen(httpsPORT, function() {
     console.log(`HTTPS Server started on port ${httpsPORT}.`);
 });
