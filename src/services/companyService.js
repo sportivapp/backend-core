@@ -302,13 +302,21 @@ CompanyService.getCompanyById = async (companyId) => {
 
     const company = await Company.query().findById(companyId).withGraphFetched('[industry,address.[country,state]]')
 
+    const headUserId = await CompanyUserMapping.query()
+        .where('ecompanyecompanyid', companyId)
+        .where('ecompanyusermappingpermission', 10)
+        .first()
+        .then(result => result.eusereuserid)
+
     const employeeCount = CompanyUserMapping.query().where('ecompanyecompanyid', companyId).count()
     const departmentCount = Company.relatedQuery('departments').for(companyId).count()
     const branchCount = Company.relatedQuery('branches').for(companyId).count()
+    const head = User.query().findById(headUserId)
 
-    return Promise.all([company, employeeCount, departmentCount, branchCount])
+    return Promise.all([company, employeeCount, departmentCount, branchCount, head])
         .then(resultArr => ({
             ...resultArr[0],
+            user: resultArr[4],
             employeeCount: parseInt(resultArr[1][0].count),
             departmentCount: parseInt(resultArr[2][0].count),
             childrenCount: parseInt(resultArr[3][0].count)
@@ -334,6 +342,8 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, user) =
         if (!industry) return
     }
 
+    let headUserId
+
     if (supervisorId) {
 
         const deleteCurrentHeadQuery = CompanyUserMapping.query()
@@ -350,7 +360,14 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, user) =
         const insertNewHeadQuery = CompanyUserMapping.query()
             .insertToTable(companyUserMappingDTO, user.sub)
 
-        await Promise.all([deleteCurrentHeadQuery, insertNewHeadQuery])
+        headUserId = await Promise.all([deleteCurrentHeadQuery, insertNewHeadQuery])
+            .then(resultArr => resultArr[1])
+    } else {
+        headUserId = await CompanyUserMapping.query()
+            .where('ecompanyecompanyid', companyId)
+            .where('ecompanyusermappingpermission', 10)
+            .first()
+            .then(result => result.eusereuserid)
     }
 
     await Company.query().findById(companyId).updateByUserId(companyDTO, user.sub)
@@ -361,9 +378,12 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, user) =
     const departmentCount = Company.relatedQuery('departments').for(companyId).count()
     const branchCount = Company.relatedQuery('branches').for(companyId).count()
 
-    return Promise.all([company, employeeCount, departmentCount, branchCount])
+    const getUserQuery = User.query().findById(headUserId)
+
+    return Promise.all([company, employeeCount, departmentCount, branchCount, getUserQuery])
         .then(resultArr => ({
             ...resultArr[0],
+            user: resultArr[4],
             employeeCount: resultArr[1].count,
             departmentCount: resultArr[2].count,
             childrenCount: resultArr[3].count
