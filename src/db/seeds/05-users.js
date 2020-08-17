@@ -7,21 +7,24 @@ exports.seed = (knex, Promise) => knex('euser').del()
           eusername: 'nawakaraadmin',
           euseremail: 'nawakaraadmin@nawakara.com',
           euserpassword: '$2y$10$UzQchZo/FrFs4UMzrRPp2OXj.tjV495wGW977M4SSczXqdVUWRaKu',
-          eusermobilenumber: '987654321'
+          eusermobilenumber: '987654321',
+          euseridentitynumber: "3600312523345675"
         },
         {
           eusernik: 'E2',
           eusername: 'nawakarahrd',
           euseremail: 'nawakarahrd@nawakara.com',
           euserpassword: '$2y$10$WdQCsI5fJycPmk4OVOzl0O70qSQAF44UFADY/2LuX3X5X15jQfns6',
-          eusermobilenumber: '987654321'
+          eusermobilenumber: '987654321',
+          euseridentitynumber: "3600312520986231"
         },
         {
           eusernik: 'E3',
           eusername: 'nawakarapm',
           euseremail: 'nawakarapm@nawakara.com',
           euserpassword: '$2y$10$Bvc8IkjHw420Eu7T/PbwwOfnKRuhy0NP3P3FwLkm7hdzPJ2lFdvs.',
-          eusermobilenumber: '888888888'
+          eusermobilenumber: '888888888',
+          euseridentitynumber: "3600312523345333"
         },
         {
           eusernik: 'E4',
@@ -30,21 +33,24 @@ exports.seed = (knex, Promise) => knex('euser').del()
           euserpassword: '$2y$10$0QN7AN62i6hjTMboj2OAROle8q9D9prO41KgUYgniRnGWqo2G6YN.',
           eusermobilenumber: '11111111',
           euserapprovaluserid1: 3,
-          euserapprovaluserid2: 2
+          euserapprovaluserid2: 2,
+          euseridentitynumber: "3600312523345111"
         },
         {
           eusernik: 'E5',
           eusername: 'nawakarauser2',
           euseremail: 'nawakarauser2@nawakara.com',
           euserpassword: '$2y$10$0QN7AN62i6hjTMboj2OAROle8q9D9prO41KgUYgniRnGWqo2G6YN.',
-          eusermobilenumber: '11111111'
+          eusermobilenumber: '11111111',
+          euseridentitynumber: "3600312523345999"
         },
         {
           eusernik: 'E6',
           eusername: 'nawakarauser3',
           euseremail: 'nawakarauser3@nawakara.com',
           euserpassword: '$2y$10$0QN7AN62i6hjTMboj2OAROle8q9D9prO41KgUYgniRnGWqo2G6YN.',
-          eusermobilenumber: '11111111'
+          eusermobilenumber: '11111111',
+          euseridentitynumber: "3600312523341234"
         },
       ]
     ));
