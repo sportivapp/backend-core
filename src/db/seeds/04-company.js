@@ -8,7 +8,8 @@ exports.seed = (knex, Promise) => knex('ecompany').del()
               eaddresseaddressid: 1,
               ecompanycreateby: 0,
               ecompanycreatetime: Date.now(),
-              eindustryeindustryid: 1
+              eindustryeindustryid: 1,
+              ecompanyphonenumber: "0881542324123"
             },
             {
               ecompanyname: 'PT. Nawakara Perkasa Nusantara (BRANCH)',
@@ -17,7 +18,8 @@ exports.seed = (knex, Promise) => knex('ecompany').del()
               ecompanyparentid: 1,
               ecompanycreateby: 0,
               ecompanycreatetime: Date.now(),
-              eindustryeindustryid: 1
+              eindustryeindustryid: 1,
+              ecompanyphonenumber: "0881541114555"
             },
             {
               ecompanyname: 'PT. Nawakara Perkasa Nusantara (SISTER)',
@@ -26,7 +28,8 @@ exports.seed = (knex, Promise) => knex('ecompany').del()
               ecompanyolderid: 1,
               ecompanycreateby: 0,
               ecompanycreatetime: Date.now(),
-              eindustryeindustryid: 1
+              eindustryeindustryid: 1,
+              ecompanyphonenumber: "0712231145123"
             },
       ]
     ));
