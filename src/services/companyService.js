@@ -281,8 +281,6 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
     }
 
     const pageObj = await query.page(page, size)
-
-    console.log(pageObj)
     
     const result = pageObj.results.map(company => ({
         ...company,
