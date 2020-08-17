@@ -75,4 +75,18 @@ FileService.deleteFileByIdAndCreateBy = async (fileId, createBy) => {
     
 }
 
+FileService.deleteFileById = async (fileId) => {
+
+    const file = await FileService.getFileById(fileId);
+
+    if (!file)
+        return
+    
+    await File.query().where('efileid', file.efileid).del();
+    await unlink(file.efilepath);
+
+    return;
+    
+}
+
 module.exports = FileService;

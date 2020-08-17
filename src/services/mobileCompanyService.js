@@ -6,7 +6,7 @@ const companyService = {}
 companyService.getCompany = async (companyId) => {
 
     const companyDetailPromise = Company.query()
-    .select('ecompanylogo', 'ecompanyname', 'eindustryname', 'eaddressstreet', 'ecompanyphonenumber', 'ecompanyemailaddress')
+    .select('efileefileid', 'ecompanyname', 'eindustryname', 'eaddressstreet', 'ecompanyphonenumber', 'ecompanyemailaddress')
     .joinRelated('address')
     .joinRelated('industry')
     .where('ecompanyid', companyId);
@@ -60,9 +60,13 @@ companyService.getCompanies = async (keyword) => {
 
 companyService.getCompanyEmployees = async (companyId) => {
 
-    companyEmployees = Company.query()
+    const companyEmployees = await Company.query()
     .withGraphJoined('departments.positions.users')
     .where('ecompanyid', companyId);
+
+    // for (let i=0; i<companyEmployees; i++) {
+            
+    // }
 
 }
 
