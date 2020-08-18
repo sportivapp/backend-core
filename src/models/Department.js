@@ -15,8 +15,7 @@ class Department extends Model {
       required: ['edepartmentname', 'edepartmentdescription'],
       properties: {
         edepartmentname: { type: 'string', minLength: 1, maxLength: 256 },
-        edepartmentdescription: { type: 'string', minLength: 1, maxLength: 256 },
-        edepartmentsuperiorid: { type: 'integer' }
+        edepartmentdescription: { type: 'string', minLength: 1, maxLength: 256 }
       }
     };
   }
