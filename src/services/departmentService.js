@@ -1,6 +1,8 @@
 const Department = require('../models/Department')
 const Company = require('../models/Company')
 const Grade = require('../models/Grades')
+const User = require('../models/User')
+const CompanyUserMapping = require('../models/CompanyUserMapping')
 const ServiceHelper = require('../helper/ServiceHelper')
 
 const departmentService = {}
@@ -45,9 +47,35 @@ departmentService.getAllDepartmentbyCompanyId = async (page, size, type, company
 
 departmentService.getDepartmentByDepartmentId = async (departmentId) => {
 
-    const department = await Department.query().select().where('edepartmentid', departmentId).first()
+    const department = await Department.query()
+    .select()
+    .where('edepartmentid', departmentId)
+    .first()
 
-    return department
+    const company = await Company.query()
+    .select()
+    .where('ecompanyid', department.ecompanyecompanyid)
+    .first()
+
+    const companyUser = await CompanyUserMapping.query()
+    .select('eusereuserid')
+    .where('ecompanyecompanyid', company.ecompanyid)
+    .where('ecompanyusermappingpermission', 10)
+    .first()
+
+    const user = await User.query()
+    .select('eusername')
+    .where('euserid', companyUser.eusereuserid)
+    .first()
+
+    const data = {
+        edepartmentname: department.edepartmentname,
+        ecompanyname: company.ecompanyname,
+        eusername: user.eusername
+    }
+
+    return data
+
 }
 
 
