@@ -64,11 +64,12 @@ departmentService.getDepartmentByDepartmentId = async (departmentId) => {
     .first()
 
     const user = await User.query()
-    .select('eusername')
+    .select('eusername','euserid')
     .where('euserid', companyUser.eusereuserid)
     .first()
 
     const data = {
+        edepartmentid: department.edepartmentid,
         edepartmentname: department.edepartmentname,
         ecompanyname: company.ecompanyname,
         eusername: user.eusername
