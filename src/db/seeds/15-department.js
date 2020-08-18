@@ -54,5 +54,12 @@ exports.seed = (knex) => knex('edepartment').del()
                     ecompanyecompanyid: 4,
                     edepartmentcreatetime: Date.now()
                 },
+                {
+                    edepartmentname: 'Finance (BRANCH)',
+                    edepartmentdescription: 'Mengatur keuangan',
+                    edepartmentcreateby: 7,
+                    ecompanyecompanyid: 5,
+                    edepartmentcreatetime: Date.now()
+                },
             ]
         ));

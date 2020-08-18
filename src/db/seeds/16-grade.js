@@ -46,7 +46,7 @@ exports.seed = (knex) => knex('egrade').del()
                 },
                 {
                     egradedescription: '',
-                    egradename: 'DEFAULT DEPARTMENT OWNER',
+                    egradename: 'Head of Finance',
                     ecompanyecompanyid: 4,
                     edepartmentedepartmentid: 7,
                     egradecreateby: 7,
@@ -56,9 +56,15 @@ exports.seed = (knex) => knex('egrade').del()
                     egradedescription: 'Ketua APSSI',
                     egradename: '',
                     ecompanyecompanyid: 4,
-                    edepartmentedepartmentid: 7,
                     egradecreateby: 7,
                     egradecreatetime: Date.now()
                 },
+                {
+                    egradedescription: 'Ketua APSSI (Branch)',
+                    egradename: '',
+                    ecompanyecompanyid: 5,
+                    egradecreateby: 7,
+                    egradecreatetime: Date.now()
+                }
             ]
         ));

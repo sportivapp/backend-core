@@ -44,7 +44,7 @@ exports.seed = (knex, Promise) => knex('ecompany').del()
               ecompanyname: 'PT. APSSI (BRANCH)',
               ecompanyemailaddress: 'yeyen@nawakara.com',
               eaddresseaddressid: 2,
-              ecompanyparentid: 5,
+              ecompanyparentid: 4,
               ecompanycreateby: 0,
               ecompanycreatetime: Date.now(),
               eindustryeindustryid: 1,
