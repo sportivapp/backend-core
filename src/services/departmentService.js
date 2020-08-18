@@ -43,6 +43,14 @@ departmentService.getAllDepartmentbyCompanyId = async (page, size, type, company
     return ServiceHelper.toPageObj(page, size, departmentPage)
 }
 
+departmentService.getDepartmentByDepartmentId = async (departmentId) => {
+
+    const department = await Department.query().select().where('edepartmentid', departmentId).first()
+
+    return department
+}
+
+
 departmentService.getCompanyByCompanyId = async (companyId) => {
     return Company.query().select().where('ecompanyid', companyId).first()
 }
