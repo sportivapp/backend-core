@@ -25,6 +25,7 @@ class Company extends Model {
     const Department = require('./Department')
     const Address = require('./Address')
     const Industry = require('./Industry')
+    const File = require('./File')
 
     return {
       address: {
@@ -93,6 +94,14 @@ class Company extends Model {
         join: {
           from: 'ecompany.eindustryeindustryid',
           to: 'eindustry.eindustryid'
+        }
+      },
+      file: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: File,
+        join: {
+          from: 'ecompany.efileefileid',
+          to: 'efile.efileid'
         }
       }
     }

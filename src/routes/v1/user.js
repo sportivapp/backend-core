@@ -1,11 +1,11 @@
+require('dotenv').config();
 const router = require('../router');
 const userController = require('../../controllers/user');
 const auth = require('../../middlewares/authentication');
-const uploadPath = require('../../../uploads');
 const multer = require('multer');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, uploadPath);
+        cb(null, process.env.UPLOADS_DIRECTORY);
     },
     filename: function (req, file, cb) {
         cb(null, Date.now() + '-' + file.originalname);

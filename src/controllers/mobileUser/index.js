@@ -5,8 +5,7 @@ const ResponseHelper = require('../../helper/ResponseHelper');
 const controller = {};
 
 controller.login = async (req, res, next) => {
-
-    console.log('yes')
+    
     const { email, password } = req.body;
 
     const loginDTO = {
@@ -124,14 +123,18 @@ controller.updateUser = async (req, res, next) => {
 
 controller.changePassword = async (req, res, next) => {
 
-    const { newPassword } = req.body;
+    const { oldPassword, newPassword } = req.body;
 
     try {
 
-        const result = await mobileUserService.changePassword(newPassword, req.user);
+        const result = await mobileUserService.changePassword(oldPassword, newPassword, req.user);
 
-        if (!result)
+        if (result === 'no user')
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
+
+        if (result === 'wrong password')
+            return res.status(403).json(ResponseHelper.toErrorResponse(403));
+
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
     } catch(e) {
         next(e);

@@ -10,6 +10,7 @@ const Module = require('../models/Module')
 const { raw } = require('objection')
 const jwt = require('jsonwebtoken')
 const ServiceHelper = require('../helper/ServiceHelper')
+const fileService = require('./mobileFileService');
 
 const CompanyService = {};
 
@@ -308,6 +309,11 @@ CompanyService.getCompanyById = async (companyId) => {
 
 CompanyService.editCompany = async (companyId, supervisorId, companyDTO, user) => {
 
+    // if fileid is not given on update, delete the file
+    if (companyDTO.efileefileid === undefined || companyDTO.efilefileid === 0) {
+        companyDTO.efilefileid = null;
+    }
+
     if (companyDTO.ecompanyolderid && companyDTO.ecompanyparentid) return
 
     if (companyDTO.ecompanyolderid) {
@@ -363,6 +369,23 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, user) =
 
     const getUserQuery = User.query().findById(headUserId)
 
+    // User didnt give a file and file existed (delete file)
+    if (company.efileefileid && companyDTO.efileefileid === null) {
+        await fileService.deleteFileById(company.efileefileid);
+    }
+    // User give a file
+    else if (companyDTO.efileefileid) {
+        
+        // File does not exist / not uploaded yet
+        const file = await fileService.getFileById(companyDTO.efileefileid);
+
+        if (!file)
+            return
+
+        const newPathDir = '/company/' + company.ecompanyid;
+        await fileService.moveFile(file, newPathDir);
+    }
+
     return Promise.all([company, employeeCount, departmentCount, branchCount, getUserQuery])
         .then(resultArr => ({
             ...resultArr[0],
@@ -371,6 +394,7 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, user) =
             departmentCount: resultArr[2].count,
             childrenCount: resultArr[3].count
         }))
+
 }
 
 CompanyService.deleteCompany = async (companyId) => {
