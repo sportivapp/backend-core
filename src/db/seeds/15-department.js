@@ -48,8 +48,8 @@ exports.seed = (knex) => knex('edepartment').del()
                     edepartmentcreatetime: Date.now()
                 },
                 {
-                    edepartmentname: 'DEFAULT DEPARTMENT APSSI',
-                    edepartmentdescription: 'di paksa bikin...',
+                    edepartmentname: 'Finance',
+                    edepartmentdescription: 'Mengatur keuangan',
                     edepartmentcreateby: 7,
                     ecompanyecompanyid: 4,
                     edepartmentcreatetime: Date.now()
