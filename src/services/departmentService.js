@@ -5,7 +5,7 @@ const ServiceHelper = require('../helper/ServiceHelper')
 
 const departmentService = {}
 
-departmentService.getAllDepartmentbyCompanyId = async (page, size, companyId) => {
+departmentService.getAllDepartmentbyCompanyId = async (page, size, type, companyId, superiorId) => {
 
     if(companyId) {
         const result = await departmentService.getCompanyByCompanyId(companyId)
@@ -13,7 +13,29 @@ departmentService.getAllDepartmentbyCompanyId = async (page, size, companyId) =>
         if( !result ) return
     }
 
-    const departmentPage = await Department.query().select().where('ecompanyecompanyid', companyId).page(page, size)
+    let departmentPage
+
+    if( type === 'SUPERIOR') {
+
+        departmentPage = await Department.query()
+        .select()
+        .where('ecompanyecompanyid', companyId)
+        .where('edepartmentsuperiorid', null)
+        .page(page, size)
+
+    } else if( type === 'SUB') {
+
+        departmentPage = await Department.query()
+        .select()
+        .where('ecompanyecompanyid', companyId)
+        .where('edepartmentsuperiorid', superiorId)
+        .page(page, size)
+
+    } else {
+
+        departmentPage = await Department.query().select().where('ecompanyecompanyid', companyId).page(page, size)
+
+    }
 
     return ServiceHelper.toPageObj(page, size, departmentPage)
 }
