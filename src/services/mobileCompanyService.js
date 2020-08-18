@@ -59,6 +59,23 @@ companyService.getCompanies = async (keyword) => {
         .andWhere(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
 }
 
+companyService.getVirtualMemberCard = async (companyId, user) => {
+
+    const virtualMemberCard = await Company.query()
+        .select('ecompany.efileefileid', 'eusername', 'egradename')
+        .withGraphJoined('users.grades')
+        .where('ecompanyid', companyId)
+        .andWhere('euserid', user.sub)
+        .first();
+
+    return {
+        efileefileid: virtualMemberCard.efileefileid,
+        eusername: virtualMemberCard.eusername,
+        egradename: virtualMemberCard.egradename
+    }
+
+}
+
 companyService.getCompanyEmployees = async (companyId) => {
 
     const companyEmployees = await Company.query()

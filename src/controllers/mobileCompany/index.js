@@ -37,4 +37,22 @@ controller.getCompanies = async (req, res, next) => {
 
 }
 
+controller.getVirtualMemberCard = async (req, res, next) => {
+
+    const { companyId } = req.params;
+
+    try {
+
+        const result = await companyService.getVirtualMemberCard(parseInt(companyId), req.user);
+
+        if (!result)
+            return res.status(404).json(ResponseHelper.toErrorResponse(404));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = controller;

@@ -53,15 +53,15 @@ exports.seed = (knex) => knex('egrade').del()
                     egradecreatetime: Date.now()
                 },
                 {
-                    egradedescription: 'Ketua APSSI',
-                    egradename: '',
+                    egradedescription: '',
+                    egradename: 'Ketua APSSI',
                     ecompanyecompanyid: 4,
                     egradecreateby: 7,
                     egradecreatetime: Date.now()
                 },
                 {
-                    egradedescription: 'Ketua APSSI (Branch)',
-                    egradename: '',
+                    egradedescription: '',
+                    egradename: 'Ketua APSSI (Branch)',
                     ecompanyecompanyid: 5,
                     egradecreateby: 7,
                     egradecreatetime: Date.now()
