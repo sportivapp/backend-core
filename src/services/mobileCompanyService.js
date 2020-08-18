@@ -9,7 +9,8 @@ companyService.getCompany = async (companyId) => {
     .select('efileefileid', 'ecompanyname', 'eindustryname', 'eaddressstreet', 'ecompanyphonenumber', 'ecompanyemailaddress')
     .joinRelated('address')
     .joinRelated('industry')
-    .where('ecompanyid', companyId);
+    .where('ecompanyid', companyId)
+    .first();
     
     const departmentWithHeadPromise = Company.query()
     .select('edepartmentname', 'eusername')
