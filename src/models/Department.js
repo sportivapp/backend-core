@@ -34,6 +34,14 @@ class Department extends Model {
           to: 'edepartment.edepartmentid'
         }
       },
+      childrens: {
+        relation: Model.HasManyRelation,
+        modelClass: Department,
+        join: {
+          from: 'edepartment.edepartmentsuperiorid',
+          to: 'edepartment.edepartmentid'
+        }
+      },
       positions: {
         relation: Model.HasManyRelation,
         modelClass: Grades,
