@@ -46,7 +46,6 @@ module.exports = (chai, httpServer, expect) => {
         username: 'nawakarauser10',
         userEmail: 'user10@nawakara.com',
         userMobileNumber: '0987654321',
-        userPassword: 'emtivnawakarauser'
       }
 
       const res = await chai.request(httpServer)
@@ -56,6 +55,7 @@ module.exports = (chai, httpServer, expect) => {
 
       expect(res.status).to.equal(200);
       expect(res.body.data).to.not.be.undefined;
+      expect(res.body.data.euserpassword).to.not.be.undefined
     });
   });
 
