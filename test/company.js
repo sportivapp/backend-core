@@ -81,7 +81,11 @@ module.exports = (chai, httpServer, expect) => {
           .send({
             companyName: 'PT. Nawakara Nusantara',
             companyEmail: 'nawakara@nawakara.com',
-            supervisorId: 1
+            supervisorId: 1,
+            street: 'Jalan Jalan',
+            postalCode: 151231,
+            countryId: 1,
+            stateId: 1
           })
 
       expect(res.status).to.equal(200)
