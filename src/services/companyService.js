@@ -360,7 +360,7 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, address
             .then(result => result.eusereuserid)
     }
 
-    const company = Company.query().findById(companyId).withGraphFetched('[industry,address]')
+    const company = await Company.query().findById(companyId)
 
     const updateAdress = (addressId) => Address.query()
         .where('eaddressid', addressId)
@@ -368,13 +368,15 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, address
 
     const updateCompany = (company) => company.$query().updateByUserId(companyDTO, user.sub)
 
-    await company.then(company => Promise.all([updateAdress(company.eaddresseaddressid), updateCompany(company)]))
+    await Promise.all([updateAdress(company.eaddresseaddressid), updateCompany(company)])
 
     const employeeCount = CompanyUserMapping.query().where('ecompanyecompanyid', companyId).count()
     const departmentCount = Company.relatedQuery('departments').for(companyId).count()
     const branchCount = Company.relatedQuery('branches').for(companyId).count()
 
     const getUserQuery = User.query().findById(headUserId)
+    const getCompanyQuery = Company.query().findById(companyId)
+        .withGraphFetched('[industry,address]')
 
     // User didnt give a file and file existed (delete file)
     if (company.efileefileid && companyDTO.efileefileid === null) {
@@ -393,7 +395,7 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, address
         await fileService.moveFile(file, newPathDir);
     }
 
-    return Promise.all([company, employeeCount, departmentCount, branchCount, getUserQuery])
+    return Promise.all([getCompanyQuery, employeeCount, departmentCount, branchCount, getUserQuery])
         .then(resultArr => ({
             ...resultArr[0],
             user: resultArr[4],
