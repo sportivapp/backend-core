@@ -191,7 +191,7 @@ userController.deleteUserById = async (req, res, next) => {
 
         const result = await userService.deleteUserById(userId, user);
 
-        if (!result)
+        if (result === undefined)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
