@@ -310,8 +310,8 @@ CompanyService.getCompanyById = async (companyId) => {
 CompanyService.editCompany = async (companyId, supervisorId, companyDTO, addressDTO, user) => {
 
     // if fileid is not given on update, delete the file
-    if (companyDTO.efileefileid === undefined || companyDTO.efilefileid === 0) {
-        companyDTO.efilefileid = null;
+    if (companyDTO.efileefileid === undefined || companyDTO.efileefileid === 0) {
+        companyDTO.efileefileid = null;
     }
 
     if (companyDTO.ecompanyolderid && companyDTO.ecompanyparentid) return
