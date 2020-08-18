@@ -341,7 +341,7 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, user) =
             .delete()
 
         const companyUserMappingDTO = {
-            ecompanyecompanyid: companyId,
+            ecompanyecompanyid: parseInt(companyId),
             eusereuserid: supervisorId,
             ecompanyusermappingpermission: 10
         }
@@ -351,6 +351,7 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, user) =
 
         headUserId = await Promise.all([deleteCurrentHeadQuery, insertNewHeadQuery])
             .then(resultArr => resultArr[1])
+            .then(result => result.eusereuserid)
     } else {
         headUserId = await CompanyUserMapping.query()
             .where('ecompanyecompanyid', companyId)

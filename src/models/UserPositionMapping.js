@@ -30,7 +30,7 @@ class UserPositionMapping extends Model {
                 modelClass: User,
                 join: {
                     from: 'euserpositionmapping.eusereuserid',
-                    to: 'euserpositionmapping.egradeegradeid'
+                    to: 'euser.euserid'
                 }
             }
         }

@@ -80,8 +80,8 @@ module.exports = (chai, httpServer, expect) => {
           .set('authorization', login.body.data)
           .send({
             companyName: 'PT. Nawakara Nusantara',
-            companyEmail: 'nawakara@nawakara.com'
-            // companyParentId: 1
+            companyEmail: 'nawakara@nawakara.com',
+            supervisorId: 1
           })
 
       expect(res.status).to.equal(200)

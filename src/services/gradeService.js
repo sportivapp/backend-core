@@ -120,4 +120,20 @@ gradeService.saveUserPositions = async (userId, positionIds, user) => {
 
 }
 
+gradeService.getUsersByPositionId = async (page, size, positionId) => {
+
+    const grade = Grade.query().findById(positionId)
+
+    if (!grade) return ServiceHelper.toEmptyPage(page, size)
+
+    const userPage = await UserPositionMapping.relatedQuery('users')
+        .for(UserPositionMapping.query().where('egradeegradeid', positionId))
+        .page(page, size)
+
+    console.log(userPage.results)
+
+    return ServiceHelper.toPageObj(page, size, userPage)
+
+}
+
 module.exports = gradeService

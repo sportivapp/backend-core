@@ -23,7 +23,8 @@ module.exports = {
         grade: {
             list: '/grades',
             id: '/grades/:gradeId',
-            mapping: '/grades-user-mapping'
+            mapping: '/grades-user-mapping',
+            users: '/grades/:gradeId/users'
         },
         absen: {
             create: '/absen',
