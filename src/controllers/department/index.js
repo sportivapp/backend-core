@@ -27,6 +27,26 @@ controller.getAllDepartmentbyCompanyId = async (req, res, next) => {
 
 }
 
+controller.getDepartmentByDepartmentId = async (req, res, next) => {
+    
+    const user = req.user
+
+    if (isUserNotValid(user)) 
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
+    const { departmentId } = req.params
+
+    try {
+        const result = await departmentService.getDepartmentByDepartmentId( departmentId )
+        if (!result)
+            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+    } catch (e) {
+        next(e)
+    }
+
+}
+
 controller.createDepartment = async (req, res, next) => {
     
     const user = req.user
