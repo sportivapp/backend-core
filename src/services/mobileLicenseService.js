@@ -6,9 +6,9 @@ const LicenseService = {};
 LicenseService.getLicense = async (licenseId) => {
 
     return License.query()
-    .select('elicenseid', 'elicenseacademicname', 'efileid', 'efilename', 'elicensegraduationdate', 'esporttypename', 'elicenselevel', 
+    .select('elicenseid', 'elicenseacademicname', 'efileid', 'efilename', 'elicensegraduationdate', 'eindustryname', 'elicenselevel', 
     'elicenseadditionalinformation')
-    .leftJoinRelated('sporttype')
+    .leftJoinRelated('industry')
     .joinRelated('file')
     .where('elicenseid', licenseId)
     .first();
@@ -18,8 +18,8 @@ LicenseService.getLicense = async (licenseId) => {
 LicenseService.getLicenses = async (user) => {
 
     return License.query()
-    .select('elicenseid', 'elicenseacademicname', 'elicensegraduationdate', 'elicenselevel', 'esporttypename')
-    .joinRelated('sporttype')
+    .select('elicenseid', 'elicenseacademicname', 'elicensegraduationdate', 'elicenselevel', 'eindustryname')
+    .joinRelated('industry')
     .where('elicensecreateby', user.sub);
 
 }

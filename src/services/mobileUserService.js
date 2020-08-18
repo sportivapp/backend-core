@@ -76,16 +76,13 @@ UserService.updateUser = async (userDTO, user) => {
 
     const updatedUser = await userFromDB.$query().updateByUserId(userDTO, user.sub).returning('*');
 
-    // There is no file
-    if (userDTO.efileefileid === null) {
-        // There is a file on user, then delete it
-        if (updatedUser.efileefileid !== null) {
-            await fileService.deleteFileByIdAndCreateBy(updatedUser.efileefileid, updatedUser.euserid);
-        }
+    // User didnt give a file and file existed (delete file)
+    if (updatedUser.efileefileid && userDTO.efileefileid === null) {
+        await fileService.deleteFileByIdAndCreateBy(updatedUser.efileefileid, updatedUser.euserid);
     }
-    // There is a file
-    else if (userDTO.efileefileid !== null) {
-
+    // User give a file
+    else if (userDTO.efileefileid) {
+        
         // File does not exist / not uploaded yet
         const file = await fileService.getFileByIdAndCreateBy(userDTO.efileefileid, user.sub);
 
@@ -100,12 +97,17 @@ UserService.updateUser = async (userDTO, user) => {
 
 }
 
-UserService.changePassword = async (newPassword, user) => {
+UserService.changePassword = async (oldPassword, newPassword, user) => {
 
     const userFromDB = await User.query().where('euserid', user.sub).first();
 
     if (!userFromDB)
-        return
+        return 'no user'
+
+    const checkOldPassword = await bcrypt.compare(oldPassword, userFromDB.euserpassword);
+
+    if (!checkOldPassword)
+        return 'wrong password'
     
     const hashedNewPassword = await bcrypt.hash(newPassword);
 

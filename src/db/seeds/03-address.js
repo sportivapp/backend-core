@@ -9,7 +9,7 @@ exports.seed = (knex, Promise) => knex('eaddress').del()
           estateestateid: 1
         },
         {
-          eaddressstreet: 'Kompleks Silver Plaza, Jl. RS. Melati Raya No.20, RT.10/RW.6, Gandaria Selatan, Kec. Cilandak, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 13300',
+          eaddressstreet: 'Jalan Lapangan 1',
           eaddresspostalcode: 13300,
           ecountryecountryid: 1,
           estateestateid: 1

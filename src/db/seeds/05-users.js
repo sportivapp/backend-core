@@ -50,7 +50,23 @@ exports.seed = (knex, Promise) => knex('euser').del()
           euseremail: 'nawakarauser3@nawakara.com',
           euserpassword: '$2y$10$0QN7AN62i6hjTMboj2OAROle8q9D9prO41KgUYgniRnGWqo2G6YN.',
           eusermobilenumber: '11111111',
-          euseridentitynumber: "3600312523341234"
+          euseridentitynumber: "3600312523341234",
+          euseraddress: 'Alamat rumah',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          euserdob: 660960000
+        },
+        {
+          eusernik: 'A1',
+          eusername: 'yeyen',
+          euseremail: 'yeyen@apssi.com',
+          euserpassword: '$2y$10$qT1LlCeYbe5DLKtzYk/C.eK1gSFJjRg1xK9WfouFVjuTfwWFBBVE2',
+          eusermobilenumber: '11111111',
+          euseridentitynumber: "3600312523341234",
+          euseraddress: 'Alamat rumah',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          euserdob: 660960000
         },
       ]
     ));

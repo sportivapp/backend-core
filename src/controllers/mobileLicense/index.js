@@ -37,12 +37,12 @@ controller.getLicenses = async (req, res, next) => {
 
 controller.createLicense = async (req, res, next) => {
 
-    const { academicName, graduationDate, sportTypeId, level, additionalInformation, fileId } = req.body;
+    const { academicName, graduationDate, industryId, level, additionalInformation, fileId } = req.body;
 
     const licenseDTO = {
         elicenseacademicname: academicName,
         elicensegraduationdate: graduationDate,
-        esporttypeesporttypeid: sportTypeId,
+        eindustryeindustryid: industryId,
         elicenselevel: level,
         elicenseadditionalinformation: additionalInformation,
         efileefileid: fileId
@@ -62,13 +62,13 @@ controller.createLicense = async (req, res, next) => {
 
 controller.updateLicense = async (req, res, next) => {
 
-    const { academicName, graduationDate, sportTypeId, level, additionalInformation, fileId } = req.body;
+    const { academicName, graduationDate, industryId, level, additionalInformation, fileId } = req.body;
     const { licenseId } = req.params;
 
     const licenseDTO = {
         elicenseacademicname: academicName,
         elicensegraduationdate: graduationDate,
-        esporttypeesporttypeid: sportTypeId,
+        eindustryeindustryid: industryId,
         elicenselevel: level,
         elicenseadditionalinformation: additionalInformation,
         efileefileid: fileId

@@ -155,6 +155,7 @@ companyController.editCompany = async (req, res, next) => {
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { companyId } = req.params
+
     const { companyName,
         companyEmail,
         street,
@@ -165,7 +166,8 @@ companyController.editCompany = async (req, res, next) => {
         supervisorId,
         companyPhoneNumber,
         countryId,
-        stateId
+        stateId,
+        fileId
     } = req.body
 
     try {
@@ -176,7 +178,8 @@ companyController.editCompany = async (req, res, next) => {
             ecompanyparentid: companyParentId,
             ecompanyolderid: companyOlderId,
             eindustryeindustryid: industryId,
-            ecompanyphonenumber: companyPhoneNumber
+            ecompanyphonenumber: companyPhoneNumber,
+            efileefileid: fileId
         }
 
         const addressDTO = {
@@ -186,7 +189,7 @@ companyController.editCompany = async (req, res, next) => {
             estateestateid: stateId
         }
 
-        const result = await companyService.editCompany(companyId, supervisorId, companyDTO, addressDTO, user)
+        const result = await companyService.editCompany(parseInt(companyId), supervisorId, companyDTO, addressDTO, user)
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))

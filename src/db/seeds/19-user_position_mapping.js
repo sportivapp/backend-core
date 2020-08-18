@@ -37,5 +37,15 @@ exports.seed = (knex, Promise) => knex('euserpositionmapping').del()
                   eusereuserid: 6,
                   euserpositionmappingcreateby: 0
                 },
+                {
+                  egradeegradeid: 7,
+                  eusereuserid: 7,
+                  euserpositionmappingcreateby: 0
+                },
+                {
+                  egradeegradeid: 8,
+                  eusereuserid: 7,
+                  euserpositionmappingcreateby: 0
+                },
             ]
       ));
