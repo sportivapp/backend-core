@@ -38,8 +38,8 @@ class Department extends Model {
         relation: Model.HasManyRelation,
         modelClass: Department,
         join: {
-          from: 'edepartment.edepartmentsuperiorid',
-          to: 'edepartment.edepartmentid'
+          from: 'edepartment.edepartmentid',
+          to: 'edepartment.edepartmentsuperiorid'
         }
       },
       positions: {
