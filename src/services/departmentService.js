@@ -45,9 +45,9 @@ departmentService.getAllDepartmentbyCompanyId = async (page, size, type, company
 
 departmentService.getDepartmentByDepartmentId = async (departmentId) => {
 
-    const departmentPage = await Department.query().select().where('edepartmentid', departmentId).first()
+    const department = await Department.query().select().where('edepartmentid', departmentId).first()
 
-    return departmentPage
+    return department
 }
 
 
