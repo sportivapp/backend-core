@@ -25,6 +25,9 @@ departmentService.getAllDepartmentbyCompanyId = async (page, size, type, company
 
     } else if( type === 'SUB') {
 
+        if(!superiorId)
+            return ServiceHelper.toEmptyPage(page, size)
+            
         departmentPage = await Department.query()
         .select()
         .where('ecompanyecompanyid', companyId)
