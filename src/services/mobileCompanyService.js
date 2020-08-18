@@ -51,7 +51,7 @@ companyService.getCompanies = async (keyword) => {
     if (keyword) newKeyword = keyword.toLowerCase()
 
     return Company.query()
-        .select('ecompanyid', 'ecompanyname', 'eindustryname', 'eaddressstreet', 'ecompanylogo')
+        .select('ecompanyid', 'ecompanyname', 'eindustryname', 'eaddressstreet', 'efileefileid')
         .joinRelated('address')
         .joinRelated('industry')
         .where('ecompanyolderid', null)
