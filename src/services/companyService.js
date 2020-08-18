@@ -226,6 +226,14 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
     else
         newKeyword = ''
 
+    const companyIds = await CompanyUserMapping.query()
+        .where('eusereuserid', user.sub)
+        .then(resultArr => resultArr.map(result => result.ecompanyecompanyid))
+
+    if (companyId) {
+        if (companyIds.indexOf(parseInt(companyId)) === -1) return ServiceHelper.toEmptyPage(page, size)
+    }
+
     let query
 
     if (type === 'SISTER' || type === 'BRANCH') {
@@ -259,6 +267,7 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
             .where(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
             .whereNull('ecompanyparentid')
             .whereNull('ecompanyolderid')
+            .whereIn('ecompanyid', companyIds)
             .withGraphFetched('[branches, sisters.industry, industry, address.[state, country]]')
             .orderBy('ecompanyusermappingcreatetime', 'ASC')
     }
