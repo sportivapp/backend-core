@@ -61,6 +61,15 @@ companyService.getCompanies = async (keyword) => {
 
 companyService.getVirtualMemberCard = async (companyId, user) => {
 
+    const userInCompany = await Company.query()
+        .joinRelated('users')
+        .where('ecompanyid', companyId)
+        .andWhere('euserid', user.sub)
+        .first();
+
+    if (!userInCompany)
+        return
+
     const virtualMemberCard = await Company.query()
         .select('ecompany.efileefileid', 'ecompanyname', 'eusername', 'egradename')
         .withGraphJoined('users.grades')
