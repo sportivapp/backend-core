@@ -300,6 +300,11 @@ UsersService.deleteUserById = async ( userId, user ) => {
     
     if (user.permission < 9) return
 
+    const projects = await User.relatedQuery('projects')
+        .for(userId)
+
+    if (projects.length > 0) return false
+
     return User.query()
         .where('euserid', userId)
         .delete()

@@ -30,6 +30,7 @@ class User extends Model {
     const Grade = require('./Grades')
     const Country = require('./Country')
     const File = require('./File')
+    const Project =require('./Project')
 
     return {
       permits: {
@@ -102,6 +103,14 @@ class User extends Model {
         join: {
           from: 'euser.euserapprovaluserid3',
           to: 'euser.euserid'
+        }
+      },
+      projects: {
+        relation: Model.HasManyRelation,
+        modelClass: Project,
+        join: {
+          from: 'euser.euserid',
+          to: 'eproject.eprojectsupervisorid'
         }
       }
     }
