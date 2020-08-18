@@ -209,4 +209,33 @@ module.exports = (chai, httpServer, expect) => {
             expect(res.body.paging.size).to.equal(size)
         });
     });
+
+    describe('GET /api/v1/grades with department', () => {
+        it('Should return grade list within department', async () => {
+            const login = await chai.request(httpServer)
+                .post('/api/v1/user-login')
+                .send({
+                    email: 'nawakaraadmin@nawakara.com',
+                    password: 'emtivnawakaraadmin'
+                })
+
+            let page = 0
+            let size = 10
+            let companyId = 2
+            let departmentId = 1
+
+            const res = await chai.request(httpServer)
+                .get(`/api/v1/grades?page=${page}&size=${size}&companyId=${companyId}&departmentId=${departmentId}`)
+                .set('authorization', login.body.data)
+                .send()
+
+            console.log(res.body.data)
+
+            expect(res.status).to.equal(200)
+            expect(res.body.data).to.not.be.undefined
+            expect(res.body.paging).to.not.be.undefined
+            expect(res.body.paging.page).to.equal(page)
+            expect(res.body.paging.size).to.equal(size)
+        });
+    });
 }

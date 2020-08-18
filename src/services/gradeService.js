@@ -7,26 +7,45 @@ const ServiceHelper = require('../helper/ServiceHelper')
 
 const gradeService = {}
 
-gradeService.getAllGrades = async (page, size, companyId) => {
+gradeService.getAllGrades = async (page, size, companyId, departmentId) => {
 
-    const branchIds = await Company.relatedQuery('branches')
-        .for(companyId)
-        .withGraphFetched('branches')
-        .then(companies => {
-            let ids = []
-            ids.push(companyId)
-            companies.forEach(company => {
-                ids.push(company.ecompanyid)
-                company.branches.forEach(branch => ids.push(branch.ecompanyid))
+    if (departmentId) {
+
+        const department = Department.query().findById(departmentId)
+        if (!department) return ServiceHelper.toEmptyPage(page, size)
+
+        const gradePage = await Grade.query()
+            .where('edepartmentedepartmentid', departmentId)
+            .withGraphFetched('[superior,department.parent.parent,company.parent.parent]')
+            .page(page, size)
+        return ServiceHelper.toPageObj(page, size, gradePage)
+
+    } else {
+
+        const company = await Company.query().findById(companyId)
+
+        if (!company) return ServiceHelper.toEmptyPage(page, size)
+
+        const branchIds = await Company.relatedQuery('branches')
+            .for(companyId)
+            .withGraphFetched('branches')
+            .then(companies => {
+                let ids = []
+                ids.push(companyId)
+                companies.forEach(company => {
+                    ids.push(company.ecompanyid)
+                    company.branches.forEach(branch => ids.push(branch.ecompanyid))
+                })
+                return ids
             })
-            return ids
-        })
 
-    const gradePage = await Grade.query()
-        .whereIn('ecompanyecompanyid', branchIds)
-        .withGraphFetched('[superior,department.parent.parent,company.parent.parent]')
-        .page(page, size)
-    return ServiceHelper.toPageObj(page, size, gradePage)
+        const gradePage = await Grade.query()
+            .whereIn('ecompanyecompanyid', branchIds)
+            .withGraphFetched('[superior,department.parent.parent,company.parent.parent]')
+            .page(page, size)
+        return ServiceHelper.toPageObj(page, size, gradePage)
+
+    }
 }
 
 gradeService.getGradeById = async (gradeId) => {

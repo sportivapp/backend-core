@@ -306,7 +306,7 @@ CompanyService.getCompanyById = async (companyId) => {
         }))
 }
 
-CompanyService.editCompany = async (companyId, supervisorId, companyDTO, user) => {
+CompanyService.editCompany = async (companyId, supervisorId, companyDTO, addressDTO, user) => {
 
     if (companyDTO.ecompanyolderid && companyDTO.ecompanyparentid) return
 
@@ -354,9 +354,15 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, user) =
             .then(result => result.eusereuserid)
     }
 
-    await Company.query().findById(companyId).updateByUserId(companyDTO, user.sub)
+    const company = Company.query().findById(companyId).withGraphFetched('[industry,address]')
 
-    const company = Company.query().findById(companyId).withGraphFetched('industry')
+    const updateAdress = (addressId) => Address.query()
+        .where('eaddressid', addressId)
+        .updateByUserId(addressDTO, user.sub)
+
+    const updateCompany = (company) => company.$query().updateByUserId(companyDTO, user.sub)
+
+    await company.then(company => Promise.all([updateAdress(company.eaddresseaddressid), updateCompany(company)]))
 
     const employeeCount = CompanyUserMapping.query().where('ecompanyecompanyid', companyId).count()
     const departmentCount = Company.relatedQuery('departments').for(companyId).count()
@@ -368,9 +374,9 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, user) =
         .then(resultArr => ({
             ...resultArr[0],
             user: resultArr[4],
-            employeeCount: resultArr[1].count,
-            departmentCount: resultArr[2].count,
-            childrenCount: resultArr[3].count
+            employeeCount: parseInt(resultArr[1][0].count),
+            departmentCount: parseInt(resultArr[2][0].count),
+            childrenCount: parseInt(resultArr[3][0].count)
         }))
 }
 
