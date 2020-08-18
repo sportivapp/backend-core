@@ -300,12 +300,10 @@ UsersService.deleteUserById = async ( userId, user ) => {
     
     if (user.permission < 9) return
 
-    const result = await User.query()
-        .deleteByUserId(user.sub)
+    return User.query()
         .where('euserid', userId)
-        .returning('*');
-
-    return result;
+        .delete()
+        .then(rowsAffected => rowsAffected === 1)
 
 }
 

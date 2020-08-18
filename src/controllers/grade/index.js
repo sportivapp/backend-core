@@ -128,4 +128,19 @@ controller.saveUserPositions = async (req, res, next) => {
     }
 }
 
+controller.getUsersByPositionId = async (req, res, next) => {
+
+    const { page, size } = req.query
+
+    const { gradeId } = req.params
+
+    try {
+        const pageObj = await gradeService.getUsersByPositionId(parseInt(page), parseInt(size), gradeId)
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+    } catch (e) {
+        next(e)
+    }
+
+}
+
 module.exports = controller
