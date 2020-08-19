@@ -75,15 +75,8 @@ departmentService.getDepartmentByDepartmentId = async (departmentId) => {
     .where('euserid', companyUser.eusereuserid)
     .first()
 
-    const userData = await Grade.query()
-        .where('edepartmentedepartmentid', departmentId)
-        .withGraphJoined('[users]')
-
-    let totalUser = 0
-
-    for(let user in userData) {
-        totalUser += userData[user].users.length
-    }
+    const userData = await Grade.relatedQuery('users')
+        .for(Grade.query().where('edepartmentedepartmentid', departmentId))
 
     const data = {
         edepartmentid: department.edepartmentid,
@@ -91,7 +84,7 @@ departmentService.getDepartmentByDepartmentId = async (departmentId) => {
         childrenCount: parseInt(subDepartment[0].count),
         ecompanyname: company.ecompanyname,
         eusername: user.eusername,
-        userCount: totalUser
+        userCount: userData.length
     }
 
     return data
