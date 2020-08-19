@@ -88,10 +88,10 @@ departmentService.getDepartmentByDepartmentId = async (departmentId) => {
     const data = {
         edepartmentid: department.edepartmentid,
         edepartmentname: department.edepartmentname,
-        esubdepartmentcount: parseInt(subDepartment[0].count),
+        childrenCount: parseInt(subDepartment[0].count),
         ecompanyname: company.ecompanyname,
         eusername: user.eusername,
-        eusercount: totalUser
+        userCount: totalUser
     }
 
     return data
