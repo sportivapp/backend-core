@@ -77,7 +77,8 @@ controller.updateGradeById = async (req, res, next) => {
         egradecreateby: user.sub,
         egradedescription: request.description,
         egradesuperiorid: request.superiorId,
-        edepartmentedepartmentid: request.departmentId
+        edepartmentedepartmentid: request.departmentId,
+        ecompanyecompanyid: request.companyId
     }
 
     try {
