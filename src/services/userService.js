@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const CompanyUserMapping = require('../models/CompanyUserMapping')
 const Company = require('../models/Company')
+const CompanySequence = require('../models/CompanySequence')
 const Grade = require('../models/Grades');
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
@@ -73,6 +74,13 @@ UsersService.createUser = async (userDTO, permission, user) => {
     const trimmedName = userDTO.eusername.replace(/\s+/g, '')
 
     userDTO.euserpassword = await bcrypt.hash('qplay'.concat(trimmedName.toLowerCase()));
+
+    const company = await Company.query().findById(user.companyId)
+
+    if (company.ecompanyautonik) {
+        const nikNumber = await CompanySequence.getNextVal(company.ecompanyid)
+        userDTO.eusernik = company.ecompanynik.concat(nikNumber)
+    }
 
     const createdUser = await User.query().insertToTable(userDTO, user.sub)
 
