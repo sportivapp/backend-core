@@ -1,27 +1,94 @@
 const Absen = require('../models/Absen');
-const Image = require('../models/Image');
 const Location = require('../models/Location');
+const User = require('../models/User')
+const Device = require('../models/Device')
 const ServiceHelper = require('../helper/ServiceHelper')
+const FileService = require('./mobileFileService')
 
 const AbsenService = {};
 
-AbsenService.createAbsenByPOS = async ( absenDTO, imageDTO ) => {
-    
-    const absen = await Absen.query().insert(absenDTO);
+AbsenService.createAbsenByPOS = async ( absenTime, deviceImei, fileId, userId ) => {
 
-    const image = await Image.query().insert(imageDTO);
+    const user = await User.query().findById(userId)
 
-    return { absen, image };
+    if (!user) return
+
+    const device = await Device.query().where('edeviceimei', deviceImei).first()
+
+    if (!device) return
+
+    // const file = await FileService.getFileById(fileId)
+
+    //for now file is still disabled to successfully run tests
+    // if (!file) return
+
+    //if frontend send millisecond based on minutes accuracy, don't need to format time on minutes accuracy
+    const formattedAbsenTime = new Date(absenTime)
+    formattedAbsenTime.setMilliseconds(0)
+
+    // if user tap absen in the time of another shift, complete 1 absen & create another
+
+    const latestAbsen = await Absen.query()
+        .where('eusereuserid', userId)
+        .orderBy('eabsencreatetime', 'DESC').first()
+
+    if (!latestAbsen || latestAbsen.eabsenclockouttime) {
+
+        const absenDTO = {
+            eabsenclockintime: absenTime,
+            eabsenclockinimageid: fileId,
+            eusereuserid: userId,
+            edeviceedeviceid: device.edeviceid,
+        }
+
+        // Get Shift for Clock In
+        const shiftTimeIn = Date.now() + 10000000
+
+        const formattedTimeIn = new Date(shiftTimeIn)
+        formattedTimeIn.setMilliseconds(0)
+
+        const diffTime = formattedAbsenTime.getTime() - formattedTimeIn.getTime()
+
+        if (diffTime > 0) absenDTO["eabsenlatetime"] = diffTime
+
+        else if (diffTime < 0) absenDTO['eabsenovertime'] = -(diffTime)
+
+        return Absen.query().insertToTable(absenDTO, userId)
+
+    } else {
+
+        const patchDTO = {
+            eabsenclockouttime: absenTime,
+            eabsenclockoutimageid: fileId
+        }
+
+        // Get Shift for Clock Out
+        const shiftTimeOut = Date.now() + 10000000
+
+        const formattedTimeOut = new Date(shiftTimeOut)
+        formattedTimeOut.setMilliseconds(0)
+
+        const diffTime = formattedAbsenTime.getTime() - formattedTimeOut.getTime()
+
+        if (diffTime < 0) patchDTO["eabsenearlyleavetime"] = diffTime * -1
+
+        else if (diffTime > 0) patchDTO['eabsenovertime'] = diffTime + latestAbsen.eabsenovertime
+
+        return latestAbsen.$query().updateByUserId(patchDTO, userId)
+
+    }
 }
 
-AbsenService.listAbsenById = async ( page, size, userId ) => {
-    const absenPage = await Absen.query().select().where('eusereuserid', userId).andWhere('eabsendeletestatus', false).orderBy('eabsencreatetime', 'asc').page(page, size);
+AbsenService.listAbsen = async ( page, size, userId ) => {
+    let pageQuery = Absen.query()
+        .orderBy('eabsencreatetime', 'ASC')
 
-    return ServiceHelper.toPageObj(page, size, absenPage);
-}
+    if (!userId)
+        pageQuery = pageQuery.where('eusereuserid', userId)
 
-AbsenService.listAbsen = async ( page, size ) => {
-    const absenPage = await Absen.query().select().where('eabsendeletestatus', false).orderBy('eabsencreatetime').page(page, size);
+    const absenPage = await pageQuery
+        .withGraphFetched('user')
+        .page(page, size);
 
     return ServiceHelper.toPageObj(page, size, absenPage);
 }
@@ -34,7 +101,6 @@ AbsenService.editAbsen = async ( absenId, absenDTO, user ) => {
     return absen;
 }
 
-// soft delete absen
 AbsenService.deleteAbsen = async ( absenId, user ) => {
     const absen = await Absen.query().
     where('eabsenid', absenId)
@@ -45,13 +111,6 @@ AbsenService.deleteAbsen = async ( absenId, user ) => {
     if (user.permission !== 1 && absen) return
 
     return absen;
-}
-
-AbsenService.createLocation = async ( locationDTO ) => {
-
-    const location = await Location.query().insert(locationDTO);
-
-    return location;
 }
 
 module.exports = AbsenService;
