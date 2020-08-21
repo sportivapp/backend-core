@@ -3,18 +3,37 @@ const ResponseHelper = require('../../helper/ResponseHelper');
 
 const Controller = {}
 
-function isUserValid(user) {
-    return user.permission === 10
-}
-
 Controller.getModulesByCompanyId = async (req, res, next) => {
 
     const { companyId } = req.params
 
     try {
         const result = await SettingService.getModulesByCompanyId(companyId);
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
+        next(e)
+    }
+
+}
+
+Controller.updateModulesNameByCompanyId = async (req, res, next) => {
+
+    const { companyId } = req.params;
+    const { moduleId, moduleName } = req.body;
+
+    const moduleDTO = {
+        emoduleemoduleid: moduleId,
+        ecompanymodulemappingname: moduleName
+    }
+
+    try {
+
+        const result = await SettingService.updateModulesByCompanyId(companyId, moduleDTO, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+
+    } catch(e) {
         next(e)
     }
 
