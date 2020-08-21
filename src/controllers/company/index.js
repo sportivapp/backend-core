@@ -62,7 +62,9 @@ companyController.createCompany = async (req, res, next) => {
             companyPhoneNumber,
             supervisorId,
             countryId,
-            stateId
+            stateId,
+            isAutoNik,
+            companyNik
         } = req.body;
 
         const companyDTO = {
@@ -71,7 +73,9 @@ companyController.createCompany = async (req, res, next) => {
             ecompanyparentid: companyParentId,
             ecompanyolderid: companyOlderId,
             eindustryeindustryid: industryId,
-            ecompanyphonenumber: companyPhoneNumber
+            ecompanyphonenumber: companyPhoneNumber,
+            ecompanyautonik: isAutoNik,
+            ecompanynik: companyNik
         }
 
         const addressDTO = {
