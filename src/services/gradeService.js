@@ -127,20 +127,13 @@ gradeService.saveUserPositions = async (userIds, positionId, loggedInUser) => {
 
     await UserPositionMapping.query()
     .where('egradeegradeid', positionId)
-    .update({
-        euserpositionmappingdeletestatus: true
-    })
+    .delete()
 
     const users = userIds.map(userId => 
         ({ 
             eusereuserid: parseInt(userId),
-            egradeegradeid: positionId,
-            euserpositionmappingdeletestatus: false
+            egradeegradeid: positionId
         }));
-
-    await UserPositionMapping.query()
-    .whereIn('eusereuserid', userIds)
-    .delete()
 
     return UserPositionMapping.query()
     .insertToTable(users, loggedInUser.sub)
