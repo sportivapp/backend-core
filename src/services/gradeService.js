@@ -123,19 +123,20 @@ gradeService.deleteGradeById = async (gradeId, user) => {
         .then(rowsAffected => rowsAffected === 1)
 }
 
-gradeService.saveUserPositions = async (userId, positionIds, user) => {
+gradeService.saveUserPositions = async (userIds, positionId, loggedInUser) => {
 
     await UserPositionMapping.query()
-    .where('eusereuserid', userId).delete()
+    .where('egradeegradeid', positionId)
+    .delete()
 
-    const positions = positionIds.map(position => 
+    const users = userIds.map(userId => 
         ({ 
-            eusereuserid: userId,
-            egradeegradeid: position
-        }));  
+            eusereuserid: parseInt(userId),
+            egradeegradeid: positionId
+        }));
 
     return UserPositionMapping.query()
-    .insertToTable(positions, user.sub)
+    .insertToTable(users, loggedInUser.sub)
 
 }
 
@@ -146,7 +147,10 @@ gradeService.getUsersByPositionId = async (page, size, positionId) => {
     if (!grade) return ServiceHelper.toEmptyPage(page, size)
 
     const userPage = await UserPositionMapping.relatedQuery('users')
-        .for(UserPositionMapping.query().where('egradeegradeid', positionId))
+        .for(UserPositionMapping.query()
+            .where('egradeegradeid', positionId)
+            .where('euserpositionmappingdeletestatus', false)
+        )
         .page(page, size)
 
     console.log(userPage.results)

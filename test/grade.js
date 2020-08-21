@@ -13,8 +13,8 @@ module.exports = (chai, httpServer, expect) => {
             expect(login.body).to.not.be.undefined
 
             const requestBody = {
-                userId: 5,
-                positionIds: [2,3]
+                userIds: [4, 5],
+                positionId: 3 
             }
 
 

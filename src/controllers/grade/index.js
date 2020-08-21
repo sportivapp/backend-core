@@ -117,12 +117,12 @@ controller.saveUserPositions = async (req, res, next) => {
 
     const user = req.user
 
-    const { positionIds, userId } = req.body
+    const { positionId, userIds } = req.body
 
-    if ( isNaN(userId) ) return res.status(400).json(ResponseHelper.toErrorResponse(400))
+    if ( isNaN(positionId) ) return res.status(400).json(ResponseHelper.toErrorResponse(400))
 
     try {
-        const result = await gradeService.saveUserPositions(userId, positionIds, user)
+        const result = await gradeService.saveUserPositions(userIds, parseInt(positionId), user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)
