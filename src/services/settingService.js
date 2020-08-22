@@ -37,4 +37,5 @@ SettingService.updateModulesByCompanyId = async ( companyId, moduleDTO, user ) =
 
 }
 
+
 module.exports = SettingService;
