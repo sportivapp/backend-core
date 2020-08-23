@@ -3,55 +3,55 @@ exports.seed = (knex, Promise) => knex('emodule').del()
     knex('emodule').insert(
       [
         {
-          emoduleemoduleid: 1,
+          emoduleid: 1,
           emodulename: 'Company'
         },
         {
-          emoduleemoduleid: 2,
+          emoduleid: 2,
           emodulename: 'Branch'
         },
         {
-          emoduleemoduleid: 3,
+          emoduleid: 3,
           emodulename: 'Department'
         },
         {
-          emoduleemoduleid: 4,
+          emoduleid: 4,
           emodulename: 'Position'
         },
         {
-          emoduleemoduleid: 5,
+          emoduleid: 5,
           emodulename: 'Employee'
         },
         {
-          emoduleemoduleid: 6,
+          emoduleid: 6,
           emodulename: 'Absence'
         },
         {
-          emoduleemoduleid: 7,
+          emoduleid: 7,
           emodulename: 'Attendance'
         },
         {
-          emoduleemoduleid: 8,
+          emoduleid: 8,
           emodulename: 'Shift'
         },
         {
-          emoduleemoduleid: 9,
+          emoduleid: 9,
           emodulename: 'Timesheet'
         },
         {
-          emoduleemoduleid: 10,
+          emoduleid: 10,
           emodulename: 'Project'
         },
         {
-          emoduleemoduleid: 11,
+          emoduleid: 11,
           emodulename: 'Announcement'
         },
         {
-          emoduleemoduleid: 12,
+          emoduleid: 12,
           emodulename: 'Report'
         },
         {
-          emoduleemoduleid: 13,
+          emoduleid: 13,
           emodulename: 'Setting'
         },
       ]

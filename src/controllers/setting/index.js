@@ -39,4 +39,48 @@ Controller.updateModulesNameByCompanyId = async (req, res, next) => {
 
 }
 
+Controller.getAllFunctionByGradeId = async (req, res, next) => {
+
+    const { gradeId } = req.params;
+
+    try {
+
+        const result = await SettingService.getAllFunctionByGradeId(gradeId);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+Controller.updateFuncionsByGradeId = async (req, res, next) => {
+
+    const { gradeId } = req.params;
+
+    // [   
+    //     {
+    //         "code": "C1",
+    //         "name": "Create Company",
+    //         "status": true
+    //     },
+    //     {
+    //         "code": "C2",
+    //         "name": "Create Branch",
+    //         "status": true
+    //     }
+    // ]
+    const functionDTO = req.body;
+
+    try {
+
+        const result = await SettingService.updateFuncionsByGradeId(gradeId, functionDTO);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = Controller;

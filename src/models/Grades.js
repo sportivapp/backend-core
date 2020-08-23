@@ -25,6 +25,8 @@ class Grade extends Model {
     const Company = require('./Company')
     const User = require('./User')
     const Department = require('./Department')
+    const Function = require('./Function');
+    const GradeFunctionMapping = require('./GradeFunctionMapping');
 
     return {
       superior: {
@@ -70,6 +72,18 @@ class Grade extends Model {
           from: 'egrade.edepartmentedepartmentid',
           to: 'edepartment.edepartmentid'
         }
+      },
+      functions: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Function,
+        join: {
+          from: 'egrade.egradeid',
+          through: {
+            from: 'egradefunctionmapping.egradeegradeid',
+            to: 'egradefunctionmapping.efunctionefunctioncode'
+          },
+          to: 'efunction.efunctioncode'
+        }        
       }
     }
   }
