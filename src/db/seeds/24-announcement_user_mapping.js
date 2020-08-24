@@ -8,7 +8,7 @@ exports.seed = (knex, Promise) => knex('eannouncementusermapping').del()
             eusereuserid: 1
         },
         {
-          eannouncementusermappingid: 1,
+          eannouncementusermappingid: 2,
           eannouncementeannouncementid: 1,
           eusereuserid: 7
       },

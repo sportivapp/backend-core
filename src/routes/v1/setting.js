@@ -7,6 +7,6 @@ router.get('/setting/company-module/:companyId', controller.getModulesByCompanyI
 router.put('/setting/company-module/:companyId', auth.authenticateToken, controller.updateModulesNameByCompanyId);
 
 router.get('/setting/function-module/:gradeId', auth.authenticateToken, controller.getAllFunctionByGradeId);
-router.put('/setting/function-module/:gradeId', auth.authenticateToken, controller.updateFuncionsByGradeId)
+router.put('/setting/function-module/:gradeId', auth.authenticateToken, controller.saveFuncionsByGradeId)
 
 module.exports = router;
