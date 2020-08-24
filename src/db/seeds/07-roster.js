@@ -5,8 +5,11 @@ exports.seed = (knex, Promise) => knex('eroster').del()
         {
             erostername: 'nawakara project',
             erosterdescription: 'nawakara first project',
-            eprojecteprojectid: 1,
-            erostercreateby: 2
+            etimesheetetimesheetid: 1,
+            erostercreateby: 2,
+            erostercreatetime: Date.now(),
+            erosteruserlimit: 3,
+            erosterreservelimit: 1
         }
     ]
   ));

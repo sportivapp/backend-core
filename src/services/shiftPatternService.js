@@ -1,0 +1,101 @@
+const Shift = require('../models/Shift')
+const ShiftTime = require('../models/ShiftTime')
+const ShiftPattern = require('../models/ShiftPattern')
+const service = {}
+
+service.createPattern = async (shiftId, patternDTO, user) => {
+
+    const shift = await Shift.query().findById(shiftId)
+
+    if (!shift) return
+
+    const dto = {
+        eshifteshiftid: shiftId,
+        eshiftpatternstarttime: patternDTO.startTime,
+        eshiftpatternendtime: patternDTO.endTime
+    }
+
+    return ShiftPattern.query()
+        .insertToTable(dto, user.sub)
+        .then(result => {
+            const times = patternDTO.times.map(time => ({
+                eshifttimename: time.name,
+                eshifttimestarthour: time.startHour,
+                eshifttimestartminute: time.startMinute,
+                eshifttimeendhour: time.endHour,
+                eshifttimeendminute: time.endMinute,
+                eshifteshiftid: shiftId,
+                eshiftpatterneshiftpatternid: result.eshiftpatternid
+            }))
+            return ShiftTime.query().insertToTable(times, user.sub)
+                .then(insertedTimes => ({ ...result, times: insertedTimes }))
+        })
+}
+
+service.getPatternById = async (patternId) => {
+    return ShiftPattern.query().findById(patternId)
+        .withGraphFetched('times')
+}
+
+service.getPatternsByShiftId = async (shiftId) => {
+    return ShiftPattern.query()
+        .where('eshifteshiftid', shiftId)
+        .withGraphFetched('times')
+}
+
+service.updatePatternById = async (patternId, patternDTO, user) => {
+
+    const pattern = await ShiftPattern.query().findById(patternId).withGraphFetched('times')
+
+    if (!pattern) return
+
+    const promises = []
+
+    const patchDTO = {
+        eshiftpatternstarttime: patternDTO.startTime,
+        eshiftpatternendtime: patternDTO.endTime
+    }
+
+    const updatePattern = pattern.$query()
+        .updateByUserId(patchDTO, user.sub).returning('*')
+
+    promises.push(updatePattern)
+
+    const deletedShiftIds = patternDTO.times.filter(time => time.deleted).map(time => time.id)
+
+    const deleteTimes = ShiftTime.query()
+        .whereIn('eshifttimeid', deletedShiftIds)
+        .where('eshiftpatterneshiftpatternid', patternId)
+        .delete()
+
+    promises.push(deleteTimes)
+
+    const updateTime = (id, patchDTO) => ShiftTime.query()
+        .findById(id)
+        .updateByUserId(patchDTO, user.sub)
+        .returning('*')
+
+    patternDTO.times.filter(time => !time.deleted)
+        .forEach(time => {
+            const patchDTO = {
+                eshifttimename: time.name,
+                eshifttimestarthour: time.startHour,
+                eshifttimestartminute: time.startMinute,
+                eshifttimeendhour: time.endHour,
+                eshifttimeendminute: time.endMinute
+            }
+            promises.push(updateTime(time.id, patchDTO))
+        })
+
+    return Promise.all(promises)
+        .then(resultArr => resultArr[0])
+        .then(resultArr => ({ ...resultArr[0], times: resultArr.slice(2, resultArr.length) }))
+}
+
+service.deletePatternById = async (patternId) => {
+    return ShiftPattern.query().findById(patternId)
+        .delete()
+        .then(rowsAffected => rowsAffected === 1)
+}
+
+module.exports = service

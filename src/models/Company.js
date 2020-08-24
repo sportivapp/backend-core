@@ -19,6 +19,14 @@ class Company extends Model {
     };
   }
 
+  static get modifiers() {
+    return {
+      baseAttributes(builder) {
+        builder.select('ecompanyid', 'ecompanyname', 'ecompanylogo')
+      }
+    }
+  }
+
   static get relationMappings() {
 
     const User = require('./User')

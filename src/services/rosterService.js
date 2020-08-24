@@ -1,44 +1,92 @@
 const Roster = require('../models/Roster');
 const RosterUserMapping = require('../models/RosterUserMapping');
+const Grades = require('../models/Grades')
+const Department = require('../models/Department')
 const ServiceHelper = require('../helper/ServiceHelper')
-const { types } = require('pg');
 
 const RosterService = {};
 
-RosterService.createRoster = async ( rosterDTO, userIds, user ) => {
+RosterService.createRosterWithDepartment = async (rosterDTO, user) => {
+
+    const userIds = await getUserIdsFromDepartment(rosterDTO.edepartmentedepartmentid)
+
+    rosterDTO.erosteruserlimit = userIds.length
+
+    return Roster.query().insertToTable(rosterDTO, user.sub)
+        .then(roster => addUsersToMappingByDepartment(roster))
+}
+
+function getUserIdsFromDepartment(departmentId) {
+    return Grades.relatedQuery('users')
+        .for(Grades.query().where('edepartmentedepartmentid', departmentId))
+        .then(users => users.map(user => user.euserid))
+}
+
+function addUsersToMappingByDepartment(roster) {
+    const mappingDTOList = userIds.map((userId, index) => ({
+        erostererosterid: roster.erosterid,
+        eusereuserid: userId,
+        erosterusermappingname: `Member ${index + 1}`
+    }))
+    return RosterUserMapping.query().insertToTable(mappingDTOList, user.sub)
+        .then(result => ({...roster, mappings: result}))
+}
+
+RosterService.createRoster = async (rosterDTO, user) => {
 
     if (user.permission !== 8 && user.permission !== 10) return
 
-    const result = await Roster.query().insert(rosterDTO);
+    const result = Roster.query().insertToTable(rosterDTO, user.sub);
 
-    await RosterService.addMember(result.erosterid, userIds )
-
-    return result;
+    await RosterService.addMember(result, user)
+    return result
 }
 
-RosterService.addMember = async ( rosterId, userIds ) => {
-    const members = userIds.map(user => 
-        ({ 
-            erostererosterid: rosterId,
-            eusereuserid: user
-        }));  
+RosterService.addMember = async (roster, user) => {
 
-    const result = await RosterUserMapping.query().insert(members);
+    if (!roster) return
 
-    return result;
+    let count = 1
+    let members = []
+
+    while (count <= roster.erosteruserlimit) {
+        const dto = {
+            erostererosterid: roster.erosterid,
+            erosterusermappingname: `Member ${count + 1}`,
+            erosterusermappingtype: 0
+        }
+        members.push(dto)
+    }
+
+    while (count <= roster.erosterreservelimit) {
+        const dto = {
+            erostererosterid: roster.erosterid,
+            erosterusermappingname: `Reserve ${count + 1}`,
+            erosterusermappingtype: 1
+        }
+        members.push(dto)
+    }
+
+    const result = await RosterUserMapping.query().insertToTable(members, user.sub);
+
+    return {...roster, mappings: result}
 }
 
-RosterService.getAllRosters = async ( page, size, user ) => {
+RosterService.getAllRosters = async (timesheetId, user) => {
 
     if (user.permission !== 8 && user.permission !== 10) return
 
-    const rosterPage = await Roster.query().select().page(page, size);
-
-    return ServiceHelper.toPageObj(page, size, rosterPage);
-
+    return Roster.query()
+        .modify('baseAttributes')
+        .where('etimesheetetimesheetid', timesheetId)
+        .withGraphFetched('[users.grades(baseAttributes).department(baseAttributes), ' +
+            'department(baseAttributes).[parent, company(baseAttributes).parent.parent]]')
+        .modifyGraph('users', builder => {
+            builder.select('euserid', 'eusername')
+        })
 }
 
-RosterService.getAllMemberById = async ( page, size, rosterId, user ) => {
+RosterService.getAllMemberById = async (page, size, rosterId, user) => {
 
     if (user.permission !== 7 && user.permission !== 8 && user.permission !== 10) return
 
@@ -47,7 +95,7 @@ RosterService.getAllMemberById = async ( page, size, rosterId, user ) => {
     return ServiceHelper.toPageObj(page, size, membersPage);
 }
 
-RosterService.viewRosterById = async (rosterId, user ) => {
+RosterService.viewRosterById = async (rosterId, user) => {
 
     if (user.permission !== 8 && user.permission !== 10) return
 
@@ -56,22 +104,38 @@ RosterService.viewRosterById = async (rosterId, user ) => {
     return result;
 }
 
-RosterService.updateRosterById = async ( rosterId, rosterDTO, userIds, user ) => {
+RosterService.updateRosterById = async (rosterId, rosterDTO, user) => {
 
     if (user.permission !== 8 && user.permission !== 10) return
 
-    // delete member that's in the roster
-    await RosterUserMapping.query().delete().where('erostererosterid', rosterId);
+    const roster = await Roster.query().findById(rosterId)
 
-    const result = await Roster.query().select().where('erosterid', rosterId).update(rosterDTO);
+    if (!roster) return
 
-    // Insert the updated member
-    await RosterService.addMember(rosterId, userIds);
+    if (rosterDTO.edepartmentedepartmentid) {
+        const department = await Department.query().findById(rosterDTO.edepartmentedepartmentid)
+        if (!department) return
+    }
 
-    return result;
+    await RosterUserMapping.query().where('erostererosterid', rosterId).delete()
+
+    let updateRoster = (rosterDTO) => roster.$query()
+        .updateByUserId(rosterDTO, user.sub)
+        .returning('*')
+
+    if (!roster.edepartmentedepartmentid && rosterDTO.edepartmentedepartmentid) {
+        const userIds = await getUserIdsFromDepartment(rosterDTO.edepartmentedepartmentid)
+        rosterDTO.erosteruserlimit = userIds.length
+        updateRoster = updateRoster
+            .then(roster => addUsersToMappingByDepartment(roster));
+    } else if (!roster.edepartmentedepartmentid && !rosterDTO.edepartmentedepartmentid) {
+        updateRoster = updateRoster
+            .then(roster => RosterService.addMember(roster, user));
+    }
+    return updateRoster(rosterDTO)
 }
 
-RosterService.deleteRosterById = async ( rosterId, user ) => {
+RosterService.deleteRosterById = async (rosterId, user) => {
 
     if (user.permission !== 8 && user.permission !== 10) return
 
@@ -80,70 +144,22 @@ RosterService.deleteRosterById = async ( rosterId, user ) => {
     return result;
 }
 
-RosterService.generateRosterShiftForDate = async (hourType, formation, rosterId, date) => {
+RosterService.updateUsersOfRosters = async (rosterDTOs, loggedInUser) => {
 
-    // return date as is
-    types.setTypeParser(1082, value => value);
-
-    const roster = await Roster.query().select('eproject.eprojectstartdate')
-    .join('eproject', 'eroster.eprojecteprojectid', 'eproject.eprojectid').where('erosterid', rosterId).first();
-
-    const start = roster.eprojectstartdate;
-    const shifts = await RosterService.getRosterShiftsByDate(hourType, formation, start, date);
-
-    return shifts;
-
-}
-
-RosterService.getRosterShiftsByDate = async (hourType, formation, start, currentDate) => {
-
-    const currentDateDate = new Date(currentDate);
-    const startDate = new Date(start);
-    const mils = currentDateDate.getTime() - startDate.getTime();
-    // Days difference ex: start 2020-07-01, current 2020-07-29 => 28
-    const days = mils / (1000*3600*24);
-
-    let startingShift = [];
-    let patterns = [];
-    
-    if (hourType === '8') {
-        if (formation === '5-2/6-1') {
-            startingShift = [0, 5, 3, 8];
-            firstPattern = ['D', 'D', 'AN', 'AN', 'N', 'N', 'O', 'D', 'D', 'AN', 'AN', 'N', 'O', 'O'];
-            secondPattern = ['D', 'D', 'AN', 'AN', 'N', 'O', 'O'];
-            thirdPattern = ['D', 'D', 'AN', 'N', 'N', 'O', 'O'];
-            fourthPattern = ['D', 'AN', 'AN', 'N', 'N', 'O', 'D', 'D', 'AN', 'AN', 'N', 'N', 'O', 'O'];
-            patterns.push(firstPattern);
-            patterns.push(secondPattern);
-            patterns.push(thirdPattern);
-            patterns.push(fourthPattern);
-        }
-    }
-
-    // Do the calculation
-    let result = [];
-    let index = 0;
-
-    for (let i=0;i<startingShift.length; i++) {
-
-        if (startingShift.length !== patterns.length) {
-            index = 0;
-        } else {
-            index += 1;
-        }
-
-        if (i === 0) {
-            index = 0;
-        }
-
-        const startingShiftIndex = startingShift[i];
-        const scheduleIndex = (days + startingShiftIndex) % patterns[index].length;
-        result.push(patterns[index][scheduleIndex]);
-
-    }
-
-    return result;
-
+    let promises = []
+    rosterDTOs.forEach(dto => {
+        dto.users.forEach(user => {
+            const promise = RosterUserMapping.query()
+                .where('erostererosterid', dto.rosterId)
+                .where('eusereuserid', user.name)
+                .updateByUserId({
+                    erosterusermappingjobdescription: user.jobDescription,
+                    eusereuserid: user.id
+                }, loggedInUser.sub)
+            promises.push(promise)
+        })
+    })
+    return Promise.all(promises)
 }
 
 module.exports = RosterService;

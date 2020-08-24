@@ -5,8 +5,8 @@ exports.up = (knex, Promise) => knex.schema.createTable('eproject', t => {
     t.string('eprojectdescription');
     t.string('eaddresslatitude');
     t.string('eaddresslongitude');
-    t.date('eprojectstartdate', true).notNullable();
-    t.date('eprojectenddate', true).notNullable();
+    t.bigInteger('eprojectstartdate').notNullable();
+    t.bigInteger('eprojectenddate').notNullable();
     t.string('eprojectaddress');
     t.boolean('eprojectisactive').notNullable().defaultTo(true);
     t.integer('eprojectcreateby').notNullable();
@@ -15,6 +15,8 @@ exports.up = (knex, Promise) => knex.schema.createTable('eproject', t => {
     t.bigInteger('eprojectchangetime');
     t.integer('eprojecttablestatus').notNullable().defaultTo(1);
     t.integer('eprojectsupervisorid').notNullable().references('euser.euserid');
+    t.integer('eprojectparentid').references('eproject.eprojectid').onDelete('CASCADE');
+    t.integer('etimesheetetimesheetid').references('etimesheet.etimesheetid').onDelete('SET NULL');
     t.integer('eprojectdeleteby');
     t.boolean('eprojectdeletestatus').defaultTo(false);
     t.bigInteger('eprojectdeletetime');

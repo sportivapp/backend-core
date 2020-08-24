@@ -48,11 +48,29 @@ module.exports = {
             deviceId: '/devices/:deviceId',
             deviceProjectId: '/devices/:deviceId/projects'
         },
+        project: {
+            list: '/project',
+            id: '/project/:projectId',
+            timesheet: '/project/:projectId/timesheet'
+        },
         roster: {
-            list: '/roster',
+            list: '/timesheet/:timesheetId/roster',
+            members: '/roster-member',
             rosterId: '/roster/:rosterId',
             shift: '/roster-shift',
-            rosterMemberId: '/roster-members/:rosterId'
+            rosterMemberId: '/roster/:rosterId/members'
+        },
+        timesheet: {
+            list: '/timesheet',
+            id: '/timesheet/:timesheetId'
+        },
+        shift: {
+            list: '/shift',
+            id: '/shift/:shiftId'
+        },
+        shiftPattern: {
+            list: '/shift/:shiftId/pattern',
+            id: '/shift/:shiftId/pattern/:patternId'
         },
         industry: {
             list: '/industry'

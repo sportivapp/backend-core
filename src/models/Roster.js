@@ -1,5 +1,5 @@
 const Model = require('./Model');
-const Project = require('./Project');
+const Department = require('./Department');
 const User = require('./User')
 
 class Roster extends Model {
@@ -14,11 +14,11 @@ class Roster extends Model {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['erostername', 'eprojecteprojectid'],
+      required: ['erostername', 'etimesheetetimesheetid'],
       properties: {
         erostername: { type: 'string', minLength: 1, maxLength: 256 },
         erosterdescription: { type: 'string', minLength: 1, maxLength: 256 },
-        eprojecteprojectid: {type: 'integer' },
+        etimesheetetimesheetid: {type: 'integer' },
         erostersupervisoruserid: {type: 'integer' },
         erosterheaduserid: {type: 'integer' }
       }
@@ -28,12 +28,12 @@ class Roster extends Model {
   static get relationMappings() {
 
     return {
-      project: {
+      department: {
         relation: Model.BelongsToOneRelation,
-        modelClass: Project,
+        modelClass: Department,
         join: {
-          from: 'eroster.eprojecteprojectid',
-          to: 'eproject.eprojectid'
+          from: 'eroster.edepartmentedepartmentid',
+          to: 'edepartment.edepartmentid'
         }
       },
       //nullable supervisor
@@ -44,13 +44,32 @@ class Roster extends Model {
           from: 'eroster.erostersupervisoruserid',
           to: 'euser.euserid'
         }
+      },
+      users: {
+        relation: Model.ManyToManyRelation,
+        modelClass: User,
+        join: {
+          from: 'eroster.erosterid',
+          through: {
+            from: 'erosterusermapping.erostererosterid',
+            to: 'erosterusermapping.eusereuserid',
+            extra: {
+              euseraliasname: 'erosterusermappingname',
+              euserjobdescription: 'erosterusermappingjobdescription'
+            }
+          },
+          to: 'euser.euserid'
+        }
       }
     }
   }
 
   static get modifiers() {
     return {
-      ...this.baseModifiers()
+      ...this.baseModifiers(),
+      baseAttributes(builder) {
+        builder.select('erosterid', 'erostername', 'erosterdescription', 'erosteruserlimit', 'erostersupervisoruserid', 'erosterheaduserid')
+      }
     }
   }
 }

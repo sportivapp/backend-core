@@ -29,6 +29,7 @@ class Project extends Model {
     const Device = require('./Device')
     const User = require('./User')
     const Roster = require('./Roster')
+    const Timesheet = require('./Timesheet')
 
     return {
       devices: {
@@ -57,6 +58,18 @@ class Project extends Model {
         join: {
           from: 'eproject.eprojectid',
           to: 'eroster.eprojecteprojectid'
+        }
+      },
+      timesheets: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Timesheet,
+        join: {
+          from: 'eproject.eprojectid',
+          through: {
+            from: 'eprojecttimesheetmapping.eprojecteprojectid',
+            to: 'eprojecttimesheetmapping.etimesheetetimesheetid'
+          },
+          to: 'etimesheet.etimesheetid'
         }
       }
     }
