@@ -1,4 +1,5 @@
 exports.up = (knex, Promise) => knex.schema.createTable('euserpositionmapping', t => {
+    t.increments('euserpositionmappingid').primary().unsigned();
     t.integer('eusereuserid').notNullable().references('euser.euserid').onDelete('CASCADE')
     t.integer('egradeegradeid').notNullable().references('egrade.egradeid').onDelete('CASCADE')
     t.bigInteger('euserpositionmappingcreatetime').notNullable().defaultTo(Date.now())
