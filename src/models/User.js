@@ -31,6 +31,7 @@ class User extends Model {
     const Country = require('./Country')
     const File = require('./File')
     const Project =require('./Project')
+    const Announcement = require('./Announcement');
 
     return {
       permits: {
@@ -111,6 +112,18 @@ class User extends Model {
         join: {
           from: 'euser.euserid',
           to: 'eproject.eprojectsupervisorid'
+        }
+      },
+      announcements: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Announcement,
+        join: {
+            from: 'euser.euserid',
+            through: {
+              from: 'eannouncementusermapping.eusereuserid',
+              to: 'eannouncementusermapping.eannouncementeannouncementid'
+            },
+            to: 'eannouncement.eannouncementid'
         }
       }
     }

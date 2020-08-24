@@ -19,6 +19,27 @@ class Announcement extends Model {
       }
     };
   }
+
+  static get relationMappings() {
+
+    const User = require('./User');
+
+    return {
+      users: {
+        relation: Model.ManyToManyRelation,
+        modelClass: User,
+        join: {
+            from: 'eannouncement.eannouncementid',
+            through: {
+              from: 'eannouncementusermapping.eannouncementeannouncementid',
+              to: 'eannouncementusermapping.eusereuserid'
+            },
+            to: 'euser.euserid'
+        }
+      }
+  }
+}
+
 }
 
 module.exports = Announcement;
