@@ -29,7 +29,7 @@ SettingService.getModuleById = async (companyId, moduleId) => {
 
 }
 
-SettingService.updateModulesByCompanyId = async ( companyId, moduleDTO, user ) => {
+SettingService.updateModuleByCompanyId = async ( companyId, moduleDTO, user ) => {
 
     const module = await SettingService.getModuleById(companyId, moduleDTO.emoduleemoduleid);
 
@@ -86,7 +86,7 @@ SettingService.deleteFuncionsByGradeId = async (gradeId) => {
 
 }
 
-SettingService.updateFuncionsByGradeId = async (gradeId, functionDTO) => {
+SettingService.saveFuncionsByGradeId = async (gradeId, functionDTO) => {
 
     await SettingService.deleteFuncionsByGradeId(gradeId);
 

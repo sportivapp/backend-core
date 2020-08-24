@@ -54,7 +54,7 @@ Controller.getAllFunctionByGradeId = async (req, res, next) => {
 
 }
 
-Controller.updateFuncionsByGradeId = async (req, res, next) => {
+Controller.saveFuncionsByGradeId = async (req, res, next) => {
 
     const { gradeId } = req.params;
 
@@ -74,7 +74,7 @@ Controller.updateFuncionsByGradeId = async (req, res, next) => {
 
     try {
 
-        const result = await SettingService.updateFuncionsByGradeId(gradeId, functionDTO);
+        const result = await SettingService.saveFuncionsByGradeId(gradeId, functionDTO);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
