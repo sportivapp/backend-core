@@ -36,6 +36,14 @@ class Announcement extends Model {
             },
             to: 'euser.euserid'
         }
+      },
+      creator: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: 'eannouncement.eannouncementcreateby',
+          to: 'euser.euserid'
+        }
       }
   }
 }
