@@ -43,9 +43,9 @@ service.updateTimesheet = async (timesheetId, timesheetDTO, rosterDTOs, user) =>
 
     let promises = []
 
-    const updateTimesheet = timesheet.$query().updateByUserId(timesheetDTO, user.sub).returning('*')
+    const updateTimesheetQuery = timesheet.$query().updateByUserId(timesheetDTO, user.sub).returning('*')
 
-    promises.push(updateTimesheet)
+    promises.push(updateTimesheetQuery)
 
     rosterDTOs.forEach(roster => {
         const id = roster.erosterid
