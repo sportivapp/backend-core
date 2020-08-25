@@ -53,16 +53,18 @@ module.exports = {
             id: '/project/:projectId',
             timesheet: '/project/:projectId/timesheet'
         },
-        roster: {
-            list: '/timesheet/:timesheetId/roster',
-            members: '/roster-member',
-            rosterId: '/roster/:rosterId',
-            shift: '/roster-shift',
-            rosterMemberId: '/roster/:rosterId/members'
-        },
         timesheet: {
             list: '/timesheet',
-            id: '/timesheet/:timesheetId'
+            id: '/timesheet/:timesheetId',
+            assign: '/timesheet/:timesheetId/assign'
+        },
+        roster: {
+            list: '/timesheet/:timesheetId/roster',
+            members: '/timesheet/:timesheetId/roster-member',
+            rosterId: '/timesheet/:timesheetId/roster/:rosterId',
+            shift: '/timesheet/:timesheetId/roster-shift',
+            rosterMemberId: '/timesheet/:timesheetId//roster/:rosterId/members',
+            memberAssign: '/timesheet/:timesheetId/roster-assign',
         },
         shift: {
             list: '/shift',

@@ -19,8 +19,10 @@ ProjectService.createProject = async(projectDTO, user) => {
 
 ProjectService.getProjectById = async (projectId) => {
 
-    return Project.query().findById(projectId).withGraphFetched('timesheets')
-
+    return Project.query().findById(projectId).withGraphFetched('timesheets.' +
+        'rosters(baseAttributes).' +
+        'mappings(baseAttributes).' +
+        'user(baseAttributes)')
 }
 
 ProjectService.getProjects = async(userId, page, size, projectId) => {
@@ -155,7 +157,9 @@ ProjectService.saveDevicesIntoProject = async (projectId, deviceIds, user) => {
     }
 }
 
-ProjectService.saveTimesheetIntoProject = async (projectId, timesheetId, user) => {
+ProjectService.saveTimesheetIntoProject = async (projectId, timesheetIds, user) => {
+
+    const timesheetId = timesheetIds[0]
 
     const timesheet = await Timesheet.query().findById(timesheetId)
 
@@ -165,9 +169,13 @@ ProjectService.saveTimesheetIntoProject = async (projectId, timesheetId, user) =
 
     if (!project) return
 
-    await ProjectTimesheetMapping.query().where('eprojecteprojectid', projectId).delete()
-    return ProjectTimesheetMapping.query()
-        .insertToTable({ eprojecteprojectid: projectId, etimesheetetimesheetid: timesheetId }, user.sub)
+    const dto = {
+        eprojecteprojectid: parseInt(projectId),
+        etimesheetetimesheetid: timesheetId
+    }
+
+    return ProjectTimesheetMapping.query().where('eprojecteprojectid', projectId).delete()
+        .then(ignored => ProjectTimesheetMapping.query().insertToTable(dto, user.sub))
 }
 
 function findByProjectIdAndDeviceId(pr, project) {

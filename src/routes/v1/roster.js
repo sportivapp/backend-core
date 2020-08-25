@@ -11,5 +11,6 @@ router.delete( routes.roster.rosterId, auth.authenticateToken, rosterController.
 // router.post( routes.roster.shift, auth.authenticateToken, rosterController.generateRosterShiftForDate);
 router.put( routes.roster.members, auth.authenticateToken, rosterController.updateUsersOfRosters)
 router.get( routes.roster.rosterMemberId, auth.authenticateToken, rosterController.getAllMemberById);
+router.post( routes.roster.memberAssign, auth.authenticateToken, rosterController.assignRosterToShiftTimeByTimesheetId);
 
 module.exports = router.expressRouter;

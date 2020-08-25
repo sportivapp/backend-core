@@ -171,5 +171,21 @@ rosterController.updateUsersOfRosters = async (req, res, next) => {
     }
 }
 
+rosterController.assignRosterToShiftTimeByTimesheetId = async (req, res, next) => {
+
+    const { timesheetId } =req.params
+
+    const { mappings, projectId } = req.body
+
+    try {
+        const result = await rosterService.assignRosterToShiftTime(timesheetId, mappings, projectId, req.user)
+        if (!result) return res.status(400).json(ResponseHelper.toErrorResponse(400))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+    } catch (e) {
+        next(e)
+    }
+
+}
+
 
 module.exports = rosterController

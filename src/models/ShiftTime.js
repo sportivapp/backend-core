@@ -38,6 +38,7 @@ class ShiftTime extends Model {
 
         const Shift = require('./Shift')
         const ShiftPattern = require('./ShiftPattern')
+        const ShiftRosterUserMapping = require('./ShiftRosterUserMapping')
 
         return {
             shift: {
@@ -54,6 +55,14 @@ class ShiftTime extends Model {
                 join: {
                     from: 'eshifttime.eshiftpatterneshiftpatternid',
                     to: 'eshiftpattern.eshiftpatternid'
+                }
+            },
+            mappings: {
+                relation: Model.HasManyRelation,
+                modelClass: ShiftRosterUserMapping,
+                join: {
+                    from: 'eshifttime.eshifttimeid',
+                    to: 'eshiftrosterusermapping.eshifttimeeshifttimeid'
                 }
             }
         }

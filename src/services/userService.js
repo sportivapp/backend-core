@@ -172,8 +172,6 @@ UsersService.updateUserById = async (userId, userDTO, permission, user) => {
         .where('eusereuserid', userId)
         .first()
 
-    console.log(userMapping)
-
     const updateUserQuery = User.query().findById(userId)
         .updateByUserId(userDTO, user.sub)
         .returning('*')

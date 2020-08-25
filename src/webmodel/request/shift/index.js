@@ -1,10 +1,9 @@
 const { routes } = require('../../../constant')
-const CreateShiftRequest = require('./CreateShiftRequest')
-const UpdateShiftRequest = require('./UpdateShiftRequest')
+const ShiftRequest = require('./ShiftRequest')
 
 const shiftSchemas = {}
 
-shiftSchemas[routes.shift.list] = CreateShiftRequest
-shiftSchemas[routes.shift.id] = UpdateShiftRequest
+shiftSchemas[routes.shift.list] = ShiftRequest
+shiftSchemas[routes.shift.id] = ShiftRequest
 
 module.exports = shiftSchemas

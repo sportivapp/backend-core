@@ -1,7 +1,7 @@
 const router = require('../router');
 const projectController = require('../../controllers/project');
 const auth = require('../../middlewares/authentication');
-const { routes } = require('../../../constant')
+const { routes } = require('../../constant')
 
 router.post(routes.project.list, auth.authenticateToken, projectController.createProject);
 router.get(routes.project.list, auth.authenticateToken, projectController.getProjects);

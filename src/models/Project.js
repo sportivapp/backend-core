@@ -16,8 +16,8 @@ class Project extends Model {
       properties: {
         eprojectname: { type: 'string', minLength: 1, maxLength: 256 },
         eprojectcode: { type: 'string', minLength: 1, maxLength: 256 },
-        eprojectstartdate: { type: 'string', format: 'date' },
-        eprojectenddate: { type: 'string', format: 'date' },
+        eprojectstartdate: { type: 'bigint' },
+        eprojectenddate: { type: 'bigint' },
         eprojectcreateby: { type: 'integer' },
         eprojectaddress: { type: 'string', minLength: 1, maxLength: 256 }
       }
@@ -66,7 +66,7 @@ class Project extends Model {
         join: {
           from: 'eproject.eprojectid',
           through: {
-            from: 'eprojecttimesheetmapping.eprojecteprojectid',
+            from: 'eprojecttimesheetmapping.eprojectprojectid',
             to: 'eprojecttimesheetmapping.etimesheetetimesheetid'
           },
           to: 'etimesheet.etimesheetid'

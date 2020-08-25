@@ -51,7 +51,7 @@ controller.createPattern = async (req, res, next) => {
 
 controller.updatePatternById = async (req, res, next) => {
 
-    const { patternId } = req.params
+    const { shiftId, patternId } = req.params
     const { startTime, endTime, times } = req.body
 
     const patternDTO = {
@@ -61,7 +61,7 @@ controller.updatePatternById = async (req, res, next) => {
     }
 
     try {
-        const result = await shiftPatternService.updatePatternById(patternId, patternDTO, req.user)
+        const result = await shiftPatternService.updatePatternById(shiftId, patternId, patternDTO, req.user)
         if (!result) return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {

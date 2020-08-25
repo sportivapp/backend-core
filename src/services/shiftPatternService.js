@@ -43,7 +43,7 @@ service.getPatternsByShiftId = async (shiftId) => {
         .withGraphFetched('times')
 }
 
-service.updatePatternById = async (patternId, patternDTO, user) => {
+service.updatePatternById = async (shiftId, patternId, patternDTO, user) => {
 
     const pattern = await ShiftPattern.query().findById(patternId).withGraphFetched('times')
 
@@ -75,6 +75,9 @@ service.updatePatternById = async (patternId, patternDTO, user) => {
         .updateByUserId(patchDTO, user.sub)
         .returning('*')
 
+    const insertTime = (timeDTO) => ShiftTime.query()
+        .insertToTable(timeDTO, user.sub)
+
     patternDTO.times.filter(time => !time.deleted)
         .forEach(time => {
             const patchDTO = {
@@ -82,13 +85,15 @@ service.updatePatternById = async (patternId, patternDTO, user) => {
                 eshifttimestarthour: time.startHour,
                 eshifttimestartminute: time.startMinute,
                 eshifttimeendhour: time.endHour,
-                eshifttimeendminute: time.endMinute
+                eshifttimeendminute: time.endMinute,
+                eshifteshiftid: parseInt(shiftId),
+                eshiftpatterneshiftpatternid: parseInt(patternId)
             }
-            promises.push(updateTime(time.id, patchDTO))
+            if (time.id) promises.push(updateTime(time.id, patchDTO))
+            else promises.push(insertTime(patchDTO))
         })
 
     return Promise.all(promises)
-        .then(resultArr => resultArr[0])
         .then(resultArr => ({ ...resultArr[0], times: resultArr.slice(2, resultArr.length) }))
 }
 

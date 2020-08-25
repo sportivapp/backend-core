@@ -5,7 +5,7 @@ const schema = Joi.object({
         id: Joi.number().required(),
         users: Joi.array().items(Joi.object({
             name: Joi.string().max(255).required(),
-            id: Joi.number(),
+            id: Joi.number().allow(null).required(),
             jobDescription: Joi.string().max(255)
         }))
     }))

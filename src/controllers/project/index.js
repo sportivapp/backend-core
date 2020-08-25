@@ -175,7 +175,7 @@ projectController.saveTimesheet = async (req, res, next) => {
     const { projectId } = req.params
 
     try {
-        const result = projectService.saveTimesheetIntoProject(projectId, timesheetIds, req.user)
+        const result = await projectService.saveTimesheetIntoProject(projectId, timesheetIds, req.user)
         if (!result) return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {

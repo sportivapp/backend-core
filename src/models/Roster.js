@@ -1,6 +1,7 @@
 const Model = require('./Model');
 const Department = require('./Department');
 const User = require('./User')
+const RosterUserMapping = require('./RosterUserMapping')
 
 class Roster extends Model {
   static get tableName() {
@@ -60,6 +61,14 @@ class Roster extends Model {
           },
           to: 'euser.euserid'
         }
+      },
+      mappings: {
+        relation: Model.HasManyRelation,
+        modelClass: RosterUserMapping,
+        join: {
+          from: 'eroster.erosterid',
+          to: 'erosterusermapping.erostererosterid'
+        }
       }
     }
   }
@@ -69,6 +78,9 @@ class Roster extends Model {
       ...this.baseModifiers(),
       baseAttributes(builder) {
         builder.select('erosterid', 'erostername', 'erosterdescription', 'erosteruserlimit', 'erostersupervisoruserid', 'erosterheaduserid')
+      },
+      idAndName(builder) {
+        builder.select('erosterid', 'erostername')
       }
     }
   }
