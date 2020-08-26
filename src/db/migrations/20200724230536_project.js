@@ -16,6 +16,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('eproject', t => {
     t.integer('eprojecttablestatus').notNullable().defaultTo(1);
     t.integer('eprojectsupervisorid').notNullable().references('euser.euserid');
     t.integer('eprojectparentid').references('eproject.eprojectid').onDelete('CASCADE');
+    t.integer('ecompanyecompanyid').references('ecompany.ecompanyid').onDelete('CASCADE');
     t.integer('etimesheetetimesheetid').references('etimesheet.etimesheetid').onDelete('SET NULL');
     t.integer('eprojectdeleteby');
     t.boolean('eprojectdeletestatus').defaultTo(false);

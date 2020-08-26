@@ -5,12 +5,13 @@ const controller = {}
 
 controller.createShift = async (req, res, next) => {
 
-    const { name, startDate, endDate } = req.body
+    const { name, startDate, endDate, isGeneral } = req.body
 
     const shiftDTO = {
         eshiftname: name,
         eshiftstartdate: startDate,
-        eshiftenddate: endDate
+        eshiftenddate: endDate,
+        eshiftgeneralstatus: isGeneral
     }
 
     try {

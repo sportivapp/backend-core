@@ -4,6 +4,7 @@ const ShiftRosterUserMapping = require('../models/ShiftRosterUserMapping')
 const Grades = require('../models/Grades')
 const Department = require('../models/Department')
 const Timesheet = require('../models/Timesheet')
+const Project = require('../models/Project')
 const ServiceHelper = require('../helper/ServiceHelper')
 const { Promise } = require('bluebird')
 
@@ -205,7 +206,8 @@ function saveShiftRosterUserMapping(mapping, rosterUserMapping, dto, projectId, 
         eshifttimeeshifttimeid: dto.shiftTimeId,
         eshiftdaytime: dto.dayTime,
         eprojecteprojectid: projectId,
-        eusereuserid: rosterUserMapping.eusereuserid
+        eusereuserid: rosterUserMapping ? rosterUserMapping.eusereuserid: dto.userId,
+        eshiftgeneralstatus: false
     }
     if (mapping) {
         return ShiftRosterUserMapping.$query().updateByUserId(mappingDTO, user.sub)
@@ -220,6 +222,10 @@ RosterService.assignRosterToShiftTime = async (timesheetId, mappings, projectId,
 
     if (!timesheet) return
 
+    const project = await Project.query().findById(projectId)
+
+    if (!project) return
+
     const reserveCount = mappings.filter(dto => dto.name.includes('Reserve')).length
     if (reserveCount > 0) return
 
@@ -232,6 +238,59 @@ RosterService.assignRosterToShiftTime = async (timesheetId, mappings, projectId,
             .first()
             .then(result => GetShiftRosterUserMapping(result))
             .then(resultArr => saveShiftRosterUserMapping(resultArr[0], resultArr[1], dto, projectId, user))
+        updatePromises.push(promise)
+    })
+
+    await Promise.all(updatePromises)
+
+    return timesheet.shift.$query()
+        .withGraphFetched('patterns.times.mappings.roster(idAndName)')
+}
+
+RosterService.assignRosterToShiftTimeGeneral = async (timesheetId, projectId, user) => {
+
+    const timesheet = await Timesheet.query().findById(timesheetId).withGraphFetched('[shift.patterns.times, rosters.mappings.user]')
+
+    if (!timesheet || !timesheet.etimesheetgeneralstatus) return
+
+    let updatePromises = []
+    let dtoList = []
+
+    timesheet.rosters.forEach(roster => {
+        roster.mappings.forEach(mapping => {
+            const dto = {
+                rosterId: roster.erosterid,
+                name: mapping.erosterusermappingname,
+                userId: mapping.user.euserid
+            }
+            dtoList.push(dto)
+        })
+    })
+
+    let shiftTimeIds = []
+
+    timesheet.shift.patterns.forEach(pattern => {
+        let timeIds = pattern.times.map(time => time.eshifttimeid)
+        shiftTimeIds.concat(timeIds)
+    })
+
+    let mappings = []
+
+    shiftTimeIds.forEach(timeId => {
+        const dtoWithShiftTimeIdList = dtoList.map(dto => {
+            dto[shiftTimeId] = timeId
+            return dto
+        })
+        mappings.concat(dtoWithShiftTimeIdList)
+    })
+
+    mappings.forEach(dto => {
+        const promise = RosterUserMapping.query()
+            .where('erostererosterid', dto.rosterId)
+            .where('erosterusermappingname', dto.name)
+            .first()
+            .then(result => GetShiftRosterUserMapping(result))
+            .then(resultArr => saveShiftRosterUserMapping(resultArr[0], undefined, dto, projectId, user))
         updatePromises.push(promise)
     })
 

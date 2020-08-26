@@ -45,7 +45,7 @@ class ShiftPattern extends Model {
                 relation: Model.HasManyRelation,
                 modelClass: ShiftTime,
                 join: {
-                    from: 'eshiftpattern.epatternid',
+                    from: 'eshiftpattern.eshiftpatternid',
                     to: 'eshifttime.eshiftpatterneshiftpatternid'
                 }
             }

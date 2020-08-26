@@ -4,6 +4,7 @@ const schema = Joi.object({
     name: Joi.string().max(255).required(),
     rosterCount: Joi.number().required(),
     shiftId: Joi.number().required(),
+    isGeneral: Joi.boolean().required(),
     rosters: Joi.array().required().items(Joi.object({
         name: Joi.string().max(255).required(),
         departmentId: Joi.number(),

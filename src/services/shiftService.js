@@ -18,8 +18,11 @@ shiftService.getShiftById = async (shiftId) => {
 }
 
 shiftService.updateShiftById = async (shiftId, shiftDTO, user) => {
-    return Shift.query()
-        .findById(shiftId)
+    const shift = await Shift.query().findById(shiftId).withGraphFetched('timesheets')
+
+    if (shift.timesheets.length > 0) return
+
+    return shift.$query()
         .updateByUserId(shiftDTO, user.sub)
         .returning('*')
 }

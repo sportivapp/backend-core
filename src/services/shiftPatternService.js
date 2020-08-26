@@ -1,6 +1,7 @@
 const Shift = require('../models/Shift')
 const ShiftTime = require('../models/ShiftTime')
 const ShiftPattern = require('../models/ShiftPattern')
+const ShiftRosterUserMapping = require('../models/ShiftRosterUserMapping')
 const service = {}
 
 service.createPattern = async (shiftId, patternDTO, user) => {
@@ -67,6 +68,9 @@ service.updatePatternById = async (shiftId, patternId, patternDTO, user) => {
         .whereIn('eshifttimeid', deletedShiftTimeIds)
         .where('eshiftpatterneshiftpatternid', patternId)
         .delete()
+        .then(ignored => ShiftRosterUserMapping.query()
+            .whereIn('eshifttimeeshifttimeid', deletedShiftTimeIds)
+            .delete())
 
     promises.push(deleteTimes)
 

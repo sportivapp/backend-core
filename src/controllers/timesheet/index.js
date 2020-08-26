@@ -5,12 +5,13 @@ const controller = {}
 
 controller.createTimesheet = async (req, res, next) => {
 
-    const { name, shiftId, rosterCount, rosters } = req.body
+    const { name, shiftId, rosterCount, rosters, isGeneral } = req.body
 
     const timesheetDTO = {
         etimesheetname: name,
         etimesheetrostercount: rosterCount,
-        eshifteshiftid: shiftId
+        eshifteshiftid: shiftId,
+        etimesheetgeneralstatus: isGeneral
     }
 
     const rosterDTOs = rosters.map(roster => ({

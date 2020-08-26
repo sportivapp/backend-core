@@ -159,23 +159,25 @@ ProjectService.saveDevicesIntoProject = async (projectId, deviceIds, user) => {
 
 ProjectService.saveTimesheetIntoProject = async (projectId, timesheetIds, user) => {
 
-    const timesheetId = timesheetIds[0]
+    const isTimesheetsValid = await Timesheet.query().whereIn('etimesheetid', timesheetIds)
+        .then(timesheetList => {
+            if (timesheetList.length < timesheetIds) return false
+            else return timesheetList.filter(timesheet => timesheet.etimesheetgeneralstatus).length <= 0
+        })
 
-    const timesheet = await Timesheet.query().findById(timesheetId)
-
-    if (!timesheet) return
+    if (!isTimesheetsValid) return
 
     const project = await Project.query().findById(projectId)
 
     if (!project) return
 
-    const dto = {
+    const dtoList = timesheetIds.map(timesheetId => ({
         eprojecteprojectid: parseInt(projectId),
         etimesheetetimesheetid: timesheetId
-    }
+    }))
 
     return ProjectTimesheetMapping.query().where('eprojecteprojectid', projectId).delete()
-        .then(ignored => ProjectTimesheetMapping.query().insertToTable(dto, user.sub))
+        .then(ignored => ProjectTimesheetMapping.query().insertToTable(dtoList, user.sub))
 }
 
 function findByProjectIdAndDeviceId(pr, project) {
