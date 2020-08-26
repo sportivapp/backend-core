@@ -23,6 +23,7 @@ class Announcement extends Model {
   static get relationMappings() {
 
     const User = require('./User');
+    const Company = require('./Company');
 
     return {
       users: {
@@ -35,6 +36,14 @@ class Announcement extends Model {
               to: 'eannouncementusermapping.eusereuserid'
             },
             to: 'euser.euserid'
+        },
+        company: {
+          relation: Model.BelongsToOneRelation,
+          modelClass: Company,
+          join: {
+            from: 'eannouncement.ecompanyecompanyid',
+            to: 'ecompany.ecompanyid'
+          }
         }
       }
   }
