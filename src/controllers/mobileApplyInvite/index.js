@@ -31,7 +31,7 @@ controller.joinRequest = async (req, res, next) => {
         const result = await applyInviteService.joinRequest(companyId, req.user);
 
         if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404));
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
@@ -49,7 +49,7 @@ controller.cancelJoinRequest = async (req, res, next) => {
         const result = await applyInviteService.cancelJoinRequest(companyId, req.user);
 
         if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404));
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
@@ -68,7 +68,7 @@ controller.processInvite = async (req, res, next) => {
         const result = await applyInviteService.processInvitation(companyId, req.user, status.toUpperCase());
 
         if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404));
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {

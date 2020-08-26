@@ -34,7 +34,7 @@ applyInviteService.joinRequest = async (companyId, user) => {
     .andWhere('eapplyinvitestatus', ApplyInviteStatusEnum.PENDING)
     .first();
 
-    if (!applyPending)
+    if (applyPending)
         return
 
     return ApplyInvite.query().insertToTable({
@@ -57,15 +57,14 @@ applyInviteService.cancelJoinRequest = async (companyId, user) => {
     if (!applyPending)
         return
     
-    return ApplyInvite.query()
-    .where('eusereuserid', user.sub)
-    .andWhere('ecompanyecompanyid', companyId)
-    .andWhere('eapplyinvitetype', ApplyInviteTypeEnum.APPLY)
-    .del();
-
+    return applyPending.$query().delete();
+    
 }
 
 applyInviteService.processInvitation = async (companyId, user, status) => {
+
+    if (!ApplyInviteStatusEnum.hasOwnProperty(status))
+        return
 
     const invitePending = await ApplyInvite.query()
     .where('eusereuserid', user.sub)
