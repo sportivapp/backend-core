@@ -27,16 +27,16 @@ ProjectService.getProjectById = async (projectId) => {
 
 ProjectService.getProjects = async(userId, page, size, projectId) => {
 
-    let projectPage = Project.query()
-        .select('eprojectid', 'eprojectname', 'eprojectcode', 'eprojectstartdate', 'eprojectenddate', 'eprojectaddress')
-        .where('eprojectcreateby', userId)
+    let id = projectId
 
-    if (projectId) {
-        projectPage = projectPage
-            .where('eprojectparentid', projectId)
+    if (!projectId) {
+        id = null
     }
 
-    return projectPage
+    return Project.query()
+        .select('eprojectid', 'eprojectname', 'eprojectcode', 'eprojectstartdate', 'eprojectenddate', 'eprojectaddress')
+        .where('eprojectcreateby', userId)
+        .where('eprojectparentid', id)
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 

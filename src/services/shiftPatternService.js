@@ -61,10 +61,10 @@ service.updatePatternById = async (shiftId, patternId, patternDTO, user) => {
 
     promises.push(updatePattern)
 
-    const deletedShiftIds = patternDTO.times.filter(time => time.deleted).map(time => time.id)
+    const deletedShiftTimeIds = patternDTO.times.filter(time => time.deleted).map(time => time.id)
 
     const deleteTimes = ShiftTime.query()
-        .whereIn('eshifttimeid', deletedShiftIds)
+        .whereIn('eshifttimeid', deletedShiftTimeIds)
         .where('eshiftpatterneshiftpatternid', patternId)
         .delete()
 

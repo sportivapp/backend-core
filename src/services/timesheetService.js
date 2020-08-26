@@ -24,17 +24,6 @@ service.createTimesheet = async (timesheetDTO, rosterDTOs, user) => {
 
     const timesheet = await Timesheet.query().insertToTable(timesheetDTO, user.sub)
 
-    let rosterPromises = []
-
-    rosterDTOs.forEach(dto => {
-        dto.etimesheetetimesheetid = timesheet.etimesheetid
-        if (dto.edepartmentedepartmentid) {
-            rosterPromises.push(rosterService.createRosterWithDepartment(dto, user))
-        }
-        else
-            rosterPromises.push(rosterService.createRoster(dto, user))
-    })
-
    return Promise.map(rosterDTOs, (dto) => {
        if (dto.edepartmentedepartmentid) return rosterService.createRosterWithDepartment(dto, user)
        return rosterService.createRoster(dto, user)
