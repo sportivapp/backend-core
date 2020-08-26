@@ -39,6 +39,7 @@ const mobileFileRoutes = require('./mobileFile');
 const mobileLicenseRoutes = require('./mobileLicense');
 const mobileCompanyRoutes = require('./mobileCompany');
 const mobileAnnouncementRoutes = require('./mobileAnnouncement');
+const mobileApplyInviteRoutes = require('./mobileApplyInvite');
 
 router.use('/api/v1/mobile', [
     mobileUserRoutes,
@@ -46,6 +47,7 @@ router.use('/api/v1/mobile', [
     mobileLicenseRoutes,
     mobileCompanyRoutes,
     mobileAnnouncementRoutes,
+    mobileApplyInviteRoutes
 ]);
 
 module.exports = router;

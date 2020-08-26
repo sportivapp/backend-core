@@ -19,6 +19,31 @@ class ApplyInvite extends Model {
             }
         };
     }
+    
+    static get relationMappings() {
+
+        const User = require('./User');
+        const Company = require('./Company');
+
+        return {
+            company: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Company,
+                join: {
+                    from: 'eapplyinvite.ecompanyecompanyid',
+                    to: 'ecompany.ecompanyid'
+                }
+            },
+            user: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: User,
+                join: {
+                    from: 'eapplyinvite.eusereuserid',
+                    to: 'euser.euserid'
+                }
+            }
+        }
+    }
 
 }
 
