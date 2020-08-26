@@ -41,7 +41,7 @@ service.createTimesheet = async (timesheetDTO, rosterDTOs, user) => {
             return rosterService.createRosterWithDepartment(dto, user)
         }, { concurrency: 5 })
             .then(rosters => rosterService
-                .assignRosterToShiftTimeGeneral(timesheet.etimesheetid, undefined, user)
+                .assignRosterToShiftTimeGeneral(timesheet.etimesheetid, user)
                     .then(ignored => ({ ...timesheet, rosters: rosters }))
             )
 

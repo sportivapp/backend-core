@@ -247,7 +247,7 @@ RosterService.assignRosterToShiftTime = async (timesheetId, mappings, projectId,
         .withGraphFetched('patterns.times.mappings.roster(idAndName)')
 }
 
-RosterService.assignRosterToShiftTimeGeneral = async (timesheetId, projectId, user) => {
+RosterService.assignRosterToShiftTimeGeneral = async (timesheetId, user) => {
 
     const timesheet = await Timesheet.query().findById(timesheetId).withGraphFetched('[shift.patterns.times, rosters.mappings.user]')
 
@@ -290,7 +290,7 @@ RosterService.assignRosterToShiftTimeGeneral = async (timesheetId, projectId, us
             .where('erosterusermappingname', dto.name)
             .first()
             .then(result => GetShiftRosterUserMapping(result))
-            .then(resultArr => saveShiftRosterUserMapping(resultArr[0], undefined, dto, projectId, user))
+            .then(resultArr => saveShiftRosterUserMapping(resultArr[0], undefined, dto, undefined, user))
         updatePromises.push(promise)
     })
 
