@@ -13,7 +13,8 @@ announcementController.createAnnouncement = async (req, res, next) => {
         const announcementDTO = {
             eannouncementtitle: announcementTitle,
             eannouncementcontent: announcementContent,
-            eannouncementcreateby: user.sub
+            eannouncementcreateby: user.sub,
+            ecompanyecompanyid: user.companyId
         }
 
         const result = await announcementService.createAnnouncement(announcementDTO, userIds, user);

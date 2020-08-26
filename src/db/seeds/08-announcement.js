@@ -3,9 +3,9 @@ exports.seed = (knex, Promise) => knex('eannouncement').del()
   knex('eannouncement').insert(
     [
         {
-            eannouncementtitle: 'nawakara announcement',
-            eannouncementcontent: 'nawakara first announcement',
-            eannouncementcreateby: 4
+            eannouncementtitle: 'System Announcement',
+            eannouncementcontent: 'Lorem ipsum dimsum',
+            eannouncementcreateby: 0
         }
     ]
   ));

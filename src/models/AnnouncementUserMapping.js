@@ -1,6 +1,6 @@
 const Model = require('./Model');
 
-class RosterUserMapping extends Model {
+class AnnouncementUserMapping extends Model {
   static get tableName() {
     return 'eannouncementusermapping';
   };
@@ -19,6 +19,7 @@ class RosterUserMapping extends Model {
       }
     };
   }
+
 }
 
-module.exports = RosterUserMapping;
+module.exports = AnnouncementUserMapping;

@@ -19,6 +19,36 @@ class Announcement extends Model {
       }
     };
   }
+
+  static get relationMappings() {
+
+    const User = require('./User');
+    const Company = require('./Company');
+
+    return {
+      users: {
+        relation: Model.ManyToManyRelation,
+        modelClass: User,
+        join: {
+            from: 'eannouncement.eannouncementid',
+            through: {
+              from: 'eannouncementusermapping.eannouncementeannouncementid',
+              to: 'eannouncementusermapping.eusereuserid'
+            },
+            to: 'euser.euserid'
+        },
+        company: {
+          relation: Model.BelongsToOneRelation,
+          modelClass: Company,
+          join: {
+            from: 'eannouncement.ecompanyecompanyid',
+            to: 'ecompany.ecompanyid'
+          }
+        }
+      }
+  }
+}
+
 }
 
 module.exports = Announcement;
