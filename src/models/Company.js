@@ -103,6 +103,18 @@ class Company extends Model {
           from: 'ecompany.efileefileid',
           to: 'efile.efileid'
         }
+      },
+      invites: {
+        relation: Model.ManyToManyRelation,
+        modelClass: User,
+        join: {
+          from: 'ecompany.ecompanyid',
+          through: {
+            from: 'eapplyinvite.ecompanyecompanyid',
+            to: 'eapplyinvite.eusereuserid'
+          },
+          to: 'euser.euserid'
+        }
       }
     }
   }

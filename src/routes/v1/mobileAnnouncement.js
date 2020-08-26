@@ -3,6 +3,7 @@ const router = express.Router();
 const controller = require('../../controllers/mobileAnnouncement');
 const auth = require('../../middlewares/authentication');
 
-router.get('/announcement', auth.authenticateToken, controller.getAnnouncement);
+router.get('/announcement', auth.authenticateToken, controller.getAnnouncements);
+router.get('/announcement/:announcementId', auth.authenticateToken, controller.getAnnouncement);
 
 module.exports = router;

@@ -125,6 +125,18 @@ class User extends Model {
             },
             to: 'eannouncement.eannouncementid'
         }
+      },
+      applications: {
+        relation: Model.ManyToManyRelation,
+        modelClass: User,
+        join: {
+          from: 'euser.euserid',
+          through: {
+            from: 'eapplyinvite.eusereuserid',
+            to: 'eapplyinvite.ecompanyecompanyid'
+          },
+          to: 'ecompany.ecompanyid'
+        }
       }
     }
   }
