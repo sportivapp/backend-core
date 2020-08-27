@@ -46,9 +46,9 @@ service.getPatternsByShiftId = async (shiftId) => {
 
 service.updatePatternById = async (shiftId, patternId, patternDTO, user) => {
 
-    const pattern = await ShiftPattern.query().findById(patternId).withGraphFetched('times')
+    const pattern = await ShiftPattern.query().findById(patternId).withGraphFetched('[times, shift.timesheets]')
 
-    if (!pattern) return
+    if (!pattern || pattern.shift.timesheets.length > 0) return
 
     const promises = []
 
