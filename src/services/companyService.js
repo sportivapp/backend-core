@@ -1,14 +1,13 @@
 const Company = require('../models/Company');
 const Address = require('../models/Address');
 const Industry = require('../models/Industry')
-const departmentService = require('./departmentService')
 const User = require('../models/User');
 const bcrypt = require('../helper/bcrypt');
 const CompanyUserMapping = require('../models/CompanyUserMapping')
 const CompanyModuleMapping = require('../models/CompanyModuleMapping')
 const Module = require('../models/Module')
+const CompanySequence = require('../models/CompanySequence')
 const { raw } = require('objection')
-const jwt = require('jsonwebtoken')
 const ServiceHelper = require('../helper/ServiceHelper')
 const fileService = require('./mobileFileService');
 
@@ -25,8 +24,12 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
     companyDTO.ecompanycreateby = 0;
     const company = await Company.query().insertToTable(companyDTO, user.euserid);
 
-    // super user of the company
+    if (companyDTO.ecompanyautonik) {
+        if (!companyDTO.ecompanynik) return
+        await CompanySequence.createSequence(company.ecompanyid)
+    }
 
+    // super user of the company
     const companyUserDTO = {
         eusereuserid: user.euserid,
         ecompanyecompanyid: company.ecompanyid,
@@ -55,7 +58,6 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
             employeeCount: 1,
             departmentCount: 1
         }))
-
 }
 
 CompanyService.getUsersByCompanyId = async(companyId, page, size) => {
@@ -161,16 +163,24 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
 
     const address = await Address.query().insertToTable(addressDTO, user.sub);
 
+    const companyIds = await CompanyUserMapping.query()
+        .where('eusereuserid', user.sub)
+        .where('ecompanyusermappingpermission', 10)
+        .then(resultArr => resultArr.map(result => result.ecompanyecompanyid))
+
     if (companyDTO.ecompanyolderid && companyDTO.ecompanyparentid) return
 
     else if (companyDTO.ecompanyolderid) {
         const olderSister = await Company.query().findById(companyDTO.ecompanyolderid)
         if (!olderSister) return
+        if (companyIds.indexOf(companyDTO.ecompanyolderid) === -1) return
     }
 
     else if (companyDTO.ecompanyparentid) {
-        const parent = await Company.query().findById(companyDTO.ecompanyparentid)
+        const parent = await Company.query().findById(companyDTO.ecompanyparentid).withGraphFetched('parent')
         if (!parent) return
+        if (companyIds.indexOf(parent.ecompanyid) === -1 && !parent.parent) return
+        else if (companyIds.indexOf(parent.parent.ecompanyid) === -1) return
     }
 
     if (companyDTO.eindustryeindustryid) {
@@ -180,6 +190,11 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
 
     companyDTO.eaddresseaddressid = address.eaddressid;
     const company = await Company.query().insertToTable(companyDTO, user.sub);
+
+    if (companyDTO.ecompanyautonik) {
+        if (!companyDTO.ecompanynik) return
+        await CompanySequence.createSequence(company.ecompanyid)
+    }
 
     const id = ( isNaN(userId) ) ? parseInt(user.sub) : userId
 

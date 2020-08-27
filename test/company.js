@@ -1,36 +1,36 @@
 module.exports = (chai, httpServer, expect) => {
 
-    describe('POST /api/v1/company-register', () => {
-        it('Should return single result of user, company and address after insert', async () => {
-
-          const login = await chai.request(httpServer)
-              .post('/api/v1/user-login')
-              .send({
-                email: 'nawakaraadmin@nawakara.com',
-                password: 'emtivnawakaraadmin'
-              })
-
-          const res = await chai.request(httpServer)
-          .post(`/api/v1/company-register`)
-          .set('authorization', login.body.data)
-          .send({
-            nik: '123456789',
-            name: 'nawakaraadmin',
-            email: 'nawakaraadmin@nawakara.com',
-            password: 'emtivnawakaraadmin',
-            mobileNumber: '987654321',
-            companyName: 'PT. Nawakara Perkasa Nusantara',
-            companyEmail: '@nawakara.com',
-            street: 'Kompleks Golden Plaza, Jl. RS. Fatmawati Raya No.15, RT.10/RW.6, Gandaria Utara, Kec. Cilandak, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12420',
-            postalCode: 12420,
-            countryId: 1,
-            stateId: 1
-          });
-
-          expect(res.status).to.equal(200);
-          expect(res.body.data).to.not.be.undefined;
-        });
-      });
+  // describe('POST /api/v1/company-register', () => {
+  //       it('Should return single result of user, company and address after insert', async () => {
+  //
+  //         const login = await chai.request(httpServer)
+  //             .post('/api/v1/user-login')
+  //             .send({
+  //               email: 'nawakaraadmin@nawakara.com',
+  //               password: 'emtivnawakaraadmin'
+  //             })
+  //
+  //         const res = await chai.request(httpServer)
+  //         .post(`/api/v1/company-register`)
+  //         .set('authorization', login.body.data)
+  //         .send({
+  //           nik: '123456789',
+  //           name: 'nawakaraadmin',
+  //           email: 'nawakaraadmin@nawakara.com',
+  //           password: 'emtivnawakaraadmin',
+  //           mobileNumber: '987654321',
+  //           companyName: 'PT. Nawakara Perkasa Nusantara',
+  //           companyEmail: '@nawakara.com',
+  //           street: 'Kompleks Golden Plaza, Jl. RS. Fatmawati Raya No.15, RT.10/RW.6, Gandaria Utara, Kec. Cilandak, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12420',
+  //           postalCode: 12420,
+  //           countryId: 1,
+  //           stateId: 1
+  //         });
+  //
+  //         expect(res.status).to.equal(200);
+  //         expect(res.body.data).to.not.be.undefined;
+  //       });
+  //     });
 
   describe('POST /api/v1/company', () => {
         it('Should return single result of user, company and address after insert', async () => {
@@ -64,6 +64,41 @@ module.exports = (chai, httpServer, expect) => {
           expect(res.body.data.employeeCount).to.not.be.undefined
         });
       });
+
+  describe('POST /api/v1/company with auto generate nik', () => {
+        it('Should return single result of user, company and address after insert with auto generate nik', async () => {
+
+            const login = await chai.request(httpServer)
+                .post('/api/v1/user-login')
+                .send({
+                    email: 'nawakaraadmin@nawakara.com',
+                    password: 'emtivnawakaraadmin'
+                })
+
+            const res = await chai.request(httpServer)
+                .post(`/api/v1/company`)
+                .set('authorization', login.body.data)
+                .send({
+                    supervisorId: 5,
+                    companyName: 'PT. Nawakara Perkasa Nusantara',
+                    companyEmail: '@nawakara.com',
+                    street: 'Kompleks Golden Plaza, Jl. RS. Fatmawati Raya No.15, RT.10/RW.6, Gandaria Utara, ' +
+                        'Kec. Cilandak, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12420',
+                    postalCode: 12420,
+                    companyParentId: 1,
+                    companyOlderId: null,
+                    industryId: 2,
+                    countryId: 1,
+                    stateId: 2,
+                    isAutoNik: true,
+                    companyNik: 'NPN'
+                });
+
+            expect(res.status).to.equal(200);
+            expect(res.body.data).to.not.be.undefined;
+            expect(res.body.data.employeeCount).to.not.be.undefined
+        });
+    });
 
   describe('PUT /api/v1/company', () => {
     it('Should return a single edited company', async () => {
