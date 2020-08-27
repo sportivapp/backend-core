@@ -10,7 +10,9 @@ exports.seed = (knex, Promise) => knex('eproject').del()
                     eprojectsupervisorid: 3,
                     eprojectcreateby: 1,
                     eprojectcreatetime: Date.now(),
-                    eprojectsupervisorid: 1
+                    eprojectsupervisorid: 1,
+                    etimesheetetimesheetid: 1,
+                    ecompanyecompanyid: 1
                 },
                 {
                     eprojectcode: '1B',
@@ -20,7 +22,9 @@ exports.seed = (knex, Promise) => knex('eproject').del()
                     eprojectsupervisorid: 3,
                     eprojectcreateby: 3,
                     eprojectcreatetime: Date.now(),
-                    eprojectsupervisorid: 3
+                    eprojectsupervisorid: 3,
+                    etimesheetetimesheetid: 1,
+                    ecompanyecompanyid: 1
                 },
             ]
         ));

@@ -5,8 +5,10 @@ exports.seed = (knex, Promise) => knex('etimesheet').del()
                 {
                     etimesheetname: 'Nawakara Timesheet',
                     etimesheetcreateby: 1,
-                    etimesheetrostercount: 3,
-                    etimesheetcreatetime: Date.now()
+                    etimesheetrostercount: 1,
+                    etimesheetcreatetime: Date.now(),
+                    eshifteshiftid: 1,
+                    ecompanyecompanyid: 1
                 }
             ]
         ));

@@ -3,13 +3,13 @@ exports.seed = (knex, Promise) => knex('eroster').del()
   knex('eroster').insert(
     [
         {
-            erostername: 'nawakara project',
-            erosterdescription: 'nawakara first project',
+            erostername: 'Tim A',
+            erosterdescription: 'Tim A of Timesheet 1',
             etimesheetetimesheetid: 1,
-            erostercreateby: 2,
+            erostercreateby: 1,
             erostercreatetime: Date.now(),
-            erosteruserlimit: 3,
-            erosterreservelimit: 1
+            erosteruserlimit: 1,
+            erosterreservelimit: 0
         }
     ]
   ));
