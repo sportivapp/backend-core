@@ -8,6 +8,35 @@ const ShiftRosterUserMapping = require('../models/ShiftRosterUserMapping')
 
 const AbsenService = {};
 
+function getShiftTimeBasedOnLatestAbsen(latestAbsen, shiftTimes) {
+    const clockInTime = new Date(latestAbsen.eabsenclockintime + latestAbsen.eabsenovertime - latestAbsen.eabsenlatetime)
+    shiftTimes = shiftTimes
+        .map(shift => shift.shiftTime)
+        .filter(time => time.eshifttimestarthour === clockInTime.getHours() && time.eshifttimestartminute === clockInTime.getMinutes())
+    return shiftTimes[0];
+}
+
+function getShiftTimeBasedOnMinimalDifferenceInStartTime(shiftTimes, formattedAbsenTime) {
+    let currentTime
+    shiftTimes = shiftTimes
+        .filter(time => time.eshifttimestarthour > formattedAbsenTime.getHours()
+            && time.eshifttimestartminute > formattedAbsenTime.getMinutes())
+    let diffDate = new Date()
+    diffDate.setHours(shiftTimes[0].eshifttimestarthour)
+    diffDate.setMinutes(shiftTimes[0].eshifttimestartminute)
+    let minDiff = diffDate.getTime() - formattedAbsenTime.getTime()
+    shiftTimes.forEach(time => {
+        diffDate.setHours(time.eshifttimestarthour)
+        diffDate.setMinutes(time.eshifttimestartminute)
+        const diff = diffDate.getTime() - formattedAbsenTime.getTime()
+        if (diff < minDiff) {
+            minDiff = diff
+            currentTime = time
+        }
+    })
+    return currentTime
+}
+
 AbsenService.createAbsenByPOS = async ( absenTime, deviceImei, fileId, userId ) => {
 
     const user = await User.query().findById(userId)
@@ -24,17 +53,29 @@ AbsenService.createAbsenByPOS = async ( absenTime, deviceImei, fileId, userId ) 
     date.setSeconds(0)
     date.setMilliseconds(0)
 
-    let shiftTime
+    //if frontend send millisecond based on minutes accuracy, don't need to format time on minutes accuracy
+    const formattedAbsenTime = new Date(absenTime)
+    formattedAbsenTime.setSeconds(0)
+    formattedAbsenTime.setMilliseconds(0)
 
     const shifts = await ShiftRosterUserMapping.query()
         .where('eusereuserid', absenDTO.eusereuserid)
         .where('eshiftdaytime', date.getTime())
         .withGraphFetched('shiftTime')
 
+    const latestAbsen = await Absen.query()
+        .where('eusereuserid', userId)
+        .orderBy('eabsencreatetime', 'DESC').first()
+
+    let shiftTime
+
     if (shifts.length > 1) {
-        //TODO needs to check if there is shift for project
-        //TODO if there is more than 1, need to know which one to pick
-        shiftTime = shifts[0].shiftTime
+        let shiftTimes = shifts.filter(shift => !shift.eshiftgeneralstatus)
+        if (!latestAbsen.eabsenclockouttime) {
+            shiftTime = getShiftTimeBasedOnLatestAbsen(latestAbsen, shiftTimes)
+        } else {
+            shiftTime = getShiftTimeBasedOnMinimalDifferenceInStartTime(shiftTimes, formattedAbsenTime)
+        }
     } else {
         shiftTime = shifts[0].shiftTime
     }
@@ -44,16 +85,7 @@ AbsenService.createAbsenByPOS = async ( absenTime, deviceImei, fileId, userId ) 
     //for now file is still disabled to successfully run tests
     // if (!file) return
 
-    //if frontend send millisecond based on minutes accuracy, don't need to format time on minutes accuracy
-    const formattedAbsenTime = new Date(absenTime)
-    formattedAbsenTime.setSeconds(0)
-    formattedAbsenTime.setMilliseconds(0)
-
     // if user tap absen in the time of another shift, complete 1 absen & create another
-
-    const latestAbsen = await Absen.query()
-        .where('eusereuserid', userId)
-        .orderBy('eabsencreatetime', 'DESC').first()
 
     if (!latestAbsen || latestAbsen.eabsenclockouttime) {
 
@@ -61,7 +93,7 @@ AbsenService.createAbsenByPOS = async ( absenTime, deviceImei, fileId, userId ) 
             eabsenclockintime: absenTime,
             eabsenclockinimageid: fileId,
             eusereuserid: userId,
-            edeviceedeviceid: device.edeviceid,
+            edeviceedeviceid: device.edeviceid
         }
 
         // Get Shift for Clock In
