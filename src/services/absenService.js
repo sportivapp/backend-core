@@ -4,6 +4,7 @@ const User = require('../models/User')
 const Device = require('../models/Device')
 const ServiceHelper = require('../helper/ServiceHelper')
 const FileService = require('./mobileFileService')
+const ShiftRosterUserMapping = require('../models/ShiftRosterUserMapping')
 
 const AbsenService = {};
 
@@ -17,6 +18,27 @@ AbsenService.createAbsenByPOS = async ( absenTime, deviceImei, fileId, userId ) 
 
     if (!device) return
 
+    const date = new Date()
+    date.setHours(0)
+    date.setMinutes(0)
+    date.setSeconds(0)
+    date.setMilliseconds(0)
+
+    let shiftTime
+
+    const shifts = await ShiftRosterUserMapping.query()
+        .where('eusereuserid', absenDTO.eusereuserid)
+        .where('eshiftdaytime', date.getTime())
+        .withGraphFetched('shiftTime')
+
+    if (shifts.length > 1) {
+        //TODO needs to check if there is shift for project
+        //TODO if there is more than 1, need to know which one to pick
+        shiftTime = shifts[0].shiftTime
+    } else {
+        shiftTime = shifts[0].shiftTime
+    }
+
     // const file = await FileService.getFileById(fileId)
 
     //for now file is still disabled to successfully run tests
@@ -24,6 +46,7 @@ AbsenService.createAbsenByPOS = async ( absenTime, deviceImei, fileId, userId ) 
 
     //if frontend send millisecond based on minutes accuracy, don't need to format time on minutes accuracy
     const formattedAbsenTime = new Date(absenTime)
+    formattedAbsenTime.setSeconds(0)
     formattedAbsenTime.setMilliseconds(0)
 
     // if user tap absen in the time of another shift, complete 1 absen & create another
@@ -42,16 +65,15 @@ AbsenService.createAbsenByPOS = async ( absenTime, deviceImei, fileId, userId ) 
         }
 
         // Get Shift for Clock In
-        const shiftTimeIn = Date.now() + 10000000
+        date.setHours(shiftTime.eshifttimestarthour)
+        date.setMinutes(shiftTime.eshifttimestartminute)
+        const shiftTimeIn = date.getTime()
 
-        const formattedTimeIn = new Date(shiftTimeIn)
-        formattedTimeIn.setMilliseconds(0)
-
-        const diffTime = formattedAbsenTime.getTime() - formattedTimeIn.getTime()
+        const diffTime = formattedAbsenTime.getTime() - shiftTimeIn
 
         if (diffTime > 0) absenDTO["eabsenlatetime"] = diffTime
 
-        else if (diffTime < 0) absenDTO['eabsenovertime'] = -(diffTime)
+        else if (diffTime < 0) absenDTO['eabsenovertime'] = Math.abs(diffTime)
 
         return Absen.query().insertToTable(absenDTO, userId)
 
@@ -63,14 +85,13 @@ AbsenService.createAbsenByPOS = async ( absenTime, deviceImei, fileId, userId ) 
         }
 
         // Get Shift for Clock Out
-        const shiftTimeOut = Date.now() + 10000000
+        date.setHours(shiftTime.eshifttimeendhour)
+        date.setMinutes(shiftTime.eshifttimeendminute)
+        const shiftTimeOut = date.getTime()
 
-        const formattedTimeOut = new Date(shiftTimeOut)
-        formattedTimeOut.setMilliseconds(0)
+        const diffTime = formattedAbsenTime.getTime() - shiftTimeOut
 
-        const diffTime = formattedAbsenTime.getTime() - formattedTimeOut.getTime()
-
-        if (diffTime < 0) patchDTO["eabsenearlyleavetime"] = diffTime * -1
+        if (diffTime < 0) patchDTO["eabsenearlyleavetime"] = Math.abs(diffTime)
 
         else if (diffTime > 0) patchDTO['eabsenovertime'] = diffTime + latestAbsen.eabsenovertime
 
