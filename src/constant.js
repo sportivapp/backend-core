@@ -27,9 +27,7 @@ module.exports = {
             users: '/grades/:gradeId/users'
         },
         absen: {
-            create: '/absen',
-            listId: '/absen-list/:userId',
-            list: '/absen-list',
+            list: '/absen',
             update: '/absen/:absenId',
             remove: '/absen-delete/:absenId'
         },
@@ -48,11 +46,36 @@ module.exports = {
             deviceId: '/devices/:deviceId',
             deviceProjectId: '/devices/:deviceId/projects'
         },
+        project: {
+            list: '/project',
+            id: '/project/:projectId',
+            timesheet: '/project/:projectId/timesheet'
+        },
+        timesheet: {
+            list: '/timesheet',
+            id: '/timesheet/:timesheetId',
+            assign: '/timesheet/:timesheetId/assign'
+        },
+        todolist: {
+            list: '/todolist',
+            id: '/todolist/:todoId',
+            category: '/todolist/todo/category'
+        },
         roster: {
-            list: '/roster',
-            rosterId: '/roster/:rosterId',
-            shift: '/roster-shift',
-            rosterMemberId: '/roster-members/:rosterId'
+            list: '/timesheet/:timesheetId/roster',
+            members: '/timesheet/:timesheetId/roster-member',
+            rosterId: '/timesheet/:timesheetId/roster/:rosterId',
+            shift: '/timesheet/:timesheetId/roster-shift',
+            rosterMemberId: '/timesheet/:timesheetId//roster/:rosterId/members',
+            memberAssign: '/timesheet/:timesheetId/roster-assign',
+        },
+        shift: {
+            list: '/shift',
+            id: '/shift/:shiftId'
+        },
+        shiftPattern: {
+            list: '/shift/:shiftId/pattern',
+            id: '/shift/:shiftId/pattern/:patternId'
         },
         industry: {
             list: '/industry'

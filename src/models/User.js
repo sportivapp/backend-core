@@ -143,7 +143,10 @@ class User extends Model {
 
   static get modifiers() {
     return {
-      ...this.baseModifiers()
+      ...this.baseModifiers(),
+      baseAttributes(builder) {
+        builder.select('euserid', 'eusername', 'euseremail', 'eusernik', 'eusermobilenumber')
+      }
     }
   }
 }

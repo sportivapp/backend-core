@@ -90,9 +90,8 @@ class Grade extends Model {
   
   static get modifiers() {
     return {
-      findByDeleteStatus(query, deleteStatus) {
-        if (!deleteStatus) query.where('egradedeletestatus', false)
-        else query.where('egradedeletestatus', deleteStatus)
+      baseAttributes(builder) {
+        builder.select('egradeid', 'egradename', 'egradedescription')
       }
     }
   }

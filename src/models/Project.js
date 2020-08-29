@@ -16,8 +16,8 @@ class Project extends Model {
       properties: {
         eprojectname: { type: 'string', minLength: 1, maxLength: 256 },
         eprojectcode: { type: 'string', minLength: 1, maxLength: 256 },
-        eprojectstartdate: { type: 'string', format: 'date' },
-        eprojectenddate: { type: 'string', format: 'date' },
+        eprojectstartdate: { type: 'bigint' },
+        eprojectenddate: { type: 'bigint' },
         eprojectcreateby: { type: 'integer' },
         eprojectaddress: { type: 'string', minLength: 1, maxLength: 256 }
       }
@@ -29,6 +29,8 @@ class Project extends Model {
     const Device = require('./Device')
     const User = require('./User')
     const Roster = require('./Roster')
+    const Timesheet = require('./Timesheet')
+    const Todo = require('./Todo')
 
     return {
       devices: {
@@ -58,13 +60,36 @@ class Project extends Model {
           from: 'eproject.eprojectid',
           to: 'eroster.eprojecteprojectid'
         }
-      }
+      },
+      timesheets: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Timesheet,
+        join: {
+          from: 'eproject.eprojectid',
+          through: {
+            from: 'eprojecttimesheetmapping.eprojecteprojectid',
+            to: 'eprojecttimesheetmapping.etimesheetetimesheetid'
+          },
+          to: 'etimesheet.etimesheetid'
+        }
+      },
+      todos: {
+        relation: Model.HasManyRelation,
+        modelClass: Todo,
+        join: {
+          from: 'eproject.eprojectid',
+          to: 'etodo.eprojecteprojectid'
+        }
+      },
     }
   }
 
   static get modifiers() {
     return {
-      ...this.baseModifiers()
+      ...this.baseModifiers(),
+      baseAttributes(builder) {
+        builder.select('eprojectname', 'eprojectcode', 'eprojectstartdate', 'eprojectenddate', 'eprojectdescription', 'eprojectaddress')
+      }
     }
   }
 }

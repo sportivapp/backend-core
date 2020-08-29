@@ -6,7 +6,9 @@ exports.seed = (knex, Promise) => knex('erosterusermapping').del()
                     erostererosterid: 1,
                     eusereuserid: 4,
                     erosterusermappingcreateby: 0,
-                    erosterusermappingcreatetime: Date.now()
+                    erosterusermappingcreatetime: Date.now(),
+                    erosterusermappingjobdescription: 'Jaga di Lokasi A',
+                    erosterusermappingname: 'Member 1'
                 }
             ]
         ));

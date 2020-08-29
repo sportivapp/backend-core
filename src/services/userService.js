@@ -172,8 +172,6 @@ UsersService.updateUserById = async (userId, userDTO, permission, user) => {
         .where('eusereuserid', userId)
         .first()
 
-    console.log(userMapping)
-
     const updateUserQuery = User.query().findById(userId)
         .updateByUserId(userDTO, user.sub)
         .returning('*')
@@ -218,30 +216,36 @@ async function generateJWTToken(user, companyId, permission) {
 
 UsersService.getAllUserByCompanyId = async ( page, size, companyId ) => {
 
-    const userPage = await CompanyUserMapping.relatedQuery('users')
-    .for(CompanyUserMapping.query().where('ecompanyecompanyid', companyId))
-    .select('euserid', 'eusername', 'euseremail', 'eusernik', 'eusermobilenumber')
-    .page(page, size);
+    // const userPage = await CompanyUserMapping.relatedQuery('users')
+    // .for(CompanyUserMapping.query().where('ecompanyecompanyid', companyId))
+    // .select('euserid', 'eusername', 'euseremail', 'eusernik', 'eusermobilenumber')
+    // .page(page, size);
 
-    const userIds = userPage.results.map(user => user.euserid);
+    const userPage = Company.relatedQuery('users')
+        .for(companyId)
+        .modify('baseAttributes')
+        .withGraphFetched('grades(baseAttributes).department(baseAttributes)')
+        .page(page, size)
 
-    const grades = await Grade.query()
-    .select('eusereuserid', 'egradename')
-    .joinRelated('users')
-    .whereIn('eusereuserid', userIds)
-
-    userPage.results.map((user) => {
-
-        const userGrades = grades.filter((grade) => {
-            return user.euserid === grade.eusereuserid
-        })
-        .map((grade) => {
-            return grade.egradename;
-        });
-
-        user.grades = userGrades;
-
-    })
+    // const userIds = userPage.results.map(user => user.euserid);
+    //
+    // const grades = await Grade.query()
+    // .select('eusereuserid', 'egradename')
+    // .joinRelated('users')
+    // .whereIn('eusereuserid', userIds)
+    //
+    // userPage.results.map((user) => {
+    //
+    //     const userGrades = grades.filter((grade) => {
+    //         return user.euserid === grade.eusereuserid
+    //     })
+    //     .map((grade) => {
+    //         return grade.egradename;
+    //     });
+    //
+    //     user.grades = userGrades;
+    //
+    // })
  
     return ServiceHelper.toPageObj(page, size, userPage)
 

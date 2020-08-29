@@ -16,6 +16,10 @@ const gradeRoutes = require('./grade')
 const industryRoutes = require('./industry')
 const stateRoutes = require('./state')
 const countryRoutes = require('./country')
+const timesheetRoutes = require('./timesheet')
+const shiftRoutes = require('./shift')
+const shiftPatternRoutes = require('./shiftPattern')
+const todoListRoutes = require('./todolist')
 
 router.use('/api/v1', [
     userRoutes,
@@ -32,6 +36,10 @@ router.use('/api/v1', [
     industryRoutes,
     stateRoutes,
     countryRoutes,
+    timesheetRoutes,
+    shiftRoutes,
+    shiftPatternRoutes,
+    todoListRoutes
 ]);
 
 const mobileUserRoutes = require('./mobileUser');
