@@ -74,6 +74,7 @@ controller.joinTeam = async (req, res, next) => {
     try {
 
         const result = await teamService.joinTeam(teamId, req.user);
+        console.log(result);
 
         if (result === 'user already in team')
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
@@ -97,7 +98,7 @@ controller.exitTeam = async (req, res, next) => {
 
         const result = await teamService.exitTeam(teamId, req.user);
 
-        if (result === 'user not on team')
+        if (result === 'user not in team')
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
