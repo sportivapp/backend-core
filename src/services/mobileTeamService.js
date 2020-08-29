@@ -24,9 +24,9 @@ const TeamUserMappingPositionEnum = {
     MEMBER: 'MEMBER'
 }
 
-teamService.isAdmin = async (teamId, user) => {
+teamService.isAdmin = async (teamId, userId) => {
     return TeamUserMapping.query()
-    .where('eusereuserid', user.sub)
+    .where('eusereuserid', userId)
     .andWhere('eteameteamid', teamId)
     .andWhere('eteamusermappingposition', TeamUserMappingPositionEnum.ADMIN)
     .first();
@@ -108,15 +108,19 @@ teamService.createTeam = async (teamDTO, user) => {
 
 teamService.joinTeam = async (teamId, user) => {
 
-    const pendingApply = await TeamLog.query()
+    // Check if this user is invited / already applied
+    const pendingLog = await TeamLog.query()
     .where('eusereuserid', user.sub)
     .andWhere('eteameteamid', teamId)
-    .andWhere('eteamlogtype', TeamLogTypeEnum.APPLY)
     .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
     .first();
 
-    if (pendingApply)
+    if (pendingLog.eteamlogtype === TeamLogTypeEnum.APPLY)
         return
+
+    if (pendingLog.eteamlogtype === TeamLogTypeEnum.INVITE) {
+        
+    }
 
     return TeamLog.query().insertToTable({
         eteameteamid: teamId,
@@ -142,7 +146,7 @@ teamService.exitTeam = async (teamId, user) => {
 
 teamService.cancelInvite = async (teamId, userId, user) => {
 
-    const isAdmin = await teamService.isAdmin(teamId, user);
+    const isAdmin = await teamService.isAdmin(teamId, user.sub);
 
     if (!isAdmin)
         return 'not admin'
@@ -161,7 +165,7 @@ teamService.processRequest = async (teamId, userId, user, status) => {
     if (status !== TeamLogStatusEnum.ACCEPTED && status !== TeamLogStatusEnum.REJECTED)
         return 'status unaccepted'
 
-    const isAdmin = await teamService.isAdmin(teamId, user);
+    const isAdmin = await teamService.isAdmin(teamId, user.sub);
 
     if (!isAdmin)
         return 'not admin'

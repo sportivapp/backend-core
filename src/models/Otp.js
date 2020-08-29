@@ -1,3 +1,5 @@
+const Model = require('./Model');
+
 class Otp extends Model {
     static get tableName() {
         return 'otp';
