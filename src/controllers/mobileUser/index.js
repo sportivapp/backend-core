@@ -27,18 +27,18 @@ controller.login = async (req, res, next) => {
 
 controller.createUser = async (req, res, next) => {
 
-    const { nik, name, email, mobileNumber, password } = req.body;
+    const { nik, name, email, mobileNumber, password, otpCode } = req.body;
 
     const userDTO = {
         eusernik: nik,
         eusername: name,
-        euseremail: email,
+        euseremail: email.toLowerCase(),
         eusermobilenumber: mobileNumber,
         euserpassword: password
     }
 
     try {
-        const result = await mobileUserService.createUser(userDTO);
+        const result = await mobileUserService.createUser(userDTO, otpCode);
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));

@@ -3,6 +3,7 @@ const User = require('../models/User');
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
 const fileService = require('./mobileFileService');
+const Otp = require('../models/Otp');
 
 const UserService = {};
 
@@ -37,10 +38,24 @@ UserService.login = async (loginDTO) => {
 
 }
 
-UserService.createUser = async (userDTO) => {
+UserService.createUser = async (userDTO, otpCode) => {
+
+    const user = await User.query().where('euseremail', userDTO.euseremail).first();
+
+    if (user)
+        return
+
+    const otp = await Otp.query().where('euseremail', userDTO.euseremail).first();
+
+    if (!otp) return
+
+    if (otp.eotpcode !== otpCode)
+        return
+
+    // confirm OTP
+    await otp.$query().updateByUserId({ eotpconfirmed: true }, 0);
 
     userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
-
     return User.query().insert(userDTO);
 
 }

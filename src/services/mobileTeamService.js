@@ -75,9 +75,16 @@ teamService.getTeam = async (teamId, user) => {
     .andWhere('eusereuserid', user.sub)
     .first();
 
-    return Promise.all([team, isInTeam]).then(result => ({
+    const isPendingApply = TeamLog.query()
+    .where('eteameteamid', teamId)
+    .andWhere('eusereuserid', user.sub)
+    .andWhere('eteamlogtype', TeamLogTypeEnum.APPLY)
+    .first();
+
+    return Promise.all([team, isInTeam, isPendingApply]).then(result => ({
         team: result[0],
-        isInTeam: result[1] ? true : false
+        isInTeam: result[1] ? true : false,
+        isPendingApply: result[2] ? true : false
     }));
 
 }
