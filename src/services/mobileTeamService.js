@@ -55,9 +55,6 @@ teamService.getTeams = async (keyword, page, size) => {
     .where(raw('lower("eteamname")'), 'like', `%${newKeyword}%`)
     .page(page, size);
 
-    if (teamsPage.length === 0) 
-        return ServiceHelper.toEmptyPage(page, size);
-
     return ServiceHelper.toPageObj(page, size, teamsPage)
 
 }
@@ -69,6 +66,9 @@ teamService.getTeam = async (teamId, user) => {
     .leftJoinRelated('team.company')
     .where('eteameteamid', teamId)
     .first();
+
+    if (!team)
+        return
 
     const isInTeam = TeamUserMapping.query()
     .where('eteameteamid', teamId)
@@ -108,6 +108,14 @@ teamService.createTeam = async (teamDTO, user) => {
 
 teamService.joinTeam = async (teamId, user) => {
 
+    // If user already in team
+    const userInTeam = await TeamUserMapping.query()
+    .where('eusereuserid', user.sub)
+    .andWhere('eteameteamid', teamId);
+
+    if (userInTeam)
+        return 'user already in team'
+
     // Check if this user already invited / applied
     const pendingLog = await TeamLog.query()
     .where('eusereuserid', user.sub)
@@ -117,7 +125,7 @@ teamService.joinTeam = async (teamId, user) => {
 
     // If double apply, return
     if (pendingLog.eteamlogtype === TeamLogTypeEnum.APPLY)
-        return
+        return 'user already applied'
 
     // If invited, then auto join
     if (pendingLog.eteamlogtype === TeamLogTypeEnum.INVITE) {
@@ -151,9 +159,11 @@ teamService.exitTeam = async (teamId, user) => {
     .first();
 
     if (!userOnTeam)
-        return
+        return 'user not on team'
 
-    return userOnTeam.$query().delete();
+    return userOnTeam.$query()
+    .delete()
+    .then(rowsAffected => rowsAffected === 1);
 
 }
 
@@ -167,7 +177,7 @@ teamService.cancelInvite = async (teamId, userId, user) => {
     const pendingInvite = await teamService.getPendingLog(teamId, userId, TeamLogTypeEnum.INVITE);
 
     if (!pendingInvite)
-        return
+        return 'user already invited'
 
     return pendingInvite.$query().delete();
 
@@ -210,7 +220,7 @@ teamService.getTeamMemberList = async (teamId, type) => {
     if (type !== TeamLogTypeEnum.MEMBER) {
 
         if (!TeamLogTypeEnum[type].hasOwnProperty(type))
-            return
+            return 'type unaccepted'
 
         return TeamLog.query()
         .select('eusereuserid', 'eusername', 'euser.efileefileid')
@@ -235,15 +245,18 @@ teamService.invite = async (teamId, user, email) => {
     if (!isAdmin)
         return 'not admin'
 
-    const invitedUser = await User.query().where('euseremail', email).first();
+    const invitedUser = await User.query()
+    .where('euseremail', email).first();
 
     if (!invitedUser)
-        return
+        return 'user does not exist'
 
-    const userInTeam = await TeamUserMapping.query().where('eusereuserid', invitedUser.euserid).andWhere('eteameteamid', teamId);
+    const userInTeam = await TeamUserMapping.query()
+    .where('eusereuserid', invitedUser.euserid)
+    .andWhere('eteameteamid', teamId);
 
     if (userInTeam)
-        return
+        return 'user already in team'
 
     // Check if this user already invited / applied
     const pendingLog = await TeamLog.query()
@@ -286,7 +299,7 @@ teamService.changeTeamMemberPosition = async (teamId, user, userId, position) =>
         return 'not admin'
 
     if (!TeamUserMappingPositionEnum.hasOwnProperty(position))
-        return
+        return 'position unaccepted'
 
     await TeamUserMapping.query()
     .where('eusereuserid', userId)
@@ -303,7 +316,8 @@ teamService.kick = async (teamId, user, userId) => {
 
     await TeamUserMapping.query()
     .where('eusereuserid', userId)
-    .delete();
+    .delete()
+    .then(rowsAffected => rowsAffected === 1);
 
 }
 

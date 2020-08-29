@@ -75,6 +75,10 @@ controller.joinTeam = async (req, res, next) => {
 
         const result = await teamService.joinTeam(teamId, req.user);
 
+        if (result === 'user already in team')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        if (result === 'user already applied')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
@@ -93,6 +97,8 @@ controller.exitTeam = async (req, res, next) => {
 
         const result = await teamService.exitTeam(teamId, req.user);
 
+        if (result === 'user not on team')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
@@ -113,6 +119,8 @@ controller.cancelInvite = async (req, res, next) => {
 
         if (result === 'not admin')
             return res.status(403).json(ResponseHelper.toErrorResponse(403));
+        if (result === 'user already invited')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
@@ -155,6 +163,8 @@ controller.getTeamMemberList = async (req, res, next) => {
 
         const result = await teamService.getTeamMemberList(req.user, type.toUpperCase());
 
+        if (result === 'type unaccepted')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404));
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
@@ -167,12 +177,61 @@ controller.getTeamMemberList = async (req, res, next) => {
 
 controller.invite = async (req, res, next) => {
 
-    const { email } = req.body;
+    const { teamId, email } = req.body;
 
     try {
 
-        const result = await teamService.invite(req.user, email);
+        const result = await teamService.invite(teamId, req.user, email);
 
+        if (result === 'not admin')
+            return res.status(403).json(ResponseHelper.toErrorResponse(403));
+        if (result === 'user does not exist')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        if (result === 'user already in team')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.changeTeamMemberPosition = async (req, res, next) => {
+
+    const { position } = req.query;
+    const { teamId, userId } = req.body;
+
+    try {
+
+        const result = await teamService.invite(teamId, user, userId, position.toUpperCase());
+
+        if (result === 'not admin')
+            return res.status(403).json(ResponseHelper.toErrorResponse(403));
+        if (result === 'position unaccepted')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.kick = async (req, res, next) => {
+
+    const { teamId, userId } = req.body;
+
+    try {
+
+        const result = await teamService.kick(teamId, req.user, userId);
+
+        if (result === 'not admin')
+            return res.status(403).json(ResponseHelper.toErrorResponse(403));
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
