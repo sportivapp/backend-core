@@ -20,6 +20,22 @@ class Absen extends Model {
       }
     };
   }
+
+  static get relationMappings() {
+
+    const User = require('./User')
+
+    return {
+      user: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: 'eabsen.eusereuserid',
+          to: 'euser.euserid'
+        }
+      }
+    }
+  }
 }
 
 module.exports = Absen;

@@ -27,9 +27,7 @@ module.exports = {
             users: '/grades/:gradeId/users'
         },
         absen: {
-            create: '/absen',
-            listId: '/absen-list/:userId',
-            list: '/absen-list',
+            list: '/absen',
             update: '/absen/:absenId',
             remove: '/absen-delete/:absenId'
         },

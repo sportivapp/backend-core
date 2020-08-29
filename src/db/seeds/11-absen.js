@@ -3,12 +3,13 @@ exports.seed = (knex, Promise) => knex('eabsen').del()
     knex('eabsen').insert(
       [
         {
-          eabsentime: Date.now(),
-          eabsenstatus: 'Hadir',
+          eabsenclockintime: Date.now(),
+          eabsenclockouttime: Date.now() + 1000000,
+          eabsencreatetime: Date.now(),
           eabsendescription: 'Sedikit flu',
           eabsencreateby: 4,
           eusereuserid: 4,
-          elocationelocationid: 1
+          edeviceedeviceid: 1
         },
       ]
     ));
