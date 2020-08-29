@@ -58,7 +58,6 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
             employeeCount: 1,
             departmentCount: 1
         }))
-
 }
 
 CompanyService.getUsersByCompanyId = async(companyId, page, size) => {
@@ -178,9 +177,10 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
     }
 
     else if (companyDTO.ecompanyparentid) {
-        const parent = await Company.query().findById(companyDTO.ecompanyparentid)
+        const parent = await Company.query().findById(companyDTO.ecompanyparentid).withGraphFetched('parent')
         if (!parent) return
-        if (companyIds.indexOf(companyDTO.ecompanyparentid) === -1) return
+        if (companyIds.indexOf(parent.ecompanyid) === -1 && !parent.parent) return
+        else if (companyIds.indexOf(parent.parent.ecompanyid) === -1) return
     }
 
     if (companyDTO.eindustryeindustryid) {

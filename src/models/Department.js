@@ -24,6 +24,7 @@ class Department extends Model {
   static get relationMappings() {
 
     const Grades = require('./Grades')
+    const Company = require('./Company')
 
     return {
       parent: {
@@ -32,6 +33,14 @@ class Department extends Model {
         join: {
           from: 'edepartment.edepartmentsuperiorid',
           to: 'edepartment.edepartmentid'
+        }
+      },
+      company: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Company,
+        join: {
+          from: 'edepartment.ecompanyecompanyid',
+          to: 'ecompany.ecompanyid'
         }
       },
       childrens: {
@@ -49,6 +58,14 @@ class Department extends Model {
           from: 'edepartment.edepartmentid',
           to: 'egrade.edepartmentedepartmentid'
         }
+      }
+    }
+  }
+
+  static get modifiers() {
+    return {
+      baseAttributes(builder) {
+        builder.select('edepartmentid', 'edepartmentname', 'edepartmentdescription')
       }
     }
   }

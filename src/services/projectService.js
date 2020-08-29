@@ -1,10 +1,17 @@
 const Project = require('../models/Project');
 const ProjectDeviceMapping = require('../models/ProjectDeviceMapping')
+const Timesheet = require('../models/Timesheet')
+const ProjectTimesheetMapping = require('../models/ProjectTimesheetMapping')
 const ServiceHelper = require('../helper/ServiceHelper')
 
 const ProjectService = {};
 
 ProjectService.createProject = async(projectDTO, user) => {
+
+    if (projectDTO.eprojectparentid) {
+        const project = await Project.query().findById(projectDTO.eprojectparentid)
+        if (!project) return
+    }
 
     return Project.query().insertToTable(projectDTO, user.sub);
 
@@ -12,18 +19,26 @@ ProjectService.createProject = async(projectDTO, user) => {
 
 ProjectService.getProjectById = async (projectId) => {
 
-    return Project.query().findById(projectId)
-
+    return Project.query().findById(projectId).withGraphFetched('timesheets.' +
+        'rosters(baseAttributes).' +
+        'mappings(baseAttributes).' +
+        'user(baseAttributes)')
 }
 
-ProjectService.getProjects = async(userId, page, size) => {
-    
-    const projectPage = await Project.query()
-    .select('eprojectid', 'eprojectname', 'eprojectcode', 'eprojectstartdate', 'eprojectenddate', 'eprojectaddress')
-    .where('eprojectcreateby', userId)
-    .page(page, size);
+ProjectService.getProjects = async(userId, page, size, projectId) => {
 
-    return ServiceHelper.toPageObj(page, size, projectPage);
+    let id = projectId
+
+    if (!projectId) {
+        id = null
+    }
+
+    return Project.query()
+        .select('eprojectid', 'eprojectname', 'eprojectcode', 'eprojectstartdate', 'eprojectenddate', 'eprojectaddress')
+        .where('eprojectcreateby', userId)
+        .where('eprojectparentid', id)
+        .page(page, size)
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
 }
 
@@ -34,20 +49,20 @@ ProjectService.updateProjectById = async(projectId, projectDTO, user) => {
     if (!project)
         return
 
+    if (projectDTO.etimesheetetimesheetid) {
+        const timesheet = Timesheet.query().findById(projectDTO.etimesheetetimesheetid)
+        if (!timesheet) return
+    }
+
     return project.$query().updateByUserId(projectDTO, user.sub);
 
 }
 
 ProjectService.deleteProjectById = async(projectId) => {
 
-    const project = await ProjectService.getProjectById(projectId);
+    const affectedRow = await Project.query().deleteById(projectId);
 
-    if (!project)
-        return
-    else {
-        const affectedRow = await Project.query().deleteById(projectId);
-        return affectedRow === 1
-    }
+    return affectedRow === 1
 
 }
 
@@ -140,6 +155,29 @@ ProjectService.saveDevicesIntoProject = async (projectId, deviceIds, user) => {
         return deleteExistingDevices
             .then(ignored => sameRelations)
     }
+}
+
+ProjectService.saveTimesheetIntoProject = async (projectId, timesheetIds, user) => {
+
+    const isTimesheetsValid = await Timesheet.query().whereIn('etimesheetid', timesheetIds)
+        .then(timesheetList => {
+            if (timesheetList.length < timesheetIds) return false
+            else return timesheetList.filter(timesheet => timesheet.etimesheetgeneralstatus).length <= 0
+        })
+
+    if (!isTimesheetsValid) return
+
+    const project = await Project.query().findById(projectId)
+
+    if (!project) return
+
+    const dtoList = timesheetIds.map(timesheetId => ({
+        eprojecteprojectid: parseInt(projectId),
+        etimesheetetimesheetid: timesheetId
+    }))
+
+    return ProjectTimesheetMapping.query().where('eprojecteprojectid', projectId).delete()
+        .then(ignored => ProjectTimesheetMapping.query().insertToTable(dtoList, user.sub))
 }
 
 function findByProjectIdAndDeviceId(pr, project) {

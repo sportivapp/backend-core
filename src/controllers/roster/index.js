@@ -76,18 +76,18 @@ rosterController.generateRosterShiftForDate = async (req, res, next) => {
 
 }
 
-rosterController.getAllRosters = async (req, res, next) => {
+rosterController.getAllRostersByTimesheetId = async (req, res, next) => {
 
-    const { page, size } = req.query
+    const { timesheetId } = req.params
     const user = req.user;
 
     try {
 
-        const pageObj = await rosterService.getAllRosters(parseInt(page), parseInt(size), user);
+        const rosterList = await rosterService.getAllRosters(timesheetId, user);
 
-        if(!pageObj)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
-        return res.status(200).json(ResponseHelper.toBaseResponse(pageObj.data, pageObj.paging))
+        if(!rosterList)
+            return res.status(403).json(ResponseHelper.toErrorResponse(403))
+        return res.status(200).json(ResponseHelper.toBaseResponse(rosterList))
         
     } catch (e) {
         next(e);
@@ -112,23 +112,24 @@ rosterController.getAllMemberById = async (req, res, next) => {
         next(e);
     }
 }
+
 rosterController.updateRosterById = async (req, res, next) => {
 
     const { rosterId } = req.params
     const user = req.user;
-    const { rosterName, rosterDescription , projectId, supervisorId, headUserId, userIds } = req.body;
+    const { name, description, departmentId, supervisorId, headUserId } = req.body;
 
     try {
 
         const rosterDTO = { 
-            erostername: rosterName, 
-            erosterdescription: rosterDescription,
-            eprojecteprojectid: projectId,
-            erostersupervisoruserid: supervisorId, 
-            erosterheaduserid: headUserId
+            erostername: name,
+            erosterdescription: description,
+            erostersupervisoruserid: supervisorId,
+            erosterheaduserid: headUserId,
+            edepartmentedepartmentid: departmentId
         }
 
-        const result = await rosterService.updateRosterById( parseInt(rosterId) , rosterDTO, userIds , user);
+        const result = await rosterService.updateRosterById(parseInt(rosterId), rosterDTO, user);
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
@@ -154,6 +155,34 @@ rosterController.viewRosterById = async (req, res, next) => {
 
     } catch(e) {
         next(e);
+    }
+
+}
+
+rosterController.updateUsersOfRosters = async (req, res, next) => {
+
+    const { rosters } = req.body
+
+    try {
+        const result = await rosterService.updateUsersOfRosters(rosters, req.user)
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+    } catch (e) {
+        next(e)
+    }
+}
+
+rosterController.assignRosterToShiftTimeByTimesheetId = async (req, res, next) => {
+
+    const { timesheetId } =req.params
+
+    const { mappings, projectId } = req.body
+
+    try {
+        const result = await rosterService.assignRosterToShiftTime(timesheetId, mappings, projectId, req.user)
+        if (!result) return res.status(400).json(ResponseHelper.toErrorResponse(400))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+    } catch (e) {
+        next(e)
     }
 
 }
