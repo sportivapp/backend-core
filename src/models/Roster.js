@@ -77,7 +77,8 @@ class Roster extends Model {
     return {
       ...this.baseModifiers(),
       baseAttributes(builder) {
-        builder.select('erosterid', 'erostername', 'erosterdescription', 'erosteruserlimit', 'erostersupervisoruserid', 'erosterheaduserid')
+        builder.select('erosterid', 'erostername', 'erosterdescription', 'erosteruserlimit','erosterreservelimit',
+            'erostersupervisoruserid', 'erosterheaduserid', 'edepartmentedepartmentid')
       },
       idAndName(builder) {
         builder.select('erosterid', 'erostername')

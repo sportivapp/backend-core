@@ -41,7 +41,8 @@ service.getPatternById = async (patternId) => {
 service.getPatternsByShiftId = async (shiftId) => {
     return ShiftPattern.query()
         .where('eshifteshiftid', shiftId)
-        .withGraphFetched('times')
+        .modify('baseAttributes')
+        .withGraphFetched('times(baseAttributes)')
 }
 
 service.updatePatternById = async (shiftId, patternId, patternDTO, user) => {

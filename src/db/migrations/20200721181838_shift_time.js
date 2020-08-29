@@ -1,10 +1,10 @@
 exports.up = (knex, Promise) => knex.schema.createTable('eshifttime', t => {
     t.increments('eshifttimeid').primary().unsigned();
     t.string('eshifttimename').notNullable();
-    t.bigInteger('eshifttimestarthour').notNullable();
-    t.bigInteger('eshifttimestartminute').notNullable();
-    t.bigInteger('eshifttimeendhour').notNullable();
-    t.bigInteger('eshifttimeendminute').notNullable();
+    t.integer('eshifttimestarthour').notNullable();
+    t.integer('eshifttimestartminute').notNullable();
+    t.integer('eshifttimeendhour').notNullable();
+    t.integer('eshifttimeendminute').notNullable();
     t.integer('eshifttimecreateby').notNullable();
     t.bigInteger('eshifttimecreatetime').notNullable();
     t.integer('eshifttimechangeby');

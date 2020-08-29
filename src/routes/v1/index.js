@@ -19,6 +19,7 @@ const countryRoutes = require('./country')
 const timesheetRoutes = require('./timesheet')
 const shiftRoutes = require('./shift')
 const shiftPatternRoutes = require('./shiftPattern')
+const todoListRoutes = require('./todolist')
 
 router.use('/api/v1', [
     userRoutes,
@@ -37,7 +38,8 @@ router.use('/api/v1', [
     countryRoutes,
     timesheetRoutes,
     shiftRoutes,
-    shiftPatternRoutes
+    shiftPatternRoutes,
+    todoListRoutes
 ]);
 
 const mobileUserRoutes = require('./mobileUser');

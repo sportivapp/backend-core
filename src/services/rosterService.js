@@ -5,6 +5,7 @@ const Grades = require('../models/Grades')
 const Department = require('../models/Department')
 const Timesheet = require('../models/Timesheet')
 const Project = require('../models/Project')
+const todoListService = require('./todoListService')
 const ServiceHelper = require('../helper/ServiceHelper')
 const { Promise } = require('bluebird')
 
@@ -86,11 +87,14 @@ RosterService.getAllRosters = async (timesheetId, user) => {
     return Roster.query()
         .modify('baseAttributes')
         .where('etimesheetetimesheetid', timesheetId)
-        .withGraphFetched('[mappings.user.grades(baseAttributes).department(baseAttributes), ' +
-            'department(baseAttributes).[parent, company(baseAttributes).parent.parent]]')
-        .modifyGraph('users', builder => {
-            builder.select('euserid', 'eusername')
-        })
+        .withGraphFetched('[mappings(baseAttributes)' +
+            '.user(baseAttributes)' +
+            '.grades(baseAttributes)' +
+            '.department(baseAttributes), ' +
+            'department(baseAttributes)' +
+            '.[parent(baseAttributes), company(baseAttributes)' +
+            '.parent(baseAttributes)' +
+            '.parent(baseAttributes)]]')
 }
 
 RosterService.getAllMemberById = async (page, size, rosterId, user) => {
@@ -106,9 +110,18 @@ RosterService.viewRosterById = async (rosterId, user) => {
 
     if (user.permission !== 8 && user.permission !== 10) return
 
-    const result = await Roster.query().select().where('erosterid', rosterId).first();
-
-    return result;
+    return Roster.query().select()
+        .modify('baseAttributes')
+        .where('erosterid', rosterId)
+        .first()
+        .withGraphFetched('[mappings(baseAttributes)' +
+            '.user(baseAttributes)' +
+            '.grades(baseAttributes)' +
+            '.department(baseAttributes), ' +
+            'department(baseAttributes)' +
+            '.[parent(baseAttributes), company(baseAttributes)' +
+            '.parent(baseAttributes)' +
+            '.parent(baseAttributes)]]');
 }
 
 RosterService.updateRosterById = async (rosterId, rosterDTO, user) => {
@@ -164,9 +177,10 @@ RosterService.deleteRosterById = async (rosterId, user) => {
     return result;
 }
 
-RosterService.updateUsersOfRosters = async (rosterDTOs, loggedInUser) => {
+RosterService.updateUsersOfRosters = async (projectId, rosterDTOs, loggedInUser) => {
 
     let promises = []
+    let shiftMappingPromises = []
 
     rosterDTOs.forEach(dto => {
         dto.users.forEach(user => {
@@ -182,16 +196,22 @@ RosterService.updateUsersOfRosters = async (rosterDTOs, loggedInUser) => {
                 const anotherPromise = ShiftRosterUserMapping.query()
                     .where('erostererosterid', dto.id)
                     .where('erosterusermappingname', user.name)
-                    .updateByUserId({ eusereuserid: user.id }, loggedInUser.sub)
-                promises.push(anotherPromise)
+                    .first()
+                    .updateByUserId({ eusereuserid: user.id, eprojecteprojectid: parseInt(projectId) }, loggedInUser.sub)
+                    .returning('*')
+                shiftMappingPromises.push(anotherPromise)
             }
             promises.push(promise)
         })
     })
     return Promise.all(promises)
+        .then(result => Promise.all(shiftMappingPromises).then(resultMapping => [result, resultMapping]))
+        .then(resultArr => todoListService.createTodoListByProject(projectId, resultArr[1], loggedInUser)
+            .then(ignored => resultArr[0]))
 }
 
 function GetShiftRosterUserMapping(dto) {
+    console.log(dto)
     return ShiftRosterUserMapping.query()
         .where('erostererosterid', dto.erostererosterid)
         .where('erosterusermappingname', dto.erosterusermappingname)
@@ -199,32 +219,27 @@ function GetShiftRosterUserMapping(dto) {
         .then(result => [result, dto])
 }
 
-function saveShiftRosterUserMapping(mapping, rosterUserMapping, dto, projectId, user) {
+function saveShiftRosterUserMapping(mapping, rosterUserMapping, dto, user) {
     const mappingDTO = {
         erostererosterid: dto.rosterId,
         erosterusermappingname: dto.name,
         eshifttimeeshifttimeid: dto.shiftTimeId,
         eshiftdaytime: dto.dayTime,
-        eprojecteprojectid: projectId,
         eusereuserid: rosterUserMapping ? rosterUserMapping.eusereuserid: dto.userId,
         eshiftgeneralstatus: false
     }
     if (mapping) {
-        return ShiftRosterUserMapping.$query().updateByUserId(mappingDTO, user.sub)
+        return mapping.$query().updateByUserId(mappingDTO, user.sub)
     } else {
         return ShiftRosterUserMapping.query().insertToTable(mappingDTO, user.sub)
     }
 }
 
-RosterService.assignRosterToShiftTime = async (timesheetId, mappings, projectId, user) => {
+RosterService.assignRosterToShiftTime = async (timesheetId, mappings, user) => {
 
     const timesheet = await Timesheet.query().findById(timesheetId).withGraphFetched('shift')
 
     if (!timesheet) return
-
-    const project = await Project.query().findById(projectId)
-
-    if (!project) return
 
     const reserveCount = mappings.filter(dto => dto.name.includes('Reserve')).length
     if (reserveCount > 0) return
@@ -237,14 +252,14 @@ RosterService.assignRosterToShiftTime = async (timesheetId, mappings, projectId,
             .where('erosterusermappingname', dto.name)
             .first()
             .then(result => GetShiftRosterUserMapping(result))
-            .then(resultArr => saveShiftRosterUserMapping(resultArr[0], resultArr[1], dto, projectId, user))
+            .then(resultArr => saveShiftRosterUserMapping(resultArr[0], resultArr[1], dto, user))
         updatePromises.push(promise)
     })
 
     await Promise.all(updatePromises)
 
     return timesheet.shift.$query()
-        .withGraphFetched('patterns.times.mappings.roster(idAndName)')
+        .withGraphFetched('patterns(baseAttributes).times(baseAttributes).mappings(baseAttributes).roster(idAndName)')
 }
 
 RosterService.assignRosterToShiftTimeGeneral = async (timesheetId, user) => {

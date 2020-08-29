@@ -12,9 +12,13 @@ class ShiftTime extends Model {
     static get jsonSchema() {
         return {
             type: 'object',
-            required: ['eshifttimename'],
+            required: ['eshifttimename', 'eshifttimestarthour', 'eshifttimestartminute', 'eshifttimeendhour', 'eshifttimeendminute'],
             properties: {
-                eshifttimename: { type: 'string', minLength: 1, maxLength: 256 }
+                eshifttimename: { type: 'string', minLength: 1, maxLength: 256 },
+                eshifttimestarthour: { type: 'integer' },
+                eshifttimestartminute: { type: 'integer' },
+                eshifttimeendhour: { type: 'integer' },
+                eshifttimeendminute: { type: 'integer' },
             }
         };
     }

@@ -117,15 +117,13 @@ rosterController.updateRosterById = async (req, res, next) => {
 
     const { rosterId } = req.params
     const user = req.user;
-    const { name, description, departmentId, supervisorId, headUserId } = req.body;
+    const { name, description, departmentId } = req.body;
 
     try {
 
         const rosterDTO = { 
             erostername: name,
             erosterdescription: description,
-            erostersupervisoruserid: supervisorId,
-            erosterheaduserid: headUserId,
             edepartmentedepartmentid: departmentId
         }
 
@@ -161,10 +159,10 @@ rosterController.viewRosterById = async (req, res, next) => {
 
 rosterController.updateUsersOfRosters = async (req, res, next) => {
 
-    const { rosters } = req.body
+    const { rosters, projectId } = req.body
 
     try {
-        const result = await rosterService.updateUsersOfRosters(rosters, req.user)
+        const result = await rosterService.updateUsersOfRosters(projectId, rosters, req.user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)
@@ -175,10 +173,10 @@ rosterController.assignRosterToShiftTimeByTimesheetId = async (req, res, next) =
 
     const { timesheetId } =req.params
 
-    const { mappings, projectId } = req.body
+    const { mappings } = req.body
 
     try {
-        const result = await rosterService.assignRosterToShiftTime(timesheetId, mappings, projectId, req.user)
+        const result = await rosterService.assignRosterToShiftTime(timesheetId, mappings, req.user)
         if (!result) return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
