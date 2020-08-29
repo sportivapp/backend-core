@@ -108,20 +108,33 @@ teamService.createTeam = async (teamDTO, user) => {
 
 teamService.joinTeam = async (teamId, user) => {
 
-    // Check if this user is invited / already applied
+    // Check if this user already invited / applied
     const pendingLog = await TeamLog.query()
     .where('eusereuserid', user.sub)
     .andWhere('eteameteamid', teamId)
     .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
     .first();
 
+    // If double apply, return
     if (pendingLog.eteamlogtype === TeamLogTypeEnum.APPLY)
         return
 
+    // If invited, then auto join
     if (pendingLog.eteamlogtype === TeamLogTypeEnum.INVITE) {
-        
+
+        TeamUserMapping.query().insertToTable({
+            eusereuserid: user.sub,
+            eteameteamid: teamId,
+            eteamusermappingposition: TeamUserMappingPositionEnum.MEMBER
+        }, user.sub);
+
+        return TeamLog.query().updateByUserId({
+            eteamlogstatus: TeamLogStatusEnum.ACCEPTED
+        }, user.sub).returning('*');
+
     }
 
+    // If not then create an apply
     return TeamLog.query().insertToTable({
         eteameteamid: teamId,
         eusereuserid: user.sub,
@@ -217,27 +230,80 @@ teamService.getTeamMemberList = async (teamId, type) => {
 
 teamService.invite = async (teamId, user, email) => {
 
+    const isAdmin = await teamService.isAdmin(teamId, user.sub);
+
+    if (!isAdmin)
+        return 'not admin'
+
     const invitedUser = await User.query().where('euseremail', email).first();
 
     if (!invitedUser)
         return
 
-    const userInTeam = TeamUserMapping.query().where('eusereuserid', invitedUser.euserid).andWhere('eteameteamid', teamId);
+    const userInTeam = await TeamUserMapping.query().where('eusereuserid', invitedUser.euserid).andWhere('eteameteamid', teamId);
 
     if (userInTeam)
         return
 
-    const teamLogPromise = TeamLog.query().insertToTable({
-        eusereuserid: invitedUser.euserid,
+    // Check if this user already invited / applied
+    const pendingLog = await TeamLog.query()
+    .where('eteameteamid', teamId)
+    .andWhere('eusereuserid', invitedUser.euserid);
+
+    // If double invite, return
+    if (pendingLog.eteamlogtype === TeamLogTypeEnum.INVITE)
+        return
+
+    // If applied, auto join
+    if (pendingLog.eteamlogtype === TeamLogTypeEnum.APPLY) {
+
+        TeamUserMapping.query().insertToTable({
+            eusereuserid: invitedUser.euserid,
+            eteameteamid: teamId,
+            eteamusermappingposition: TeamUserMappingPositionEnum.MEMBER
+        }, user.sub);
+
+        return TeamLog.query().updateByUserId({
+            eteamlogstatus: TeamLogStatusEnum.ACCEPTED
+        }, user.sub).returning('*');
+
+    }
+
+    // If not then create an invite
+    return TeamLog.query().insertToTable({
         eteameteamid: teamId,
+        eusereuserid: invitedUser.euserid,
         eteamlogtype: TeamLogTypeEnum.INVITE
     }, user.sub);
+    
+}
 
-    const teamUserMappingPromise = TeamUserMapping.query().insertToTable({
-        eusereuserid: invitedUser.euserid,
-        eteameteamid: teamId,
-        eteamusermappingposition: TeamUserMappingPositionEnum.MEMBER
-    }, user.sub);
+teamService.changeTeamMemberPosition = async (teamId, user, userId, position) => {
+
+    const isAdmin = await teamService.isAdmin(teamId, user.sub);
+
+    if (!isAdmin)
+        return 'not admin'
+
+    if (!TeamUserMappingPositionEnum.hasOwnProperty(position))
+        return
+
+    await TeamUserMapping.query()
+    .where('eusereuserid', userId)
+    .updateByUserId({ eteamusermappingposition: position }, user.sub);
+
+}
+
+teamService.kick = async (teamId, user, userId) => {
+
+    const isAdmin = await teamService.isAdmin(teamId, user.sub);
+
+    if (!isAdmin)
+        return 'not admin'
+
+    await TeamUserMapping.query()
+    .where('eusereuserid', userId)
+    .delete();
 
 }
 
