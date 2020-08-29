@@ -22,7 +22,7 @@ class Shift extends Model {
     static get modifiers() {
         return {
             baseAttributes(builder) {
-                builder.select('eshiftid', 'eshiftname', 'eshiftstartdate', 'eshiftenddate')
+                builder.select('eshiftid', 'eshiftname', 'eshiftstartdate', 'eshiftenddate', 'eshiftgeneralstatus')
             }
         }
     }

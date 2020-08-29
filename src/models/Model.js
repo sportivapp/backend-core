@@ -23,8 +23,7 @@ class Model extends objection.Model {
     return CustomQueryBuilder
   }
 
-  static baseSchema() {
-    const tableName = this.tableName
+  static baseProperties(tableName) {
     const schema = {}
     schema[tableName.concat('createtime')] = { type: 'bigint' }
     schema[tableName.concat('createby')] = { type: 'integer' }

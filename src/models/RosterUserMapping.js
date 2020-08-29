@@ -48,7 +48,7 @@ class RosterUserMapping extends Model {
   static get modifiers() {
     return {
       baseAttributes(builder) {
-        builder.select('erosterusermappingname', 'erosterusermappingjobdescription')
+        builder.select('erosterusermappingname', 'erosterusermappingjobdescription', 'erosterusermappingtype')
       }
     }
   }

@@ -8,11 +8,17 @@ const service = {}
 
 service.getTimesheetById = async (timesheetId) => {
     return Timesheet.query().findById(timesheetId)
-        .withGraphFetched('[shift.patterns.times, rosters.mappings(baseAttributes)]')
+        .modify('baseAttributes')
+        .withGraphFetched('[shift(baseAttributes)' +
+            '.patterns(baseAttributes)' +
+            '.times(baseAttributes)' +
+            ', rosters(baseAttributes)' +
+            '.mappings(baseAttributes)' +
+            '.user(baseAttributes)]')
 }
 
 service.getTimesheets = async () => {
-    return Timesheet.query()
+    return Timesheet.query().modify('baseAttributes')
 }
 
 service.createTimesheet = async (timesheetDTO, rosterDTOs, user) => {
@@ -36,7 +42,8 @@ service.createTimesheet = async (timesheetDTO, rosterDTOs, user) => {
         return Promise.map(departments, (department) => {
             const dto = {
                 erostername: department.edepartmentname,
-                edepartmentedepartmentid: department.edepartmentid
+                edepartmentedepartmentid: department.edepartmentid,
+                etimesheetetimesheetid: timesheet.etimesheetid
             }
             return rosterService.createRosterWithDepartment(dto, user)
         }, { concurrency: 5 })
@@ -47,6 +54,7 @@ service.createTimesheet = async (timesheetDTO, rosterDTOs, user) => {
 
     } else {
         return Promise.map(rosterDTOs, (dto) => {
+            dto["etimesheetetimesheetid"] = timesheet.etimesheetid
             if (dto.edepartmentedepartmentid) return rosterService.createRosterWithDepartment(dto, user)
             return rosterService.createRoster(dto, user)
         }, { concurrency: 5 })

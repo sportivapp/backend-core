@@ -43,6 +43,14 @@ class Timesheet extends Model {
             }
         }
     }
+
+    static get modifiers() {
+        return {
+            baseAttributes(builder) {
+                builder.select('etimesheetid', 'etimesheetname', 'etimesheetrostercount', 'etimesheetgeneralstatus')
+            }
+        }
+    }
 }
 
 module.exports = Timesheet;

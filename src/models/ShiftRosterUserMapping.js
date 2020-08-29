@@ -54,6 +54,14 @@ class ShiftRosterUserMapping extends Model {
             }
         }
     }
+
+    static get modifiers() {
+        return {
+            baseAttributes(builder) {
+                builder.select('eshiftdaytime', 'eshiftgeneralstatus', 'erosterusermappingname')
+            }
+        }
+    }
 }
 
 module.exports = ShiftRosterUserMapping;

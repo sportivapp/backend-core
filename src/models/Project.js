@@ -30,6 +30,7 @@ class Project extends Model {
     const User = require('./User')
     const Roster = require('./Roster')
     const Timesheet = require('./Timesheet')
+    const Todo = require('./Todo')
 
     return {
       devices: {
@@ -66,18 +67,29 @@ class Project extends Model {
         join: {
           from: 'eproject.eprojectid',
           through: {
-            from: 'eprojecttimesheetmapping.eprojectprojectid',
+            from: 'eprojecttimesheetmapping.eprojecteprojectid',
             to: 'eprojecttimesheetmapping.etimesheetetimesheetid'
           },
           to: 'etimesheet.etimesheetid'
         }
-      }
+      },
+      todos: {
+        relation: Model.HasManyRelation,
+        modelClass: Todo,
+        join: {
+          from: 'eproject.eprojectid',
+          to: 'etodo.eprojecteprojectid'
+        }
+      },
     }
   }
 
   static get modifiers() {
     return {
-      ...this.baseModifiers()
+      ...this.baseModifiers(),
+      baseAttributes(builder) {
+        builder.select('eprojectname', 'eprojectcode', 'eprojectstartdate', 'eprojectenddate', 'eprojectdescription', 'eprojectaddress')
+      }
     }
   }
 }

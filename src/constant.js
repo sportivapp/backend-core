@@ -58,6 +58,11 @@ module.exports = {
             id: '/timesheet/:timesheetId',
             assign: '/timesheet/:timesheetId/assign'
         },
+        todolist: {
+            list: '/todolist',
+            id: '/todolist/:todoId',
+            category: '/todolist/todo/category'
+        },
         roster: {
             list: '/timesheet/:timesheetId/roster',
             members: '/timesheet/:timesheetId/roster-member',

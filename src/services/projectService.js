@@ -19,7 +19,9 @@ ProjectService.createProject = async(projectDTO, user) => {
 
 ProjectService.getProjectById = async (projectId) => {
 
-    return Project.query().findById(projectId).withGraphFetched('timesheets.' +
+    return Project.query().findById(projectId)
+        .modify('baseAttributes')
+        .withGraphFetched('timesheets(baseAttributes).' +
         'rosters(baseAttributes).' +
         'mappings(baseAttributes).' +
         'user(baseAttributes)')
@@ -34,7 +36,7 @@ ProjectService.getProjects = async(userId, page, size, projectId) => {
     }
 
     return Project.query()
-        .select('eprojectid', 'eprojectname', 'eprojectcode', 'eprojectstartdate', 'eprojectenddate', 'eprojectaddress')
+        .select('eprojectid', 'eprojectname', 'eprojectcode', 'eprojectstartdate', 'eprojectenddate', 'eprojectaddress', 'eprojectdescription')
         .where('eprojectcreateby', userId)
         .where('eprojectparentid', id)
         .page(page, size)
@@ -54,7 +56,7 @@ ProjectService.updateProjectById = async(projectId, projectDTO, user) => {
         if (!timesheet) return
     }
 
-    return project.$query().updateByUserId(projectDTO, user.sub);
+    return project.$query().updateByUserId(projectDTO, user.sub).returning('*').modify('baseAttributes');
 
 }
 
@@ -178,6 +180,10 @@ ProjectService.saveTimesheetIntoProject = async (projectId, timesheetIds, user) 
 
     return ProjectTimesheetMapping.query().where('eprojecteprojectid', projectId).delete()
         .then(ignored => ProjectTimesheetMapping.query().insertToTable(dtoList, user.sub))
+        .then(ignored => project.$query().modify('baseAttributes').withGraphFetched('timesheets(baseAttributes).' +
+            'rosters(baseAttributes).' +
+            'mappings(baseAttributes).' +
+            'user(baseAttributes)'))
 }
 
 function findByProjectIdAndDeviceId(pr, project) {
