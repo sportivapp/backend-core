@@ -12,7 +12,7 @@ class Experience extends Model {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['eexperiencename'],
+      required: ['eexperiencename', 'eexperiencestartdate'],
       properties: {
         eexperiencename: { type: 'string', minLength: 1, maxLength: 65 },
         eexperiencestartdate: { type: 'integer'},
