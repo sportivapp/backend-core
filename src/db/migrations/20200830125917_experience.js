@@ -1,7 +1,7 @@
 exports.up = (knex, Promise) => knex.schema.createTable('eexperience', t => {
     t.increments('eexperienceid').primary().unsigned();
     t.string('eexperiencename', 65).notNullable();
-    t.bigInteger('eexperiencestartdate');
+    t.bigInteger('eexperiencestartdate').notNullable();
     t.bigInteger('eexperienceenddate');
     t.string('eexperiencelocation', 65);
     t.string('eexperienceposition', 65);
