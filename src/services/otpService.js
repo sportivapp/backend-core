@@ -20,20 +20,24 @@ OtpService.createOtp = async (email) => {
 
     // If email exist in user
     if (promised[1])
-        return
-
-    // If otp confirmed
-    if (promised[0].otpcodeconfirmed)
-        return
-
-    const otpCode = otpCodeGenerator.create4DigitsOTP();
+        return 'email used'
 
     let returnedOtp = {}
-    // If email exist in otp
+    const otpCode = otpCodeGenerator.create4DigitsOTP();
+    
+    // If otp exist for this email
     if (promised[0]) {
-        returnedOtp = await promised[0].$query().updateByUserId({ eotpcode: otpCode }, 0).returning('*');
-    } else {
 
+        // If already confirmed
+        if (promised[0].otpcodeconfirmed)
+            return 'otp already confirmed'
+
+        // resend Otp
+        returnedOtp = await promised[0].$query().updateByUserId({ eotpcode: otpCode }, 0).returning('*');
+    } 
+
+    // If otp does not exist for this email
+    if (!promised[0]) {
         await emailService.sendEmailOTP(email, otpCode);
 
         returnedOtp = await Otp.query().insertToTable({
