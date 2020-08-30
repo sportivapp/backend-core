@@ -12,8 +12,10 @@ experienceService.createExperience = async (experienceDTO, loggedInUser) => {
 
 experienceService.getExperienceList = async (page, size, loggedInUser) => {
 
-    if( isNaN(page) || isNaN(size) )
-        return ServiceHelper.toEmptyPage(page, size)
+    if( isNaN(page) || isNaN(size) ) {
+        page = 0
+        size = 10
+    }
 
     const pageObj = await Experience.query()
     .select()
