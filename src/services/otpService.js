@@ -38,13 +38,15 @@ OtpService.createOtp = async (email) => {
 
     // If otp does not exist for this email
     if (!promised[0]) {
-        await emailService.sendEmailOTP(email, otpCode);
 
         returnedOtp = await Otp.query().insertToTable({
             eotpcode: otpCode,
             euseremail: email
         }, 0);
+        
     }
+
+    await emailService.sendEmailOTP(email, otpCode);
 
     return returnedOtp;
 
