@@ -23,8 +23,7 @@ companyService.getCompany = async (companyId) => {
     .joinRelated('branches')
     .where('ecompany.ecompanyid', companyId);
 
-    const result = await Promise.all([companyDetailPromise, departmentWithHeadPromise, branchesPromise])
-        .then();
+    const result = await Promise.all([companyDetailPromise, departmentWithHeadPromise, branchesPromise]);
 
     let departmentWithHead = [];
     for (let i=0; i<result[1].length; i++) {

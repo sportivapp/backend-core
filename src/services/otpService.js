@@ -15,8 +15,7 @@ OtpService.createOtp = async (email) => {
     const otp = Otp.query().where('euseremail', email).first();
     const user = User.query().where('euseremail', email).first();
 
-    const promised = await Promise.all([otp, user])
-    .then();
+    const promised = await Promise.all([otp, user]);
 
     // If email exist in user
     if (promised[1])
