@@ -86,7 +86,7 @@ module.exports = {
         country: {
             list: '/country'
         },
-        mobileExperience: {
+        experience: {
             list: '/experience',
             id: '/experience/:experienceId'
         }
