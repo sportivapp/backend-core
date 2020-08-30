@@ -32,7 +32,7 @@ OtpService.createOtp = async (email) => {
         console.log(Date.now());
         console.log((promised[0].otpcodechangetime - Date.now()));
         // If less than one minute passed
-        if ((promised[0].otpcodechangetime - Date.now()) < 60000)
+        if ((Date.now() - parseInt(promised[0].otpcodechangetime)) < 60000)
             return 'you need to wait'
 
         // If already confirmed
