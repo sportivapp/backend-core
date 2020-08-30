@@ -29,7 +29,7 @@ OtpService.createOtp = async (email) => {
     if (promised[0]) {
 
         // If less than one minute passed
-        if (promised[0].otpcodechangetime + 60000 < Date.now())
+        if ((promised[0].otpcodechangetime - Date.now()) < 60000)
             return 'you need to wait'
 
         // If already confirmed
