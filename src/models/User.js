@@ -12,9 +12,9 @@ class User extends Model {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['eusernik', 'eusername', 'euseremail', 'euserpassword', 'eusermobilenumber'],
+      required: ['eusername', 'euseremail', 'euserpassword', 'eusermobilenumber'], // 'eusernik', 
       properties: {
-        eusernik: {  type: 'string', minLength: 1, maxLength: 256 },
+        // eusernik: {  type: 'string', minLength: 1, maxLength: 256 },
         eusername: { type: 'string', minLength: 1, maxLength: 256 },
         euseremail: { type: 'string', minLength: 1, maxLength: 256 },
         euserpassword: { type: 'string', minLength: 1, maxLength: 256 },
