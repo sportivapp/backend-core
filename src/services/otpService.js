@@ -28,6 +28,9 @@ OtpService.createOtp = async (email) => {
     // If otp exist for this email
     if (promised[0]) {
 
+        if (promised[0].otpcodecreatetime + 60000 < Date.now())
+            return 'you need to wait'
+
         // If already confirmed
         if (promised[0].otpcodeconfirmed)
             return 'otp already confirmed'
@@ -43,7 +46,7 @@ OtpService.createOtp = async (email) => {
             eotpcode: otpCode,
             euseremail: email
         }, 0);
-        
+
     }
 
     await emailService.sendEmailOTP(email, otpCode);
