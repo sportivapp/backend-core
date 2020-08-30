@@ -9,7 +9,7 @@ controller.login = async (req, res, next) => {
     const { email, password } = req.body;
 
     const loginDTO = {
-        euseremail: email,
+        euseremail: email.toLowerCase(),
         euserpassword: password
     }
 
