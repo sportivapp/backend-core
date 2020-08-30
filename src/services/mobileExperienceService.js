@@ -60,7 +60,7 @@ experienceService.deleteExperience = async (experienceId, loggedInUser) => {
     .delete()
     .where('eexperienceid', experienceId)
     .where('eusereuserid', loggedInUser.sub)
-    .returning('*')
+    .then(rowsAffected => rowsAffected === 1)
 }
 
 module.exports = experienceService
