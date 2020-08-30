@@ -26,23 +26,15 @@ experienceService.getExperienceList = async (page, size, loggedInUser) => {
 }
 
 experienceService.getExperienceById = async (experienceId, loggedInUser) => {
+
     const experience = await Experience.query()
-    .select()
+    .select('eexperienceid','eexperiencename', 'eexperiencestartdate', 'eexperienceenddate', 'eexperiencelocation', 'eexperienceposition', 'eexperiencedescription', 'eindustryname')
+    .joinRelated('industries')
     .where('eexperienceid', experienceId)
     .where('eusereuserid', loggedInUser.sub)
     .first()
 
-    const industry = await Industry.query()
-    .select()
-    .where('eindustryid', experience.eindustryeindustryid)
-    .first()
-
-    const result = {
-        ...experience,
-        eindustryname: industry.eindustryname
-    }
-
-    return result
+    return experience
 
 }
 
