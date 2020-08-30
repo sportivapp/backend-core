@@ -1,10 +1,16 @@
 const Otp = require('../models/Otp');
 const User = require('../models/User');
 const otpCodeGenerator = require('../helper/otpCodeGenerator');
+const emailService = require('../helper/emailService');
 
 const OtpService = {};
 
 OtpService.createOtp = async (email) => {
+
+    const isEmail = await emailService.validateEmail(email);
+    
+    if (!isEmail)
+        return 'invalid email'
 
     const otp = Otp.query().where('euseremail', email).first();
     const user = User.query().where('euseremail', email).first();
@@ -27,13 +33,14 @@ OtpService.createOtp = async (email) => {
     if (promised[0]) {
         otp = await promised[0].$query().updateByUserId({ eotpcode: otpCode }, 0).returning('*');
     } else {
+
+        await emailService.sendEmailOTP(email, otpCode);
+
         otp = await Otp.query().insertToTable({
             eotpcode: otpCode,
             euseremail: email
         }, 0);
     }
-
-    // emailService.sendOtpToEmail(email);
 
     return otp;
 
