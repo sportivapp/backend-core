@@ -24,6 +24,22 @@ class Experience extends Model {
     }
   }
 
+  static get relationMappings() {
+
+    const Industry = require('./Industry')
+
+    return {
+      industries: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Industry,
+        join: {
+          from: 'eexperience.eindustryeindustryid',
+          to: 'eindustry.eindustryid'
+        }
+      }
+    }
+  }
+
 }
 
 module.exports = Experience;
