@@ -85,6 +85,10 @@ module.exports = {
         },
         country: {
             list: '/country'
+        },
+        mobileExperience: {
+            list: '/experience',
+            id: '/experience/:experienceId'
         }
     }
 }
