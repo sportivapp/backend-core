@@ -28,7 +28,8 @@ OtpService.createOtp = async (email) => {
     // If otp exist for this email
     if (promised[0]) {
 
-        if (promised[0].otpcodecreatetime + 60000 < Date.now())
+        // If less than one minute passed
+        if (promised[0].otpcodechangetime + 60000 < Date.now())
             return 'you need to wait'
 
         // If already confirmed
