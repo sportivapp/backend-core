@@ -39,6 +39,7 @@ controller.createUser = async (req, res, next) => {
 
     try {
         const result = await mobileUserService.createUser(userDTO, otpCode);
+        console.log(result);
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));

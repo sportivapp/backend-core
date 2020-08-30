@@ -43,14 +43,15 @@ UserService.createUser = async (userDTO, otpCode) => {
     const user = await User.query().where('euseremail', userDTO.euseremail).first();
 
     if (user)
-        return
+        return 'user exist'
 
     const otp = await Otp.query().where('euseremail', userDTO.euseremail).first();
 
-    if (!otp) return
+    if (!otp)
+        return 'no otp found'
 
     if (otp.eotpcode !== otpCode)
-        return
+        return 'otp code not match'
 
     // confirm OTP
     await otp.$query().updateByUserId({ eotpconfirmed: true }, 0);
