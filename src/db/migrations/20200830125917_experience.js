@@ -13,7 +13,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('eexperience', t => {
     t.boolean('eexperiencedeletestatus').defaultTo(false);
     t.integer('eexperiencetablestatus').notNullable().defaultTo(1);
     t.integer('eusereuserid').notNullable().references('euser.euserid').onDelete('CASCADE');
-    t.integer('eindustryeindustryid').notNullable().references('eindustry.eindustryid')
+    t.integer('eindustryeindustryid').notNullable().references('eindustry.eindustryid').onDelete('SET NULL')
   });
   
   exports.down = (knex, Promise) => knex.schema.dropTable('eexperience');
