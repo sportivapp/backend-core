@@ -28,21 +28,21 @@ OtpService.createOtp = async (email) => {
 
     const otpCode = otpCodeGenerator.create4DigitsOTP();
 
-    let otp = {}
+    let returnedOtp = {}
     // If email exist in otp
     if (promised[0]) {
-        otp = await promised[0].$query().updateByUserId({ eotpcode: otpCode }, 0).returning('*');
+        returnedOtp = await promised[0].$query().updateByUserId({ eotpcode: otpCode }, 0).returning('*');
     } else {
 
         await emailService.sendEmailOTP(email, otpCode);
 
-        otp = await Otp.query().insertToTable({
+        returnedOtp = await Otp.query().insertToTable({
             eotpcode: otpCode,
             euseremail: email
         }, 0);
     }
 
-    return otp;
+    return returnedOtp;
 
 }
 
