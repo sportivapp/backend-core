@@ -41,9 +41,10 @@ experienceService.getExperienceById = async (experienceId, loggedInUser) => {
 experienceService.editExperience = async (experienceDTO, experienceId, loggedInUser) => {
 
     return Experience.query()
-    .updateByUserId(experienceDTO, loggedInUser.sub)
     .where('eexperienceid', experienceId)
     .where('eusereuserid', loggedInUser.sub)
+    .first()
+    .updateByUserId(experienceDTO, loggedInUser.sub)
     .returning('*')
 
 }
