@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router();
+const router = require('../router')
 const experienceController = require('../../controllers/mobileExperience');
 const auth = require('../../middlewares/authentication');
 const { routes } = require('../../constant')
@@ -10,4 +9,4 @@ router.get(routes.experience.id, auth.authenticateToken, experienceController.ge
 router.put(routes.experience.id, auth.authenticateToken, experienceController.editExperience);
 router.delete(routes.experience.id, auth.authenticateToken, experienceController.deleteExperience);
 
-module.exports = router;
+module.exports = router.expressRouter;
