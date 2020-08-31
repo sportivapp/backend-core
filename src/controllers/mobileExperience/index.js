@@ -70,8 +70,6 @@ experienceController.getExperienceList = async (req, res, next) => {
 
         const pageObj = await mobileExperienceService.getExperienceList(parseInt(page), parseInt(size), req.user)
 
-        if (!pageObj)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
 
     } catch(e) {
