@@ -23,7 +23,7 @@ experienceController.createExperience = async (req, res, next) => {
         const result = await mobileExperienceService.createExperience(experienceDTO, req.user)
 
         if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+            return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch(e) {
@@ -53,7 +53,7 @@ experienceController.editExperience = async (req, res, next) => {
         const result = await mobileExperienceService.editExperience(experienceDTO, experienceId, req.user)
 
         if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+            return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch(e) {
