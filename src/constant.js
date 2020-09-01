@@ -18,7 +18,8 @@ module.exports = {
             id: '/user/:userId',
             approval: '/user/approval',
             changeCompany: '/user/change-company',
-            currentCompany: '/user/current-company'
+            currentCompany: '/user/current-company',
+            coach: '/user/coach'
         },
         grade: {
             list: '/grades',
@@ -89,6 +90,9 @@ module.exports = {
         experience: {
             list: '/experience',
             id: '/experience/:experienceId'
+        },
+        coach: {
+            list: '/coach'
         }
     }
 }
