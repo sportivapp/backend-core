@@ -129,16 +129,14 @@ UserService.updateUserCoachData = async (userCoachDTO, user, industries) => {
 
     const userFromDB = await UserService.getUserById(user.sub);
 
-    if (!user)
+    if (!userFromDB)
         return
     
     userCoachDTO.euserdob = new Date(userCoachDTO.euserdob).getTime();
 
-    const updatedUser = await userFromDB.$query().updateByUserId(userCoachDTO, user.sub).returning('*');
-
     // User didnt give a file and file existed (delete file)
-    if (updatedUser.efileefileid && userCoachDTO.efileefileid === null) {
-        await fileService.deleteFileByIdAndCreateBy(updatedUser.efileefileid, updatedUser.euserid);
+    if (userFromDB.efileefileid && userCoachDTO.efileefileid === null) {
+        await fileService.deleteFileByIdAndCreateBy(userFromDB.efileefileid, userFromDB.euserid);
     }
     // User give a file
     else if (userCoachDTO.efileefileid) {
@@ -149,7 +147,7 @@ UserService.updateUserCoachData = async (userCoachDTO, user, industries) => {
         if (!file)
             return
 
-        const newPathDir = '/coach/' + updatedUser.euserid;
+        const newPathDir = '/coach/' + userFromDB.euserid;
         await fileService.moveFile(file, newPathDir);
     }
 
@@ -158,10 +156,14 @@ UserService.updateUserCoachData = async (userCoachDTO, user, industries) => {
         eusereuserid: user.sub
     }))
 
-    await UserIndustryMapping.query()
+    const updatedUser = userFromDB.$query().updateByUserId(userCoachDTO, user.sub);
+
+    const insertedMapping = UserIndustryMapping.query()
     .insertToTable(mapping, user.sub)
 
-    return 1;
+    return Promise.all([updatedUser, insertedMapping])
+    .then(arr => arr[0])
+    .then(rowsAffected => rowsAffected === 1)
 
 }
 
