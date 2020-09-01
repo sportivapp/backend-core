@@ -1,5 +1,6 @@
 require('dotenv').config();
 const User = require('../models/User');
+const UserIndustryMapping = require('../models/UserIndustryMapping')
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
 const fileService = require('./mobileFileService');
@@ -86,8 +87,8 @@ UserService.getUserById = async (userId) => {
 
 UserService.updateUser = async (userDTO, user) => {
 
-    if (userDTO.efileefileid === undefined || userDTO.efilefileid === 0) {
-        userDTO.efilefileid = null;
+    if (userDTO.efileefileid === undefined || userDTO.efileefileid === 0) {
+        userDTO.efileefileid = null;
     }
 
     const userFromDB = await UserService.getUserById(user.sub);
@@ -117,6 +118,52 @@ UserService.updateUser = async (userDTO, user) => {
     }
 
     return 1;
+
+}
+
+UserService.updateUserCoachData = async (userCoachDTO, user, industries) => {
+
+    if (userCoachDTO.efileefileid === undefined || userCoachDTO.efileefileid === 0) {
+        userCoachDTO.efileefileid = null;
+    }
+
+    const userFromDB = await UserService.getUserById(user.sub);
+
+    if (!userFromDB)
+        return
+    
+    userCoachDTO.euserdob = new Date(userCoachDTO.euserdob).getTime();
+
+    // User didnt give a file and file existed (delete file)
+    if (userFromDB.efileefileid && userCoachDTO.efileefileid === null) {
+        await fileService.deleteFileByIdAndCreateBy(userFromDB.efileefileid, userFromDB.euserid);
+    }
+    // User give a file
+    else if (userCoachDTO.efileefileid) {
+        
+        // File does not exist / not uploaded yet
+        const file = await fileService.getFileByIdAndCreateBy(userCoachDTO.efileefileid, user.sub);
+
+        if (!file)
+            return
+
+        const newPathDir = '/coach/' + userFromDB.euserid;
+        await fileService.moveFile(file, newPathDir);
+    }
+
+    const mapping = industries.map(industry => ({
+        eindustryeindustryid: industry,
+        eusereuserid: user.sub
+    }))
+
+    const updatedUser = userFromDB.$query().updateByUserId(userCoachDTO, user.sub);
+
+    const insertedMapping = UserIndustryMapping.query()
+    .insertToTable(mapping, user.sub)
+
+    return Promise.all([updatedUser, insertedMapping])
+    .then(arr => arr[0])
+    .then(rowsAffected => rowsAffected === 1)
 
 }
 

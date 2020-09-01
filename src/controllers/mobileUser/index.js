@@ -121,6 +121,39 @@ controller.updateUser = async (req, res, next) => {
 
 }
 
+controller.updateUserCoachData = async (req, res, next) => {
+
+    const { name, mobileNumber, dob, gender, hobby, countryId, fileId, address, facebook, instagram, linkedin, industries } = req.body;
+
+    const userCoachDTO = {
+        eusername: name,
+        eusermobilenumber: mobileNumber,
+        euserdob: dob,
+        eusergender: gender,
+        euserhobby: hobby,
+        ecountryecountryid : countryId,
+        efileefileid: fileId,
+        euseraddress: address,
+        euserfacebook: facebook,
+        euserinstagram: instagram,
+        euserlinkedin: linkedin,
+        euseriscoach: true
+    }
+
+    try {
+
+        const result = await mobileUserService.updateUserCoachData(userCoachDTO, req.user, industries);
+
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 controller.changePassword = async (req, res, next) => {
 
     const { oldPassword, newPassword } = req.body;
