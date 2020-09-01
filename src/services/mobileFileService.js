@@ -39,7 +39,7 @@ FileService.createMultipleFiles = async (files, user) => {
 FileService.moveFile = async (file, newPathDir, deleteDirectory = true, isMultiple = false) => {
 
     const newPathDirFull = process.env.UPLOADS_DIRECTORY + newPathDir;
-    const newPathFull = process.env.UPLOADS_DIRECTORY + newPathDir + '/' + file.efilename;
+    let newPathFull = process.env.UPLOADS_DIRECTORY + newPathDir + '/' + file.efilename;
 
     try {
 
@@ -68,12 +68,12 @@ FileService.moveFile = async (file, newPathDir, deleteDirectory = true, isMultip
         let newFiles = []
         for(let i = 0; i < file.length ; i++) {
 
-            let newFilePathFull = process.env.UPLOADS_DIRECTORY + newPathDir + '/' + file[i].efilename;
+            newPathFull = process.env.UPLOADS_DIRECTORY + newPathDir + '/' + file[i].efilename;
 
             newFiles.push(
                 rename(file[i].efilepath, newPathFull)
                 .then(ignored => {
-                    file[i].efilepath = newFilePathFull
+                    file[i].efilepath = newPathFull
                     return File.query().patchAndFetchById(file[i].efileid, file[i])
                 })
             )
