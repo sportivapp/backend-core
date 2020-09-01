@@ -1,5 +1,6 @@
 require('dotenv').config();
 const User = require('../models/User');
+const UserIndustryMapping = require('../models/UserIndustryMapping')
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
 const fileService = require('./mobileFileService');
@@ -86,8 +87,8 @@ UserService.getUserById = async (userId) => {
 
 UserService.updateUser = async (userDTO, user) => {
 
-    if (userDTO.efileefileid === undefined || userDTO.efilefileid === 0) {
-        userDTO.efilefileid = null;
+    if (userDTO.efileefileid === undefined || userDTO.efileefileid === 0) {
+        userDTO.efileefileid = null;
     }
 
     const userFromDB = await UserService.getUserById(user.sub);
@@ -115,6 +116,50 @@ UserService.updateUser = async (userDTO, user) => {
         const newPathDir = '/user/' + updatedUser.euserid;
         await fileService.moveFile(file, newPathDir);
     }
+
+    return 1;
+
+}
+
+UserService.updateUserCoachData = async (userCoachDTO, user, industries) => {
+
+    if (userCoachDTO.efileefileid === undefined || userCoachDTO.efileefileid === 0) {
+        userCoachDTO.efileefileid = null;
+    }
+
+    const userFromDB = await UserService.getUserById(user.sub);
+
+    if (!user)
+        return
+    
+    userCoachDTO.euserdob = new Date(userCoachDTO.euserdob).getTime();
+
+    const updatedUser = await userFromDB.$query().updateByUserId(userCoachDTO, user.sub).returning('*');
+
+    // User didnt give a file and file existed (delete file)
+    if (updatedUser.efileefileid && userCoachDTO.efileefileid === null) {
+        await fileService.deleteFileByIdAndCreateBy(updatedUser.efileefileid, updatedUser.euserid);
+    }
+    // User give a file
+    else if (userCoachDTO.efileefileid) {
+        
+        // File does not exist / not uploaded yet
+        const file = await fileService.getFileByIdAndCreateBy(userCoachDTO.efileefileid, user.sub);
+
+        if (!file)
+            return
+
+        const newPathDir = '/coach/' + updatedUser.euserid;
+        await fileService.moveFile(file, newPathDir);
+    }
+
+    const mapping = industries.map(industry => ({
+        eindustryeindustryid: industry,
+        eusereuserid: user.sub
+    }))
+
+    await UserIndustryMapping.query()
+    .insertToTable(mapping, user.sub)
 
     return 1;
 
