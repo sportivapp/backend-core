@@ -21,10 +21,25 @@ FileService.createFile = async (file, user) => {
 
 }
 
-FileService.moveFile = async (file, newPathDir, deleteDirectory = true) => {
+FileService.createMultipleFiles = async (files, user) => {
+
+    const fileDTOs = files.map(file => ({
+        efilename: file.filename,
+        efilepath: file.path,
+        efiletype: file.mimetype
+    }))
+
+    const uploadFiles = await File.query()
+    .insertToTable(fileDTOs, user.sub)
+
+    return uploadFiles
+
+}
+
+FileService.moveFile = async (file, newPathDir, deleteDirectory = true, isMultiple = false) => {
 
     const newPathDirFull = process.env.UPLOADS_DIRECTORY + newPathDir;
-    const newPathFull = process.env.UPLOADS_DIRECTORY + newPathDir + '/' + file.efilename;
+    let newPathFull = process.env.UPLOADS_DIRECTORY + newPathDir + '/' + file.efilename;
 
     try {
 
@@ -41,11 +56,33 @@ FileService.moveFile = async (file, newPathDir, deleteDirectory = true) => {
 
     }
 
-    // Move uploaded file to movePath
-    await rename(file.efilepath, newPathFull);
+    if(!isMultiple) {
+        // Move uploaded file to movePath
+        await rename(file.efilepath, newPathFull)
+        .then(ignored => {
+            file.efilepath = newPathFull
+            return File.query().patchAndFetchById(file.efileid, file)
+        })
 
-    file.efilepath = newPathFull;
-    await File.query().patchAndFetchById(file.efileid, file);
+    } else {
+        let newFiles = []
+        for(let i = 0; i < file.length ; i++) {
+
+            newPathFull = process.env.UPLOADS_DIRECTORY + newPathDir + '/' + file[i].efilename;
+
+            newFiles.push(
+                rename(file[i].efilepath, newPathFull)
+                .then(ignored => {
+                    file[i].efilepath = newPathFull
+                    return File.query().patchAndFetchById(file[i].efileid, file[i])
+                })
+            )
+        }
+
+        await Promise.all(newFiles)
+
+    }
+
 
 }
 

@@ -1,12 +1,27 @@
 const Experience = require('../models/Experience')
-const Industry = require('../models/Industry')
+const FileExperienceMapping = require('../models/FileExperienceMapping')
 const ServiceHelper = require('../helper/ServiceHelper')
+const fileService = require('../services/mobileFileService')
 
 const experienceService = {}
 
-experienceService.createExperience = async (experienceDTO, loggedInUser) => {
+experienceService.createExperience = async (experienceDTO, loggedInUser, files) => {
 
-    return Experience.query().insertToTable(experienceDTO, loggedInUser.sub)
+    const experience = await Experience.query()
+    .insertToTable(experienceDTO, loggedInUser.sub)
+
+    const mapping = files.map(file => ({
+        efileefileid: file.efileid,
+        eexperienceeexperienceid: experience.eexperienceid
+    }))
+    
+    // insert file to mapping
+    await FileExperienceMapping.query().insertToTable(mapping, loggedInUser.sub)
+
+    const newPathDir = '/experience/' + experience.eexperienceid;
+    await fileService.moveFile(files, newPathDir, true, true);
+
+    return experience
 
 }
 
