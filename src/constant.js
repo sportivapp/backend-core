@@ -90,9 +90,6 @@ module.exports = {
         experience: {
             list: '/experience',
             id: '/experience/:experienceId'
-        },
-        coach: {
-            list: '/coach'
         }
     }
 }
