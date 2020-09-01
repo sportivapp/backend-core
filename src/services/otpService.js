@@ -51,7 +51,7 @@ OtpService.createOtp = async (email) => {
 
     await emailService.sendEmailOTP(email, otpCode);
 
-    return returnedOtp;
+    return 1;
 
 }
 

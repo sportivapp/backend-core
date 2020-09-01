@@ -1,4 +1,5 @@
 const Model = require('./Model');
+const Team = require('./Team');
 
 class User extends Model {
   static get tableName() {
@@ -137,7 +138,19 @@ class User extends Model {
           },
           to: 'ecompany.ecompanyid'
         }
-      }
+      },
+      teams: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Team,
+        join: {
+            from: 'euser.euserid',
+            through: {
+                from: 'eteamusermapping.eusereuserid',
+                to: 'eteamusermapping.eteameteamid'
+            },
+            to: 'eteam.eteamid'
+        }
+    },
     }
   }
 
