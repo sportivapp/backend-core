@@ -21,6 +21,21 @@ FileService.createFile = async (file, user) => {
 
 }
 
+FileService.createMultipleFiles = async (files, user) => {
+
+    const fileDTOs = files.map(file => ({
+        efilename: file.filename,
+        efilepath: file.path,
+        efiletype: file.mimetype
+    }))
+
+    const uploadFiles = await File.query()
+    .insertToTable(fileDTOs, user.sub)
+
+    return uploadFiles
+
+}
+
 FileService.moveFile = async (file, newPathDir, deleteDirectory = true) => {
 
     const newPathDirFull = process.env.UPLOADS_DIRECTORY + newPathDir;
