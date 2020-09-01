@@ -20,7 +20,7 @@ experienceController.createExperience = async (req, res, next) => {
             eusereuserid: req.user.sub
         }
 
-        const result = await mobileExperienceService.createExperience(experienceDTO, req.user, req.body.fileIds)
+        const result = await mobileExperienceService.createExperience(experienceDTO, req.user, req.body.files)
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
