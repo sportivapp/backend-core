@@ -19,7 +19,7 @@ experienceService.createExperience = async (experienceDTO, loggedInUser, files) 
     await FileExperienceMapping.query().insertToTable(mapping, loggedInUser.sub)
 
     const newPathDir = '/experience/' + experience.eexperienceid;
-    await fileService.moveFile(files, newPathDir, true , true);
+    await fileService.moveFile(files, newPathDir, true, true);
 
     return experience
 
