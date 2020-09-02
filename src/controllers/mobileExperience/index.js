@@ -7,25 +7,20 @@ experienceController.createExperience = async (req, res, next) => {
 
     const request = req.body
 
-    let endDate
-
-    // if endDate != 0, then give the body value
-    if ( request.endDate ) { 
-        endDate = request.endDate
-    }
-
     try {
 
         const experienceDTO = {
             eexperiencename: request.name,
             eexperiencestartdate: request.startDate,
-            eexperienceenddate: endDate,
+            eexperienceenddate: request.endDate,
             eexperiencelocation: request.location,
             eexperienceposition: request.position,
             eexperiencedescription: request.description,
             eindustryeindustryid: request.industryId,
             eusereuserid: req.user.sub
         }
+
+        experienceDTO.eexperienceenddate = experienceDTO.eexperienceenddate === 0 ? null : request.endDate
 
         const result = await mobileExperienceService.createExperience(experienceDTO, req.user, req.body.fileIds)
 
@@ -56,6 +51,8 @@ experienceController.editExperience = async (req, res, next) => {
             eexperiencedescription: request.description,
             eindustryeindustryid: request.industryId
         }
+
+        experienceDTO.eexperienceenddate = experienceDTO.eexperienceenddate === 0 ? null : request.endDate
 
         const result = await mobileExperienceService.editExperience(experienceDTO, parseInt(experienceId), req.user, req.body.fileIds)
 
