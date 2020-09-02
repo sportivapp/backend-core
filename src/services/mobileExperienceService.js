@@ -18,9 +18,6 @@ experienceService.createExperience = async (experienceDTO, loggedInUser, files) 
     // insert file to mapping
     await FileExperienceMapping.query().insertToTable(mapping, loggedInUser.sub)
 
-    const newPathDir = '/experience/' + experience.eexperienceid;
-    await fileService.moveFile(files, newPathDir, true, true);
-
     return experience
 
 }
@@ -49,11 +46,35 @@ experienceService.getExperienceById = async (experienceId, loggedInUser) => {
     .where('eusereuserid', loggedInUser.sub)
     .first()
 
-    return experience
+    const files = await FileExperienceMapping.query()
+    .select('efileefileid')
+    .where('eexperienceeexperienceid', experienceId)
+    .where('efileexperiencemappingcreateby', loggedInUser.sub)
+
+    const result = {
+        ...experience,
+        files
+    }
+
+    return result
 
 }
 
-experienceService.editExperience = async (experienceDTO, experienceId, loggedInUser) => {
+experienceService.editExperience = async (experienceDTO, experienceId, loggedInUser, files) => {
+
+    // remove file experience mapping by experienceid
+    await FileExperienceMapping.query()
+    .delete()
+    .where('eexperienceeexperienceid', experienceId)
+
+    const mapping = files.map(file => ({
+        efileefileid: file.efileid,
+        eexperienceeexperienceid: experienceId
+    }))
+
+    // add file experience mapping
+    await FileExperienceMapping.query()
+    .insertToTable(mapping, loggedInUser.sub)
 
     return Experience.query()
     .where('eexperienceid', experienceId)
