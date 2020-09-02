@@ -20,7 +20,7 @@ experienceController.createExperience = async (req, res, next) => {
             eusereuserid: req.user.sub
         }
 
-        const result = await mobileExperienceService.createExperience(experienceDTO, req.user, req.body.files)
+        const result = await mobileExperienceService.createExperience(experienceDTO, req.user, req.body.fileIds)
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
@@ -50,7 +50,7 @@ experienceController.editExperience = async (req, res, next) => {
             eindustryeindustryid: request.industryId
         }
 
-        const result = await mobileExperienceService.editExperience(experienceDTO, experienceId, req.user)
+        const result = await mobileExperienceService.editExperience(experienceDTO, parseInt(experienceId), req.user, req.body.fileIds)
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
