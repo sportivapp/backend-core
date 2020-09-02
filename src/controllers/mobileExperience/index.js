@@ -6,13 +6,20 @@ const experienceController = {};
 experienceController.createExperience = async (req, res, next) => {
 
     const request = req.body
-    
+
+    let endDate
+
+    // if endDate != 0, then give the body value
+    if ( request.endDate ) { 
+        endDate = request.endDate
+    }
+
     try {
 
         const experienceDTO = {
             eexperiencename: request.name,
             eexperiencestartdate: request.startDate,
-            eexperienceenddate: request.endDate,
+            eexperienceenddate: endDate,
             eexperiencelocation: request.location,
             eexperienceposition: request.position,
             eexperiencedescription: request.description,
