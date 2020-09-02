@@ -90,6 +90,12 @@ UserService.updateUser = async (userDTO, user) => {
     // efileefileid null if undefined or 0 was sent
     if (userDTO.efileefileid === undefined || userDTO.efileefileid === 0) {
         userDTO.efileefileid = null;
+    } else {
+        // Check whether the user uses self created file
+        const file = await fileService.getFileByIdAndCreateBy(licenseDTO.efileefileid, user.sub);
+
+        if (!file)
+            return
     }
 
     const userFromDB = await UserService.getUserById(user.sub);
