@@ -16,7 +16,6 @@ class Experience extends Model {
       properties: {
         eexperiencename: { type: 'string', minLength: 1, maxLength: 65 },
         eexperiencestartdate: { type: 'integer'},
-        eexperienceenddate: { type: 'integer'},
         eexperiencelocation: { type: 'string', minLength: 1, maxLength: 65 },
         eexperienceposition: { type: 'string', minLength: 1, maxLength: 65 },
         eexperiencedescription: { type: 'string', minLength: 1, maxLength: 1025 },
