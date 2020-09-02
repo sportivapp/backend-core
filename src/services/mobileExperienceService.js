@@ -69,14 +69,17 @@ experienceService.editExperience = async (experienceDTO, experienceId, loggedInU
     .delete()
     .where('eexperienceeexperienceid', experienceId)
 
-    const mapping = files.map(file => ({
-        efileefileid: file,
-        eexperienceeexperienceid: experienceId
-    }))
+    if( files !== undefined ) {
+        const mapping = files.map(file => ({
+            efileefileid: file,
+            eexperienceeexperienceid: experienceId
+        }))
+    
+        // add file experience mapping
+        await FileExperienceMapping.query()
+        .insertToTable(mapping, loggedInUser.sub)
+    }
 
-    // add file experience mapping
-    await FileExperienceMapping.query()
-    .insertToTable(mapping, loggedInUser.sub)
 
     return Experience.query()
     .where('eexperienceid', experienceId)
