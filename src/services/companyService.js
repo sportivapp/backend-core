@@ -333,7 +333,7 @@ CompanyService.getCompanyById = async (companyId) => {
 
 CompanyService.editCompany = async (companyId, supervisorId, companyDTO, addressDTO, user) => {
 
-    // if fileid is not given on update, delete the file
+    // efileefileid null if undefined or 0 was sent
     if (companyDTO.efileefileid === undefined || companyDTO.efileefileid === 0) {
         companyDTO.efileefileid = null;
     }
@@ -401,23 +401,6 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, address
     const getUserQuery = User.query().findById(headUserId)
     const getCompanyQuery = Company.query().findById(companyId)
         .withGraphFetched('[industry,address]')
-
-    // User didnt give a file and file existed (delete file)
-    if (company.efileefileid && companyDTO.efileefileid === null) {
-        await fileService.deleteFileById(company.efileefileid);
-    }
-    // User give a file
-    else if (companyDTO.efileefileid) {
-        
-        // File does not exist / not uploaded yet
-        const file = await fileService.getFileById(companyDTO.efileefileid);
-
-        if (!file)
-            return
-
-        const newPathDir = '/company/' + company.ecompanyid;
-        await fileService.moveFile(file, newPathDir);
-    }
 
     return Promise.all([getCompanyQuery, employeeCount, departmentCount, branchCount, getUserQuery])
         .then(resultArr => ({

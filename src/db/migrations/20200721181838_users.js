@@ -33,6 +33,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('euser', t => {
     t.integer('euserapprovaluserid2').references('euser.euserid');
     t.integer('euserapprovaluserid3').references('euser.euserid');
     t.boolean('eusermultiapproval').notNullable().defaultTo(false);
+    t.boolean('euseriscoach').notNullable().defaultTo(false);
   });
   
   exports.down = (knex, Promise) => knex.schema.dropTable('euser');

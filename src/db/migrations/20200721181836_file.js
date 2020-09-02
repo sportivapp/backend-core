@@ -8,5 +8,5 @@ exports.up = (knex, Promise) => knex.schema.createTable('efile', t => {
     t.integer('efilechangeby');
     t.bigInteger('efilechangetime');
 });
-  
+
 exports.down = (knex, Promise) => knex.schema.dropTable('efile');

@@ -1,12 +1,26 @@
 const Experience = require('../models/Experience')
-const Industry = require('../models/Industry')
+const FileExperienceMapping = require('../models/FileExperienceMapping')
 const ServiceHelper = require('../helper/ServiceHelper')
+const fileService = require('../services/mobileFileService')
 
 const experienceService = {}
 
-experienceService.createExperience = async (experienceDTO, loggedInUser) => {
+experienceService.createExperience = async (experienceDTO, loggedInUser, fileIds) => {
 
-    return Experience.query().insertToTable(experienceDTO, loggedInUser.sub)
+    const experience = await Experience.query()
+    .insertToTable(experienceDTO, loggedInUser.sub)
+
+    if( fileIds !== undefined ) {
+        const mapping = fileIds.map(fileId => ({
+            efileefileid: fileId,
+            eexperienceeexperienceid: experience.eexperienceid
+        }))
+        
+        // insert file to mapping
+        await FileExperienceMapping.query().insertToTable(mapping, loggedInUser.sub)
+    }
+
+    return experience
 
 }
 
@@ -34,11 +48,38 @@ experienceService.getExperienceById = async (experienceId, loggedInUser) => {
     .where('eusereuserid', loggedInUser.sub)
     .first()
 
-    return experience
+    const files = await FileExperienceMapping.query()
+    .select('efileefileid')
+    .where('eexperienceeexperienceid', experienceId)
+    .where('efileexperiencemappingcreateby', loggedInUser.sub)
+
+    const result = {
+        ...experience,
+        files
+    }
+
+    return result
 
 }
 
-experienceService.editExperience = async (experienceDTO, experienceId, loggedInUser) => {
+experienceService.editExperience = async (experienceDTO, experienceId, loggedInUser, fileIds) => {
+
+    // remove file experience mapping by experienceid
+    await FileExperienceMapping.query()
+    .delete()
+    .where('eexperienceeexperienceid', experienceId)
+
+    if( fileIds !== undefined ) {
+        const mapping = fileIds.map(fileId => ({
+            efileefileid: fileId,
+            eexperienceeexperienceid: experienceId
+        }))
+    
+        // add file experience mapping
+        await FileExperienceMapping.query()
+        .insertToTable(mapping, loggedInUser.sub)
+    }
+
 
     return Experience.query()
     .where('eexperienceid', experienceId)
