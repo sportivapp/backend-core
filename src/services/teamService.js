@@ -4,6 +4,12 @@ const { raw } = require('objection');
 
 const teamService = {}
 
+teamService.createTeam = async (teamDTO, user) => {
+
+    return Team.query().insertToTable(teamDTO, user.sub);
+
+}
+
 teamService.getTeamByCompanyId = async (page, size, companyId) => {
 
     if(isNaN(page) || isNaN(size)) {
