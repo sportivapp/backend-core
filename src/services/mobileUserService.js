@@ -87,6 +87,7 @@ UserService.getUserById = async (userId) => {
 
 UserService.updateUser = async (userDTO, user) => {
 
+    // efileefileid null if undefined or 0 was sent
     if (userDTO.efileefileid === undefined || userDTO.efileefileid === 0) {
         userDTO.efileefileid = null;
     }
@@ -100,29 +101,13 @@ UserService.updateUser = async (userDTO, user) => {
 
     const updatedUser = await userFromDB.$query().updateByUserId(userDTO, user.sub).returning('*');
 
-    // User didnt give a file and file existed (delete file)
-    if (updatedUser.efileefileid && userDTO.efileefileid === null) {
-        await fileService.deleteFileByIdAndCreateBy(updatedUser.efileefileid, updatedUser.euserid);
-    }
-    // User give a file
-    else if (userDTO.efileefileid) {
-        
-        // File does not exist / not uploaded yet
-        const file = await fileService.getFileByIdAndCreateBy(userDTO.efileefileid, user.sub);
-
-        if (!file)
-            return
-
-        const newPathDir = '/user/' + updatedUser.euserid;
-        await fileService.moveFile(file, newPathDir);
-    }
-
     return 1;
 
 }
 
 UserService.updateUserCoachData = async (userCoachDTO, user, industries) => {
 
+    // efileefileid null if undefined or 0 was sent
     if (userCoachDTO.efileefileid === undefined || userCoachDTO.efileefileid === 0) {
         userCoachDTO.efileefileid = null;
     }
@@ -133,23 +118,6 @@ UserService.updateUserCoachData = async (userCoachDTO, user, industries) => {
         return
     
     userCoachDTO.euserdob = new Date(userCoachDTO.euserdob).getTime();
-
-    // User didnt give a file and file existed (delete file)
-    if (userFromDB.efileefileid && userCoachDTO.efileefileid === null) {
-        await fileService.deleteFileByIdAndCreateBy(userFromDB.efileefileid, userFromDB.euserid);
-    }
-    // User give a file
-    else if (userCoachDTO.efileefileid) {
-        
-        // File does not exist / not uploaded yet
-        const file = await fileService.getFileByIdAndCreateBy(userCoachDTO.efileefileid, user.sub);
-
-        if (!file)
-            return
-
-        const newPathDir = '/coach/' + userFromDB.euserid;
-        await fileService.moveFile(file, newPathDir);
-    }
 
     const mapping = industries.map(industry => ({
         eindustryeindustryid: industry,

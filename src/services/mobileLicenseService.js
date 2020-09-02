@@ -28,15 +28,13 @@ LicenseService.createLicense = async (licenseDTO, user) => {
 
     const file = await fileService.getFileByIdAndCreateBy(licenseDTO.efileefileid, user.sub);
 
+    // License must have a file attached
     if (!file)
         return
 
     licenseDTO.elicensegraduationdate = new Date(licenseDTO.elicensegraduationdate).getTime();
 
     const license = await License.query().insertToTable(licenseDTO, user.sub);
-
-    const newPathDir = '/license/' + license.elicenseid;
-    await fileService.moveFile(file, newPathDir);
 
     return license;
 
@@ -52,6 +50,7 @@ LicenseService.updateLicense = async (licenseDTO, licenseId, user) => {
 
     const file = await fileService.getFileByIdAndCreateBy(licenseDTO.efileefileid, user.sub);
 
+    // License must have a file attached
     if (!file)
         return
 

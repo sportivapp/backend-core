@@ -36,56 +36,6 @@ FileService.createMultipleFiles = async (files, user) => {
 
 }
 
-FileService.moveFile = async (file, newPathDir, deleteDirectory = true, isMultiple = false) => {
-
-    const newPathDirFull = process.env.UPLOADS_DIRECTORY + newPathDir;
-    let newPathFull = process.env.UPLOADS_DIRECTORY + newPathDir + '/' + file.efilename;
-
-    try {
-
-        // Try to access path
-        await access(newPathDirFull);
-
-        if (deleteDirectory === true)
-            await unlink(newPathDirFull);
-
-    } catch(e) {
-
-        // if path doesn't exist, create
-        await mkdir(newPathDirFull, {recursive: true});
-
-    }
-
-    if(!isMultiple) {
-        // Move uploaded file to movePath
-        await rename(file.efilepath, newPathFull)
-        .then(ignored => {
-            file.efilepath = newPathFull
-            return File.query().patchAndFetchById(file.efileid, file)
-        })
-
-    } else {
-        let newFiles = []
-        for(let i = 0; i < file.length ; i++) {
-
-            newPathFull = process.env.UPLOADS_DIRECTORY + newPathDir + '/' + file[i].efilename;
-
-            newFiles.push(
-                rename(file[i].efilepath, newPathFull)
-                .then(ignored => {
-                    file[i].efilepath = newPathFull
-                    return File.query().patchAndFetchById(file[i].efileid, file[i])
-                })
-            )
-        }
-
-        await Promise.all(newFiles)
-
-    }
-
-
-}
-
 FileService.getFileByIdAndCreateBy = async (fileId, createBy) => {
 
     return File.query().where('efileid', fileId).andWhere('efilecreateby', createBy).first();
