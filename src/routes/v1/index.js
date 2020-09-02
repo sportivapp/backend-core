@@ -21,6 +21,7 @@ const shiftRoutes = require('./shift')
 const shiftPatternRoutes = require('./shiftPattern')
 const todoListRoutes = require('./todolist')
 const otpRoutes = require('./otp');
+const teamRoutes = require('./team');
 
 
 router.use('/api/v1', [
@@ -42,7 +43,8 @@ router.use('/api/v1', [
     shiftRoutes,
     shiftPatternRoutes,
     todoListRoutes,
-    otpRoutes
+    otpRoutes,
+    teamRoutes
 ]);
 
 const mobileUserRoutes = require('./mobileUser');
