@@ -1,6 +1,7 @@
 const Model = require('./Model');
 const Company = require('./Company');
 const TeamUserMapping = require('./TeamUserMapping');
+const Industry = require('./Industry');
 
 class Team extends Model {
     static get tableName() {
@@ -31,10 +32,6 @@ class Team extends Model {
                 modelClass: TeamUserMapping,
                 join: {
                     from: 'eteam.eteamid',
-                    // through: {
-                    //     from: 'eteamusermapping.eteameteamid',
-                    //     to: 'eteamusermapping.eusereuserid'
-                    // },
                     to: 'eteamusermapping.eteameteamid'
                 }
             },
@@ -56,6 +53,18 @@ class Team extends Model {
                 join: {
                     from: 'eteam.ecompanyecompanyid',
                     to: 'ecompany.ecompanyid'
+                }
+            },
+            industries: {
+                relation: Model.ManyToManyRelation,
+                modelClass: Industry,
+                join: {
+                    from: 'eteam.eteamid',
+                    through: {
+                        from: 'eteamindustrymapping.eteameteamid',
+                        to: 'eteamindustrymapping.eindustryeindustryid'
+                    },
+                    to: 'eindustry.eindustryid'
                 }
             }
         }

@@ -1,4 +1,5 @@
 const TeamUserMapping = require('../models/TeamUserMapping');
+const TeamIndustryMapping = require('../models/TeamIndustryMapping');
 const TeamLog = require('../models/TeamLog');
 const Team = require('../models/Team');
 const User = require('../models/User');
@@ -71,6 +72,11 @@ teamService.getTeam = async (teamId, user) => {
     if (!team)
         return
 
+    const teamIndustries = TeamIndustryMapping.query()
+    .select('eindustryid', 'eindustryname')
+    .joinRelated('industry')
+    .where('eteameteamid', teamId);
+
     const isInTeam = TeamUserMapping.query()
     .where('eteameteamid', teamId)
     .andWhere('eusereuserid', user.sub)
@@ -82,28 +88,69 @@ teamService.getTeam = async (teamId, user) => {
     .andWhere('eteamlogtype', TeamLogTypeEnum.APPLY)
     .first();
 
-    return Promise.all([team, isInTeam, isPendingApply]).then(result => ({
+    return Promise.all([team, teamIndustries, isInTeam, isPendingApply]).then(result => ({
         team: result[0],
-        isInTeam: result[1] ? true : false,
-        isPendingApply: result[2] ? true : false
+        teamIndustries: result[1],
+        isInTeam: result[2] ? true : false,
+        isPendingApply: result[3] ? true : false
     }));
 
 }
 
-teamService.createTeam = async (teamDTO, user) => {
+teamService.createTeam = async (teamDTO, user, industryIds) => {
 
     const team = await Team.query().insertToTable(teamDTO, user.sub);
 
     if (!team)
         return
 
-    await TeamUserMapping.query().insertToTable({
+    const teamUserMappingPromise =  TeamUserMapping.query().insertToTable({
         eusereuserid: user.sub,
         eteameteamid: team.eteamid,
         eteamusermappingposition: TeamUserMappingPositionEnum.ADMIN
     }, user.sub);
 
+    const teamIndustryMapping = industryIds.map(industryId => {
+        return {
+            eindustryeindustryid: industryId,
+            eteameteamid: team.eteamid
+        }
+    });
+
+    const teamIndustryMappingPromise = TeamIndustryMapping.query().insertToTable(teamIndustryMapping, user.sub);
+
+    await Promise.all([teamUserMappingPromise, teamIndustryMappingPromise]);
+
     return team;
+
+}
+
+teamService.updateTeam = async (teamDTO, user, teamId, industryIds) => {
+
+    const isAdmin = await teamService.isAdmin(teamId, user.sub);
+
+    if (!isAdmin)
+        return 'not admin'
+
+    const newTeam = await Team.query().updateByUserId(teamDTO, user.sub);
+
+    if (!newTeam)
+        return 'failed update team'
+
+    // remove all industry mapping from the team
+    await TeamIndustryMapping.query().where('eteameteamid', teamId).delete();
+
+    const teamIndustryMapping = industryIds.map(industryId => {
+        return {
+            eindustryeindustryid: industryId,
+            eteameteamid: teamId
+        }
+    });
+
+    // insert new industry mapping to team
+    await TeamIndustryMapping.query().insertToTable(teamIndustryMapping, user.sub);
+
+    return newTeam;
 
 }
 

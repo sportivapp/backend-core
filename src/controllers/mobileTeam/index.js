@@ -39,7 +39,7 @@ controller.getTeam = async (req, res, next) => {
 
 controller.createTeam = async (req, res, next) => {
 
-    const { name, companyId, fileId, address, phoneNumber, email } = req.body;
+    const { name, companyId, fileId, address, phoneNumber, email, industryIds } = req.body;
 
     const teamDTO = {
         eteamname: name,
@@ -50,12 +50,49 @@ controller.createTeam = async (req, res, next) => {
         efileefileid: fileId
     };
 
-    teamDTO.ecompanyecompanyid = teamDTO.ecompanyecompanyid === 0 ? null : teamDTO.ecompanyecompanyid;
-    teamDTO.efileefileid = teamDTO.efileefileid === 0 ? null : teamDTO.efileefileid;
+    teamDTO.ecompanyecompanyid = teamDTO.ecompanyecompanyid === 0 ? null : 
+    teamDTO.ecompanyecompanyid === undefined ? null : teamDTO.ecompanyecompanyid;
+
+    teamDTO.efileefileid = teamDTO.efileefileid === 0 ? null : 
+    teamDTO.efileefileid === undefined ? null : teamDTO.efileefileid;
 
     try {
 
-        const result = await teamService.createTeam(teamDTO, req.user);
+        const result = await teamService.createTeam(teamDTO, req.user, industryIds);
+
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.updateTeam = async (req, res, next) => {
+
+    const { name, companyId, fileId, address, phoneNumber, email, industryIds } = req.body;
+    const { teamId } = req.params;
+
+    const teamDTO = {
+        eteamname: name,
+        eteamaddress: address,
+        eteamphonenumber: phoneNumber,
+        eteamemail: email,
+        ecompanyecompanyid: companyId,
+        efileefileid: fileId
+    };
+
+    teamDTO.ecompanyecompanyid = teamDTO.ecompanyecompanyid === 0 ? null : 
+    teamDTO.ecompanyecompanyid === undefined ? null : teamDTO.ecompanyecompanyid;
+
+    teamDTO.efileefileid = teamDTO.efileefileid === 0 ? null : 
+    teamDTO.efileefileid === undefined ? null : teamDTO.efileefileid;
+
+    try {
+
+        const result = await teamService.updateTeam(teamDTO, req.user, teamId, industryIds);
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
