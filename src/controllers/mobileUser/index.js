@@ -123,7 +123,7 @@ controller.updateUser = async (req, res, next) => {
 
 controller.updateUserCoachData = async (req, res, next) => {
 
-    const { name, mobileNumber, dob, gender, hobby, countryId, fileId, address, facebook, instagram, linkedin, industries } = req.body;
+    const { name, mobileNumber, dob, gender, hobby, countryId, fileId, address, facebook, instagram, linkedin, industryIds } = req.body;
 
     const userCoachDTO = {
         eusername: name,
@@ -142,7 +142,7 @@ controller.updateUserCoachData = async (req, res, next) => {
 
     try {
 
-        const result = await mobileUserService.updateUserCoachData(userCoachDTO, req.user, industries);
+        const result = await mobileUserService.updateUserCoachData(userCoachDTO, req.user, industryIds);
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));

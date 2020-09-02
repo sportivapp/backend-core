@@ -90,6 +90,9 @@ module.exports = {
         experience: {
             list: '/experience',
             id: '/experience/:experienceId'
+        },
+        team: {
+            list: '/team'
         }
     }
 }

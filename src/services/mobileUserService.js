@@ -111,11 +111,10 @@ UserService.updateUser = async (userDTO, user) => {
 
 }
 
-UserService.updateUserCoachData = async (userCoachDTO, user, industries) => {
+UserService.updateUserCoachData = async (userCoachDTO, user, industryIds) => {
 
-    // efileefileid null if undefined or 0 was sent
-    if (userCoachDTO.efileefileid === undefined || userCoachDTO.efileefileid === 0) {
-        userCoachDTO.efileefileid = null;
+    if (userCoachDTO.efileefileid === null) {
+        return 'no profile picture given'
     }
 
     const userFromDB = await UserService.getUserById(user.sub);
@@ -125,19 +124,18 @@ UserService.updateUserCoachData = async (userCoachDTO, user, industries) => {
     
     userCoachDTO.euserdob = new Date(userCoachDTO.euserdob).getTime();
 
-    const mapping = industries.map(industry => ({
-        eindustryeindustryid: industry,
+    const userIndustryMappings = industryIds.map(industryId => ({
+        eindustryeindustryid: industryId,
         eusereuserid: user.sub
     }))
 
     const updatedUser = userFromDB.$query().updateByUserId(userCoachDTO, user.sub);
 
     const insertedMapping = UserIndustryMapping.query()
-    .insertToTable(mapping, user.sub)
+    .insertToTable(userIndustryMappings, user.sub)
 
     return Promise.all([updatedUser, insertedMapping])
     .then(arr => arr[0])
-    .then(rowsAffected => rowsAffected === 1)
 
 }
 
