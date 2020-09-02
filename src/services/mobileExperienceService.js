@@ -10,13 +10,16 @@ experienceService.createExperience = async (experienceDTO, loggedInUser, files) 
     const experience = await Experience.query()
     .insertToTable(experienceDTO, loggedInUser.sub)
 
-    const mapping = files.map(file => ({
-        efileefileid: file.efileid,
-        eexperienceeexperienceid: experience.eexperienceid
-    }))
-    
-    // insert file to mapping
-    await FileExperienceMapping.query().insertToTable(mapping, loggedInUser.sub)
+    if( files !== undefined ) {
+        const mapping = files.map(file => ({
+            efileefileid: file.efileid,
+            eexperienceeexperienceid: experience.eexperienceid
+        }))
+        
+        // insert file to mapping
+        await FileExperienceMapping.query().insertToTable(mapping, loggedInUser.sub)
+    }
+
 
     return experience
 
