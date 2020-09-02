@@ -31,6 +31,11 @@ FileService.createMultipleFiles = async (files, user) => {
 
     const uploadFiles = await File.query()
     .insertToTable(fileDTOs, user.sub)
+    .then(uploadFile => {
+        return uploadFile.map(file => {
+            return file.efileid
+        })
+    })
 
     return uploadFiles
 
