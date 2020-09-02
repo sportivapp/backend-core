@@ -5,14 +5,14 @@ const fileService = require('../services/mobileFileService')
 
 const experienceService = {}
 
-experienceService.createExperience = async (experienceDTO, loggedInUser, files) => {
+experienceService.createExperience = async (experienceDTO, loggedInUser, fileIds) => {
 
     const experience = await Experience.query()
     .insertToTable(experienceDTO, loggedInUser.sub)
 
-    if( files !== undefined ) {
-        const mapping = files.map(file => ({
-            efileefileid: file,
+    if( fileIds !== undefined ) {
+        const mapping = fileIds.map(fileId => ({
+            efileefileid: fileId,
             eexperienceeexperienceid: experience.eexperienceid
         }))
         
@@ -62,16 +62,16 @@ experienceService.getExperienceById = async (experienceId, loggedInUser) => {
 
 }
 
-experienceService.editExperience = async (experienceDTO, experienceId, loggedInUser, files) => {
+experienceService.editExperience = async (experienceDTO, experienceId, loggedInUser, fileIds) => {
 
     // remove file experience mapping by experienceid
     await FileExperienceMapping.query()
     .delete()
     .where('eexperienceeexperienceid', experienceId)
 
-    if( files !== undefined ) {
-        const mapping = files.map(file => ({
-            efileefileid: file,
+    if( fileIds !== undefined ) {
+        const mapping = fileIds.map(fileId => ({
+            efileefileid: fileId,
             eexperienceeexperienceid: experienceId
         }))
     
