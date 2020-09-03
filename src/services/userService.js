@@ -116,6 +116,13 @@ UsersService.getUserById = async ( userId, user ) => {
 
 }
 
+UsersService.getProfile = async ( user ) => {
+
+    return User.query()
+        .findById(user.sub);
+
+}
+
 UsersService.getUserCurrentCompany = async ( user ) => {
 
     const companyData = await Company.query()
@@ -285,9 +292,7 @@ UsersService.changeUserPassword = async ( user , newPassword) => {
 
     const encryptedPassword = await bcrypt.hash(newPassword);
 
-    const newData = await User.query().patchAndFetchById(user.sub, { euserpassword: encryptedPassword });
-
-    return newData;
+    return User.query().findById(user.sub).updateByUserId({ euserpassword: encryptedPassword }, user.sub);
 }
 
 UsersService.changeUserCompany = async (companyId, user) => {
