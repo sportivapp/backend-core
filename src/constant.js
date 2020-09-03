@@ -12,13 +12,16 @@ module.exports = {
             register: '/user',
             forgot: '/user-forgot-password',
             create: '/user-create',
-            password: '/user-change-password',
             list: '/user/company/:companyId',
             import: '/user-import-template',
             id: '/user/:userId',
             approval: '/user/approval',
-            changeCompany: '/user/change-company',
-            currentCompany: '/user/current-company'
+        },
+        profile: {
+            company: '/profile/company',
+            currentCompany: '/user/current-company',
+            changePassword: '/profile/change-password',
+            profile: '/profile'
         },
         grade: {
             list: '/grades',
