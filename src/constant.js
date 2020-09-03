@@ -92,7 +92,12 @@ module.exports = {
             id: '/experience/:experienceId'
         },
         team: {
-            list: '/team'
+            list: '/team',
+            id: '/team/:teamId',
+            member: '/team-member',
+            invite: '/team-invite',
+            processInvitation: '/team-process-invitation',
+            add: '/team-add-member'
         }
     }
 }
