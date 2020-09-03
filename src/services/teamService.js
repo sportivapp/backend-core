@@ -63,13 +63,13 @@ teamService.createTeam = async (teamDTO, user, industryIds) => {
 
 }
 
-teamService.getTeamsByCompanyId = async (page = 0, size = 10, companyId) => {
+teamService.getTeamsByCompanyId = async (page = 0, size = 10, user) => {
 
     const teamPage = await Team.query()
     .select('eteamid', 'ecompanyecompanyid', 'efileefileid', 'eteamname', 'eteamcreatetime', 
     Team.relatedQuery('members').count().as('membersCount'))
     .withGraphJoined('industries(selectName)')
-    .where('ecompanyecompanyid', companyId)
+    .where('ecompanyecompanyid', user.companyId)
     .page(page, size);
 
     if (!teamPage)
@@ -78,10 +78,7 @@ teamService.getTeamsByCompanyId = async (page = 0, size = 10, companyId) => {
     return ServiceHelper.toPageObj(page, size, teamPage)
 }
 
-teamService.getTeamDetailByCompanyId = async (companyId, teamId) => {
-
-    if(isNaN(companyId))
-        return
+teamService.getTeamDetailByCompanyId = async (teamId, user) => {
 
     const team = Team.query()
     .select()

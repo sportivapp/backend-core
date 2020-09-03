@@ -37,7 +37,7 @@ controller.getTeamsByCompanyId = async (req, res, next) => {
     
     try {
 
-        const pageObj = await teamService.getTeamsByCompanyId(page, size, req.user.companyId);
+        const pageObj = await teamService.getTeamsByCompanyId(page, size, req.user);
 
         if (!pageObj)
             return res.status(404).json(ResponseHelper.toErrorResponse(404))
@@ -55,7 +55,7 @@ controller.getTeamDetailByCompanyId = async (req, res, next) => {
     
     try {
 
-        const result = await teamService.getTeamDetailByCompanyId(req.user.companyId, teamId);
+        const result = await teamService.getTeamDetailByCompanyId(teamId, req.user);
 
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404));
