@@ -6,7 +6,7 @@ const experienceController = {};
 experienceController.createExperience = async (req, res, next) => {
 
     const request = req.body
-    
+
     try {
 
         const experienceDTO = {
@@ -19,6 +19,8 @@ experienceController.createExperience = async (req, res, next) => {
             eindustryeindustryid: request.industryId,
             eusereuserid: req.user.sub
         }
+
+        experienceDTO.eexperienceenddate = experienceDTO.eexperienceenddate === 0 ? null : request.endDate
 
         const result = await mobileExperienceService.createExperience(experienceDTO, req.user, req.body.fileIds)
 
@@ -49,6 +51,8 @@ experienceController.editExperience = async (req, res, next) => {
             eexperiencedescription: request.description,
             eindustryeindustryid: request.industryId
         }
+
+        experienceDTO.eexperienceenddate = experienceDTO.eexperienceenddate === 0 ? null : request.endDate
 
         const result = await mobileExperienceService.editExperience(experienceDTO, parseInt(experienceId), req.user, req.body.fileIds)
 

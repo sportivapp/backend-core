@@ -39,7 +39,7 @@ controller.getTeam = async (req, res, next) => {
 
 controller.createTeam = async (req, res, next) => {
 
-    const { name, companyId, fileId, address, phoneNumber, email } = req.body;
+    const { name, companyId, fileId, address, phoneNumber, email, industryIds } = req.body;
 
     const teamDTO = {
         eteamname: name,
@@ -50,12 +50,49 @@ controller.createTeam = async (req, res, next) => {
         efileefileid: fileId
     };
 
-    teamDTO.ecompanyecompanyid = teamDTO.ecompanyecompanyid === 0 ? null : teamDTO.ecompanyecompanyid;
-    teamDTO.efileefileid = teamDTO.efileefileid === 0 ? null : teamDTO.efileefileid;
+    teamDTO.ecompanyecompanyid = teamDTO.ecompanyecompanyid === 0 ? null : 
+    teamDTO.ecompanyecompanyid === undefined ? null : teamDTO.ecompanyecompanyid;
+
+    teamDTO.efileefileid = teamDTO.efileefileid === 0 ? null : 
+    teamDTO.efileefileid === undefined ? null : teamDTO.efileefileid;
 
     try {
 
-        const result = await teamService.createTeam(teamDTO, req.user);
+        const result = await teamService.createTeam(teamDTO, req.user, industryIds);
+
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.updateTeam = async (req, res, next) => {
+
+    const { name, companyId, fileId, address, phoneNumber, email, industryIds } = req.body;
+    const { teamId } = req.params;
+
+    const teamDTO = {
+        eteamname: name,
+        eteamaddress: address,
+        eteamphonenumber: phoneNumber,
+        eteamemail: email,
+        ecompanyecompanyid: companyId,
+        efileefileid: fileId
+    };
+
+    teamDTO.ecompanyecompanyid = teamDTO.ecompanyecompanyid === 0 ? null : 
+    teamDTO.ecompanyecompanyid === undefined ? null : teamDTO.ecompanyecompanyid;
+
+    teamDTO.efileefileid = teamDTO.efileefileid === 0 ? null : 
+    teamDTO.efileefileid === undefined ? null : teamDTO.efileefileid;
+
+    try {
+
+        const result = await teamService.updateTeam(teamDTO, req.user, teamId, industryIds);
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
@@ -74,7 +111,6 @@ controller.joinTeam = async (req, res, next) => {
     try {
 
         const result = await teamService.joinTeam(teamId, req.user);
-        console.log(result);
 
         if (result === 'user already in team')
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
@@ -120,7 +156,7 @@ controller.cancelInvite = async (req, res, next) => {
 
         if (result === 'not admin')
             return res.status(403).json(ResponseHelper.toErrorResponse(403));
-        if (result === 'user already invited')
+        if (result === 'user not invited')
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
@@ -159,10 +195,11 @@ controller.getTeamMemberList = async (req, res, next) => {
 
     // INVITE / APPLY / MEMBER
     const { type } = req.query;
+    const { teamId } = req.body;
     
     try {
 
-        const result = await teamService.getTeamMemberList(req.user, type.toUpperCase());
+        const result = await teamService.getTeamMemberList(teamId, req.user, type.toUpperCase());
 
         if (result === 'type unaccepted')
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
@@ -209,6 +246,8 @@ controller.changeTeamMemberPosition = async (req, res, next) => {
 
         const result = await teamService.invite(teamId, user, userId, position.toUpperCase());
 
+        if (result === 'cannot change your position')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
         if (result === 'not admin')
             return res.status(403).json(ResponseHelper.toErrorResponse(403));
         if (result === 'position unaccepted')
@@ -231,8 +270,53 @@ controller.kick = async (req, res, next) => {
 
         const result = await teamService.kick(teamId, req.user, userId);
 
+        if (result === 'cannot kick yourself')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
         if (result === 'not admin')
             return res.status(403).json(ResponseHelper.toErrorResponse(403));
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.cancelRequest = async (req, res, next) => {
+
+    const { teamId } = req.body;
+
+    try {
+
+        const result = await teamService.cancelRequest(teamId, req.user);
+
+        if (result === 'user not applied')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.processInvitation = async (req, res, next) => {
+
+    const { teamId } = req.body;
+    const { status } = req.query;
+
+    try {
+
+        const result = await teamService.processInvitation(teamId, req.user, status.toUpperCase());
+
+        if (result === 'status unaccepted')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        if (result === 'no invitation')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
         return res.status(200).json(ResponseHelper.toBaseResponse(result));

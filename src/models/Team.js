@@ -1,7 +1,9 @@
 const Model = require('./Model');
 const Company = require('./Company');
+const TeamUserMapping = require('./TeamUserMapping');
+const Industry = require('./Industry');
 
-class UserPositionMapping extends Model {
+class Team extends Model {
     static get tableName() {
         return 'eteam';
     };
@@ -25,8 +27,16 @@ class UserPositionMapping extends Model {
         const User = require('./User')
 
         return {
+            position: {
+                relation: Model.HasManyRelation,
+                modelClass: TeamUserMapping,
+                join: {
+                    from: 'eteam.eteamid',
+                    to: 'eteamusermapping.eteameteamid'
+                }
+            },
             members: {
-                relation: Model.BelongsToOneRelation,
+                relation: Model.ManyToManyRelation,
                 modelClass: User,
                 join: {
                     from: 'eteam.eteamid',
@@ -44,9 +54,21 @@ class UserPositionMapping extends Model {
                     from: 'eteam.ecompanyecompanyid',
                     to: 'ecompany.ecompanyid'
                 }
+            },
+            industries: {
+                relation: Model.ManyToManyRelation,
+                modelClass: Industry,
+                join: {
+                    from: 'eteam.eteamid',
+                    through: {
+                        from: 'eteamindustrymapping.eteameteamid',
+                        to: 'eteamindustrymapping.eindustryeindustryid'
+                    },
+                    to: 'eindustry.eindustryid'
+                }
             }
         }
     }
 }
 
-module.exports = UserPositionMapping;
+module.exports = Team;
