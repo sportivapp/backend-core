@@ -8,25 +8,6 @@ function isUserNotValid(user) {
     return user.permission !== 9 && user.permission !== 10
 }
 
-userController.changePassword = async (req, res, next) => {
-
-    const user = req.user;
-    const { newPassword } = req.body; 
-
-    try {
-
-        const result = await userService.changeUserPassword(user, newPassword);
-
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
-        return res.status(200).json(ResponseHelper.toBaseResponse(result))
-
-        
-    } catch (e) {
-        next(e);
-    }
-}
-
 userController.registerEmployees = async (req, res, next) => {
 
     if (isUserNotValid(req.user))
@@ -110,23 +91,6 @@ userController.getUserById = async (req, res, next) => {
 
 }
 
-userController.getUserCurrentCompany = async (req, res, next) => {
-
-    const user = req.user;
-
-    try {
-
-        const result = await userService.getUserCurrentCompany(user);
-
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
-        return res.status(200).json(ResponseHelper.toBaseResponse(
-            result))
-
-    } catch (e) {
-        next(e);
-    }
-}
 userController.updateUserById = async (req, res, next) => {
 
     const user = req.user
@@ -159,23 +123,6 @@ userController.updateUserById = async (req, res, next) => {
         const data = await userService.updateUserById(userId, userDTO, permission, user)
         if (!data) return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
-
-    } catch (e) {
-        next(e)
-    }
-}
-
-userController.changeUserCompany = async (req, res, next) => {
-
-    const user = req.user
-    const { companyId } = req.body
-
-    try {
-
-        const result = await userService.changeUserCompany(companyId, user)
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
-        return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch (e) {
         next(e)

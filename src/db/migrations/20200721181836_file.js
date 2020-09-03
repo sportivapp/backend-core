@@ -5,6 +5,8 @@ exports.up = (knex, Promise) => knex.schema.createTable('efile', t => {
     t.string('efiletype').notNullable();
     t.integer('efilecreateby').notNullable();
     t.bigInteger('efilecreatetime').notNullable();
+    t.integer('efilechangeby');
+    t.bigInteger('efilechangetime');
 });
-  
+
 exports.down = (knex, Promise) => knex.schema.dropTable('efile');

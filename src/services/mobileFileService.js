@@ -21,31 +21,23 @@ FileService.createFile = async (file, user) => {
 
 }
 
-FileService.moveFile = async (file, newPathDir, deleteDirectory = true) => {
+FileService.createMultipleFiles = async (files, user) => {
 
-    const newPathDirFull = process.env.UPLOADS_DIRECTORY + newPathDir;
-    const newPathFull = process.env.UPLOADS_DIRECTORY + newPathDir + '/' + file.efilename;
+    const fileDTOs = files.map(file => ({
+        efilename: file.filename,
+        efilepath: file.path,
+        efiletype: file.mimetype
+    }))
 
-    try {
+    const uploadFiles = await File.query()
+    .insertToTable(fileDTOs, user.sub)
+    .then(uploadFile => {
+        return uploadFile.map(file => {
+            return file.efileid
+        })
+    })
 
-        // Try to access path
-        await access(newPathDirFull);
-
-        if (deleteDirectory === true)
-            await unlink(newPathDirFull);
-
-    } catch(e) {
-
-        // if path doesn't exist, create
-        await mkdir(newPathDirFull, {recursive: true});
-
-    }
-
-    // Move uploaded file to movePath
-    await rename(file.efilepath, newPathFull);
-
-    file.efilepath = newPathFull;
-    await File.query().patchAndFetchById(file.efileid, file);
+    return uploadFiles
 
 }
 

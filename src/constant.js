@@ -16,11 +16,12 @@ module.exports = {
             import: '/user-import-template',
             id: '/user/:userId',
             approval: '/user/approval',
+            coach: '/user/coach'
         },
         profile: {
-            company: '/profile/company',
+            company: '/user/company',
             currentCompany: '/user/current-company',
-            changePassword: '/profile/change-password',
+            changePassword: '/user/change-password',
             profile: '/profile'
         },
         grade: {
@@ -94,6 +95,13 @@ module.exports = {
         },
         country: {
             list: '/country'
+        },
+        experience: {
+            list: '/experience',
+            id: '/experience/:experienceId'
+        },
+        team: {
+            list: '/team'
         }
     }
 }

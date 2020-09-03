@@ -9,7 +9,7 @@ controller.login = async (req, res, next) => {
     const { email, password } = req.body;
 
     const loginDTO = {
-        euseremail: email,
+        euseremail: email.toLowerCase(),
         euserpassword: password
     }
 
@@ -27,18 +27,18 @@ controller.login = async (req, res, next) => {
 
 controller.createUser = async (req, res, next) => {
 
-    const { nik, name, email, mobileNumber, password } = req.body;
+    const { nik, name, email, mobileNumber, password, otpCode } = req.body;
 
     const userDTO = {
         eusernik: nik,
         eusername: name,
-        euseremail: email,
+        euseremail: email.toLowerCase(),
         eusermobilenumber: mobileNumber,
         euserpassword: password
     }
 
     try {
-        const result = await mobileUserService.createUser(userDTO);
+        const result = await mobileUserService.createUser(userDTO, otpCode);
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
@@ -110,6 +110,39 @@ controller.updateUser = async (req, res, next) => {
     try {
 
         const result = await mobileUserService.updateUser(userDTO, req.user);
+
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.updateUserCoachData = async (req, res, next) => {
+
+    const { name, mobileNumber, dob, gender, hobby, countryId, fileId, address, facebook, instagram, linkedin, industryIds } = req.body;
+
+    const userCoachDTO = {
+        eusername: name,
+        eusermobilenumber: mobileNumber,
+        euserdob: dob,
+        eusergender: gender,
+        euserhobby: hobby,
+        ecountryecountryid : countryId,
+        efileefileid: fileId,
+        euseraddress: address,
+        euserfacebook: facebook,
+        euserinstagram: instagram,
+        euserlinkedin: linkedin,
+        euseriscoach: true
+    }
+
+    try {
+
+        const result = await mobileUserService.updateUserCoachData(userCoachDTO, req.user, industryIds);
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));

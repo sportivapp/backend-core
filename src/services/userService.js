@@ -357,4 +357,11 @@ UsersService.addApprovalUsers = async (userId, approverUserIds, user) => {
         .returning('*')
 }
 
+UsersService.updateProfile = async (userDTO, user) => {
+
+    return User.query().findById(user.sub)
+        .updateByUserId(userDTO, user.sub)
+        .returning('*')
+}
+
 module.exports = UsersService;

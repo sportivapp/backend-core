@@ -1,3 +1,5 @@
+const { uniqueId } = require("lodash");
+
 exports.up = (knex, Promise) => knex.schema.createTable('euser', t => {
     t.increments('euserid').primary().unsigned();
     t.integer('euseruserstatus').notNullable().defaultTo(1);
@@ -5,7 +7,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('euser', t => {
     t.bigInteger('euserlastlogout');
     t.string('eusername', 256).notNullable();
     t.string('euseridentitynumber', 17);
-    t.string('euseremail', 256).notNullable();
+    t.string('euseremail', 256).unique().notNullable();
     t.string('euserpassword', 256).notNullable();
     t.string('eusermobilenumber', 256).notNullable();
     t.bigInteger('euserdob');
@@ -31,6 +33,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('euser', t => {
     t.integer('euserapprovaluserid2').references('euser.euserid');
     t.integer('euserapprovaluserid3').references('euser.euserid');
     t.boolean('eusermultiapproval').notNullable().defaultTo(false);
+    t.boolean('euseriscoach').notNullable().defaultTo(false);
   });
   
   exports.down = (knex, Promise) => knex.schema.dropTable('euser');
