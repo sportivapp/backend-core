@@ -11,7 +11,7 @@ router.post('/team-join', auth.authenticateToken, controller.joinTeam);
 router.post('/team-exit', auth.authenticateToken, controller.exitTeam);
 router.post('/team-cancel-invite', auth.authenticateToken, controller.cancelInvite);
 router.post('/team-process-request', auth.authenticateToken, controller.processRequest);
-router.get('/team-members', auth.authenticateToken, controller.getTeamMemberList);
+router.post('/team-members', auth.authenticateToken, controller.getTeamMemberList);
 router.post('/team-invite', auth.authenticateToken, controller.invite);
 router.post('/team-change-permission', auth.authenticateToken, controller.changeTeamMemberPosition);
 router.post('/team-kick', auth.authenticateToken, controller.kick);

@@ -26,7 +26,7 @@ const TeamUserMappingPositionEnum = {
     MEMBER: 'MEMBER'
 }
 
-teamService.getAdmin = async (teamId, userId) => {
+teamService.isAdmin = async (teamId, userId) => {
     return TeamUserMapping.query()
     .where('eusereuserid', userId)
     .andWhere('eteameteamid', teamId)
@@ -35,7 +35,15 @@ teamService.getAdmin = async (teamId, userId) => {
     .then(user => {
         return user.eteamusermappingposition === TeamUserMappingPositionEnum.ADMIN
     })
+}
 
+teamService.isUserInCompany = async (teamId, user) => {
+    return Team.query()
+    .where('eteamid', teamId)
+    .first()
+    .then(team => {
+        return team.ecompanyecompanyid === user.companyId;
+    });
 }
 
 teamService.createTeam = async (teamDTO, user, industryIds) => {
@@ -63,24 +71,32 @@ teamService.createTeam = async (teamDTO, user, industryIds) => {
 
 }
 
-teamService.getTeams = async (page = 0, size = 10, user) => {
+teamService.getTeams = async (keyword, page = 0, size = 10, user) => {
 
-    const teamPage = await Team.query()
+    let newKeyword = ''
+
+    if (keyword) newKeyword = keyword.toLowerCase();
+
+    const teamsPage = await Team.query()
     .select('eteamid', 'ecompanyecompanyid', 'efileefileid', 'eteamname', 'eteamcreatetime', 
     Team.relatedQuery('members').count().as('membersCount'))
     .withGraphJoined('industries(selectName)')
     .where('ecompanyecompanyid', user.companyId)
+    .where(raw('lower("eteamname")'), 'like', `%${newKeyword}%`)
     .page(page, size);
 
-    if (!teamPage)
-        return
-
-    return ServiceHelper.toPageObj(page, size, teamPage)
+    return ServiceHelper.toPageObj(page, size, teamsPage)
 }
 
 teamService.getTeamDetail = async (teamId, user) => {
 
+    const isUserCompany = await teamService.isUserInCompany(teamId, user);
+
+    if (!isUserCompany)
+        return 'unauthorized'
+
     const team = await Team.query()
+    .select('eteamname', 'efileefileid')
     .where('ecompanyecompanyid', user.companyId)
     .where('eteamid', teamId)
     .first()
@@ -100,31 +116,44 @@ teamService.getTeamDetail = async (teamId, user) => {
 
 }
 
-teamService.getTeamMemberList = async (teamId, user, type) => {
+teamService.getTeamMemberList = async (teamId, user, page = 0, size = 10, type) => {
+
+    const isUserCompany = await teamService.isUserInCompany(teamId, user);
+
+    if (!isUserCompany)
+        return 'unauthorized'
+
+    let promised
 
     // Return members in team
     if (type === TeamLogTypeEnum.MEMBER) {
-        return TeamUserMapping.query()
+        promised = TeamUserMapping.query()
         .select('euserid', 'eusername', 'user.efileefileid', 'eteamusermappingposition')
         .leftJoinRelated('[user, team]')
         .where('eteamid', teamId)
+        .page(page, size);
+    } else if (TeamLogTypeEnum.APPLY !== type && TeamLogTypeEnum.INVITE !== type)
+        return 'type unaccepted'
+    else {
+
+        const isAdmin = await teamService.isAdmin(teamId, user.sub);
+
+        if (!isAdmin)
+            return 'not admin'
+
+        // return log by type (APPLY / INVITE)
+        promised = TeamLog.query()
+        .select('eusereuserid', 'user.eusername', 'user.efileefileid')
+        .leftJoinRelated('user.file')
+        .where('eteameteamid', teamId)
+        .andWhere('eteamlogtype', type)
+        .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING);
+
     }
 
-    if (TeamLogTypeEnum.APPLY !== type && TeamLogTypeEnum.INVITE !== type)
-        return 'type unaccepted'
+    const membersPage = await promised.page(page, size);
 
-    const isAdmin = await teamService.getAdmin(teamId, user.sub);
-
-    if (!isAdmin)
-        return 'not admin'
-        
-    // return log by type (APPLY / INVITE)
-    return TeamLog.query()
-    .select('eusereuserid', 'user.eusername', 'user.efileefileid')
-    .leftJoinRelated('user.file')
-    .where('eteameteamid', teamId)
-    .andWhere('eteamlogtype', type)
-    .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING);
+    return ServiceHelper.toPageObj(page, size, membersPage)
 
 }
 
@@ -186,7 +215,7 @@ teamService.processIntoTeam = async (teamId, user, userId) => {
 
 teamService.invite = async (teamId, user, email) => {
 
-    const isAdmin = await teamService.getAdmin(teamId, user.sub);
+    const isAdmin = await teamService.isAdmin(teamId, user.sub);
 
     if (!isAdmin)
         return 'not admin'
