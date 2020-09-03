@@ -32,6 +32,7 @@ class User extends Model {
     const File = require('./File')
     const Project =require('./Project')
     const Announcement = require('./Announcement');
+    const Department = require('./Department')
 
     return {
       permits: {
@@ -64,6 +65,18 @@ class User extends Model {
             to: 'euserpositionmapping.egradeegradeid'
           },
           to: 'egrade.egradeid'
+        }
+      },
+      departments: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Department,
+        join: {
+          from: 'euser.euserid',
+          through: {
+            from: 'euserpositionmapping.eusereuserid',
+            to: 'euserpositionmapping.edepartmentedepartmentid'
+          },
+          to: 'edepartment.edepartmentid'
         }
       },
       country: {

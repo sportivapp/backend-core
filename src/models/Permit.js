@@ -12,9 +12,9 @@ class Permit extends Model {
     static get jsonSchema() {
         return {
             type: 'object',
-            required: ['epermitstatus', 'epermitdescription', 'epermitstartdate', 'epermitenddate'],
+            required: ['epermitdescription', 'epermitstartdate', 'epermitenddate'],
             properties: {
-                epermitstatus: { type: 'integer' },
+                epermitstatus: { type: 'string' },
                 epermitdescription: { type: 'string', minLength: 1, maxLength: 256 },
                 epermitstartdate: { type: 'bigint' },
                 epermitenddate: { type: 'bigint' }
@@ -32,7 +32,7 @@ class Permit extends Model {
                 relation: Model.BelongsToOneRelation,
                 modelClass: User,
                 join: {
-                    from: 'epermit.euseruserid',
+                    from: 'epermit.eusereuserid',
                     to: 'euser.euserid'
                 }
             },
