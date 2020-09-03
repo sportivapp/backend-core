@@ -1,6 +1,5 @@
 const Announcement = require('../models/Announcement');
 const AnnouncementUserMapping = require('../models/AnnouncementUserMapping');
-const AnnouncementDelete = require('../models/AnnouncementDelete');
 const ServiceHelper = require('../helper/ServiceHelper')
 
 const AnnouncementService = {};
@@ -44,23 +43,21 @@ AnnouncementService.getAnnouncementById = async (announcementId, user) => {
     return announcement
 }
 
-AnnouncementService.addUser = async (announcementId, userIds) => {
+AnnouncementService.addUser = async (announcementId, userIds, loggedInUser) => {
 
     const users = userIds.map(user => ({
         eannouncementeannouncementid: announcementId, 
         eusereuserid: user
     }));
 
-    return AnnouncementUserMapping.query().insert(users);
+    return AnnouncementUserMapping.query().insertToTable(users, loggedInUser.sub);
 }
 
 AnnouncementService.createAnnouncement = async ( announcementDTO, userIds, user ) => {
 
-    const announcement = await Announcement.query().insertToTable(announcementDTO, user.sub);
+    const announcement = await Announcement.query().insertToTable(announcementDTO, user.sub)
 
-    userIds.push(user.sub)
-
-    await AnnouncementService.addUser(announcement.eannouncementid, userIds);
+    await AnnouncementService.addUser(announcement.eannouncementid, userIds, user);
 
     return announcement;
 }
@@ -83,7 +80,7 @@ AnnouncementService.updateAnnouncement = async (announcementId, announcementDTO,
         .returning('*');
 
     // Insert user that get the announcement
-    await AnnouncementService.addUser(parseInt(announcementId, 10) , userIds);
+    await AnnouncementService.addUser(parseInt(announcementId, 10) , userIds, user);
 
     return result;
 }
