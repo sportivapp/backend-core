@@ -50,11 +50,11 @@ announcementController.deleteAnnouncement = async (req, res, next) => {
 
 announcementController.getAllAnnouncement = async (req, res, next) => {
 
-    const { page, size } = req.query
+    const { page, size, type } = req.query
     const user = req.user;
 
     try {
-        const pageObj = await announcementService.getAllAnnouncement(parseInt(page), parseInt(size), user);
+        const pageObj = await announcementService.getAllAnnouncement(parseInt(page), parseInt(size), type, user);
 
         if(!pageObj)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
