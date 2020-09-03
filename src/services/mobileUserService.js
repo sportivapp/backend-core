@@ -1,8 +1,11 @@
 require('dotenv').config();
 const User = require('../models/User');
+const UserIndustryMapping = require('../models/UserIndustryMapping')
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
 const fileService = require('./mobileFileService');
+const Otp = require('../models/Otp');
+const emailService = require('../helper/emailService');
 
 const UserService = {};
 
@@ -37,10 +40,31 @@ UserService.login = async (loginDTO) => {
 
 }
 
-UserService.createUser = async (userDTO) => {
+UserService.createUser = async (userDTO, otpCode) => {
 
+    const isEmail = emailService.validateEmail(userDTO.euseremail);
+
+    if (!isEmail)
+        return 'invalid email'
+
+    const user = await User.query().where('euseremail', userDTO.euseremail).first();
+
+    if (user)
+        return 'user exist'
+
+    const otp = await Otp.query().where('euseremail', userDTO.euseremail).first();
+
+    if (!otp)
+        return 'no otp found'
+
+    if (otp.eotpcode !== otpCode)
+        return 'otp code not match'
+
+    // confirm OTP
+    await otp.$query().updateByUserId({ eotpconfirmed: true }, 0);
+
+    userDTO.eusername = userDTO.euseremail.split('@')[0];
     userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
-
     return User.query().insert(userDTO);
 
 }
@@ -63,8 +87,15 @@ UserService.getUserById = async (userId) => {
 
 UserService.updateUser = async (userDTO, user) => {
 
-    if (userDTO.efileefileid === undefined || userDTO.efilefileid === 0) {
-        userDTO.efilefileid = null;
+    // efileefileid null if undefined or 0 was sent
+    if (userDTO.efileefileid === undefined || userDTO.efileefileid === 0) {
+        userDTO.efileefileid = null;
+    } else {
+        // Check whether the user uses self created file
+        const file = await fileService.getFileByIdAndCreateBy(licenseDTO.efileefileid, user.sub);
+
+        if (!file)
+            return
     }
 
     const userFromDB = await UserService.getUserById(user.sub);
@@ -76,24 +107,35 @@ UserService.updateUser = async (userDTO, user) => {
 
     const updatedUser = await userFromDB.$query().updateByUserId(userDTO, user.sub).returning('*');
 
-    // User didnt give a file and file existed (delete file)
-    if (updatedUser.efileefileid && userDTO.efileefileid === null) {
-        await fileService.deleteFileByIdAndCreateBy(updatedUser.efileefileid, updatedUser.euserid);
-    }
-    // User give a file
-    else if (userDTO.efileefileid) {
-        
-        // File does not exist / not uploaded yet
-        const file = await fileService.getFileByIdAndCreateBy(userDTO.efileefileid, user.sub);
-
-        if (!file)
-            return
-
-        const newPathDir = '/user/' + updatedUser.euserid;
-        await fileService.moveFile(file, newPathDir);
-    }
-
     return 1;
+
+}
+
+UserService.updateUserCoachData = async (userCoachDTO, user, industryIds) => {
+
+    if (userCoachDTO.efileefileid === null) {
+        return 'no profile picture given'
+    }
+
+    const userFromDB = await UserService.getUserById(user.sub);
+
+    if (!userFromDB)
+        return
+    
+    userCoachDTO.euserdob = new Date(userCoachDTO.euserdob).getTime();
+
+    const userIndustryMappings = industryIds.map(industryId => ({
+        eindustryeindustryid: industryId,
+        eusereuserid: user.sub
+    }))
+
+    const updatedUser = userFromDB.$query().updateByUserId(userCoachDTO, user.sub);
+
+    const insertedMapping = UserIndustryMapping.query()
+    .insertToTable(userIndustryMappings, user.sub)
+
+    return Promise.all([updatedUser, insertedMapping])
+    .then(arr => arr[0])
 
 }
 

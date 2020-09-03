@@ -21,6 +21,9 @@ const shiftRoutes = require('./shift')
 const shiftPatternRoutes = require('./shiftPattern')
 const todoListRoutes = require('./todolist')
 const profileRoutes = require('./profile')
+const otpRoutes = require('./otp');
+const teamRoutes = require('./team');
+
 
 router.use('/api/v1', [
     userRoutes,
@@ -41,7 +44,9 @@ router.use('/api/v1', [
     shiftRoutes,
     shiftPatternRoutes,
     todoListRoutes,
-    profileRoutes
+    profileRoutes,
+    otpRoutes,
+    teamRoutes
 ]);
 
 const mobileUserRoutes = require('./mobileUser');
@@ -50,6 +55,8 @@ const mobileLicenseRoutes = require('./mobileLicense');
 const mobileCompanyRoutes = require('./mobileCompany');
 const mobileAnnouncementRoutes = require('./mobileAnnouncement');
 const mobileApplyInviteRoutes = require('./mobileApplyInvite');
+const mobileTeamRoutes = require('./mobileTeam');
+const mobileExperienceRoutes = require('./mobileExperience');
 
 router.use('/api/v1/mobile', [
     mobileUserRoutes,
@@ -57,7 +64,9 @@ router.use('/api/v1/mobile', [
     mobileLicenseRoutes,
     mobileCompanyRoutes,
     mobileAnnouncementRoutes,
-    mobileApplyInviteRoutes
+    mobileApplyInviteRoutes,
+    mobileTeamRoutes,
+    mobileExperienceRoutes
 ]);
 
 module.exports = router;

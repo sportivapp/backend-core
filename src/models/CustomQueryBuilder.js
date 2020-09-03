@@ -9,6 +9,8 @@ class CustomQueryBuilder extends QueryBuilder {
             const addedDataList = data.map(obj => {
                 obj[tableName.concat('createtime')] = Date.now()
                 obj[tableName.concat('createby')] = userId
+                obj[tableName.concat('changetime')] = Date.now()
+                obj[tableName.concat('changeby')] = userId
                 return obj
             })
             return this.insert(addedDataList)
@@ -16,6 +18,8 @@ class CustomQueryBuilder extends QueryBuilder {
             const addedData = { ...data }
             addedData[tableName.concat('createtime')] = Date.now()
             addedData[tableName.concat('createby')] = userId
+            addedData[tableName.concat('changetime')] = Date.now()
+            addedData[tableName.concat('changeby')] = userId
             return this.insert(addedData)
         }
     }

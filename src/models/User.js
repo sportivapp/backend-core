@@ -1,4 +1,5 @@
 const Model = require('./Model');
+const Team = require('./Team');
 
 class User extends Model {
   static get tableName() {
@@ -12,9 +13,9 @@ class User extends Model {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['eusernik', 'eusername', 'euseremail', 'euserpassword', 'eusermobilenumber'],
+      required: ['eusername', 'euseremail', 'euserpassword', 'eusermobilenumber'], // 'eusernik', 
       properties: {
-        eusernik: {  type: 'string', minLength: 1, maxLength: 256 },
+        // eusernik: {  type: 'string', minLength: 1, maxLength: 256 },
         eusername: { type: 'string', minLength: 1, maxLength: 256 },
         euseremail: { type: 'string', minLength: 1, maxLength: 256 },
         euserpassword: { type: 'string', minLength: 1, maxLength: 256 },
@@ -137,7 +138,19 @@ class User extends Model {
           },
           to: 'ecompany.ecompanyid'
         }
-      }
+      },
+      teams: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Team,
+        join: {
+            from: 'euser.euserid',
+            through: {
+                from: 'eteamusermapping.eusereuserid',
+                to: 'eteamusermapping.eteameteamid'
+            },
+            to: 'eteam.eteamid'
+        }
+    },
     }
   }
 

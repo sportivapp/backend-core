@@ -17,6 +17,7 @@ const controller = require('../../controllers/mobileFile');
 const auth = require('../../middlewares/authentication');
 
 router.post('/file', auth.authenticateToken, upload.single('file'), controller.createFile);
+router.post('/files', auth.authenticateToken, upload.array('files', 5), controller.createMultipleFiles);
 router.get('/file-preview/:fileId', auth.authenticateToken, controller.previewFile);
 router.get('/self-file-preview/:fileId', auth.authenticateToken, controller.previewFileRestricted);
 

@@ -16,6 +16,7 @@ module.exports = {
             import: '/user-import-template',
             id: '/user/:userId',
             approval: '/user/approval',
+            coach: '/user/coach'
         },
         profile: {
             company: '/user/company',
@@ -88,6 +89,13 @@ module.exports = {
         },
         country: {
             list: '/country'
+        },
+        experience: {
+            list: '/experience',
+            id: '/experience/:experienceId'
+        },
+        team: {
+            list: '/team'
         }
     }
 }

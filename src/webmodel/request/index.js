@@ -10,6 +10,7 @@ const projectSchemas = require('./project')
 const timesheetSchemas = require('./timesheet')
 const shiftSchemas = require('./shift')
 const shiftPatternSchemas = require('./shiftPattern')
+const experienceSchemas = require('./experience')
 
 module.exports = {
     ...companySchemas,
@@ -23,5 +24,6 @@ module.exports = {
     ...projectSchemas,
     ...timesheetSchemas,
     ...shiftSchemas,
-    ...shiftPatternSchemas
+    ...shiftPatternSchemas,
+    ...experienceSchemas
 }
