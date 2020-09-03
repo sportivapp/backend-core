@@ -20,6 +20,7 @@ const timesheetRoutes = require('./timesheet')
 const shiftRoutes = require('./shift')
 const shiftPatternRoutes = require('./shiftPattern')
 const todoListRoutes = require('./todolist')
+const profileRoutes = require('./profile')
 const otpRoutes = require('./otp');
 const teamRoutes = require('./team');
 
@@ -43,6 +44,7 @@ router.use('/api/v1', [
     shiftRoutes,
     shiftPatternRoutes,
     todoListRoutes,
+    profileRoutes,
     otpRoutes,
     teamRoutes
 ]);

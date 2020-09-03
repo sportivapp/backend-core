@@ -12,14 +12,17 @@ module.exports = {
             register: '/user',
             forgot: '/user-forgot-password',
             create: '/user-create',
-            password: '/user-change-password',
             list: '/user/company/:companyId',
             import: '/user-import-template',
             id: '/user/:userId',
             approval: '/user/approval',
-            changeCompany: '/user/change-company',
-            currentCompany: '/user/current-company',
             coach: '/user/coach'
+        },
+        profile: {
+            company: '/user/company',
+            currentCompany: '/user/current-company',
+            changePassword: '/user/change-password',
+            profile: '/profile'
         },
         grade: {
             list: '/grades',
