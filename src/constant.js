@@ -19,7 +19,7 @@ module.exports = {
             coach: '/user/coach'
         },
         profile: {
-            company: '/profile/company',
+            changeCompany: '/change-company',
             currentCompany: '/current-company',
             changePassword: '/change-password',
             profile: '/profile'
