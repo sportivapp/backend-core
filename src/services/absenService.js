@@ -17,7 +17,7 @@ function getShiftTimeBasedOnLatestAbsen(latestAbsen, shiftTimes) {
 }
 
 function getShiftTimeBasedOnMinimalDifferenceInStartTime(shiftTimes, formattedAbsenTime) {
-    let currentTime
+    let currentTime = shiftTimes[0]
     shiftTimes = shiftTimes
         .filter(time => time.eshifttimestarthour > formattedAbsenTime.getHours()
             && time.eshifttimestartminute > formattedAbsenTime.getMinutes())
@@ -80,12 +80,12 @@ AbsenService.createAbsenByPOS = async ( absenTime, deviceImei, fileId, userId ) 
         shiftTime = shifts[0].shiftTime
     }
 
-    // const file = await FileService.getFileById(fileId)
-
-    //for now file is still disabled to successfully run tests
-    // if (!file) return
-
-    // if user tap absen in the time of another shift, complete 1 absen & create another
+    if (fileId) {
+        const file = await FileService.getFileById(fileId)
+        if (!file) return
+    } else {
+        fileId = null
+    }
 
     if (!latestAbsen || latestAbsen.eabsenclockouttime) {
 
@@ -93,10 +93,10 @@ AbsenService.createAbsenByPOS = async ( absenTime, deviceImei, fileId, userId ) 
             eabsenclockintime: absenTime,
             eabsenclockinimageid: fileId,
             eusereuserid: userId,
-            edeviceedeviceid: device.edeviceid
+            edeviceedeviceid: device.edeviceid,
+            eshifttimeeshifttimeid: shiftTime.eshifttimeid
         }
 
-        // Get Shift for Clock In
         date.setHours(shiftTime.eshifttimestarthour)
         date.setMinutes(shiftTime.eshifttimestartminute)
         const shiftTimeIn = date.getTime()
@@ -116,7 +116,6 @@ AbsenService.createAbsenByPOS = async ( absenTime, deviceImei, fileId, userId ) 
             eabsenclockoutimageid: fileId
         }
 
-        // Get Shift for Clock Out
         date.setHours(shiftTime.eshifttimeendhour)
         date.setMinutes(shiftTime.eshifttimeendminute)
         const shiftTimeOut = date.getTime()
@@ -133,10 +132,11 @@ AbsenService.createAbsenByPOS = async ( absenTime, deviceImei, fileId, userId ) 
 }
 
 AbsenService.listAbsen = async ( page, size, userId ) => {
+
     let pageQuery = Absen.query()
         .orderBy('eabsencreatetime', 'ASC')
 
-    if (!userId)
+    if (userId)
         pageQuery = pageQuery.where('eusereuserid', userId)
 
     const absenPage = await pageQuery
@@ -147,9 +147,11 @@ AbsenService.listAbsen = async ( page, size, userId ) => {
 }
 
 AbsenService.editAbsen = async ( absenId, absenDTO, user ) => {
-    const absen = await Absen.query().updateByUserId(absenDTO, user.sub).where('eabsenid', absenId).andWhere('eusereuserid', user.sub);
+    const absen = await Absen.query().updateByUserId(absenDTO, user.sub)
+        .where('eabsenid', absenId)
+        .andWhere('eusereuserid', user.sub);
 
-    if (user.permission !== 1 && absen) return
+    if (!absen) return
 
     return absen;
 }
@@ -160,8 +162,6 @@ AbsenService.deleteAbsen = async ( absenId, user ) => {
         .andWhere('eusereuserid', user.sub)
         .deleteByUserId(user.sub)
         .returning('*');
-
-    if (user.permission !== 1 && absen) return
 
     return absen;
 }
