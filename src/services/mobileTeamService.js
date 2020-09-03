@@ -30,7 +30,10 @@ teamService.isAdmin = async (teamId, userId) => {
     .where('eusereuserid', userId)
     .andWhere('eteameteamid', teamId)
     .andWhere('eteamusermappingposition', TeamUserMappingPositionEnum.ADMIN)
-    .first();
+    .first()
+    .then(user => {
+        return user.eteamusermappingposition === TeamUserMappingPositionEnum.ADMIN
+    });
 }
 
 teamService.getPendingLog = async (teamId, userId, types) => {
@@ -45,7 +48,7 @@ teamService.getPendingLog = async (teamId, userId, types) => {
 
 }
 
-teamService.getTeams = async (keyword, page, size) => {
+teamService.getTeams = async (keyword, page = 0, size = 10) => {
 
     let newKeyword = ''
 
@@ -297,31 +300,39 @@ teamService.processRequest = async (teamId, userId, user, status) => {
 
 }
 
-teamService.getTeamMemberList = async (teamId, user, type) => {
+teamService.getTeamMemberList = async (teamId, user, page = 0, size = 10, type) => {
+
+    let promised
 
     // Return members in team
     if (type === TeamLogTypeEnum.MEMBER) {
-        return TeamUserMapping.query()
+        promised = TeamUserMapping.query()
         .select('euserid', 'eusername', 'user.efileefileid', 'eteamusermappingposition')
         .leftJoinRelated('[user, team]')
         .where('eteamid', teamId)
+        .page(page, size);
+    } else if (TeamLogTypeEnum.APPLY !== type && TeamLogTypeEnum.INVITE !== type)
+        return 'type unaccepted'
+    else {
+
+        const isAdmin = await teamService.isAdmin(teamId, user.sub);
+
+        if (!isAdmin)
+            return 'not admin'
+
+        // return log by type (APPLY / INVITE)
+        promised = TeamLog.query()
+        .select('eusereuserid', 'user.eusername', 'user.efileefileid')
+        .leftJoinRelated('user.file')
+        .where('eteameteamid', teamId)
+        .andWhere('eteamlogtype', type)
+        .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING);
+
     }
 
-    if (TeamLogTypeEnum.APPLY !== type && TeamLogTypeEnum.INVITE !== type)
-        return 'type unaccepted'
+    const membersPage = await promised.page(page, size);
 
-    const isAdmin = await teamService.isAdmin(teamId, user.sub);
-
-    if (!isAdmin)
-        return 'not admin'
-        
-    // return log by type (APPLY / INVITE)
-    return TeamLog.query()
-    .select('eusereuserid', 'user.eusername', 'user.efileefileid')
-    .leftJoinRelated('user.file')
-    .where('eteameteamid', teamId)
-    .andWhere('eteamlogtype', type)
-    .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING);
+    return ServiceHelper.toPageObj(page, size, membersPage)
 
 }
 

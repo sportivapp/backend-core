@@ -5,13 +5,11 @@ const controller = {};
 
 controller.createTeam = async (req, res, next) => {
 
-    const { name, fileId, address, phoneNumber, email, industryIds } = req.body;
+    const { name, fileId, description, industryIds } = req.body;
 
     const teamDTO = {
         eteamname: name,
-        eteamaddress: address,
-        eteamphonenumber: phoneNumber,
-        eteamemail: email,
+        eteamdescription: description,
         ecompanyecompanyid: req.user.companyId,
         efileefileid: fileId
     };
@@ -31,13 +29,13 @@ controller.createTeam = async (req, res, next) => {
 
 }
 
-controller.getTeamsByCompanyId = async (req, res, next) => {
+controller.getTeams = async (req, res, next) => {
 
-    const { page, size } = req.query;
+    const { keyword, page, size } = req.query;
     
     try {
 
-        const pageObj = await teamService.getTeamsByCompanyId(page, size, req.user.companyId);
+        const pageObj = await teamService.getTeams(keyword, parseInt(page), parseInt(size), req.user);
 
         if (!pageObj)
             return res.status(404).json(ResponseHelper.toErrorResponse(404))
@@ -49,14 +47,16 @@ controller.getTeamsByCompanyId = async (req, res, next) => {
 
 }
 
-controller.getTeamDetailByCompanyId = async (req, res, next) => {
+controller.getTeamDetail = async (req, res, next) => {
 
     const { teamId } = req.params
     
     try {
 
-        const result = await teamService.getTeamDetailByCompanyId(req.user.companyId, teamId);
+        const result = await teamService.getTeamDetail(teamId, req.user);
 
+        if (result === 'unauthorized')
+            return res.status(403).json(ResponseHelper.toErrorResponse(403));
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404));
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
@@ -89,13 +89,17 @@ controller.addUserToTeam = async (req, res, next) => {
 controller.getTeamMemberList = async (req, res, next) => {
 
     // INVITE / APPLY / MEMBER
-    const { type } = req.query;
+    const { page, size, type } = req.query;
     const { teamId } = req.body;
     
     try {
 
-        const result = await teamService.getTeamMemberList(teamId, req.user, type.toUpperCase());
+        const result = await teamService.getTeamMemberList(teamId, req.user, parseInt(page), parseInt(size), type.toUpperCase());
 
+        if (result === 'unauthorized')
+            return res.status(403).json(ResponseHelper.toErrorResponse(403));
+        if (result === 'not admin')
+            return res.status(403).json(ResponseHelper.toErrorResponse(403));
         if (result === 'type unaccepted')
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
         if (!result)

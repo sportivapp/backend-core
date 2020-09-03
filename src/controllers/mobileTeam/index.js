@@ -39,13 +39,11 @@ controller.getTeam = async (req, res, next) => {
 
 controller.createTeam = async (req, res, next) => {
 
-    const { name, companyId, fileId, address, phoneNumber, email, industryIds } = req.body;
+    const { name, companyId, fileId, description, industryIds } = req.body;
 
     const teamDTO = {
         eteamname: name,
-        eteamaddress: address,
-        eteamphonenumber: phoneNumber,
-        eteamemail: email,
+        eteamdescription: description,
         ecompanyecompanyid: companyId,
         efileefileid: fileId
     };
@@ -72,14 +70,12 @@ controller.createTeam = async (req, res, next) => {
 
 controller.updateTeam = async (req, res, next) => {
 
-    const { name, companyId, fileId, address, phoneNumber, email, industryIds } = req.body;
+    const { name, companyId, fileId, description, industryIds } = req.body;
     const { teamId } = req.params;
 
     const teamDTO = {
         eteamname: name,
-        eteamaddress: address,
-        eteamphonenumber: phoneNumber,
-        eteamemail: email,
+        eteamdescription: description,
         ecompanyecompanyid: companyId,
         efileefileid: fileId
     };
@@ -194,18 +190,18 @@ controller.processRequest = async (req, res, next) => {
 controller.getTeamMemberList = async (req, res, next) => {
 
     // INVITE / APPLY / MEMBER
-    const { type } = req.query;
+    const { page, size, type } = req.query;
     const { teamId } = req.body;
     
     try {
 
-        const result = await teamService.getTeamMemberList(teamId, req.user, type.toUpperCase());
+        const pageObj = await teamService.getTeamMemberList(teamId, req.user, parseInt(page), parseInt(size), type.toUpperCase());
 
-        if (result === 'type unaccepted')
+        if (pageObj === 'type unaccepted')
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
-        if (!result)
+        if (!pageObj)
             return res.status(404).json(ResponseHelper.toErrorResponse(404));
-        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
 
     } catch(e) {
         next(e);
