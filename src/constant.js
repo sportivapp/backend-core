@@ -19,9 +19,9 @@ module.exports = {
             coach: '/user/coach'
         },
         profile: {
-            company: '/user/company',
-            currentCompany: '/user/current-company',
-            changePassword: '/user/change-password',
+            company: '/profile/company',
+            currentCompany: '/current-company',
+            changePassword: '/change-password',
             profile: '/profile'
         },
         grade: {
