@@ -43,6 +43,9 @@ absenController.listAbsen = async (req, res, next) => {
     
     const { page, size, userId } = req.query
 
+    if (req.user.functions.indexOf('R6') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     try {
 
         const pageObj = await absenService.listAbsen(parseInt(page), parseInt(size), userId);

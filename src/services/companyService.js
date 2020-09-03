@@ -2,6 +2,9 @@ const Company = require('../models/Company');
 const Address = require('../models/Address');
 const Industry = require('../models/Industry')
 const User = require('../models/User');
+const Grades = require('../models/Grades')
+const Function = require('../models/Function')
+const UserPositionMapping = require('../models/UserPositionMapping')
 const bcrypt = require('../helper/bcrypt');
 const CompanyUserMapping = require('../models/CompanyUserMapping')
 const CompanyModuleMapping = require('../models/CompanyModuleMapping')
@@ -10,6 +13,7 @@ const CompanySequence = require('../models/CompanySequence')
 const { raw } = require('objection')
 const ServiceHelper = require('../helper/ServiceHelper')
 const fileService = require('./mobileFileService');
+const settingService = require('./settingService')
 
 const CompanyService = {};
 
@@ -29,11 +33,26 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
         await CompanySequence.createSequence(company.ecompanyid)
     }
 
+    const gradeDTO = {
+        egradename: 'Super Admin',
+        egradedescription: 'Administrator',
+        ecompanyecompanyid: company.ecompanyid
+    }
+
+    const grade = await Grades.query().insertToTable(gradeDTO, user.euserid)
+        .then(grade => UserPositionMapping.query().insertToTable(
+            {
+                egradeegradeid: grade.egradeid,
+                eusereuserid: user.euserid
+            }, user.euserid).then(ignored => grade))
+
+    const insertFunctionCodes = Function.query().then(func => func.efunctioncode)
+        .then(codes => settingService.saveFuncionsByGradeId(grade.egradeid, codes))
+
     // super user of the company
     const companyUserDTO = {
         eusereuserid: user.euserid,
         ecompanyecompanyid: company.ecompanyid,
-        ecompanyusermappingpermission: 10,
         ecompanyusermappingcreateby: 0
     }
 
@@ -50,7 +69,7 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
 
     const insertCompanyUserMappingQuery = CompanyUserMapping.query().insertToTable(companyUserDTO, user.euserid)
 
-    return Promise.all([insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery])
+    return Promise.all([insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery, insertFunctionCodes])
         .then(ignored => ({
             user: user,
             company: company,
@@ -83,7 +102,7 @@ CompanyService.getAllCompanyByUserId = async(userId) => {
 
 CompanyService.saveUsersToCompany = async(companyId, users, loggedInUser) => {
 
-    //accepting model [{'id': 1, 'deleted': false/true, 'permission': 10}]
+    //accepting model [{'id': 1, 'deleted': false/true}]
 
     const company = await Company.query().findById(companyId)
 
@@ -98,18 +117,16 @@ CompanyService.saveUsersToCompany = async(companyId, users, loggedInUser) => {
 
     const insertedUsers = users.filter(user => !user.deleted)
 
-    const filterRelationsByIdAndPermission = (relation, user) => {
-        return user.id === relation.eusereuserid && user.permission === relation.ecompanyusermappingpermission
+    const filterRelationsById = (relation, user) => {
+        return user.id === relation.eusereuserid
     }
 
-    const deleteRelation = (userId, permission) => CompanyUserMapping.query()
+    const deleteRelation = (userId) => CompanyUserMapping.query()
         .where('eusereuserid', userId)
-        .where('ecompanyusermappingpermission', permission)
         .deleteByUserId(loggedInUser.sub)
 
-    const unDeleteRelation = (userId, permission) => CompanyUserMapping.query()
+    const unDeleteRelation = (userId) => CompanyUserMapping.query()
         .where('eusereuserid', userId)
-        .where('ecompanyusermappingpermission', permission)
         .unDeleteByUserId(loggedInUser.sub)
 
     const selectRelationsByDeleteStatusQuery = (status) => CompanyUserMapping.query()
@@ -122,27 +139,26 @@ CompanyService.saveUsersToCompany = async(companyId, users, loggedInUser) => {
         .whereIn('eusereuserid', deletedUsers.map(user => user.id))
         .then(relations => {
             relations
-                .filter(relation => !!deletedUsers.find(user => filterRelationsByIdAndPermission(relation, user)))
-                .forEach(relation => deleteRelationPromises.push(deleteRelation(relation.eusereuserid, relation.ecompanyusermappingpermission)))
+                .filter(relation => !!deletedUsers.find(user => filterRelationsById(relation, user)))
+                .forEach(relation => deleteRelationPromises.push(deleteRelation(relation.eusereuserid)))
             return deleteRelationPromises
         })
 
     const selectUnDeletedRelations = selectRelationsByDeleteStatusQuery(true)
         .then(relations => {
             relations
-                .filter(relation => !!insertedUsers.find(user => filterRelationsByIdAndPermission(relation, user)))
-                .forEach(relation => unDeleteRelationPromises.push(unDeleteRelation(relation.eusereuserid, relation.ecompanyusermappingpermission)))
+                .filter(relation => !!insertedUsers.find(user => filterRelationsById(relation, user)))
+                .forEach(relation => unDeleteRelationPromises.push(unDeleteRelation(relation.eusereuserid)))
             return unDeleteRelationPromises
         })
 
     const filterNewUserIds = (existedRelations) => {
         return insertedUsers
-            .filter(user => !existedRelations.find(relation => filterRelationsByIdAndPermission(relation, user)))
+            .filter(user => !existedRelations.find(relation => filterRelationsById(relation, user)))
             .map(user => ({
                 eusereuserid: user.id,
                 ecompanyecompanyid: parseInt(companyId),
-                ecompanyusermappingcreateby: loggedInUser.sub,
-                ecompanyusermappingpermission: user.permission
+                ecompanyusermappingcreateby: loggedInUser.sub
             }))
     }
 
@@ -165,7 +181,6 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
 
     const companyIds = await CompanyUserMapping.query()
         .where('eusereuserid', user.sub)
-        .where('ecompanyusermappingpermission', 10)
         .then(resultArr => resultArr.map(result => result.ecompanyecompanyid))
 
     if (companyDTO.ecompanyolderid && companyDTO.ecompanyparentid) return
@@ -200,8 +215,7 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
 
     const companyUserMappingDTO = {
         ecompanyecompanyid: company.ecompanyid,
-        eusereuserid: id,
-        ecompanyusermappingpermission: 10
+        eusereuserid: id
     }
 
     const insertCompanyModuleMappingQuery = Module.query()
@@ -216,11 +230,26 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
 
     const insertCompanyUserMappingQuery = CompanyUserMapping.query().insertToTable(companyUserMappingDTO, user.sub)
 
+    const gradeDTO = {
+        egradename: 'Super Admin',
+        egradedescription: 'Administrator',
+        ecompanyecompanyid: company.ecompanyid
+    }
+
+    const insertGradeAndFunctions = Grades.query().insertToTable(gradeDTO, user.sub)
+        .then(grade => UserPositionMapping.query().insertToTable(
+            {
+                egradeegradeid: grade.egradeid,
+                eusereuserid: user.sub
+            }, user.sub).then(ignored => grade))
+        .then(grade => Function.query().then(func => func.efunctioncode)
+            .then(codes => settingService.saveFuncionsByGradeId(grade.egradeid, codes)))
+
     // super user of the company
     const findUserQuery = User.query()
         .findById(id)
 
-    return Promise.all([findUserQuery, insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery])
+    return Promise.all([findUserQuery, insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery, insertGradeAndFunctions])
         .then(resultArr => ({
             company: company,
             address: address,
@@ -308,20 +337,19 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
 
 CompanyService.getCompanyById = async (companyId) => {
 
-    const company = await Company.query().findById(companyId).withGraphFetched('[industry,address.[country,state]]')
+    const company = await Company.query().findById(companyId)
+        .withGraphFetched('[industry,address.[country,state]]')
 
-    const headUserId = await CompanyUserMapping.query()
-        .where('ecompanyecompanyid', companyId)
-        .where('ecompanyusermappingpermission', 10)
+    const headUser = Grades.query().where('ecompanyecompanyid', companyId)
+        .orderBy('egradecreatetime', 'ASC')
         .first()
-        .then(result => result.eusereuserid)
+        .then(position => position.$relatedQuery('users').orderBy('eusercreatetime', 'ASC').modify('baseAttributes').first())
 
     const employeeCount = CompanyUserMapping.query().where('ecompanyecompanyid', companyId).count()
     const departmentCount = Company.relatedQuery('departments').for(companyId).count()
     const branchCount = Company.relatedQuery('branches').for(companyId).count()
-    const head = User.query().findById(headUserId)
 
-    return Promise.all([company, employeeCount, departmentCount, branchCount, head])
+    return Promise.all([company, employeeCount, departmentCount, branchCount, headUser])
         .then(resultArr => ({
             ...resultArr[0],
             user: resultArr[4],
@@ -355,33 +383,30 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, address
         if (!industry) return
     }
 
-    let headUserId
+    let headUser
 
     if (supervisorId) {
 
-        const deleteCurrentHeadQuery = CompanyUserMapping.query()
-            .where('ecompanyecompanyid', companyId)
-            .where('ecompanyusermappingpermission', 10)
-            .delete()
-
-        const companyUserMappingDTO = {
-            ecompanyecompanyid: parseInt(companyId),
-            eusereuserid: supervisorId,
-            ecompanyusermappingpermission: 10
-        }
-
-        const insertNewHeadQuery = CompanyUserMapping.query()
-            .insertToTable(companyUserMappingDTO, user.sub)
-
-        headUserId = await Promise.all([deleteCurrentHeadQuery, insertNewHeadQuery])
-            .then(resultArr => resultArr[1])
-            .then(result => result.eusereuserid)
-    } else {
-        headUserId = await CompanyUserMapping.query()
-            .where('ecompanyecompanyid', companyId)
-            .where('ecompanyusermappingpermission', 10)
+        const superAdminPosition = await Grades.query().where('ecompanyecompanyid', companyId)
+            .orderBy('egradecreatetime', 'ASC')
             .first()
-            .then(result => result.eusereuserid)
+
+        headUser = await UserPositionMapping.query()
+            .where('egradeegradeid', superAdminPosition.egradeid)
+            .first()
+            .updateByUserId({ eusereuserid: supervisorId }, user.sub)
+            .returning('eusereuserid')
+            .then(result => User.query().findById(result.eusereuserid))
+
+    } else {
+        headUser = await Grades.query().where('ecompanyecompanyid', companyId)
+        .orderBy('egradecreatetime', 'ASC')
+        .first()
+        .then(position => position
+            .$relatedQuery('users')
+            .orderBy('eusercreatetime', 'ASC')
+            .first()
+        )
     }
 
     const company = await Company.query().findById(companyId)
@@ -397,8 +422,6 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, address
     const employeeCount = CompanyUserMapping.query().where('ecompanyecompanyid', companyId).count()
     const departmentCount = Company.relatedQuery('departments').for(companyId).count()
     const branchCount = Company.relatedQuery('branches').for(companyId).count()
-
-    const getUserQuery = User.query().findById(headUserId)
     const getCompanyQuery = Company.query().findById(companyId)
         .withGraphFetched('[industry,address]')
 
@@ -419,10 +442,10 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, address
         await fileService.moveFile(file, newPathDir);
     }
 
-    return Promise.all([getCompanyQuery, employeeCount, departmentCount, branchCount, getUserQuery])
+    return Promise.all([getCompanyQuery, employeeCount, departmentCount, branchCount])
         .then(resultArr => ({
             ...resultArr[0],
-            user: resultArr[4],
+            user: headUser,
             employeeCount: parseInt(resultArr[1][0].count),
             departmentCount: parseInt(resultArr[2][0].count),
             childrenCount: parseInt(resultArr[3][0].count)

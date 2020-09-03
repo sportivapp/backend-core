@@ -3,6 +3,7 @@ const CompanyUserMapping = require('../models/CompanyUserMapping')
 const Company = require('../models/Company')
 const CompanySequence = require('../models/CompanySequence')
 const Grade = require('../models/Grades');
+const UserPositionMapping = require('../models/UserPositionMapping');
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -13,8 +14,6 @@ const ServiceHelper = require('../helper/ServiceHelper')
 const UsersService = {};
 
 UsersService.registerEmployees = async (user, path) => {
-
-    if (user.permission < 9) return
 
     let positions = [];
     const values = await readXlsxFile(path).then((rows) => {
@@ -69,7 +68,7 @@ UsersService.registerEmployees = async (user, path) => {
 
 }
 
-UsersService.createUser = async (userDTO, permission, user) => {
+UsersService.createUser = async (userDTO, user) => {
 
     const trimmedName = userDTO.eusername.replace(/\s+/g, '')
 
@@ -84,16 +83,10 @@ UsersService.createUser = async (userDTO, permission, user) => {
 
     const createdUser = await User.query().insertToTable(userDTO, user.sub)
 
-    let realPermission
-
-    if (!permission) realPermission = 1
-    else realPermission = permission
-
     await CompanyUserMapping.query()
         .insertToTable({
             ecompanyecompanyid: user.companyId,
             eusereuserid: createdUser.euserid,
-            ecompanyusermappingpermission: realPermission
         }, user.sub)
 
     return createdUser
@@ -113,6 +106,13 @@ UsersService.getUserById = async ( userId, user ) => {
     if (!mapping) return
 
     return result;
+
+}
+
+UsersService.getProfile = async ( user ) => {
+
+    return User.query()
+        .findById(user.sub);
 
 }
 
@@ -161,43 +161,21 @@ UsersService.getUserCurrentCompany = async ( user ) => {
 
 }
 
-UsersService.updateUserById = async (userId, userDTO, permission, user) => {
+UsersService.updateUserById = async (userId, userDTO, user) => {
 
-    if (user.permission != 9 && user.permission != 10) {
-        if (userId != user.sub) return
-    }
-
-    const userMapping = await CompanyUserMapping.query()
-        .where('ecompanyecompanyid', user.companyId)
-        .where('eusereuserid', userId)
-        .first()
-
-    const updateUserQuery = User.query().findById(userId)
+    return User.query().findById(userId)
         .updateByUserId(userDTO, user.sub)
         .returning('*')
-
-    let realPermission
-
-    if (!permission) realPermission = 1
-    else realPermission = permission
-
-    let additionalQuery
-
-    if (userMapping.ecompanyusermappingpermission != realPermission) {
-        additionalQuery = CompanyUserMapping.query()
-            .where('ecompanyecompanyid', user.companyId)
-            .where('eusereuserid', userId)
-            .updateByUserId({ ecompanyusermappingpermission: realPermission }, user.sub)
-    }
-
-    if (additionalQuery)
-        return Promise.all([additionalQuery, updateUserQuery])
-            .then(resultArr => resultArr[1])
-    else
-        return updateUserQuery
 }
 
-async function generateJWTToken(user, companyId, permission) {
+UsersService.updateProfile = async (userDTO, user) => {
+
+    return User.query().findById(user.sub)
+        .updateByUserId(userDTO, user.sub)
+        .returning('*')
+}
+
+async function generateJWTToken(user, companyId, functions) {
 
     const config = {
         sub: user.euserid,
@@ -205,7 +183,7 @@ async function generateJWTToken(user, companyId, permission) {
         email: user.euseremail,
         name: user.eusername,
         mobileNumber: user.eusermobilenumber,
-        permission: permission,
+        functions: functions,
         companyId: companyId
     }
     const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' });
@@ -216,36 +194,11 @@ async function generateJWTToken(user, companyId, permission) {
 
 UsersService.getAllUserByCompanyId = async ( page, size, companyId ) => {
 
-    // const userPage = await CompanyUserMapping.relatedQuery('users')
-    // .for(CompanyUserMapping.query().where('ecompanyecompanyid', companyId))
-    // .select('euserid', 'eusername', 'euseremail', 'eusernik', 'eusermobilenumber')
-    // .page(page, size);
-
     const userPage = Company.relatedQuery('users')
         .for(companyId)
         .modify('baseAttributes')
         .withGraphFetched('grades(baseAttributes).department(baseAttributes)')
         .page(page, size)
-
-    // const userIds = userPage.results.map(user => user.euserid);
-    //
-    // const grades = await Grade.query()
-    // .select('eusereuserid', 'egradename')
-    // .joinRelated('users')
-    // .whereIn('eusereuserid', userIds)
-    //
-    // userPage.results.map((user) => {
-    //
-    //     const userGrades = grades.filter((grade) => {
-    //         return user.euserid === grade.eusereuserid
-    //     })
-    //     .map((grade) => {
-    //         return grade.egradename;
-    //     });
-    //
-    //     user.grades = userGrades;
-    //
-    // })
  
     return ServiceHelper.toPageObj(page, size, userPage)
 
@@ -265,15 +218,21 @@ UsersService.login = async (loginDTO) => {
     if (success === true) {
 
         const result = await User.query()
-        .select('ecompanyecompanyid', 'ecompanyusermappingpermission')
+        .select('ecompanyecompanyid')
         .joinRelated('companies')
-        .where('eusereuserid', user.euserid)
+        .withGraphFetched('grades.functions')
         .orderBy('ecompanyusermappingcreatetime', 'ASC')
         .first();
 
+        let functions = result.grades[0].functions.map(func => func.efunctioncode)
+
+        result.grades.forEach(grade => {
+            if (grade.functions.length > functions.length) functions = grade.functions.map(func => func.efunctioncode)
+        })
+
         if (!result || !result.ecompanyecompanyid) return
 
-        token = await generateJWTToken(user, result.ecompanyecompanyid, result.ecompanyusermappingpermission);
+        token = await generateJWTToken(user, result.ecompanyecompanyid, functions);
 
     }
 
@@ -285,9 +244,7 @@ UsersService.changeUserPassword = async ( user , newPassword) => {
 
     const encryptedPassword = await bcrypt.hash(newPassword);
 
-    const newData = await User.query().patchAndFetchById(user.sub, { euserpassword: encryptedPassword });
-
-    return newData;
+    return User.query().findById(user.sub).updateByUserId({ euserpassword: encryptedPassword }, user.sub);
 }
 
 UsersService.changeUserCompany = async (companyId, user) => {
@@ -299,26 +256,34 @@ UsersService.changeUserCompany = async (companyId, user) => {
     .where('eusereuserid', user.sub)
     .first()
 
+    const result = await User.query()
+        .joinRelated('companies')
+        .withGraphFetched('grades.functions')
+        .where('ecompanyecompanyid', companyId)
+        .first();
+
+    let functions = result.grades[0].functions.map(func => func.efunctioncode)
+
+    result.grades.forEach(grade => {
+        if (grade.functions.length > functions.length) functions = grade.functions.map(func => func.efunctioncode)
+    })
+
     if(!userCompany)
         return
 
-    let token = null;
-    token = await generateJWTToken(loggedInUser, companyId, userCompany.ecompanyusermappingpermission);
-
-    return token;
+    return generateJWTToken(loggedInUser, companyId, functions);
 }
 
-UsersService.deleteUserById = async ( userId, user ) => {
-    
-    if (user.permission < 9) return
+UsersService.deleteUserById = async ( userId, loggedInUser ) => {
+
+    const user = await UsersService.getUserById(userId, loggedInUser)
 
     const projects = await User.relatedQuery('projects')
-        .for(userId)
+        .for(user.euserid)
 
     if (projects.length > 0) return false
 
-    return User.query()
-        .where('euserid', userId)
+    return user.$query()
         .delete()
         .then(rowsAffected => rowsAffected === 1)
 

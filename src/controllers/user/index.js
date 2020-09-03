@@ -4,14 +4,10 @@ const templatePath = require('../../../templates/index');
 
 const userController = {}
 
-function isUserNotValid(user) {
-    return user.permission !== 9 && user.permission !== 10
-}
-
 userController.changePassword = async (req, res, next) => {
 
     const user = req.user;
-    const { newPassword } = req.body; 
+    const { newPassword } = req.body;
 
     try {
 
@@ -29,7 +25,7 @@ userController.changePassword = async (req, res, next) => {
 
 userController.registerEmployees = async (req, res, next) => {
 
-    if (isUserNotValid(req.user))
+    if (req.user.functions.indexOf('C5') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const path = req.file.path;
@@ -51,7 +47,7 @@ userController.registerEmployees = async (req, res, next) => {
 
 userController.createUser = async (req, res, next) => {
 
-    if (isUserNotValid(req.user))
+    if (req.user.functions.indexOf('C5') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const user = req.user
@@ -63,8 +59,6 @@ userController.createUser = async (req, res, next) => {
         gender,
         hobby,
         address,
-        isMultiApproval,
-        permission,
         identityNumber
     } = req.body
 
@@ -75,14 +69,13 @@ userController.createUser = async (req, res, next) => {
             eusername: username,
             euseremail: userEmail,
             eusermobilenumber: userMobileNumber,
-            eusermultiapproval: isMultiApproval,
             eusergender: gender,
             euserhobby: hobby,
             euseridentitynumber: identityNumber,
             euseraddress: address
         }
 
-        const data = await userService.createUser(userDTO, permission, user)
+        const data = await userService.createUser(userDTO, user)
 
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
 
@@ -95,6 +88,9 @@ userController.getUserById = async (req, res, next) => {
 
     const user = req.user;
     const { userId } = req.params;
+
+    if (req.user.functions.indexOf('R5') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
 
@@ -114,6 +110,9 @@ userController.getUserCurrentCompany = async (req, res, next) => {
 
     const user = req.user;
 
+    if (req.user.functions.indexOf('R1') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     try {
 
         const result = await userService.getUserCurrentCompany(user);
@@ -127,6 +126,7 @@ userController.getUserCurrentCompany = async (req, res, next) => {
         next(e);
     }
 }
+
 userController.updateUserById = async (req, res, next) => {
 
     const user = req.user
@@ -137,11 +137,12 @@ userController.updateUserById = async (req, res, next) => {
         gender,
         hobby,
         address,
-        isMultiApproval,
-        permission,
         identityNumber
     } = req.body
     const { userId } = req.params
+
+    if (req.user.functions.indexOf('U5') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
 
@@ -149,14 +150,13 @@ userController.updateUserById = async (req, res, next) => {
             eusernik: userNik,
             eusername: username,
             eusermobilenumber: userMobileNumber,
-            eusermultiapproval: isMultiApproval,
             eusergender: gender,
             euserhobby: hobby,
             euseridentitynumber: identityNumber,
             euseraddress: address
         }
 
-        const data = await userService.updateUserById(userId, userDTO, permission, user)
+        const data = await userService.updateUserById(userId, userDTO, user)
         if (!data) return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
 
@@ -187,12 +187,12 @@ userController.deleteUserById = async (req, res, next) => {
     const user = req.user;
     const { userId } = req.params;
 
+    if (req.user.functions.indexOf('D5') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     try {
 
         const result = await userService.deleteUserById(userId, user);
-
-        if (result === undefined)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch (e) {
@@ -218,7 +218,7 @@ userController.forgotPassword = async (req, res, next) => {
 
 userController.getAllUserByCompanyId = async (req, res, next) => {
 
-    if (isUserNotValid(req.user))
+    if (req.user.functions.indexOf('R5') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { page, size } = req.query
@@ -276,6 +276,9 @@ userController.importTemplate = async (req, res, next) => {
 }
 
 userController.addApprovalUsers = async (req, res, next) => {
+
+    if (req.user.functions.indexOf('C6') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
         const {userId, approvalUserIds} = req.body

@@ -2,19 +2,24 @@ const CompanyModuleMapping = require('../models/CompanyModuleMapping');
 const Function = require('../models/Function');
 const GradeFunctionMapping = require('../models/GradeFunctionMapping');
 const Grade = require('../models/Grades');
+const Module = require('../models/Module')
 
 const SettingService = {};
 
 SettingService.getModulesByCompanyId = async ( companyId ) => {
-    
-    const modules = await CompanyModuleMapping.query()
-    .select('ecompanymodulemappingname', 'emoduleemoduleid')
-    .where('ecompanyecompanyid', companyId);
 
-    if (modules.length === 0)
-        return;
- 
-    return modules;
+    return CompanyModuleMapping.relatedQuery('module')
+        .for(CompanyModuleMapping.query().where('ecompanyecompanyid', companyId));
+
+}
+
+SettingService.getModulesByUserId = async ( userId ) => {
+
+    const moduleIds = await Grade.relatedQuery('functions')
+        .for(Grade.query().joinRelated('users').where('eusereuserid', userId))
+        .then(functions => functions.map(func => func.emoduleemoduleid))
+
+    return Module.query().whereIn('emoduleid', moduleIds);
 
 }
 

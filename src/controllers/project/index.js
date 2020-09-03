@@ -3,13 +3,9 @@ const ResponseHelper = require('../../helper/ResponseHelper');
 
 const projectController = {};
 
-function isUserNotValid(user) {
-    return user.permission !== 8 && user.permission !== 10
-}
-
 projectController.createProject = async (req, res, next) => {
 
-    if (isUserNotValid(req.user))
+    if (req.user.functions.indexOf('C10') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
@@ -39,7 +35,7 @@ projectController.createProject = async (req, res, next) => {
 
 projectController.getProjectById = async (req, res, next) => {
 
-    if (isUserNotValid(req.user))
+    if (req.user.functions.indexOf('R10') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { projectId } = req.params;
@@ -60,11 +56,11 @@ projectController.getProjectById = async (req, res, next) => {
 
 projectController.deleteProjectById = async (req, res, next) => {
 
-    if (isUserNotValid(req.user))
-        return res.status(403).json(ResponseHelper.toErrorResponse(403))
-
     const user = req.user;
     const { projectId } = req.params;
+
+    if (user.functions.indexOf('D10') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
 
@@ -82,12 +78,13 @@ projectController.deleteProjectById = async (req, res, next) => {
 
 projectController.updateProjectById = async (req, res, next) => {
 
-    if (isUserNotValid(req.user))
-        return res.status(403).json(ResponseHelper.toErrorResponse(403))
-
     const user = req.user;
     const { projectId } = req.params;
     const { code, name, startDate, endDate, address, description } = req.body;
+
+    if (user.functions.indexOf('U10') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     const projectDTO = { 
         eprojectcode: code, 
         eprojectname: name,
@@ -111,16 +108,15 @@ projectController.updateProjectById = async (req, res, next) => {
 
 projectController.getProjects = async (req, res, next) => {
 
+    const user = req.user;
+    const { page, size } = req.query
+
+    if (user.functions.indexOf('R10') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     try {
 
-        if (isUserNotValid(req.user))
-            return res.status(403).json(ResponseHelper.toErrorResponse(403))
-
-        const user = req.user;
-        const { page, size } = req.query
-        const userId = user.sub;
-
-        const pageObj = await projectService.getProjects(userId, parseInt(page), parseInt(size));
+        const pageObj = await projectService.getProjects(user.sub, parseInt(page), parseInt(size));
 
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
 
@@ -131,14 +127,14 @@ projectController.getProjects = async (req, res, next) => {
 
 projectController.saveDevicesIntoProject = async (req, res, next) => {
 
+    const { deviceIds } = req.body;
+    const { projectId } = req.params;
+    const user = req.user;
+
+    if (user.functions.indexOf('C10') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     try {
-
-        if (isUserNotValid(req.user))
-            return res.status(403).json(ResponseHelper.toErrorResponse(403))
-
-        const { deviceIds } = req.body;
-        const { projectId } = req.params;
-        const user = req.user;
 
         const deviceList = await projectService.saveDevicesIntoProject(projectId, deviceIds, user)
 
@@ -151,13 +147,13 @@ projectController.saveDevicesIntoProject = async (req, res, next) => {
 
 projectController.getDevicesByProjectId = async (req, res, next) => {
 
+    const { page, size } = req.query
+    const { projectId } = req.params
+
+    if (req.user.functions.indexOf('R10') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     try {
-
-        if (isUserNotValid(req.user))
-            return res.status(403).json(ResponseHelper.toErrorResponse(403))
-
-        const { page, size } = req.query
-        const { projectId } = req.params
 
         const pageObj = await projectService.getDevicesByProjectId(projectId, page, size)
 
@@ -173,6 +169,9 @@ projectController.saveTimesheet = async (req, res, next) => {
     const { timesheetIds } = req.body
 
     const { projectId } = req.params
+
+    if (req.user.functions.indexOf('C10') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
         const result = await projectService.saveTimesheetIntoProject(projectId, timesheetIds, req.user)
