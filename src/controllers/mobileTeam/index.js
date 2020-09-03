@@ -39,13 +39,11 @@ controller.getTeam = async (req, res, next) => {
 
 controller.createTeam = async (req, res, next) => {
 
-    const { name, companyId, fileId, address, phoneNumber, email, industryIds } = req.body;
+    const { name, companyId, fileId, description, industryIds } = req.body;
 
     const teamDTO = {
         eteamname: name,
-        eteamaddress: address,
-        eteamphonenumber: phoneNumber,
-        eteamemail: email,
+        eteamdescription: description,
         ecompanyecompanyid: companyId,
         efileefileid: fileId
     };
@@ -72,14 +70,12 @@ controller.createTeam = async (req, res, next) => {
 
 controller.updateTeam = async (req, res, next) => {
 
-    const { name, companyId, fileId, address, phoneNumber, email, industryIds } = req.body;
+    const { name, companyId, fileId, description, industryIds } = req.body;
     const { teamId } = req.params;
 
     const teamDTO = {
         eteamname: name,
-        eteamaddress: address,
-        eteamphonenumber: phoneNumber,
-        eteamemail: email,
+        eteamdescription: description,
         ecompanyecompanyid: companyId,
         efileefileid: fileId
     };

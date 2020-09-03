@@ -5,13 +5,11 @@ const controller = {};
 
 controller.createTeam = async (req, res, next) => {
 
-    const { name, fileId, address, phoneNumber, email, industryIds } = req.body;
+    const { name, fileId, description, industryIds } = req.body;
 
     const teamDTO = {
         eteamname: name,
-        eteamaddress: address,
-        eteamphonenumber: phoneNumber,
-        eteamemail: email,
+        eteamdescription: description,
         ecompanyecompanyid: req.user.companyId,
         efileefileid: fileId
     };
