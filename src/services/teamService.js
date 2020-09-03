@@ -63,7 +63,7 @@ teamService.createTeam = async (teamDTO, user, industryIds) => {
 
 }
 
-teamService.getTeamsByCompanyId = async (page = 0, size = 10, user) => {
+teamService.getTeams = async (page = 0, size = 10, user) => {
 
     const teamPage = await Team.query()
     .select('eteamid', 'ecompanyecompanyid', 'efileefileid', 'eteamname', 'eteamcreatetime', 
@@ -78,22 +78,25 @@ teamService.getTeamsByCompanyId = async (page = 0, size = 10, user) => {
     return ServiceHelper.toPageObj(page, size, teamPage)
 }
 
-teamService.getTeamDetailByCompanyId = async (teamId, user) => {
+teamService.getTeamDetail = async (teamId, user) => {
 
-    const team = Team.query()
-    .select()
-    .where('ecompanyecompanyid', companyId)
+    const team = await Team.query()
+    .where('ecompanyecompanyid', user.companyId)
     .where('eteamid', teamId)
     .first()
 
     if (!team)
         return
 
-    const industry = TeamIndustryMapping.query()
+    const industry = await TeamIndustryMapping.query()
     .select('industry.eindustryname')
     .leftJoinRelated('industry')
+    .where('eteameteamid', teamId);
 
-    return Promise.all([team, industry]);
+    return {
+        team,
+        industry
+    }
 
 }
 
