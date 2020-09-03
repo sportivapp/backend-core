@@ -31,13 +31,13 @@ controller.createTeam = async (req, res, next) => {
 
 }
 
-controller.getTeamsByCompanyId = async (req, res, next) => {
+controller.getTeams = async (req, res, next) => {
 
     const { page, size } = req.query;
     
     try {
 
-        const pageObj = await teamService.getTeamsByCompanyId(page, size, req.user.companyId);
+        const pageObj = await teamService.getTeams(page, size, req.user);
 
         if (!pageObj)
             return res.status(404).json(ResponseHelper.toErrorResponse(404))
@@ -49,13 +49,13 @@ controller.getTeamsByCompanyId = async (req, res, next) => {
 
 }
 
-controller.getTeamDetailByCompanyId = async (req, res, next) => {
+controller.getTeamDetail = async (req, res, next) => {
 
     const { teamId } = req.params
     
     try {
 
-        const result = await teamService.getTeamDetailByCompanyId(req.user.companyId, teamId);
+        const result = await teamService.getTeamDetail(teamId, req.user);
 
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404));

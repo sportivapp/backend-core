@@ -63,13 +63,13 @@ teamService.createTeam = async (teamDTO, user, industryIds) => {
 
 }
 
-teamService.getTeamsByCompanyId = async (page = 0, size = 10, companyId) => {
+teamService.getTeams = async (page = 0, size = 10, user) => {
 
     const teamPage = await Team.query()
     .select('eteamid', 'ecompanyecompanyid', 'efileefileid', 'eteamname', 'eteamcreatetime', 
     Team.relatedQuery('members').count().as('membersCount'))
     .withGraphJoined('industries(selectName)')
-    .where('ecompanyecompanyid', companyId)
+    .where('ecompanyecompanyid', user.companyId)
     .page(page, size);
 
     if (!teamPage)
@@ -78,25 +78,25 @@ teamService.getTeamsByCompanyId = async (page = 0, size = 10, companyId) => {
     return ServiceHelper.toPageObj(page, size, teamPage)
 }
 
-teamService.getTeamDetailByCompanyId = async (companyId, teamId) => {
+teamService.getTeamDetail = async (teamId, user) => {
 
-    if(isNaN(companyId))
-        return
-
-    const team = Team.query()
-    .select()
-    .where('ecompanyecompanyid', companyId)
+    const team = await Team.query()
+    .where('ecompanyecompanyid', user.companyId)
     .where('eteamid', teamId)
     .first()
 
     if (!team)
         return
 
-    const industry = TeamIndustryMapping.query()
+    const industry = await TeamIndustryMapping.query()
     .select('industry.eindustryname')
     .leftJoinRelated('industry')
+    .where('eteameteamid', teamId);
 
-    return Promise.all([team, industry]);
+    return {
+        team,
+        industry
+    }
 
 }
 
