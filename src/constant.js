@@ -18,9 +18,9 @@ module.exports = {
             approval: '/user/approval',
         },
         profile: {
-            company: '/profile/company',
+            company: '/user/company',
             currentCompany: '/user/current-company',
-            changePassword: '/profile/change-password',
+            changePassword: '/user/change-password',
             profile: '/profile'
         },
         grade: {
