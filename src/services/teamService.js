@@ -63,18 +63,14 @@ teamService.createTeam = async (teamDTO, user, industryIds) => {
 
 }
 
-teamService.getTeamsByCompanyId = async (page, size, companyId) => {
-
-    if(isNaN(page) || isNaN(size)) {
-        page = 0
-        size = 10
-    }
+teamService.getTeamsByCompanyId = async (page = 0, size = 10, companyId) => {
 
     const teamPage = await Team.query()
-    .select('eteamid', 'ecompanyecompanyid', 'efileefileid', 'eteamname', 'eteamcreatetime')
-    .withGraphFetched('[industries, members]')
+    .select('eteamid', 'ecompanyecompanyid', 'efileefileid', 'eteamname', 'eteamcreatetime', 
+    Team.relatedQuery('members').count().as('membersCount'))
+    .withGraphJoined('industries(selectName)')
     .where('ecompanyecompanyid', companyId)
-    .page(page, size)
+    .page(page, size);
 
     if (!teamPage)
         return
@@ -100,11 +96,7 @@ teamService.getTeamDetailByCompanyId = async (companyId, teamId) => {
     .select('industry.eindustryname')
     .leftJoinRelated('industry')
 
-    return Promise.all([team, industry])
-    .then(result => ({
-        team: result[0],
-        sportType: result[1]
-    }))
+    return Promise.all([team, industry]);
 
 }
 
