@@ -166,6 +166,15 @@ teamService.checkUserInTeamByUserIds = async (teamId, userIds) => {
 
 }
 
+teamService.checkUserInTeam = async (teamId, userId) => {
+
+    return TeamUserMapping.query()
+    .where('eteameteamid', teamId)
+    .andWhere('eusereuserid', userId)
+    .first();
+
+}
+
 teamService.getPendingLog = async (teamId, userId, types) => {
 
     return TeamLog.query()
@@ -186,6 +195,16 @@ teamService.getPendingLogByUserIds = async (teamId, userIds, types) => {
     .whereIn('eteamlogtype', types)
     .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
     .orderBy('eteamlogcreatetime', 'DESC')
+
+}
+
+teamService.createTeamLog = async (teamId, user, userId, type) => {
+
+    return TeamLog.query().insertToTable({
+        eteameteamid: teamId,
+        eusereuserid: userId,
+        eteamlogtype: type
+    }, user.sub);
 
 }
 
@@ -373,6 +392,78 @@ teamService.processInvitation = async (teamId, user, status) => {
 
     if (status === TeamLogStatusEnum.ACCEPTED)
         return teamService.processIntoTeam(teamId, user, user.sub);
+
+}
+
+teamService.joinTeam = async (teamId, user) => {
+
+    // If user already in team
+    const userInTeam = await teamService.checkUserInTeam(teamId, user.sub);
+
+    if (userInTeam)
+        return 'user already in team'
+
+    // Check if this user already invited / applied
+    const pendingInviteApply = await teamService.getPendingLog(teamId, user.sub, [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
+
+    // If there is no pending invite / apply, create apply log
+    if (!pendingInviteApply)
+        return teamService.createTeamLog(teamId, user, user.sub, TeamLogTypeEnum.APPLY);
+
+    // If apply pending exist, return
+    if (pendingInviteApply.eteamlogtype === TeamLogTypeEnum.APPLY && pendingInviteApply.eteamlogstatus === TeamLogStatusEnum.PENDING)
+        return 'user already applied'
+
+    // If invited, then auto join
+    if (pendingInviteApply.eteamlogtype === TeamLogTypeEnum.INVITE && pendingInviteApply.eteamlogstatus === TeamLogStatusEnum.PENDING)
+        return teamService.processIntoTeam(teamId, user, user.sub);
+
+}
+
+teamService.removeUserFromTeam = async (userInTeam) => {
+
+    return userInTeam.$query()
+    .delete()
+    .then(rowsAffected => rowsAffected === 1);
+
+}
+
+teamService.kick = async (teamId, user, userId) => {
+
+    if (user.sub === userId)
+        return 'cannot kick yourself'
+
+    const isAdmin = await teamService.isAdmin(teamId, user.sub);
+
+    if (!isAdmin)
+        return 'not admin'
+
+    // If user already in team
+    const userInTeam = await teamService.checkUserInTeam(teamId, userId);
+
+    if (!userInTeam)
+        return 'user not in team'
+
+    return teamService.removeUserFromTeam(userInTeam);
+
+}
+
+teamService.changeTeamMemberPosition = async (teamId, user, userId, position) => {
+
+    if (user.sub === userId)
+        return 'cannot change your position'
+
+    const isAdmin = await teamService.isAdmin(teamId, user.sub);
+
+    if (!isAdmin)
+        return 'not admin'
+
+    if (!TeamUserMappingPositionEnum.hasOwnProperty(position))
+        return 'position unaccepted'
+
+    await TeamUserMapping.query()
+    .where('eusereuserid', userId)
+    .updateByUserId({ eteamusermappingposition: position }, user.sub);
 
 }
 
