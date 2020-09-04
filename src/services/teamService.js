@@ -272,7 +272,7 @@ teamService.processIntoTeamByUserId = async (teamId, user, userIds) => {
             eteameteamid: teamId,
             eteamusermappingposition: TeamUserMappingPositionEnum.MEMBER
         }
-    ))
+    ))  
 
     const teamUserMappingPromise = TeamUserMapping.query().insertToTable(mapping, user.sub);
 
@@ -392,18 +392,6 @@ teamService.processInvitation = async (teamId, user, status) => {
 
     if (status === TeamLogStatusEnum.ACCEPTED)
         return teamService.processIntoTeamByEmail(teamId, user, user.sub);
-
-}
-
-teamService.addUserToTeam = async (teamId, user, userIds) => {
-
-    const mapping = userIds.map(userId => ({
-        eusereuserid: userId,
-        eteameteamid: teamId,
-        eteamusermappingposition: TeamUserMappingPositionEnum.MEMBER
-    }))
-
-    return TeamUserMapping.query().insertToTable(mapping, user.sub);
 
 }
 
