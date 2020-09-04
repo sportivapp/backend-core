@@ -11,5 +11,8 @@ router.post( routes.team.member, auth.authenticateToken, controller.getTeamMembe
 router.post( routes.team.invite, auth.authenticateToken, controller.invite);
 router.post( routes.team.processInvitation, auth.authenticateToken, controller.processInvitation);
 router.post( routes.team.processRequest, auth.authenticateToken, controller.processRequest);
+router.post( routes.team.join, auth.authenticateToken, controller.joinTeam);
+router.put( routes.team.position, auth.authenticateToken, controller.changeTeamMemberPosition);
+router.delete( routes.team.member, auth.authenticateToken, controller.kick);
 
 module.exports = router;
