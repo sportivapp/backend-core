@@ -122,7 +122,9 @@ service.searchApprovals = async (valueAndTypeList, index) => {
     return query
         .withGraphFetched('approvalUsers')
         .then(list => {
-            if (list.length <= 0) return service.searchApprovals(valueAndTypeList, index + 1)
+            const isApprovalUserExist = list.map(approval => approval.approvalUsers.length)
+                .filter(length => length > 0).length > 0
+            if (list.length <= 0 || !isApprovalUserExist) return service.searchApprovals(valueAndTypeList, index + 1)
             else return list
         })
 
