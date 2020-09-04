@@ -5,6 +5,7 @@ const User = require('../models/User')
 const TeamIndustryMapping = require('../models/TeamIndustryMapping')
 const ServiceHelper = require('../helper/ServiceHelper');
 const { raw } = require('objection');
+const { toLower } = require('lodash')
 
 const teamService = {}
 
@@ -157,7 +158,7 @@ teamService.getTeamMemberList = async (teamId, user, page = 0, size = 10, type) 
 
 }
 
-teamService.checkUserInTeam = async (teamId, userId) => {
+teamService.checkUserInTeamByEmail = async (teamId, userId) => {
 
     return TeamUserMapping.query()
     .where('eteameteamid', teamId)
@@ -166,7 +167,15 @@ teamService.checkUserInTeam = async (teamId, userId) => {
 
 }
 
-teamService.getPendingLog = async (teamId, userId, types) => {
+teamService.checkUserInTeamByUserId = async (teamId, userIds) => {
+
+    return TeamUserMapping.query()
+    .where('eteameteamid', teamId)
+    .whereIn('eusereuserid', userIds)
+
+}
+
+teamService.getPendingLogByEmail = async (teamId, userId, types) => {
 
     return TeamLog.query()
     .where('eusereuserid', userId)
@@ -178,7 +187,19 @@ teamService.getPendingLog = async (teamId, userId, types) => {
 
 }
 
-teamService.createTeamLog = async (teamId, user, userId, type) => {
+teamService.getPendingLogByUserId = async (teamId, userIds, types) => {
+
+    return TeamLog.query()
+    .whereIn('eusereuserid', userIds)
+    .andWhere('eteameteamid', teamId)
+    .whereIn('eteamlogtype', types)
+    .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
+    .orderBy('eteamlogcreatetime', 'DESC')
+
+}
+
+
+teamService.createTeamLogByEmail = async (teamId, user, userId, type) => {
 
     return TeamLog.query().insertToTable({
         eteameteamid: teamId,
@@ -188,9 +209,28 @@ teamService.createTeamLog = async (teamId, user, userId, type) => {
 
 }
 
-teamService.updateTeamLog = async (teamId, user, userId, status) => {
+teamService.createTeamLogByUserId = async (teamId, user, userIds, type) => {
 
-    const log = await teamService.getPendingLog(teamId, userId, [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
+    await TeamLog.query()
+    .delete()
+    .where('eteameteamid', teamId)
+    .whereIn('eusereuserid', userIds)
+    .where('eteamlogtype', type)
+    .where('eteamlogstatus', TeamLogStatusEnum.PENDING)
+
+    const logDTOs = userIds.map(userId => ({
+        eteameteamid: teamId,
+        eusereuserid: userId,
+        eteamlogtype: type
+    }))
+
+    return TeamLog.query().insertToTable(logDTOs, user.sub);
+
+}
+
+teamService.updateTeamLogByEmail = async (teamId, user, userId, status) => {
+
+    const log = await teamService.getPendingLogByEmail(teamId, userId, [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
 
     return log.$query().updateByUserId({
         eteamlogstatus: status
@@ -199,7 +239,18 @@ teamService.updateTeamLog = async (teamId, user, userId, status) => {
 
 }
 
-teamService.processIntoTeam = async (teamId, user, userId) => {
+teamService.updateTeamLogByUserId = async (teamId, user, userIds, status) => {
+
+    const log = await teamService.getPendingLogByUserId(teamId, userIds, [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
+
+    return log.$query().updateByUserId({
+        eteamlogstatus: status
+    }, user.sub)
+    .returning('*');
+
+}
+
+teamService.processIntoTeamByEmail = async (teamId, user, userId) => {
 
     const teamUserMappingPromise = TeamUserMapping.query().insertToTable({
         eusereuserid: userId,
@@ -207,71 +258,99 @@ teamService.processIntoTeam = async (teamId, user, userId) => {
         eteamusermappingposition: TeamUserMappingPositionEnum.MEMBER
     }, user.sub);
 
-    const teamLogPromise = teamService.updateTeamLog(teamId, user, userId, TeamLogStatusEnum.ACCEPTED);
+    const teamLogPromise = teamService.updateTeamLogByEmail(teamId, user, userId, TeamLogStatusEnum.ACCEPTED);
 
     return Promise.all([teamUserMappingPromise, teamLogPromise])
 
 }
 
-teamService.invite = async (teamId, user, email) => {
+teamService.processIntoTeamByUserId = async (teamId, user, userIds) => {
+
+    const mapping = userIds.map(userId => (
+        {
+            eusereuserid: userId,
+            eteameteamid: teamId,
+            eteamusermappingposition: TeamUserMappingPositionEnum.MEMBER
+        }
+    ))
+
+    const teamUserMappingPromise = TeamUserMapping.query().insertToTable(mapping, user.sub);
+
+    const teamLogPromise = teamService.updateTeamLogByUserId(teamId, user, userIds, TeamLogStatusEnum.ACCEPTED);
+
+    return Promise.all([teamUserMappingPromise, teamLogPromise])
+
+}
+
+teamService.invite = async (teamId, user, email, type, userIds) => {
 
     const isAdmin = await teamService.isAdmin(teamId, user.sub);
 
     if (!isAdmin)
         return 'not admin'
 
-    const invitedUser = await User.query()
-    .where('euseremail', email)
-    .first();
+    let invitedUser
+    if(toLower(type) === 'email') {
+        invitedUser = await User.query()
+        .where('euseremail', email)
+        .first();
+    } else if (toLower(type) === 'user') {
+        invitedUser = await User.query()
+        .whereIn('euserid', userIds)
+    } else {
+        return
+    }
 
     if (!invitedUser)
         return 'user does not exist'
 
-    const userInTeam = await teamService.checkUserInTeam(teamId, invitedUser.euserid);
+    if( toLower(type) === 'user') {
 
-    if (userInTeam)
-        return 'user already in team'
+        const userInTeam = await teamService.checkUserInTeamByUserId(teamId, userIds);
 
-    // Check if this user already invited / applied
-    const pendingInviteApply = await teamService.getPendingLog(teamId, invitedUser.euserid, 
-        [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
+        if (userInTeam.length > 0)
+            return 'one or more user already in team'
+        
+        const pendingInviteApply = await teamService.getPendingLogByUserId(teamId, userIds, 
+            [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
 
-    // If there is no pending log then create log and return
-    if (!pendingInviteApply)
-        return teamService.createTeamLog(teamId, user, invitedUser.euserid, TeamLogTypeEnum.INVITE)
+        // If all users that're requested already invited 
+        if (pendingInviteApply.length === userIds.length)
+            return 'all users already invited'
 
-    // If double invite, return
-    if (pendingInviteApply.eteamlogtype === TeamLogTypeEnum.INVITE && pendingInviteApply.eteamlogstatus === TeamLogStatusEnum.PENDING)
+        // If some user have some pending log and some user doesnt have it
+        if (pendingInviteApply.length < userIds.length)
+            return teamService.createTeamLogByUserId(teamId, user, userIds, TeamLogTypeEnum.INVITE)
+
+        // If applied, auto join
+        if (pendingInviteApply.eteamlogtype === TeamLogTypeEnum.APPLY && pendingInviteApply.eteamlogstatus === TeamLogStatusEnum.PENDING)
+            return teamService.processIntoTeamByUserId(teamId, user, userIds);
+            
+
+    } else if( toLower(type) === 'email') {
+        
+        const userInTeam = await teamService.checkUserInTeamByEmail(teamId, invitedUser.euserid);
+
+        if (userInTeam)
+            return 'user already in team'
+
+        // Check if this user already invited / applied
+        const pendingInviteApply = await teamService.getPendingLogByEmail(teamId, invitedUser.euserid, 
+            [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
+
+        // If there is no pending log then create log and return
+        if (!pendingInviteApply)
+            return teamService.createTeamLogByEmail(teamId, user, invitedUser.euserid, TeamLogTypeEnum.INVITE)
+
+        // If double invite, return
+        if (pendingInviteApply.eteamlogtype === TeamLogTypeEnum.INVITE && pendingInviteApply.eteamlogstatus === TeamLogStatusEnum.PENDING)
         return 'user already invited'
 
-    // If applied, auto join
-    if (pendingInviteApply.eteamlogtype === TeamLogTypeEnum.APPLY && pendingInviteApply.eteamlogstatus === TeamLogStatusEnum.PENDING)
-        return teamService.processIntoTeam(teamId, user, invitedUser.euserid);
-    
-}
+        // If applied, auto join
+        if (pendingInviteApply.eteamlogtype === TeamLogTypeEnum.APPLY && pendingInviteApply.eteamlogstatus === TeamLogStatusEnum.PENDING)
+            return teamService.processIntoTeamByEmail(teamId, user, invitedUser.euserid);
 
-teamService.joinTeam = async (teamId, user) => {
-
-    // If user already in team
-    const userInTeam = await teamService.checkUserInTeam(teamId, user.sub);
-
-    if (userInTeam)
-        return 'user already in team'
-
-    // Check if this user already invited / applied
-    const pendingInviteApply = await teamService.getPendingLog(teamId, user.sub, [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
-
-    // If there is no pending invite / apply, create apply log
-    if (!pendingInviteApply)
-        return teamService.createTeamLog(teamId, user, user.sub, TeamLogTypeEnum.APPLY);
-
-    // If apply pending exist, return
-    if (pendingInviteApply.eteamlogtype === TeamLogTypeEnum.APPLY && pendingInviteApply.eteamlogstatus === TeamLogStatusEnum.PENDING)
-        return 'user already applied'
-
-    // If invited, then auto join
-    if (pendingInviteApply.eteamlogtype === TeamLogTypeEnum.INVITE && pendingInviteApply.eteamlogstatus === TeamLogStatusEnum.PENDING)
-        return teamService.processIntoTeam(teamId, user, user.sub);
+    }
 
 }
 
@@ -285,16 +364,16 @@ teamService.processRequest = async (teamId, userId, user, status) => {
     if (!isAdmin)
         return 'not admin'
 
-    const pendingApply = await teamService.getPendingLog(teamId, userId, [TeamLogTypeEnum.APPLY]);
+    const pendingApply = await teamService.getPendingLogByEmail(teamId, userId, [TeamLogTypeEnum.APPLY]);
 
     if (!pendingApply)
         return 'no apply'
 
     if (status === TeamLogStatusEnum.REJECTED)
-        return teamService.updateTeamLog(teamId, user, userId, TeamLogStatusEnum.REJECTED)
+        return teamService.updateTeamLogByEmail(teamId, user, userId, TeamLogStatusEnum.REJECTED)
 
     if (status === TeamLogStatusEnum.ACCEPTED)
-        return teamService.processIntoTeam(teamId, user, userId);
+        return teamService.processIntoTeamByEmail(teamId, user, userId);
 
 }
 
@@ -303,16 +382,16 @@ teamService.processInvitation = async (teamId, user, status) => {
     if (status !== TeamLogStatusEnum.ACCEPTED && status !== TeamLogStatusEnum.REJECTED)
         return 'status unaccepted'
 
-    const pendingInvite = await teamService.getPendingLog(teamId, user.sub, [TeamLogTypeEnum.INVITE]);
+    const pendingInvite = await teamService.getPendingLogByEmail(teamId, user.sub, [TeamLogTypeEnum.INVITE]);
 
     if (!pendingInvite)
         return 'no invitation'
 
     if (status === TeamLogStatusEnum.REJECTED)
-        return teamService.updateTeamLog(teamId, user, user.sub, TeamLogStatusEnum.REJECTED)
+        return teamService.updateTeamLogByEmail(teamId, user, user.sub, TeamLogStatusEnum.REJECTED)
 
     if (status === TeamLogStatusEnum.ACCEPTED)
-        return teamService.processIntoTeam(teamId, user, user.sub);
+        return teamService.processIntoTeamByEmail(teamId, user, user.sub);
 
 }
 
