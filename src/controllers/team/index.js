@@ -67,25 +67,6 @@ controller.getTeamDetail = async (req, res, next) => {
 
 }
 
-// add user in company to team (to get all user by company, check user service)
-controller.addUserToTeam = async (req, res, next) => {
-
-    const { teamId, userIds } = req.body;
-    
-    try {
-
-        const result = await teamService.addUserToTeam(teamId, req.user, userIds);
-
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400));
-        return res.status(200).json(ResponseHelper.toBaseResponse(result));
-
-    } catch(e) {
-        next(e);
-    }
-
-}
-
 controller.getTeamMemberList = async (req, res, next) => {
 
     // INVITE / APPLY / MEMBER
