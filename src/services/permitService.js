@@ -146,7 +146,10 @@ permitService.updatePermitStatusById = async (permitId, status, user) => {
 
     else {
 
-        if (permitApproval.approval.eapprovaltype === 'MULTI') {
+        await permitApproval.$query()
+            .updateByUserId({ epermitapprovalmappingstatus: status }, user.sub)
+
+        if (permitApproval.approval && permitApproval.approval.eapprovaltype === 'MULTI') {
 
             const permitStatusChangedMappings = await PermitApprovalMapping.query()
                 .where('epermitepermitid', permitId)
@@ -160,40 +163,43 @@ permitService.updatePermitStatusById = async (permitId, status, user) => {
                 .filter(status => status === PermitStatusEnum.PENDING)
                 .length > 0
 
-            const updatePermitApproval = permitApproval.$query()
-                .updateByUserId({ epermitapprovalmappingstatus: status }, user.sub)
-
             const updatePermit = (status) => Permit.query()
                 .findById(permitId)
                 .updateByUserId({ epermitstatus: status }, user.sub)
                 .returning('*')
 
             if (approvedList.length === permitStatusChangedMappings.length) {
-                return Promise.all([updatePermitApproval, updatePermit(PermitStatusEnum.APPROVED)])
-                    .then(arr => arr[1])
+                return updatePermit(PermitStatusEnum.APPROVED)
             }
             else if (!isPendingPermitExist) {
-                return Promise.all([updatePermitApproval, updatePermit(PermitStatusEnum.REJECTED)])
-                    .then(arr => arr[1])
+                return updatePermit(PermitStatusEnum.REJECTED)
             }
-            else return updatePermitApproval.then(ignored => permit)
+            else return permit
 
         } else {
 
-            const selectApprovedPermitMapping = await PermitApprovalMapping.query()
+            await permitApproval.$query()
+                .updateByUserId({ epermitapprovalmappingstatus: status }, user.sub)
+
+            const permitMappings = await PermitApprovalMapping.query()
                 .where('epermitepermitid', permitId)
-                .where('epermitapprovalmappingstatus', PermitStatusEnum.APPROVED)
-                .first()
 
-            let realStatus
+            const isApprovedExist = permitMappings
+                .filter(mapping => mapping.epermitapprovalmappingstatus === PermitStatusEnum.APPROVED)
+                .length > 0
 
-            if (selectApprovedPermitMapping) realStatus = PermitStatusEnum.APPROVED
-            else realStatus = PermitStatusEnum.REJECTED
+            const isRejectExist = permitMappings
+                .filter(mapping => mapping.epermitapprovalmappingstatus === PermitStatusEnum.REJECTED)
+                .length > 0
 
-            return Permit.query()
+            const updatePermit = (status) => Permit.query()
                 .findById(permitId)
-                .updateByUserId({ epermitstatus: realStatus }, user.sub)
+                .updateByUserId({ epermitstatus: status }, user.sub)
                 .returning('*')
+
+            if (isApprovedExist) return updatePermit(PermitStatusEnum.APPROVED)
+            else if (isRejectExist) return updatePermit(PermitStatusEnum.REJECTED)
+            else return permit
         }
     }
 }

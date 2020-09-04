@@ -112,10 +112,10 @@ service.deleteUserFromApproval = async (approvalId, userId) => {
 service.searchApprovals = async (valueAndTypeList, index) => {
     if (index >= valueAndTypeList.length) return []
     let type = valueAndTypeList[index].type
-    let value =valueAndTypeList[index].value
+    let value = valueAndTypeList[index].value
     let column
     if (type.includes('DEPARTMENT')) column = 'edepartmentedepartmentid'
-    else if(type.includes('USER')) column = 'etargetuserid'
+    else if (type.includes('USER')) column = 'etargetuserid'
     else column = 'ecompanyecompanyid'
     let query = Approval.query()
     query = type.includes('LIST') ? query.whereIn(column, value) : query.where(column, value)
