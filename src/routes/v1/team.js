@@ -8,9 +8,8 @@ router.post( routes.team.list, auth.authenticateToken, controller.createTeam);
 router.get( routes.team.list, auth.authenticateToken, controller.getTeams);
 router.get( routes.team.id, auth.authenticateToken, controller.getTeamDetail);
 router.post( routes.team.member, auth.authenticateToken, controller.getTeamMemberList);
-
 router.post( routes.team.invite, auth.authenticateToken, controller.invite);
 router.post( routes.team.processInvitation, auth.authenticateToken, controller.processInvitation);
-
+router.post( routes.team.processRequest, auth.authenticateToken, controller.processRequest);
 
 module.exports = router;
