@@ -29,7 +29,7 @@ app.use(morgan('dev'));
 app.use(routes)
 
 app.use((_, __, next) => {
-    const err = new Error('Not Found');
+    const err = new Error('Path Not Found');
     err.status = 404;
     next(err);
 });
