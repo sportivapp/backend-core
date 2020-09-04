@@ -1,5 +1,6 @@
 const Schemas = require('../webmodel/request');
 const ResponseHelper = require('../helper/ResponseHelper')
+const ErrorTypeEnum = require('../models/enum/ErrorTypeEnum');
 
 // enabled HTTP methods for request data validation
 const supportedMethods = ['post', 'put']
@@ -36,7 +37,7 @@ module.exports = async (req, res, next) => {
                     errors[detail.path.join('.')] = error
                 })
 
-                return res.status(400).json(ResponseHelper.toErrorResponse(400, errors))
+                return res.status(400).json(ResponseHelper.toErrorResponse(400, errors, ErrorTypeEnum.VALIDATION))
             }
 
         }
