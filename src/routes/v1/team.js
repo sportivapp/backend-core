@@ -10,7 +10,6 @@ router.get( routes.team.id, auth.authenticateToken, controller.getTeamDetail);
 router.post( routes.team.member, auth.authenticateToken, controller.getTeamMemberList);
 
 router.post( routes.team.invite, auth.authenticateToken, controller.invite);
-router.post( routes.team.add, auth.authenticateToken, controller.addUserToTeam);
 router.post( routes.team.processInvitation, auth.authenticateToken, controller.processInvitation);
 
 
