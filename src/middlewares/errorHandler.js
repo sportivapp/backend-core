@@ -14,5 +14,5 @@ async function processError (error, res) {
     else if (error instanceof NotFoundError)
         return res.status(404).json(ResponseHelper.toErrorResponse(404))
     else
-        return res.status(500).json(ResponseHelper.toErrorResponse(500))
+        return res.status(error.status || 500).json(ResponseHelper.toErrorResponse(500, error.message || 'INTERNAL_SERVER_ERROR'))
 }
