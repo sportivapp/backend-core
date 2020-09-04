@@ -115,11 +115,12 @@ controller.getTeamMemberList = async (req, res, next) => {
 // invite user by email to team
 controller.invite = async (req, res, next) => {
 
-    const { teamId, email } = req.body;
+    const { type } = req.query
+    const { teamId, email, userIds } = req.body;
 
     try {
 
-        const result = await teamService.invite(teamId, req.user, email);
+        const result = await teamService.invite(teamId, req.user, email, type, userIds);
 
         if (result === 'not admin')
             return res.status(403).json(ResponseHelper.toErrorResponse(403));
