@@ -100,6 +100,7 @@ module.exports = {
             member: '/team-member',
             invite: '/team-invite',
             processInvitation: '/team-process-invitation',
+            processRequest: '/team-process-request',
             add: '/team-add-member'
         }
     }
