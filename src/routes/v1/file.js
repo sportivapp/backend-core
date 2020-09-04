@@ -13,7 +13,7 @@ const upload = multer({storage: storage});
 
 const express = require('express');
 const router = express.Router();
-const controller = require('../../controllers/mobileFile');
+const controller = require('../../controllers/file');
 const auth = require('../../middlewares/authentication');
 
 router.post('/file', auth.authenticateToken, upload.single('file'), controller.createFile);

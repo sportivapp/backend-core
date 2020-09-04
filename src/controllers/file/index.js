@@ -1,4 +1,4 @@
-const fileService = require('../../services/mobileFileService');
+const fileService = require('../../services/fileService');
 const ResponseHelper = require('../../helper/ResponseHelper');
 
 const controller = {};
