@@ -319,11 +319,10 @@ teamService.invite = async (teamId, user, email, type, userIds) => {
             return 'one or more user already in team'
         
         // Check if this user already invited / applied
-        const pendingInviteApply = await teamService.getPendingLogByUserId(teamId, userIds, 
-            [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
+        const pendingInviteApply = await teamService.getPendingLogByUserId(teamId, userIds, [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
 
         const removedElement = (array, elem) => {
-            var index = array.indexOf(elem);
+            let index = array.indexOf(elem);
             if (index > -1) {
                 array.splice(index, 1);
             }
@@ -360,8 +359,8 @@ teamService.invite = async (teamId, user, email, type, userIds) => {
         }
 
         const result = {
-            invitedUser: invited,
-            aapliedUser: applied
+            invitedUsers: invited,
+            appliedUsers: applied
         }
 
         return result
