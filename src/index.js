@@ -2,7 +2,8 @@ const   express     = require('express'),
         cors        = require('cors'),
         morgan      = require('morgan'),
         fs          = require('fs'),
-        https       = require('https')
+        https       = require('https'),
+        path        = require('path')
 
 const app = express();
 const routes = require('./routes/v1');
@@ -25,7 +26,7 @@ app.use((_, res, next) => {
 app.use(express.json({limit: '1000mb'}));
 app.use(express.urlencoded({limit: '1000mb', extended: true }));
 app.use(morgan('dev'));
-app.use(express.static('../temp'));
+app.use(express.static(path.resolve(__dirname + '/../temp')));
 
 app.use(routes)
 
