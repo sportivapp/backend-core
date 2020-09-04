@@ -157,4 +157,73 @@ controller.processInvitation = async (req, res, next) => {
 
 }
 
+controller.joinTeam = async (req, res, next) => {
+
+    const { teamId } = req.body;
+    
+    try {
+
+        const result = await teamService.joinTeam(teamId, req.user);
+
+        if (result === 'user already in team')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        if (result === 'user already applied')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.kick = async (req, res, next) => {
+
+    const { teamId, userId } = req.body;
+
+    try {
+
+        const result = await teamService.kick(teamId, req.user, userId);
+
+        if (result === 'cannot kick yourself')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        if (result === 'not admin')
+            return res.status(403).json(ResponseHelper.toErrorResponse(403));
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.changeTeamMemberPosition = async (req, res, next) => {
+
+    const { position } = req.query;
+    const { teamId, userId } = req.body;
+
+    try {
+
+        const result = await teamService.invite(teamId, user, userId, position.toUpperCase());
+
+        if (result === 'cannot change your position')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        if (result === 'not admin')
+            return res.status(403).json(ResponseHelper.toErrorResponse(403));
+        if (result === 'position unaccepted')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = controller
