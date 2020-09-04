@@ -64,12 +64,7 @@ service.updateApproval = async (companyId, departmentId, userId, isMultiple, use
         .where('edepartmentedepartmentid', departmentId)
         .where('etargetuserid', userId)
         .first()
-        .updateByUserId({
-            eapprovaltype: isMultiple ? 'MULTI': 'SINGLE',
-            ecompanyecompanyid: companyId,
-            edepartmentedepartmentid: departmentId,
-            etargetuserid: userId
-        }, user.sub)
+        .updateByUserId({ eapprovaltype: isMultiple ? 'MULTI': 'SINGLE' }, user.sub)
         .returning('*')
         .withGraphFetched('[company(baseAttributes)' +
             '.parent(baseAttributes)' +
