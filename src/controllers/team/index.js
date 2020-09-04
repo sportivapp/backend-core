@@ -93,22 +93,14 @@ controller.getTeamMemberList = async (req, res, next) => {
 
 }
 
-// invite user by email to team
 controller.invite = async (req, res, next) => {
 
-    const { type } = req.query
-    const { teamId, email, userIds } = req.body;
+    const { teamId, userIds } = req.body;
 
     try {
 
-        const result = await teamService.invite(teamId, req.user, email, type, userIds);
+        const result = await teamService.invite(teamId, req.user, userIds);
 
-        if (result === 'not admin')
-            return res.status(403).json(ResponseHelper.toErrorResponse(403));
-        if (result === 'user does not exist')
-            return res.status(400).json(ResponseHelper.toErrorResponse(400));
-        if (result === 'user already in team')
-            return res.status(400).json(ResponseHelper.toErrorResponse(400));
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
