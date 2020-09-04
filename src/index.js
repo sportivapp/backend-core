@@ -25,6 +25,7 @@ app.use((_, res, next) => {
 app.use(express.json({limit: '1000mb'}));
 app.use(express.urlencoded({limit: '1000mb', extended: true }));
 app.use(morgan('dev'));
+app.use(express.static('../temp'));
 
 app.use(routes)
 
