@@ -334,13 +334,12 @@ teamService.invite = async (teamId, user, email, type, userIds) => {
 
         if(pendingInviteApply.length > 0) {
             // take the user that havent been log into team log, also taking user that has PENDING and already APPLY
-            pendingInviteApply.map(loggedUser => {
-                userIds.map(userId => {
+            
+            pendingInviteApply.forEach(loggedUser => {
+                userIds.forEach(userId => {
                     if(loggedUser.eusereuserid === userId)
                         removedElement(invitedUserIds, userId)
                 })
-                
-                return
             })
         }
 
