@@ -23,7 +23,7 @@ const todoListRoutes = require('./todolist')
 const profileRoutes = require('./profile')
 const otpRoutes = require('./otp');
 const teamRoutes = require('./team');
-
+const fileRoutes = require('./file');
 
 router.use('/api/v1', [
     userRoutes,
@@ -46,11 +46,11 @@ router.use('/api/v1', [
     todoListRoutes,
     profileRoutes,
     otpRoutes,
-    teamRoutes
+    teamRoutes,
+    fileRoutes,
 ]);
 
 const mobileUserRoutes = require('./mobileUser');
-const mobileFileRoutes = require('./mobileFile');
 const mobileLicenseRoutes = require('./mobileLicense');
 const mobileCompanyRoutes = require('./mobileCompany');
 const mobileAnnouncementRoutes = require('./mobileAnnouncement');
@@ -60,7 +60,6 @@ const mobileExperienceRoutes = require('./mobileExperience');
 
 router.use('/api/v1/mobile', [
     mobileUserRoutes,
-    mobileFileRoutes,
     mobileLicenseRoutes,
     mobileCompanyRoutes,
     mobileAnnouncementRoutes,

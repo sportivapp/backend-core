@@ -9,7 +9,7 @@ const Module = require('../models/Module')
 const CompanySequence = require('../models/CompanySequence')
 const { raw } = require('objection')
 const ServiceHelper = require('../helper/ServiceHelper')
-const fileService = require('./mobileFileService');
+const fileService = require('./fileService');
 
 const CompanyService = {};
 
