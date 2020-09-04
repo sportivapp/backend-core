@@ -7,6 +7,7 @@ const   express     = require('express'),
 const app = express();
 const routes = require('./routes/v1');
 const slackLoggingService = require('./helper/slackLoggingService');
+const errorHandler = require('./middlewares/errorHandler');
 
 const webHookURL = 'https://hooks.slack.com/services/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';
 let errorMsg = {};
@@ -33,25 +34,27 @@ app.use((_, __, next) => {
     next(err);
 });
 
-app.use((error, req, res, next) => {
-    // errorMsg = error;
-    console.log(error)
-    const status = error.status || 500;
-    res.status(status).send({
-        error: {
-            status: status,
-            message: error.message || 'Internal Server Error',
-        },
-    });
-    
-    errorMsg = {
-        status: status,
-        message: error.message || 'Internal Server Error',
-        errStack: error.stack
-    }
+// app.use((error, req, res, next) => {
+//     // errorMsg = error;
+//     console.log(error)
+//     const status = error.status || 500;
+//     res.status(status).send({
+//         error: {
+//             status: status,
+//             message: error.message || 'Internal Server Error',
+//         },
+//     });
+//
+//     errorMsg = {
+//         status: status,
+//         message: error.message || 'Internal Server Error',
+//         errStack: error.stack
+//     }
+//
+//     slackLoggingService.sendSlackMessage(webHookURL, slackLoggingService.setLogMessage(errorMsg));
+// });
 
-    slackLoggingService.sendSlackMessage(webHookURL, slackLoggingService.setLogMessage(errorMsg));
-});
+app.use(errorHandler)
 
 require('dotenv').config();
 const httpPORT = process.env.PORT || 5100;
