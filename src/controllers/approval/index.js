@@ -37,11 +37,11 @@ controller.getApprovalByCompanyIdAndDepartmentIdAndUserId = async (req, res, nex
 
 controller.updateApprovalByCompanyIdAndDepartmentIdAndUserId = async (req, res, next) => {
 
-    const { companyId, departmentId, userId, isMultiple } = req.body
+    const { companyId, departmentId, targetUserId, isMultiple } = req.body
 
     try {
-        const result = await approvalService.updateApproval(companyId, departmentId, userId, isMultiple, req.user)
-        if (!result) return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        const result = await approvalService.updateApproval(companyId, departmentId, targetUserId, isMultiple, req.user)
+        if (!result) return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)

@@ -10,7 +10,7 @@ controller.createPermit = async (req, res, next) => {
     const user = req.user
 
     const permitDTO = {
-        eusereuserid: permitRequest.userId,
+        eusereuserid: req.user.sub,
         epermitdescription: permitRequest.description,
         epermitstartdate: permitRequest.startDate,
         epermitenddate: permitRequest.endDate,

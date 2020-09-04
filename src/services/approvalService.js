@@ -41,23 +41,7 @@ service.getApproval = async (companyId, departmentId, userId) => {
         .first()
 }
 
-service.updateApproval = async (companyId, departmentId, userId, isMultiple, user) => {
-
-    if (!companyId) return
-
-    const company = await Company.query().findById(companyId).withGraphFetched('parent.parent')
-
-    if (!company) return
-
-    if (departmentId) {
-        const department = await Department.query().findById(departmentId).withGraphFetched('parent')
-        if (!department) return
-    } else departmentId = null
-
-    if (userId) {
-        const user = await User.query().findById(userId)
-        if (!user) return
-    } else userId = null
+service.updateApproval = async (companyId = null, departmentId = null, userId = null, isMultiple, user) => {
 
     return Approval.query()
         .where('ecompanyecompanyid', companyId)

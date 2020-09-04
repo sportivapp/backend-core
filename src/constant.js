@@ -102,6 +102,13 @@ module.exports = {
         },
         team: {
             list: '/team'
+        },
+        permit: {
+            list: '/permit',
+            id: '/permit/:permitId',
+            action: '/permit/action',
+            request: '/permit/:permitId/request',
+            subordinate: '/permit/subordinate'
         }
     }
 }
