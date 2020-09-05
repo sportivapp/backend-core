@@ -63,4 +63,20 @@ controller.previewFileRestricted = async (req, res, next) => {
 
 }
 
+controller.getFile = async (req, res, next) => {
+
+    const { fileId } = req.params;
+
+    try {
+        const result = await fileService.getFileByIdAndCreateBy(fileId, req.user.sub);
+        
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result)); 
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = controller;
