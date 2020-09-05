@@ -132,7 +132,7 @@ controller.updateUserCoachData = async (req, res, next) => {
         eusergender: gender,
         euserhobby: hobby,
         ecountryecountryid : countryId,
-        efileefileid: fileId,
+        efileefileid: fileId === 0 ? null : fileId,
         euseraddress: address,
         euserfacebook: facebook,
         euserinstagram: instagram,

@@ -113,10 +113,6 @@ UserService.updateUser = async (userDTO, user) => {
 
 UserService.updateUserCoachData = async (userCoachDTO, user, industryIds) => {
 
-    if (userCoachDTO.efileefileid === null) {
-        return 'no profile picture given'
-    }
-
     const userFromDB = await UserService.getUserById(user.sub);
 
     if (!userFromDB)
