@@ -148,7 +148,7 @@ controller.cancelInvite = async (req, res, next) => {
     
     try {
 
-        const result = await teamService.exitTeam(teamId, userId, req.user);
+        const result = await teamService.cancelInvite(teamId, userId, req.user);
 
         if (result === 'not admin')
             return res.status(403).json(ResponseHelper.toErrorResponse(403));
