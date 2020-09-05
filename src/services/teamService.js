@@ -5,7 +5,6 @@ const User = require('../models/User')
 const TeamIndustryMapping = require('../models/TeamIndustryMapping')
 const ServiceHelper = require('../helper/ServiceHelper');
 const { raw } = require('objection');
-const { toLower } = require('lodash')
 
 const teamService = {}
 
@@ -265,17 +264,18 @@ teamService.processIntoTeamByUserIds = async (teamId, user, appliedUsers) => {
         return
     }
     
-    const userIds = appliedUsers.map(appliedUser => {
-        return appliedUser.eusereuserid
-    })
+    let userIds = [];
 
-    const mapping = userIds.map(userId => (
-        {
-            eusereuserid: userId,
+    const mapping = appliedUsers.map(appliedUser => {
+
+        userIds.push(appliedUser.eusereuserid);
+
+        return {
+            eusereuserid: appliedUser.eusereuserid,
             eteameteamid: teamId,
             eteamusermappingposition: TeamUserMappingPositionEnum.MEMBER
         }
-    ))
+    })
 
     const teamUserMappingPromise = TeamUserMapping.query().insertToTable(mapping, user.sub);
 
@@ -295,62 +295,62 @@ teamService.invite = async (teamId, user, userIds) => {
     if (!isAdmin)
         return 'not admin'
 
-    const invitedUser = await User.query()
+    const invitedUsers = await User.query()
         .whereIn('euserid', userIds)
 
-    if (!invitedUser)
-        return 'user does not exist'
+    if (invitedUsers.length !== userIds.length)
+        return 'one or more user not exist'
 
-        const userInTeam = await teamService.checkUserInTeamByUserIds(teamId, userIds);
+    const userInTeam = await teamService.checkUserInTeamByUserIds(teamId, userIds);
 
-        if (userInTeam.length > 0)
-            return 'one or more user already in team'
+    if (userInTeam.length > 0)
+        return 'one or more user already in team'
+    
+    // Check if this user already invited / applied
+    const pendingInviteApply = await teamService.getPendingLogByUserIds(teamId, userIds, [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
+
+    const removedElement = (array, elem) => {
+        let index = array.indexOf(elem);
+        if (index > -1) {
+            array.splice(index, 1);
+        }
+    }
+
+    let invitedUserIds = userIds
+    let userApplyList = await teamService.getPendingLogByUserIds(teamId, userIds, [TeamLogTypeEnum.APPLY]);
+
+
+    if(pendingInviteApply.length > 0) {
+        // take the user that havent been log into team log, also taking user that has PENDING and already APPLY
         
-        // Check if this user already invited / applied
-        const pendingInviteApply = await teamService.getPendingLogByUserIds(teamId, userIds, [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
-
-        const removedElement = (array, elem) => {
-            let index = array.indexOf(elem);
-            if (index > -1) {
-                array.splice(index, 1);
-            }
-        }
-
-        let invitedUserIds = userIds
-        let userApplyList = await teamService.getPendingLogByUserIds(teamId, userIds, [TeamLogTypeEnum.APPLY]);
-
-
-        if(pendingInviteApply.length > 0) {
-            // take the user that havent been log into team log, also taking user that has PENDING and already APPLY
-            
-            pendingInviteApply.forEach(loggedUser => {
-                userIds.forEach(userId => {
-                    if(loggedUser.eusereuserid === userId)
-                        removedElement(invitedUserIds, userId)
-                })
+        pendingInviteApply.forEach(loggedUser => {
+            userIds.forEach(userId => {
+                if(loggedUser.eusereuserid === userId)
+                    removedElement(invitedUserIds, userId)
             })
-        }
+        })
+    }
 
-        let invited
-        let applied
+    let invited
+    let applied
 
-        if(invitedUserIds.length > 0)
-            invited = await teamService.createTeamLogByUserIds(teamId, user, invitedUserIds, TeamLogTypeEnum.INVITE)
+    if(invitedUserIds.length > 0)
+        invited = await teamService.createTeamLogByUserIds(teamId, user, invitedUserIds, TeamLogTypeEnum.INVITE)
 
-        if(userApplyList.length > 0) 
-            applied = await teamService.processIntoTeamByUserIds(teamId, user, userApplyList);
+    if(userApplyList.length > 0) 
+        applied = await teamService.processIntoTeamByUserIds(teamId, user, userApplyList);
 
-        //if no apply log and no invite log need to be created
-        if(invitedUserIds.length <= 0 && userApplyList.length <= 0) {
-            return "users already invited"
-        }
+    //if no apply log and no invite log need to be created
+    if(invitedUserIds.length <= 0 && userApplyList.length <= 0) {
+        return "users already invited"
+    }
 
-        const result = {
-            invitedUsers: invited,
-            appliedUsers: applied
-        }
+    const result = {
+        invitedUsers: invited,
+        appliedUsers: applied
+    }
 
-        return result
+    return result
 
 }
 
@@ -464,6 +464,27 @@ teamService.changeTeamMemberPosition = async (teamId, user, userId, position) =>
     await TeamUserMapping.query()
     .where('eusereuserid', userId)
     .updateByUserId({ eteamusermappingposition: position }, user.sub);
+
+}
+
+teamService.getMembersToInvite = async (teamId, user, page = 0, size = 10) => {
+
+    let existUserIds = [];
+
+    if (teamId) {
+        const users = await TeamUserMapping.query().select('eusereuserid');
+        existUserIds = users.map(user => user.eusereuserid);
+    }
+
+    const usersPage = await User.query()
+    .select('euser.efileefileid', 'euserid', 'eusername')
+    .joinRelated('companies')
+    .where('ecompanyid', user.companyId)
+    .whereNotIn('euserid', existUserIds)
+    .modify({ ecompanyusermappingdeletestatus: false })
+    .page(page, size);
+
+    return ServiceHelper.toPageObj(page, size, usersPage)
 
 }
 
