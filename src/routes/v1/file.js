@@ -6,14 +6,14 @@ const storage = multer.diskStorage({
         cb(null, temp);
     },
     filename: (req, file, cb) => {
-        cb(null, file.originalname);
+        cb(null, Date.now() + '-' + file.originalname);
     }
 });
 const upload = multer({storage: storage});
 
 const express = require('express');
 const router = express.Router();
-const controller = require('../../controllers/mobileFile');
+const controller = require('../../controllers/file');
 const auth = require('../../middlewares/authentication');
 
 router.post('/file', auth.authenticateToken, upload.single('file'), controller.createFile);

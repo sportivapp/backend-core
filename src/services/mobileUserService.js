@@ -3,7 +3,7 @@ const User = require('../models/User');
 const UserIndustryMapping = require('../models/UserIndustryMapping')
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
-const fileService = require('./mobileFileService');
+const fileService = require('./fileService');
 const Otp = require('../models/Otp');
 const emailService = require('../helper/emailService');
 

@@ -97,7 +97,7 @@ teamService.getTeamDetail = async (teamId, user) => {
         return 'unauthorized'
 
     const team = await Team.query()
-    .select('eteamname', 'efileefileid')
+    .select('eteamname', 'eteamdescription', 'efileefileid')
     .where('ecompanyecompanyid', user.companyId)
     .where('eteamid', teamId)
     .first()

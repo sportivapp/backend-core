@@ -1,7 +1,7 @@
 const Experience = require('../models/Experience')
 const FileExperienceMapping = require('../models/FileExperienceMapping')
 const ServiceHelper = require('../helper/ServiceHelper')
-const fileService = require('../services/mobileFileService')
+const fileService = require('../services/fileService')
 
 const experienceService = {}
 
