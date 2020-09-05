@@ -270,7 +270,7 @@ controller.changeTeamMemberPosition = async (req, res, next) => {
 
     try {
 
-        const result = await teamService.invite(teamId, user, userId, position.toUpperCase());
+        const result = await teamService.changeTeamMemberPosition(teamId, req.user, userId, position.toUpperCase());
 
         if (result === 'cannot change your position')
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
