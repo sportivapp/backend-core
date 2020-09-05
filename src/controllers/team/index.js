@@ -241,13 +241,13 @@ controller.exitTeam = async (req, res, next) => {
 
 }
 
-controller.kick = async (req, res, next) => {
+controller.kickUserFromTeam = async (req, res, next) => {
 
     const { teamId, userId } = req.body;
 
     try {
 
-        const result = await teamService.kick(teamId, req.user, userId);
+        const result = await teamService.kickUserFromTeam(teamId, req.user, userId);
 
         if (result === 'cannot kick yourself')
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
