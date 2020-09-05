@@ -489,7 +489,7 @@ teamService.removeUserFromTeam = async (userInTeam) => {
 
 }
 
-teamService.kick = async (teamId, user, userId) => {
+teamService.kickUserFromTeam = async (teamId, user, userId) => {
 
     if (user.sub === userId)
         return 'cannot kick yourself'
