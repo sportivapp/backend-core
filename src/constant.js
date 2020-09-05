@@ -102,7 +102,10 @@ module.exports = {
             processInvitation: '/team-process-invitation',
             processRequest: '/team-process-request',
             join: '/team-join',
-            position: '/team-member-position'
+            position: '/team-member-position',
+            cancelInvitation: '/team-cancel-invite',
+            cancelRequest: '/team-cancel-request',
+            exit: '/team-exit',
         }
     }
 }
