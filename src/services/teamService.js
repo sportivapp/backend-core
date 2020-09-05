@@ -5,7 +5,6 @@ const User = require('../models/User')
 const TeamIndustryMapping = require('../models/TeamIndustryMapping')
 const ServiceHelper = require('../helper/ServiceHelper');
 const { raw } = require('objection');
-const { toLower } = require('lodash')
 
 const teamService = {}
 
@@ -465,6 +464,27 @@ teamService.changeTeamMemberPosition = async (teamId, user, userId, position) =>
     await TeamUserMapping.query()
     .where('eusereuserid', userId)
     .updateByUserId({ eteamusermappingposition: position }, user.sub);
+
+}
+
+teamService.getMembersToInvite = async (teamId, user, page = 0, size = 10) => {
+
+    let existUserIds = [];
+
+    if (teamId) {
+        const users = await TeamUserMapping.query().select('eusereuserid');
+        existUserIds = users.map(user => user.eusereuserid);
+    }
+
+    const usersPage = await User.query()
+    .select('euser.efileefileid', 'euserid', 'eusername')
+    .joinRelated('companies')
+    .where('ecompanyid', user.companyId)
+    .whereNotIn('euserid', existUserIds)
+    .modify({ ecompanyusermappingdeletestatus: false })
+    .page(page, size);
+
+    return ServiceHelper.toPageObj(page, size, usersPage)
 
 }
 

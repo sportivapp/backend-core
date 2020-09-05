@@ -226,4 +226,21 @@ controller.changeTeamMemberPosition = async (req, res, next) => {
 
 }
 
+controller.getMembersToInvite = async (req, res, next) => {
+
+    const { page, size } = req.query;
+    const { teamId } = req.params;
+
+    try {
+
+        const pageObj = await teamService.getMembersToInvite(teamId, req.user, parseInt(page), parseInt(size));
+
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
+        
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = controller

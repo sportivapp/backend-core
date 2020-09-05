@@ -17,5 +17,6 @@ router.put( routes.team.position, auth.authenticateToken, controller.changeTeamM
 router.delete( routes.team.member, auth.authenticateToken, controller.kick);
 
 router.post( routes.team.processInvitation, auth.authenticateToken, controller.processInvitation);
+router.get(routes.team.inviteId, auth.authenticateToken, controller.getMembersToInvite);
 
 module.exports = router;
