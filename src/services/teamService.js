@@ -8,6 +8,22 @@ const { raw } = require('objection');
 
 const teamService = {}
 
+const UnsupportedOperationErrorEnum = {
+    UNAUTHORIZED: 'UNAUTHORIZED',
+    NOT_ADMIN: 'NOT_ADMIN',
+    USER_NOT_IN_TEAM: 'USER_NOT_IN_TEAM',
+    UPDATE_FAILED: 'UPDATE_FAILED',
+    USER_APPLIED: 'USER_APPLIED',
+    USER_IN_TEAM: 'USER_IN_TEAM',
+    USER_ALREADY_INVITED: 'USER_ALREADY_INVITED',
+    USER_NOT_INVITED: 'USER_NOT_INVITED',
+    STATUS_UNACCEPTED: 'STATUS_UNACCEPTED',
+    USER_NOT_APPLIED: 'USER_NOT_APPLIED',
+    TYPE_UNACCEPTED: 'TYPE_UNACCEPTED',
+    USER_NOT_EXIST: 'USER_NOT_EXIST',
+    FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
+    POSITION_UNACCEPTED: 'POSITION_UNACCEPTED'
+}
 
 const TeamLogStatusEnum = {
     PENDING: 'PENDING',
@@ -93,7 +109,7 @@ teamService.getTeamDetail = async (teamId, user) => {
     const isUserCompany = await teamService.isUserInCompany(teamId, user);
 
     if (!isUserCompany)
-        return 'unauthorized'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.UNAUTHORIZED)
 
     const team = await Team.query()
     .select('eteamname', 'eteamdescription', 'efileefileid')
@@ -121,7 +137,7 @@ teamService.getTeamMemberList = async (teamId, user, page = 0, size = 10, type) 
     const isUserCompany = await teamService.isUserInCompany(teamId, user);
 
     if (!isUserCompany)
-        return 'unauthorized'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.UNAUTHORIZED)
 
     let promised
 
@@ -133,13 +149,13 @@ teamService.getTeamMemberList = async (teamId, user, page = 0, size = 10, type) 
         .where('eteamid', teamId)
         .page(page, size);
     } else if (TeamLogTypeEnum.APPLY !== type && TeamLogTypeEnum.INVITE !== type)
-        return 'type unaccepted'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TYPE_UNACCEPTED)
     else {
 
         const isAdmin = await teamService.isAdmin(teamId, user.sub);
 
         if (!isAdmin)
-            return 'not admin'
+            throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
         // return log by type (APPLY / INVITE)
         promised = TeamLog.query()
@@ -293,18 +309,18 @@ teamService.invite = async (teamId, user, userIds) => {
     const isAdmin = await teamService.isAdmin(teamId, user.sub);
 
     if (!isAdmin)
-        return 'not admin'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
     const invitedUsers = await User.query()
         .whereIn('euserid', userIds)
 
     if (invitedUsers.length !== userIds.length)
-        return 'one or more user not exist'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
 
     const userInTeam = await teamService.checkUserInTeamByUserIds(teamId, userIds);
 
     if (userInTeam.length > 0)
-        return 'one or more user already in team'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_IN_TEAM)
     
     // Check if this user already invited / applied
     const pendingInviteApply = await teamService.getPendingLogByUserIds(teamId, userIds, [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
@@ -342,7 +358,7 @@ teamService.invite = async (teamId, user, userIds) => {
 
     //if no apply log and no invite log need to be created
     if(invitedUserIds.length <= 0 && userApplyList.length <= 0) {
-        return "users already invited"
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_IN_TEAM)
     }
 
     const result = {
@@ -359,12 +375,12 @@ teamService.cancelInvite = async (teamId, userId, user) => {
     const isAdmin = await teamService.isAdmin(teamId, user.sub);
 
     if (!isAdmin)
-        return 'not admin'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
     
     const pendingInvite = await teamService.getPendingLog(teamId, userId, [TeamLogTypeEnum.INVITE]);
 
     if (!pendingInvite)
-        return 'user not invited'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_INVITED)
 
     return pendingInvite.$query().delete();
 
@@ -373,17 +389,17 @@ teamService.cancelInvite = async (teamId, userId, user) => {
 teamService.processRequest = async (teamId, userId, user, status) => {
 
     if (status !== TeamLogStatusEnum.ACCEPTED && status !== TeamLogStatusEnum.REJECTED)
-        return 'status unaccepted'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.STATUS_UNACCEPTED)
 
     const isAdmin = await teamService.isAdmin(teamId, user.sub);
 
     if (!isAdmin)
-        return 'not admin'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
     const pendingApply = await teamService.getPendingLog(teamId, userId, [TeamLogTypeEnum.APPLY]);
 
     if (!pendingApply)
-        return 'no apply'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_APPLIED)
 
     if (status === TeamLogStatusEnum.REJECTED)
         return teamService.updateTeamLog(teamId, user, userId, TeamLogStatusEnum.REJECTED)
@@ -398,7 +414,7 @@ teamService.cancelRequest = async (teamId, user) => {
     const pendingApply = await teamService.getPendingLog(teamId, user.sub, [TeamLogTypeEnum.APPLY]);
 
     if (!pendingApply)
-        return 'user not applied'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_APPLIED)
 
     return pendingApply.$query().delete();
 
@@ -407,12 +423,12 @@ teamService.cancelRequest = async (teamId, user) => {
 teamService.processInvitation = async (teamId, user, status) => {
 
     if (status !== TeamLogStatusEnum.ACCEPTED && status !== TeamLogStatusEnum.REJECTED)
-        return 'status unaccepted'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.STATUS_UNACCEPTED)
 
     const pendingInvite = await teamService.getPendingLog(teamId, user.sub, [TeamLogTypeEnum.INVITE]);
 
     if (!pendingInvite)
-        return 'no invitation'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_INVITED)
 
     if (status === TeamLogStatusEnum.REJECTED)
         return teamService.updateTeamLog(teamId, user, user.sub, TeamLogStatusEnum.REJECTED)
@@ -428,7 +444,7 @@ teamService.joinTeam = async (teamId, user) => {
     const userInTeam = await teamService.checkUserInTeam(teamId, user.sub);
 
     if (userInTeam)
-        return 'user already in team'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_IN_TEAM)
 
     // Check if this user already invited / applied
     const pendingInviteApply = await teamService.getPendingLog(teamId, user.sub, [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
@@ -439,7 +455,7 @@ teamService.joinTeam = async (teamId, user) => {
 
     // If apply pending exist, return
     if (pendingInviteApply.eteamlogtype === TeamLogTypeEnum.APPLY && pendingInviteApply.eteamlogstatus === TeamLogStatusEnum.PENDING)
-        return 'user already applied'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_APPLIED)
 
     // If invited, then auto join
     if (pendingInviteApply.eteamlogtype === TeamLogTypeEnum.INVITE && pendingInviteApply.eteamlogstatus === TeamLogStatusEnum.PENDING)
@@ -464,7 +480,7 @@ teamService.exitTeam = async (teamId, user) => {
     const userInTeam = await teamService.checkUserInTeam(teamId, user.sub);
 
     if (!userInTeam)
-        return 'user not in team'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
 
     const removeUser = await teamService.removeUserFromTeam(userInTeam);
 
@@ -492,18 +508,18 @@ teamService.removeUserFromTeam = async (userInTeam) => {
 teamService.kickUserFromTeam = async (teamId, user, userId) => {
 
     if (user.sub === userId)
-        return 'cannot kick yourself'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION)
 
     const isAdmin = await teamService.isAdmin(teamId, user.sub);
 
     if (!isAdmin)
-        return 'not admin'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
     // If user already in team
     const userInTeam = await teamService.checkUserInTeam(teamId, userId);
 
     if (!userInTeam)
-        return 'user not in team'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
 
     return teamService.removeUserFromTeam(userInTeam);
 
@@ -512,15 +528,15 @@ teamService.kickUserFromTeam = async (teamId, user, userId) => {
 teamService.changeTeamMemberPosition = async (teamId, user, userId, position) => {
 
     if (user.sub === userId)
-        return 'cannot change your position'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION)
 
     const isAdmin = await teamService.isAdmin(teamId, user.sub);
 
     if (!isAdmin)
-        return 'not admin'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
     if (!TeamUserMappingPositionEnum.hasOwnProperty(position))
-        return 'position unaccepted'
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.POSITION_UNACCEPTED)
 
     return TeamUserMapping.query()
     .where('eusereuserid', userId)
