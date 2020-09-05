@@ -23,7 +23,9 @@ const UnsupportedOperationErrorEnum = {
     TYPE_UNACCEPTED: 'TYPE_UNACCEPTED',
     USER_NOT_EXIST: 'USER_NOT_EXIST',
     FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
-    POSITION_UNACCEPTED: 'POSITION_UNACCEPTED'
+    POSITION_UNACCEPTED: 'POSITION_UNACCEPTED',
+    INDUSTRY_NOT_FILLED: 'INDUSTRY_NOT_FILLED'
+
 }
 
 const TeamLogStatusEnum = {
@@ -68,6 +70,10 @@ teamService.createTeam = async (teamDTO, user, industryIds) => {
 
     const team = await Team.query().insertToTable(teamDTO, user.sub)
     
+    if (industryIds === undefined ) {
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INDUSTRY_NOT_FILLED)
+    }
+
     const teamUserMappingPromise =  TeamUserMapping.query().insertToTable({
         eusereuserid: user.sub,
         eteameteamid: team.eteamid,
