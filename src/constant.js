@@ -99,7 +99,6 @@ module.exports = {
             id: '/team/:teamId',
             member: '/team-member',
             invite: '/team-invite',
-            inviteId: '/team-invite/:teamId',
             processInvitation: '/team-process-invitation',
             processRequest: '/team-process-request',
             join: '/team-join',

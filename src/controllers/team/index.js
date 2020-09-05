@@ -228,8 +228,7 @@ controller.changeTeamMemberPosition = async (req, res, next) => {
 
 controller.getMembersToInvite = async (req, res, next) => {
 
-    const { page, size } = req.query;
-    const { teamId } = req.params;
+    const { teamId, page, size } = req.query;
 
     try {
 
