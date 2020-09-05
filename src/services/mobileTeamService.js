@@ -386,8 +386,9 @@ teamService.changeTeamMemberPosition = async (teamId, user, userId, position) =>
     if (!TeamUserMappingPositionEnum.hasOwnProperty(position))
         return 'position unaccepted'
 
-    await TeamUserMapping.query()
+    return TeamUserMapping.query()
     .where('eusereuserid', userId)
+    .andWhere('eteameteamid', teamId)
     .updateByUserId({ eteamusermappingposition: position }, user.sub);
 
 }
