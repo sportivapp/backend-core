@@ -354,6 +354,22 @@ teamService.invite = async (teamId, user, userIds) => {
 
 }
 
+teamService.cancelInvite = async (teamId, userId, user) => {
+
+    const isAdmin = await teamService.isAdmin(teamId, user.sub);
+
+    if (!isAdmin)
+        return 'not admin'
+    
+    const pendingInvite = await teamService.getPendingLog(teamId, userId, [TeamLogTypeEnum.INVITE]);
+
+    if (!pendingInvite)
+        return 'user not invited'
+
+    return pendingInvite.$query().delete();
+
+}
+
 teamService.processRequest = async (teamId, userId, user, status) => {
 
     if (status !== TeamLogStatusEnum.ACCEPTED && status !== TeamLogStatusEnum.REJECTED)
@@ -374,6 +390,17 @@ teamService.processRequest = async (teamId, userId, user, status) => {
 
     if (status === TeamLogStatusEnum.ACCEPTED)
         return teamService.processIntoTeam(teamId, user, userId);
+
+}
+
+teamService.cancelRequest = async (teamId, user) => {
+
+    const pendingApply = await teamService.getPendingLog(teamId, user.sub, [TeamLogTypeEnum.APPLY]);
+
+    if (!pendingApply)
+        return 'user not applied'
+
+    return pendingApply.$query().delete();
 
 }
 
@@ -417,6 +444,40 @@ teamService.joinTeam = async (teamId, user) => {
     // If invited, then auto join
     if (pendingInviteApply.eteamlogtype === TeamLogTypeEnum.INVITE && pendingInviteApply.eteamlogstatus === TeamLogStatusEnum.PENDING)
         return teamService.processIntoTeam(teamId, user, user.sub);
+
+}
+
+teamService.getTeamMemberCount = async (teamId) => {
+
+    const teamMemberCount = await TeamUserMapping.query()
+    .where('eteameteamid', teamId)
+    .count()
+    .first();
+
+    return parseInt(teamMemberCount.count);
+    
+}
+
+teamService.exitTeam = async (teamId, user) => {
+
+    // If user already in team
+    const userInTeam = await teamService.checkUserInTeam(teamId, user.sub);
+
+    if (!userInTeam)
+        return 'user not in team'
+
+    const removeUser = await teamService.removeUserFromTeam(userInTeam);
+
+    const teamMemberCount = await teamService.getTeamMemberCount(teamId);
+
+    // If team has no member after user leaving
+    if (teamMemberCount === 0) {
+        await Team.query()
+        .where('eteamid', teamId)
+        .delete();
+    }
+
+    return removeUser
 
 }
 
