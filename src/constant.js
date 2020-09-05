@@ -100,7 +100,12 @@ module.exports = {
             member: '/team-member',
             invite: '/team-invite',
             processInvitation: '/team-process-invitation',
-            add: '/team-add-member'
+            processRequest: '/team-process-request',
+            join: '/team-join',
+            position: '/team-member-position',
+            cancelInvitation: '/team-cancel-invite',
+            cancelRequest: '/team-cancel-request',
+            exit: '/team-exit',
         }
     }
 }

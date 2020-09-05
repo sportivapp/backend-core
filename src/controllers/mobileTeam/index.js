@@ -132,7 +132,7 @@ controller.cancelInvite = async (req, res, next) => {
     
     try {
 
-        const result = await teamService.exitTeam(teamId, userId, req.user);
+        const result = await teamService.cancelInvite(teamId, userId, req.user);
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
