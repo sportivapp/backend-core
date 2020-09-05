@@ -111,6 +111,28 @@ controller.invite = async (req, res, next) => {
 
 }
 
+controller.cancelInvite = async (req, res, next) => {
+
+    const { teamId, userId } = req.body;
+    
+    try {
+
+        const result = await teamService.cancelInvite(teamId, userId, req.user);
+
+        if (result === 'not admin')
+            return res.status(403).json(ResponseHelper.toErrorResponse(403));
+        if (result === 'user not invited')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 controller.processRequest = async (req, res, next) => {
 
     const { teamId, userId } = req.body;
@@ -124,6 +146,26 @@ controller.processRequest = async (req, res, next) => {
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
         if (result === 'not admin')
             return res.status(403).json(ResponseHelper.toErrorResponse(403));
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.cancelRequest = async (req, res, next) => {
+
+    const { teamId } = req.body;
+
+    try {
+
+        const result = await teamService.cancelRequest(teamId, req.user);
+
+        if (result === 'user not applied')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
@@ -168,6 +210,26 @@ controller.joinTeam = async (req, res, next) => {
         if (result === 'user already in team')
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
         if (result === 'user already applied')
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.exitTeam = async (req, res, next) => {
+
+    const { teamId } = req.body;
+    
+    try {
+
+        const result = await teamService.exitTeam(teamId, req.user);
+
+        if (result === 'user not in team')
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
