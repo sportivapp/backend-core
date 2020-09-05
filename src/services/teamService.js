@@ -4,6 +4,7 @@ const TeamLog = require('../models/TeamLog')
 const User = require('../models/User')
 const TeamIndustryMapping = require('../models/TeamIndustryMapping')
 const ServiceHelper = require('../helper/ServiceHelper');
+const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const { raw } = require('objection');
 
 const teamService = {}
@@ -58,6 +59,7 @@ teamService.isUserInCompany = async (teamId, user) => {
     .where('eteamid', teamId)
     .first()
     .then(team => {
+        if(team.ecompanyecompanyid === undefined) return false
         return team.ecompanyecompanyid === user.companyId;
     });
 }
@@ -118,7 +120,7 @@ teamService.getTeamDetail = async (teamId, user) => {
     .first()
 
     if (!team)
-        return
+        throw new NotFoundError()
 
     const industry = await TeamIndustryMapping.query()
     .select('industry.eindustryname')
@@ -133,6 +135,14 @@ teamService.getTeamDetail = async (teamId, user) => {
 }
 
 teamService.getTeamMemberList = async (teamId, user, page = 0, size = 10, type) => {
+
+    const team = await Team.query()
+    .select()
+    .where('eteamid', teamId)
+    .first()
+
+    if (!team)
+        throw new NotFoundError()
 
     const isUserCompany = await teamService.isUserInCompany(teamId, user);
 
