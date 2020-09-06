@@ -129,17 +129,17 @@ UserService.updateUserCoachData = async (userCoachDTO, user, industryIds) => {
         eusereuserid: user.sub
     }))
 
-    const updatedUser = userFromDB.$query().updateByUserId(userCoachDTO, user.sub);
+
 
     await CoachIndustryMapping.query()
     .delete()
     .where('eusereuserid', user.sub)
 
-    const insertedMapping = CoachIndustryMapping.query()
+    // insert industry and coach to mapping
+    await CoachIndustryMapping.query()
     .insertToTable(coachIndustryMappings, user.sub)
 
-    return Promise.all([updatedUser, insertedMapping])
-    .then(arr => arr[0])
+    return userFromDB.$query().updateByUserId(userCoachDTO, user.sub);
 
 }
 
