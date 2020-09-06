@@ -73,9 +73,8 @@ UserService.getUserById = async (userId) => {
 
     const user = await User.query()
     .select('euserid', 'eusername', 'eusermobilenumber', 'euseremail', 'euseridentitynumber', 'euserdob', 'euseraddress', 'eusergender', 
-    'euserhobby', 'euserfacebook', 'euserinstagram', 'euserlinkedin', 'ecountryname', 'efileefileid')
+    'euserhobby', 'euserfacebook', 'euserinstagram', 'euserlinkedin', 'ecountryname', 'efileefileid', 'euseriscoach')
     .leftJoinRelated('country')
-    // .leftJoinRelated('efile')
     .where('euserid', userId).first();
 
     if (!user)
