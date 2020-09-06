@@ -84,14 +84,29 @@ UserService.getUserById = async (userId) => {
     
 }
 
-UserService.updateUser = async (userDTO, user) => {
+async function updateUserAndIndustries(userFromDB, userDTO, industryIds, user, trx) {
+
+    await userFromDB.$query(trx).updateByUserId(userDTO, user.sub);
+
+    const userIndustryMapping = industryIds.map(industryId => {
+        return {
+            eusereuserid: userDTO.euserid,
+            eindustryeindustryid: industryId
+        }
+    });
+
+    return userFromDB.$relatedQuery('userIndustriesMapping', trx).insertToTable(userIndustryMapping, user.sub);
+
+}
+
+UserService.updateUser = async (userDTO, industryIds, user) => {
 
     // efileefileid null if undefined or 0 was sent
     if (userDTO.efileefileid === undefined || userDTO.efileefileid === 0) {
         userDTO.efileefileid = null;
     } else {
         // Check whether the user uses self created file
-        const file = await fileService.getFileByIdAndCreateBy(licenseDTO.efileefileid, user.sub);
+        const file = await fileService.getFileByIdAndCreateBy(userDTO.efileefileid, user.sub);
 
         if (!file)
             return
@@ -99,12 +114,12 @@ UserService.updateUser = async (userDTO, user) => {
 
     const userFromDB = await UserService.getUserById(user.sub);
 
-    if (!user)
+    if (!userFromDB)
         return
     
-    userDTO.euserdob = new Date(userDTO.euserdob).getTime();
-
-    const updatedUser = await userFromDB.$query().updateByUserId(userDTO, user.sub).returning('*');
+    await User.transaction(async trx => {
+        await updateUserAndIndustries(userFromDB, userDTO, industryIds, user, trx);
+    })
 
     return 1;
 

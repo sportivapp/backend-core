@@ -90,7 +90,7 @@ controller.getSelf = async (req, res, next) => {
 
 controller.updateUser = async (req, res, next) => {
 
-    const { name, mobileNumber, identityNumber, dob, gender, hobby, countryId, fileId, address, facebook, instagram, linkedin } = req.body;
+    const { name, mobileNumber, identityNumber, dob, gender, hobby, countryId, fileId, address, industryIds, facebook, instagram, linkedin } = req.body;
 
     const userDTO = {
         eusername: name,
@@ -109,7 +109,7 @@ controller.updateUser = async (req, res, next) => {
 
     try {
 
-        const result = await mobileUserService.updateUser(userDTO, req.user);
+        const result = await mobileUserService.updateUser(userDTO, industryIds, req.user);
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
