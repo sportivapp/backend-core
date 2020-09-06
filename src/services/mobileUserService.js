@@ -1,6 +1,6 @@
 require('dotenv').config();
 const User = require('../models/User');
-const UserIndustryMapping = require('../models/UserIndustryMapping')
+const CoachIndustryMapping = require('../models/CoachIndustryMapping')
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
 const fileService = require('./fileService');
@@ -119,18 +119,34 @@ UserService.updateUserCoachData = async (userCoachDTO, user, industryIds) => {
     
     userCoachDTO.euserdob = new Date(userCoachDTO.euserdob).getTime();
 
-    const userIndustryMappings = industryIds.map(industryId => ({
+    const coachIndustryMappings = industryIds.map(industryId => ({
         eindustryeindustryid: industryId,
         eusereuserid: user.sub
     }))
 
     const updatedUser = userFromDB.$query().updateByUserId(userCoachDTO, user.sub);
 
-    const insertedMapping = UserIndustryMapping.query()
-    .insertToTable(userIndustryMappings, user.sub)
+    const insertedMapping = CoachIndustryMapping.query()
+    .insertToTable(coachIndustryMappings, user.sub)
 
     return Promise.all([updatedUser, insertedMapping])
     .then(arr => arr[0])
+
+}
+
+UserService.removeCoach = async (user) => {
+
+    const userFromDB = await UserService.getUserById(user.sub);
+
+    if (!userFromDB)
+        return 
+
+    await CoachIndustryMapping.query()
+    .delete()
+    .where('eusereuserid', user.sub)
+
+    return userFromDB.$query()
+    .updateByUserId({euseriscoach: false}, user.sub);
 
 }
 

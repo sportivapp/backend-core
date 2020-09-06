@@ -154,6 +154,22 @@ controller.updateUserCoachData = async (req, res, next) => {
 
 }
 
+controller.removeCoach = async (req, res, next) => {
+
+    try {
+
+        const result = await mobileUserService.removeCoach(req.user);
+
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 controller.changePassword = async (req, res, next) => {
 
     const { oldPassword, newPassword } = req.body;

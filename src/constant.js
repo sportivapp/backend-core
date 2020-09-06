@@ -16,7 +16,8 @@ module.exports = {
             import: '/user-import-template',
             id: '/user/:userId',
             approval: '/user/approval',
-            coach: '/user/coach'
+            coach: '/user/coach',
+            removeCoach: '/user/coach-remove'
         },
         profile: {
             changeCompany: '/change-company',
