@@ -129,17 +129,17 @@ UserService.updateUserCoachData = async (userCoachDTO, user, industryIds) => {
         eusereuserid: user.sub
     }))
 
-
+    const updatedUser = userFromDB.$query().updateByUserId(userCoachDTO, user.sub);
 
     await CoachIndustryMapping.query()
     .delete()
     .where('eusereuserid', user.sub)
 
-    // insert industry and coach to mapping
-    await CoachIndustryMapping.query()
+    const insertedMapping = CoachIndustryMapping.query()
     .insertToTable(coachIndustryMappings, user.sub)
 
-    return userFromDB.$query().updateByUserId(userCoachDTO, user.sub);
+    return Promise.all([updatedUser, insertedMapping])
+    .then(arr => arr[0])
 
 }
 
@@ -148,16 +148,14 @@ UserService.removeCoach = async (user) => {
     const userFromDB = await UserService.getUserById(user.sub);
 
     if (!userFromDB)
-        return
-
-    const updatedUser = userFromDB.$query()
-    .updateByUserId({euseriscoach: false}, user.sub);
+        return 
 
     await CoachIndustryMapping.query()
     .delete()
     .where('eusereuserid', user.sub)
 
-    return updatedUser
+    return userFromDB.$query()
+    .updateByUserId({euseriscoach: false}, user.sub);
 
 }
 
