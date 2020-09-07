@@ -128,14 +128,14 @@ teamService.getTeamDetail = async (teamId, user) => {
     if (!team)
         throw new NotFoundError()
 
-    const industry = await TeamIndustryMapping.query()
-    .select('industry.eindustryname')
-    .leftJoinRelated('industry')
-    .where('eteameteamid', teamId);
+    const teamIndustries = TeamIndustryMapping.query()
+    .select('eindustryid', 'eindustryname')
+    .joinRelated('industry')
+    .where('eteameteamid', team.eteamid);
 
     return {
         team,
-        industry
+        teamIndustries
     }
 
 }

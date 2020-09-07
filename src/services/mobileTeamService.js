@@ -94,15 +94,15 @@ teamService.getTeam = async (teamId, user) => {
     const teamIndustries = TeamIndustryMapping.query()
     .select('eindustryid', 'eindustryname')
     .joinRelated('industry')
-    .where('eteameteamid', team.teamId);
+    .where('eteameteamid', team.eteamid);
 
     const isInTeam = TeamUserMapping.query()
-    .where('eteameteamid', team.teamId)
+    .where('eteameteamid', team.eteamid)
     .andWhere('eusereuserid', user.sub)
     .first();
 
     const isPendingApply = TeamLog.query()
-    .where('eteameteamid', team.teamId)
+    .where('eteameteamid', team.eteamid)
     .andWhere('eusereuserid', user.sub)
     .andWhere('eteamlogtype', TeamLogTypeEnum.APPLY)
     .first();
