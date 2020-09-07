@@ -120,7 +120,7 @@ teamService.getTeamDetail = async (teamId, user) => {
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.UNAUTHORIZED)
 
     const team = await Team.query()
-    .select('eteamname', 'eteamdescription', 'efileefileid')
+    .select('eteamid', 'eteamname', 'eteamdescription', 'efileefileid')
     .where('ecompanyecompanyid', user.companyId)
     .where('eteamid', teamId)
     .first()
@@ -128,7 +128,7 @@ teamService.getTeamDetail = async (teamId, user) => {
     if (!team)
         throw new NotFoundError()
 
-    const teamIndustries = TeamIndustryMapping.query()
+    const teamIndustries = await TeamIndustryMapping.query()
     .select('eindustryid', 'eindustryname')
     .joinRelated('industry')
     .where('eteameteamid', team.eteamid);
