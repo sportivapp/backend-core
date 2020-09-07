@@ -81,6 +81,9 @@ departmentService.getDepartmentByDepartmentId = async (departmentId) => {
     const data = {
         edepartmentid: department.edepartmentid,
         edepartmentname: department.edepartmentname,
+        edepartmentdescription: department.edepartmentdescription,
+        edepartmentsuperiorid: department.edepartmentsuperiorid,
+        ecompanyecompanyid: department.ecompanyecompanyid,
         childrenCount: parseInt(subDepartment[0].count),
         ecompanyname: company.ecompanyname,
         eusername: user.eusername,
