@@ -1,26 +1,29 @@
 const Approval = require('../models/Approval')
 const ApprovalUser = require('../models/ApprovalUser')
 const User = require('../models/User')
-const Company = require('../models/Company')
-const Department = require('../models/Department')
+const { transaction } = require('objection')
 
-const service = {}
+const approvalService = {}
 
-service.createApproval = async (approvalDTO, userIds, isMultiApproval, user) => {
+approvalService.createApproval = async (approvalDTO, userIds, isMultiApproval, user) => {
 
     const isUserIdValid = await User.query().whereIn('euserid', userIds)
         .then(list => list.length === userIds.length)
 
     if (!isUserIdValid) return
 
-    return Approval.query()
-        .insertToTable({ ...approvalDTO, eapprovaltype: isMultiApproval ? 'MULTI' : 'SINGLE' }, user.sub)
-        .then(approval => [approval, userIds.map(userId => ({eapprovaleapprovalid: approval.eapprovalid, eusereuserid: userId}))])
-        .then(resultArr => ApprovalUser.query().insertToTable(resultArr[1], user.sub)
-            .then(approvalUsers => ({ ...resultArr[0], approvalUsers })))
+    await transaction(Approval, ApprovalUser, async (Approval, trx) => {
+
+
+        const createdApproval = await Approval.query()
+            .insertToTable({ ...approvalDTO, eapprovaltype: isMultiApproval ? 'MULTI' : 'SINGLE' }, user.sub)
+
+        return addUsersFromApproval(trx, createdApproval.eapprovalid, userIds, user)
+            .then(approvalUsers => ({ ...createdApproval, approvalUsers }))
+    })
 }
 
-service.getApproval = async (companyId, departmentId, userId) => {
+approvalService.getApproval = async (companyId, departmentId, userId) => {
 
     if (!companyId) return
 
@@ -41,54 +44,41 @@ service.getApproval = async (companyId, departmentId, userId) => {
         .first()
 }
 
-service.updateApproval = async (companyId = null, departmentId = null, userId = null, isMultiple, user) => {
+approvalService.updateApproval = async (approvalDTO, userIds, user) => {
 
-    return Approval.query()
-        .where('ecompanyecompanyid', companyId)
-        .where('edepartmentedepartmentid', departmentId)
-        .where('etargetuserid', userId)
+    const approval = await Approval.query()
+        .where('ecompanyecompanyid', approvalDTO.companyId)
+        .where('edepartmentedepartmentid', approvalDTO.departmentId)
+        .where('etargetuserid', approvalDTO.userId)
         .first()
-        .updateByUserId({ eapprovaltype: isMultiple ? 'MULTI': 'SINGLE' }, user.sub)
-        .returning('*')
-        .withGraphFetched('[company(baseAttributes)' +
-            '.parent(baseAttributes)' +
-            '.parent(baseAttributes), ' +
-            'department(baseAttributes)' +
-            '.parent(baseAttributes), ' +
-            'users(baseAttributes)]')
-}
-
-service.addUserFromApproval = async (approvalId, userId) => {
-
-    const user = await User.query().findById(userId)
-
-    if (!user) return
-
-    const approval = await Approval.query().findById(approvalId)
+        .withGraphFetched('approvalUsers')
 
     if (!approval) return
 
-    return ApprovalUser.query().insertToTable({ eapprovaleapprovalid: approvalId, eusereuserid: userId }, user.sub)
+    const actualUserIds = await User.query().whereIn('euserid', userIds)
+        .then(users => users.map(user => user.euserid))
+
+    if(actualUserIds.length !== userIds.length) return
+
+    await transaction(Approval, async (_, trx) => {
+
+        const updateApproval = approval.$query(trx)
+            .updateByUserId({ eapprovaltype: approvalDTO.isMultiple ? 'MULTI': 'SINGLE' }, user.sub)
+            .returning('*')
+            .withGraphFetched('[company(baseAttributes)' +
+                '.parent(baseAttributes)' +
+                '.parent(baseAttributes), ' +
+                'department(baseAttributes)' +
+                '.parent(baseAttributes), ' +
+                'users(baseAttributes)]')
+
+        return deleteUsersFromApproval(approval.eapprovalid, actualUserIds, trx)
+            .then(ignored => addUsersFromApproval(approval.eapprovalid, userIds, user, trx))
+            .then(ignored => updateApproval)
+    })
 }
 
-service.deleteUserFromApproval = async (approvalId, userId) => {
-
-    const user = await User.query().findById(userId)
-
-    if (!user) return false
-
-    const approval = await Approval.query().findById(approvalId)
-
-    if (!approval) return false
-
-    return ApprovalUser.query()
-        .where('eapprovaleapprovalid', approvalId)
-        .where('eusereuserid', userId )
-        .delete()
-        .then(rowsAffected => rowsAffected > 0)
-}
-
-service.searchApprovals = async (valueAndTypeList, index) => {
+approvalService.searchApprovals = async (valueAndTypeList, index) => {
     if (index >= valueAndTypeList.length) return []
     let type = valueAndTypeList[index].type
     let value = valueAndTypeList[index].value
@@ -103,10 +93,27 @@ service.searchApprovals = async (valueAndTypeList, index) => {
         .then(list => {
             const isApprovalUserExist = list.map(approval => approval.approvalUsers.length)
                 .filter(length => length > 0).length > 0
-            if (list.length <= 0 || !isApprovalUserExist) return service.searchApprovals(valueAndTypeList, index + 1)
+            if (list.length <= 0 || !isApprovalUserExist) return approvalService.searchApprovals(valueAndTypeList, index + 1)
             else return list
         })
 
 }
 
-module.exports = service
+async function addUsersFromApproval (approvalId, userIds, user, trx) {
+
+    let promises = userIds
+        .map(userId => ApprovalUser.query(trx).insertToTable({ eapprovaleapprovalid: approvalId, eusereuserid: userId }, user.sub))
+
+    return Promise.all(promises)
+}
+
+async function deleteUsersFromApproval (approvalId, userIds, trx) {
+
+    return ApprovalUser.query(trx)
+        .where('eapprovaleapprovalid', approvalId)
+        .whereIn('eusereuserid', userIds)
+        .delete()
+        .then(rowsAffected => rowsAffected > 0)
+}
+
+module.exports = approvalService

@@ -39,36 +39,16 @@ controller.updateApprovalByCompanyIdAndDepartmentIdAndUserId = async (req, res, 
 
     const { companyId, departmentId, targetUserId, isMultiple } = req.body
 
-    try {
-        const result = await approvalService.updateApproval(companyId, departmentId, targetUserId, isMultiple, req.user)
-        if (!result) return res.status(400).json(ResponseHelper.toErrorResponse(400))
-        return res.status(200).json(ResponseHelper.toBaseResponse(result))
-    } catch (e) {
-        next(e)
+    const approvalDTO = {
+        companyId: companyId ? companyId : null,
+        departmentId: departmentId ? departmentId : null,
+        targetUserId: targetUserId ? targetUserId : null,
+        isMultiple
     }
-}
-
-controller.addUserByApprovalId = async (req, res, next) => {
-
-    const { approvalId } = req.params
-
-    const { userId } = req.body
 
     try {
-        const result = await approvalService.addUserFromApproval(approvalId, userId)
+        const result = await approvalService.updateApproval(approvalDTO, isMultiple, req.user)
         if (!result) return res.status(400).json(ResponseHelper.toErrorResponse(400))
-        return res.status(200).json(ResponseHelper.toBaseResponse(result))
-    } catch (e) {
-        next(e)
-    }
-}
-
-controller.deleteUserByApprovalId = async (req, res, next) => {
-
-    const { approvalId, userId } = req.params
-
-    try {
-        const result = await approvalService.deleteUserFromApproval(approvalId, userId)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)

@@ -50,8 +50,6 @@ permitService.requestApproval = async (permitId, user) => {
         .withGraphFetched('user(baseAttributes).departments.parent')
         .first()
 
-    console.log(permit)
-
     if (!permit || !permit.user) return
 
     if (permit.epermitstatus !== PermitStatusEnum.CREATED) return

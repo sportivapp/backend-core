@@ -5,6 +5,7 @@ const schema = Joi.object({
     departmentId: Joi.number().positive(),
     targetUserId: Joi.number().positive(),
     isMultiple: Joi.boolean().required(),
+    userIds: Joi.array().required().items(Joi.number().positive())
 })
 
 module.exports = schema
