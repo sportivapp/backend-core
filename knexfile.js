@@ -15,7 +15,7 @@ module.exports = {
 
   development: {
     client: 'postgres',
-    connection: 'postgres://postgres:12345678@localhost:5432/emtiv_dev',
+    connection: 'postgres://emtiv:SCo434yU11@172.16.75.157:5432/emtiv_dev',
     migrations: {
       directory: path.join(BASE_PATH, 'migrations')
     },
