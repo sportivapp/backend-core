@@ -49,11 +49,11 @@ Messages.setLogMessage = ( error ) => {
             'color': '#eed140', // color of the attachments sidebar.
             'fields': [ // actual fields
                 {
-                    'title': error.status,
+                    'type': error.name,
                     'value': error.message 
                     // + '\n ROUTES: ' + error.routes
                     + ' \n\n\n\n DETAILS:\n\n' 
-                    + error.errStack,
+                    + error.stack,
                     'short': true // long fields will be full width
                 },
             ],

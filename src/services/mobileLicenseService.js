@@ -1,5 +1,5 @@
 const License = require('../models/License');
-const fileService = require('./mobileFileService');
+const fileService = require('./fileService');
 
 const LicenseService = {};
 

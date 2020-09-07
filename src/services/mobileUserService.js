@@ -1,9 +1,9 @@
 require('dotenv').config();
 const User = require('../models/User');
-const UserIndustryMapping = require('../models/UserIndustryMapping')
+const CoachIndustryMapping = require('../models/CoachIndustryMapping')
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
-const fileService = require('./mobileFileService');
+const fileService = require('./fileService');
 const Otp = require('../models/Otp');
 const emailService = require('../helper/emailService');
 
@@ -73,9 +73,8 @@ UserService.getUserById = async (userId) => {
 
     const user = await User.query()
     .select('euserid', 'eusername', 'eusermobilenumber', 'euseremail', 'euseridentitynumber', 'euserdob', 'euseraddress', 'eusergender', 
-    'euserhobby', 'euserfacebook', 'euserinstagram', 'euserlinkedin', 'ecountryname', 'efileefileid')
+    'euserhobby', 'euserfacebook', 'euserinstagram', 'euserlinkedin', 'ecountryname', 'efileefileid', 'euseriscoach')
     .leftJoinRelated('country')
-    // .leftJoinRelated('efile')
     .where('euserid', userId).first();
 
     if (!user)
@@ -85,14 +84,29 @@ UserService.getUserById = async (userId) => {
     
 }
 
-UserService.updateUser = async (userDTO, user) => {
+async function updateUserAndIndustries(userFromDB, userDTO, industryIds, user, trx) {
+
+    await userFromDB.$query(trx).updateByUserId(userDTO, user.sub);
+
+    const userIndustryMapping = industryIds.map(industryId => {
+        return {
+            eusereuserid: userDTO.euserid,
+            eindustryeindustryid: industryId
+        }
+    });
+
+    return userFromDB.$relatedQuery('userIndustriesMapping', trx).insertToTable(userIndustryMapping, user.sub);
+
+}
+
+UserService.updateUser = async (userDTO, industryIds, user) => {
 
     // efileefileid null if undefined or 0 was sent
     if (userDTO.efileefileid === undefined || userDTO.efileefileid === 0) {
         userDTO.efileefileid = null;
     } else {
         // Check whether the user uses self created file
-        const file = await fileService.getFileByIdAndCreateBy(licenseDTO.efileefileid, user.sub);
+        const file = await fileService.getFileByIdAndCreateBy(userDTO.efileefileid, user.sub);
 
         if (!file)
             return
@@ -100,22 +114,18 @@ UserService.updateUser = async (userDTO, user) => {
 
     const userFromDB = await UserService.getUserById(user.sub);
 
-    if (!user)
+    if (!userFromDB)
         return
     
-    userDTO.euserdob = new Date(userDTO.euserdob).getTime();
-
-    const updatedUser = await userFromDB.$query().updateByUserId(userDTO, user.sub).returning('*');
+    await User.transaction(async trx => {
+        await updateUserAndIndustries(userFromDB, userDTO, industryIds, user, trx);
+    })
 
     return 1;
 
 }
 
 UserService.updateUserCoachData = async (userCoachDTO, user, industryIds) => {
-
-    if (userCoachDTO.efileefileid === null) {
-        return 'no profile picture given'
-    }
 
     const userFromDB = await UserService.getUserById(user.sub);
 
@@ -124,18 +134,34 @@ UserService.updateUserCoachData = async (userCoachDTO, user, industryIds) => {
     
     userCoachDTO.euserdob = new Date(userCoachDTO.euserdob).getTime();
 
-    const userIndustryMappings = industryIds.map(industryId => ({
+    const coachIndustryMappings = industryIds.map(industryId => ({
         eindustryeindustryid: industryId,
         eusereuserid: user.sub
     }))
 
     const updatedUser = userFromDB.$query().updateByUserId(userCoachDTO, user.sub);
 
-    const insertedMapping = UserIndustryMapping.query()
-    .insertToTable(userIndustryMappings, user.sub)
+    const insertedMapping = CoachIndustryMapping.query()
+    .insertToTable(coachIndustryMappings, user.sub)
 
     return Promise.all([updatedUser, insertedMapping])
     .then(arr => arr[0])
+
+}
+
+UserService.removeCoach = async (user) => {
+
+    const userFromDB = await UserService.getUserById(user.sub);
+
+    if (!userFromDB)
+        return 
+
+    await CoachIndustryMapping.query()
+    .delete()
+    .where('eusereuserid', user.sub)
+
+    return userFromDB.$query()
+    .updateByUserId({euseriscoach: false}, user.sub);
 
 }
 

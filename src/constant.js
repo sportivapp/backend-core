@@ -16,12 +16,13 @@ module.exports = {
             import: '/user-import-template',
             id: '/user/:userId',
             approval: '/user/approval',
-            coach: '/user/coach'
+            coach: '/user/coach',
+            removeCoach: '/user/coach-remove'
         },
         profile: {
-            company: '/user/company',
-            currentCompany: '/user/current-company',
-            changePassword: '/user/change-password',
+            changeCompany: '/change-company',
+            currentCompany: '/current-company',
+            changePassword: '/change-password',
             profile: '/profile'
         },
         grade: {
@@ -101,6 +102,17 @@ module.exports = {
             id: '/experience/:experienceId'
         },
         team: {
+            list: '/team',
+            id: '/team/:teamId',
+            member: '/team-member',
+            invite: '/team-invite',
+            processInvitation: '/team-process-invitation',
+            processRequest: '/team-process-request',
+            join: '/team-join',
+            position: '/team-member-position',
+            cancelInvitation: '/team-cancel-invite',
+            cancelRequest: '/team-cancel-request',
+            exit: '/team-exit',
             list: '/team'
         },
         permit: {
