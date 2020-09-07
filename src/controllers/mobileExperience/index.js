@@ -68,13 +68,15 @@ experienceController.editExperience = async (req, res, next) => {
 
 experienceController.getExperienceList = async (req, res, next) => {
 
-    const { page, size } = req.query
+    const { page, size, keyword } = req.query
     
     try {
 
-        const pageObj = await mobileExperienceService.getExperienceList(parseInt(page), parseInt(size), req.user)
+        const pageObj = await mobileExperienceService.getExperienceList(parseInt(page), parseInt(size), req.user,keyword)
 
-        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+        if(!pageObj)
+            return res.status(404).json(ResponseHelper.toErrorResponse(404));
+        return res.status(200).json(ResponseHelper.toBaseResponse(pageObj.data, pageObj.paging))
 
     } catch(e) {
         next(e)
