@@ -11,6 +11,7 @@ router.delete( routes.user.removeCoach, auth.authenticateToken, controller.remov
 router.post('/user-profile', auth.authenticateToken, controller.getUserById);
 router.get('/user-self-profile', auth.authenticateToken, controller.getSelf);
 router.put('/user', auth.authenticateToken, controller.updateUser);
+router.put(routes.user.changeIndustry, auth.authenticateToken, controller.changeIndustryByUserId);
 router.post('/user-change-password', auth.authenticateToken, controller.changePassword);
 
 module.exports = router;
