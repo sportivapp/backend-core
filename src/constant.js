@@ -83,7 +83,8 @@ module.exports = {
             id: '/shift/:shiftId/pattern/:patternId'
         },
         industry: {
-            list: '/industry'
+            list: '/industry',
+            change: '/industry/user'
         },
         state: {
             list: '/state'
