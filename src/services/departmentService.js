@@ -78,7 +78,7 @@ departmentService.getDepartmentByDepartmentId = async (departmentId) => {
     const userData = await Grade.relatedQuery('users')
         .for(Grade.query().where('edepartmentedepartmentid', departmentId))
 
-    const data = {
+    return {
         edepartmentid: department.edepartmentid,
         edepartmentname: department.edepartmentname,
         edepartmentdescription: department.edepartmentdescription,
@@ -89,8 +89,6 @@ departmentService.getDepartmentByDepartmentId = async (departmentId) => {
         eusername: user.eusername,
         userCount: userData.length
     }
-
-    return data
 
 }
 
