@@ -191,4 +191,19 @@ controller.changePassword = async (req, res, next) => {
 
 }
 
+
+controller.changeIndustryByUserId = async (req, res, next) => {
+
+    const { type } = req.query
+
+    try {
+        const result = await mobileUserService.changeIndustryByUserId(req.user, type.toUpperCase(), req.body.industryIds)
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+    } catch (e) {
+        console.log(e)
+        next(e)
+    }
+
+}
+
 module.exports = controller;
