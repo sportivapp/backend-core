@@ -120,7 +120,7 @@ teamService.getTeamDetail = async (teamId, user) => {
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.UNAUTHORIZED)
 
     const team = await Team.query()
-    .select('eteamname', 'eteamdescription', 'efileefileid')
+    .select('eteamid', 'eteamname', 'eteamdescription', 'efileefileid')
     .where('ecompanyecompanyid', user.companyId)
     .where('eteamid', teamId)
     .first()
