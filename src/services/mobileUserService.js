@@ -191,21 +191,6 @@ UserService.changePassword = async (oldPassword, newPassword, user) => {
 
 }
 
-UserService.getUserById = async (userId) => {
-
-    const user = await User.query()
-    .select('euserid', 'eusername', 'eusermobilenumber', 'euseremail', 'euseridentitynumber', 'euserdob', 'euseraddress', 'eusergender', 
-    'euserhobby', 'euserfacebook', 'euserinstagram', 'euserlinkedin', 'ecountryname', 'efileefileid', 'euseriscoach')
-    .leftJoinRelated('country')
-    .where('euserid', userId).first();
-
-    if (!user)
-        return
-
-    return user;
-    
-}
-
 UserService.changeIndustryByUserId = async (user, type, industryIds) => {
 
     const userFromDB = await UserService.getUserById(user.sub)
