@@ -154,7 +154,10 @@ UserService.removeCoach = async (user) => {
     const userFromDB = await UserService.getUserById(user.sub);
 
     if (!userFromDB)
-        return 
+        return
+
+    if (userFromDB.euseriscoach === false)
+        return
 
     await CoachIndustryMapping.query()
     .delete()
