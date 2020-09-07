@@ -17,7 +17,8 @@ module.exports = {
             id: '/user/:userId',
             approval: '/user/approval',
             coach: '/user/coach',
-            removeCoach: '/user/coach-remove'
+            removeCoach: '/user/coach-remove',
+            changeIndustry: '/user/change-industry'
         },
         profile: {
             changeCompany: '/change-company',
@@ -83,8 +84,7 @@ module.exports = {
             id: '/shift/:shiftId/pattern/:patternId'
         },
         industry: {
-            list: '/industry',
-            change: '/industry/user'
+            list: '/industry'
         },
         state: {
             list: '/state'
