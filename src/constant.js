@@ -108,6 +108,10 @@ module.exports = {
             cancelInvitation: '/team-cancel-invite',
             cancelRequest: '/team-cancel-request',
             exit: '/team-exit',
+        },
+        class: {
+            list: '/class',
+            id: '/class/:classId'
         }
     }
 }
