@@ -54,7 +54,6 @@ const mobileUserRoutes = require('./mobileUser');
 const mobileLicenseRoutes = require('./mobileLicense');
 const mobileCompanyRoutes = require('./mobileCompany');
 const mobileAnnouncementRoutes = require('./mobileAnnouncement');
-const mobileApplyInviteRoutes = require('./mobileApplyInvite');
 const mobileTeamRoutes = require('./mobileTeam');
 const mobileExperienceRoutes = require('./mobileExperience');
 
@@ -63,7 +62,6 @@ router.use('/api/v1/mobile', [
     mobileLicenseRoutes,
     mobileCompanyRoutes,
     mobileAnnouncementRoutes,
-    mobileApplyInviteRoutes,
     mobileTeamRoutes,
     mobileExperienceRoutes
 ]);
