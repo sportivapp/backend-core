@@ -23,12 +23,15 @@ mobileClassService.createClass = async (classDTO, user) => {
     return Class.query().insertToTable(classDTO, user.sub)
 }
 
-mobileClassService.getAllClassByCompanyId = async (companyId = null, page, size, keyword = '') => {
+mobileClassService.getAllClassByCompanyId = async (companyId, page, size, keyword) => {
 
     if (companyId < 1) companyId = null
 
-    return Class.query()
-        .where('ecompanyecompanyid', companyId)
+    let pageQuery = Class.query()
+
+    if (companyId !== null) pageQuery = pageQuery.where('ecompanyecompanyid', companyId)
+
+    return pageQuery
         .andWhere(raw('lower("eclassname")'), 'like', `%${keyword.toLowerCase()}%`)
         .withGraphFetched('[company(baseAttributes), industry(baseAttributes)]')
         .page(page, size)
@@ -55,7 +58,8 @@ mobileClassService.updateClassById = async (classId, classDTO, user) => {
     if (!ClassTypeEnum.hasOwnProperty(classDTO.eclasstype)) throw new UnsupportedOperationError('TYPE_INVALID')
 
     return mobileClassService.getClassById(classId)
-        .then(foundClass => foundClass.$query().updateByUserId(classDTO, user.sub).returning('*'))
+        .then(foundClass => foundClass.$query().updateByUserId(classDTO, user.sub).returning('*')
+            .withGraphFetched('[company(baseAttributes), industry(baseAttributes)]'))
 }
 
 mobileClassService.deleteClassById = async (classId) => {
