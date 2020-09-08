@@ -29,6 +29,36 @@ controller.createTeam = async (req, res, next) => {
 
 }
 
+controller.updateTeam = async (req, res, next) => {
+
+    const { name, fileId, description, industryIds } = req.body;
+    const { teamId } = req.params;
+
+    const teamDTO = {
+        eteamname: name,
+        eteamdescription: description,
+        ecompanyecompanyid: req.user.companyId,
+        efileefileid: fileId
+    };
+
+    teamDTO.ecompanyecompanyid = teamDTO.ecompanyecompanyid === 0 ? null : 
+    teamDTO.ecompanyecompanyid === undefined ? null : teamDTO.ecompanyecompanyid;
+
+    teamDTO.efileefileid = teamDTO.efileefileid === 0 ? null : 
+    teamDTO.efileefileid === undefined ? null : teamDTO.efileefileid;
+
+    try {
+
+        const result = await teamService.updateTeam(teamDTO, req.user, teamId, industryIds);
+
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 controller.getTeams = async (req, res, next) => {
 
     const { keyword, page, size } = req.query;
@@ -71,9 +101,9 @@ controller.getTeamMemberList = async (req, res, next) => {
     
     try {
 
-        const result = await teamService.getTeamMemberList(teamId, req.user, parseInt(page), parseInt(size), type.toUpperCase());
+        const pageObj = await teamService.getTeamMemberList(teamId, req.user, parseInt(page), parseInt(size), type.toUpperCase());
 
-        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
 
     } catch(e) {
         next(e);

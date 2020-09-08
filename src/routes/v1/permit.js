@@ -1,15 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const { Create, List, SubordinatePermitList, RequestApproval, GetById, UpdateById, UpdateStatusById, DeleteById } = require('../../controllers/permit')
+const controller = require('../../controllers/permit')
 const auth = require('../../middlewares/authentication');
+const { routes } = require('../../constant');
 
-router.post('/permit', auth.authenticateToken, Create)
-router.get('/permit', auth.authenticateToken, List)
-router.get('/permit/subordinate', auth.authenticateToken, SubordinatePermitList)
-router.post('/permit/action', auth.authenticateToken, UpdateStatusById)
-router.get('/permit/:permitId', auth.authenticateToken, GetById)
-router.put('/permit/:permitId', auth.authenticateToken, UpdateById)
-router.delete('/permit/:permitId', auth.authenticateToken, DeleteById)
-router.get('/permit/:permitId/request', auth.authenticateToken, RequestApproval)
+router.post(routes.permit.list, auth.authenticateToken, controller.createPermit)
+router.get(routes.permit.list, auth.authenticateToken, controller.getPermitList)
+router.get(routes.permit.subordinate, auth.authenticateToken, controller.getSubordinatePermitList)
+router.post(routes.permit.action, auth.authenticateToken, controller.updatePermitStatusById)
+router.get(routes.permit.id, auth.authenticateToken, controller.getPermitById)
+router.put(routes.permit.id, auth.authenticateToken, controller.updatePermitById)
+router.delete(routes.permit.id, auth.authenticateToken, controller.deletePermitById)
+router.get(routes.permit.request, auth.authenticateToken, controller.requestApproval)
 
 module.exports = router

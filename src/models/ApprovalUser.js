@@ -1,12 +1,12 @@
 const Model = require('./Model');
 
-class ApplyInvite extends Model {
+class ApprovalUser extends Model {
     static get tableName() {
-        return 'eapplyinvite';
+        return 'eapprovaluser';
     };
 
     static get idColumn() {
-        return 'eapplyinviteid';
+        return 'eapprovaluserid';
     };
 
     static get jsonSchema() {
@@ -19,27 +19,27 @@ class ApplyInvite extends Model {
             }
         };
     }
-    
+
     static get relationMappings() {
 
         const User = require('./User');
-        const Company = require('./Company');
+        const Approval = require('./Approval');
 
         return {
-            company: {
-                relation: Model.BelongsToOneRelation,
-                modelClass: Company,
-                join: {
-                    from: 'eapplyinvite.ecompanyecompanyid',
-                    to: 'ecompany.ecompanyid'
-                }
-            },
             user: {
                 relation: Model.BelongsToOneRelation,
                 modelClass: User,
                 join: {
-                    from: 'eapplyinvite.eusereuserid',
+                    from: 'eapprovaluser.eusereuserid',
                     to: 'euser.euserid'
+                }
+            },
+            approval: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Approval,
+                join: {
+                    from: 'eapprovaluser.eapprovaleapprovalid',
+                    to: 'eapproval.eapprovalid'
                 }
             }
         }
@@ -47,4 +47,4 @@ class ApplyInvite extends Model {
 
 }
 
-module.exports = ApplyInvite;
+module.exports = ApprovalUser;

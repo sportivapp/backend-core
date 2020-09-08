@@ -1,13 +1,24 @@
 require('dotenv').config();
 const User = require('../models/User');
 const CoachIndustryMapping = require('../models/CoachIndustryMapping')
+const UserIndustryMapping = require('../models/UserIndustryMapping')
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
 const fileService = require('./fileService');
 const Otp = require('../models/Otp');
 const emailService = require('../helper/emailService');
+const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
+const CompanyUserMapping = require('../models/CompanyUserMapping');
+const TeamUserMapping = require('../models/TeamUserMapping');
+const License = require('../models/License');
 
 const UserService = {};
+
+const UnsupportedOperationErrorEnum = {
+    NOT_ADMIN: 'NOT_ADMIN',
+    USER_NOT_EXIST: 'USER_NOT_EXIST',
+    INDUSTRY_IS_EMPTY: 'INDUSTRY_IS_EMPTY',
+}
 
 async function generateJWTToken(user) {
 
@@ -75,13 +86,29 @@ UserService.getUserById = async (userId) => {
     .select('euserid', 'eusername', 'eusermobilenumber', 'euseremail', 'euseridentitynumber', 'euserdob', 'euseraddress', 'eusergender', 
     'euserhobby', 'euserfacebook', 'euserinstagram', 'euserlinkedin', 'ecountryname', 'efileefileid', 'euseriscoach')
     .leftJoinRelated('country')
-    .where('euserid', userId).first();
+    .where('euserid', userId)
+    .first();
 
     if (!user)
         return
 
     return user;
     
+}
+
+UserService.getOtherUserById = async (userId, type) => {
+
+    if (type !== 'USER' && type !== 'COACH')
+        return
+
+    let relatedIndustry = 'coachIndustries'
+    if (type === 'USER')
+        relatedIndustry = 'userIndustries'
+
+    return User.query()
+    .withGraphFetched("[" + relatedIndustry + ", companies, teams, experiences, licenses]")
+    .where('euserid', userId);
+
 }
 
 async function updateUserAndIndustries(userFromDB, userDTO, industryIds, user, trx) {
@@ -131,6 +158,9 @@ UserService.updateUserCoachData = async (userCoachDTO, user, industryIds) => {
 
     if (!userFromDB)
         return
+
+    if (userFromDB.euseriscoach)
+        return
     
     userCoachDTO.euserdob = new Date(userCoachDTO.euserdob).getTime();
 
@@ -154,7 +184,10 @@ UserService.removeCoach = async (user) => {
     const userFromDB = await UserService.getUserById(user.sub);
 
     if (!userFromDB)
-        return 
+        return
+
+    if (userFromDB.euseriscoach === false)
+        return
 
     await CoachIndustryMapping.query()
     .delete()
@@ -180,6 +213,68 @@ UserService.changePassword = async (oldPassword, newPassword, user) => {
     const hashedNewPassword = await bcrypt.hash(newPassword);
 
     return userFromDB.$query().updateByUserId({euserpassword: hashedNewPassword}, user.sub);
+
+}
+
+UserService.getIndustryByUserId = async (user, type) => {
+
+    const userFromDB = await UserService.getUserById(user.sub)
+
+    if(!userFromDB)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
+
+    if(type === 'USER') {
+
+        return UserIndustryMapping.query()
+            .select('eindustryid', 'eindustryname')
+            .joinRelated('industry')
+            .where('eusereuserid', user.sub);
+
+    } else if ( type === 'COACH') {
+
+        return CoachIndustryMapping.query()
+            .select('eindustryid', 'eindustryname')
+            .joinRelated('industry')
+            .where('eusereuserid', user.sub);
+    }
+
+}
+
+UserService.changeIndustryByUserId = async (user, type, industryIds) => {
+
+    const userFromDB = await UserService.getUserById(user.sub)
+
+    if(!userFromDB)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
+
+    if(industryIds.length <= 0) 
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INDUSTRY_IS_EMPTY)
+
+    const mapping = industryIds.map(industryId => ({
+        eusereuserid: user.sub,
+        eindustryeindustryid: industryId
+    }))
+
+    if(type === 'USER') {
+
+        return UserIndustryMapping.query()
+            .delete()
+            .where('eusereuserid', user.sub)
+            .then(ignore => {
+                    return UserIndustryMapping.query()
+                    .insertToTable(mapping, user.sub)
+                })
+
+    } else if ( type === 'COACH') {
+
+        return CoachIndustryMapping.query()
+            .delete()
+            .where('eusereuserid', user.sub)
+            .then(ignore => {
+                    return CoachIndustryMapping.query()
+                    .insertToTable(mapping, user.sub)
+                })
+    }
 
 }
 

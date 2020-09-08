@@ -17,7 +17,8 @@ module.exports = {
             id: '/user/:userId',
             approval: '/user/approval',
             coach: '/user/coach',
-            removeCoach: '/user/coach-remove'
+            removeCoach: '/user/coach-remove',
+            industry: '/user/industry'
         },
         profile: {
             changeCompany: '/change-company',
@@ -40,6 +41,12 @@ module.exports = {
             create: '/announcement',
             id: '/announcement/:announcementId',
             list: '/announcement-list'
+        },
+        approval: {
+            find: '/approval/find',
+            list: '/approval',
+            id: '/approval/:approvalId',
+            user: '/approval/:approvalId/user/:userId'
         },
         department: {
             list: '/department',
@@ -111,6 +118,13 @@ module.exports = {
         class: {
             list: '/class',
             id: '/class/:classId'
+        },
+        permit: {
+            list: '/permit',
+            id: '/permit/:permitId',
+            action: '/permit/action',
+            request: '/permit/:permitId/request',
+            subordinate: '/permit/subordinate'
         }
     }
 }

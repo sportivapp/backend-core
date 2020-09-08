@@ -1,7 +1,6 @@
 const Experience = require('../models/Experience')
 const FileExperienceMapping = require('../models/FileExperienceMapping')
 const ServiceHelper = require('../helper/ServiceHelper')
-const fileService = require('../services/fileService')
 const { raw } = require('objection');
 
 const experienceService = {}
@@ -25,7 +24,7 @@ experienceService.createExperience = async (experienceDTO, loggedInUser, fileIds
 
 }
 
-experienceService.getExperienceList = async (page =0, size = 10, loggedInUser, keyword) => {
+experienceService.getExperienceList = async (page = 0, size = 10, loggedInUser, keyword) => {
 
     let newKeyword = ''
 
@@ -82,7 +81,6 @@ experienceService.editExperience = async (experienceDTO, experienceId, loggedInU
         .insertToTable(mapping, loggedInUser.sub)
     }
 
-
     return Experience.query()
     .where('eexperienceid', experienceId)
     .where('eusereuserid', loggedInUser.sub)
@@ -99,6 +97,7 @@ experienceService.deleteExperience = async (experienceId, loggedInUser) => {
     .where('eexperienceid', experienceId)
     .where('eusereuserid', loggedInUser.sub)
     .then(rowsAffected => rowsAffected === 1)
+
 }
 
 module.exports = experienceService
