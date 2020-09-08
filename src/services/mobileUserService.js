@@ -194,6 +194,30 @@ UserService.changePassword = async (oldPassword, newPassword, user) => {
 
 }
 
+UserService.getIndustryByUserId = async (user, type) => {
+
+    const userFromDB = await UserService.getUserById(user.sub)
+
+    if(!userFromDB)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
+
+    if(type === 'USER') {
+
+        return UserIndustryMapping.query()
+            .select('eindustryid', 'eindustryname')
+            .joinRelated('industry')
+            .where('eusereuserid', user.sub);
+
+    } else if ( type === 'COACH') {
+
+        return CoachIndustryMapping.query()
+            .select('eindustryid', 'eindustryname')
+            .joinRelated('industry')
+            .where('eusereuserid', user.sub);
+    }
+
+}
+
 UserService.changeIndustryByUserId = async (user, type, industryIds) => {
 
     const userFromDB = await UserService.getUserById(user.sub)

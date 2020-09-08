@@ -18,7 +18,7 @@ module.exports = {
             approval: '/user/approval',
             coach: '/user/coach',
             removeCoach: '/user/coach-remove',
-            changeIndustry: '/user/change-industry'
+            industry: '/user/industry'
         },
         profile: {
             changeCompany: '/change-company',
