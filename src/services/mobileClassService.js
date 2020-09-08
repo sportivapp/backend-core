@@ -4,6 +4,7 @@ const Company = require('../models/Company')
 const ServiceHelper = require('../helper/ServiceHelper')
 const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
 const ClassTypeEnum = require('../models/enum/ClassTypeEnum')
+const { raw } = require('objection')
 
 const mobileClassService = {}
 
@@ -22,10 +23,13 @@ mobileClassService.createClass = async (classDTO, user) => {
     return Class.query().insertToTable(classDTO, user.sub)
 }
 
-mobileClassService.getAllClassByCompanyId = async (companyId = null, page, size) => {
+mobileClassService.getAllClassByCompanyId = async (companyId = null, page, size, keyword = '') => {
+
+    if (companyId < 1) companyId = null
 
     return Class.query()
         .where('ecompanyecompanyid', companyId)
+        .andWhere(raw('lower("eclassname")'), 'like', `%${keyword.toLowerCase()}%`)
         .withGraphFetched('[company(baseAttributes), industry(baseAttributes)]')
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
