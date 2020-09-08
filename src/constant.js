@@ -5,7 +5,11 @@ module.exports = {
             list: '/company',
             register: '/company-register',
             id: '/company/:companyId',
-            users: '/company/:companyId/users'
+            users: '/company/:companyId/users',
+            exit: '/company-exit',
+            pending: '/company-user-pending',
+            cancelJoin: '/company-cancel-join/:companyId',
+            processInvitation: '/company-process-invitation'
         },
         user: {
             login: '/user-login',
