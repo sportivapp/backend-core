@@ -1,5 +1,8 @@
 const Model = require('./Model');
 const Team = require('./Team');
+const Industry = require('./Industry');
+const License = require('./License');
+const Experience = require('./Experience');
 
 class User extends Model {
   static get tableName() {
@@ -183,6 +186,54 @@ class User extends Model {
         join: {
           from: 'euser.euserid',
           to: 'euserindustrymapping.eusereuserid'
+        }
+      },
+      userIndustries: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Industry,
+        join: {
+          from: 'euser.euserid',
+          through: {
+            from: 'euserindustrymapping.eusereuserid',
+            to: 'euserindustrymapping.eindustryeindustryid'
+          },
+          to: 'eindustry.eindustryid'
+        }
+      },
+      coachIndustriesMapping: {
+        relation: Model.HasManyRelation,
+        modelClass: UserIndustryMapping,
+        join: {
+          from: 'euser.euserid',
+          to: 'ecoachindustrymapping.eusereuserid'
+        }
+      },
+      coachIndustries: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Industry,
+        join: {
+          from: 'euser.euserid',
+          through: {
+            from: 'ecoachindustrymapping.eusereuserid',
+            to: 'ecoachindustrymapping.eindustryeindustryid'
+          },
+          to: 'eindustry.eindustryid'
+        }
+      },
+      licenses: {
+        relation: Model.HasManyRelation,
+        modelClass: License,
+        join: {
+          from: 'euser.euserid',
+          to: 'elicense.elicensecreateby'
+        }
+      },
+      experiences: {
+        relation: Model.HasManyRelation,
+        modelClass: Experience,
+        join: {
+          from: 'euser.euserid',
+          to: 'eexperience.eusereuserid'
         }
       }
     }

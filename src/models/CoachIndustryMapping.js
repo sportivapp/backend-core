@@ -18,6 +18,31 @@ class CoachIndustryMapping extends Model {
     }
   }
 
+  static get relationMappings() {
+
+    const User = require('./User');
+    const Industry = require('./Industry');
+
+    return {
+        industry: {
+            relation: Model.BelongsToOneRelation,
+            modelClass: Industry,
+            join: {
+                from: 'ecoachindustrymapping.eindustryeindustryid',
+                to: 'eindustry.eindustryid'
+            }
+        },
+        coach: {
+            relation: Model.BelongsToOneRelation,
+            modelClass: User,
+            join: {
+                from: 'ecoachindustrymapping.eusereuserid',
+                to: 'euser.euserid'
+            }
+        }
+    }
+}
+
 }
 
 module.exports = CoachIndustryMapping;

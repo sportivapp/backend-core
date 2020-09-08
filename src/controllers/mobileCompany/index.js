@@ -9,7 +9,7 @@ controller.getCompany = async (req, res, next) => {
 
     try {
 
-        const result = await companyService.getCompany(parseInt(companyId));
+        const result = await companyService.getCompany(parseInt(companyId), req.user);
 
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404));
@@ -47,6 +47,22 @@ controller.getVirtualMemberCard = async (req, res, next) => {
 
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.joinCompany = async (req, res, next) => {
+
+    const { companyId } = req.body;
+    
+    try {
+
+        const result = await companyService.joinCompany(companyId, req.user);
+
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {

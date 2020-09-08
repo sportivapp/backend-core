@@ -17,7 +17,8 @@ module.exports = {
             id: '/user/:userId',
             approval: '/user/approval',
             coach: '/user/coach',
-            removeCoach: '/user/coach-remove'
+            removeCoach: '/user/coach-remove',
+            industry: '/user/industry'
         },
         profile: {
             changeCompany: '/change-company',
@@ -113,7 +114,10 @@ module.exports = {
             cancelInvitation: '/team-cancel-invite',
             cancelRequest: '/team-cancel-request',
             exit: '/team-exit',
-            list: '/team'
+        },
+        class: {
+            list: '/class',
+            id: '/class/:classId'
         },
         permit: {
             list: '/permit',

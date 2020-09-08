@@ -24,7 +24,8 @@ const UnsupportedOperationErrorEnum = {
     USER_NOT_EXIST: 'USER_NOT_EXIST',
     FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
     POSITION_UNACCEPTED: 'POSITION_UNACCEPTED',
-    INDUSTRY_NOT_FILLED: 'INDUSTRY_NOT_FILLED'
+    INDUSTRY_NOT_FILLED: 'INDUSTRY_NOT_FILLED',
+    TEAM_NOT_FOUND: 'TEAM_NOT_FOUND'
 
 }
 
@@ -95,6 +96,45 @@ teamService.createTeam = async (teamDTO, user, industryIds) => {
 
 }
 
+teamService.updateTeam = async (teamDTO, user, teamId, industryIds) => {
+
+    if (!industryIds || industryIds.length <= 0)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INDUSTRY_NOT_FILLED)
+
+    const isAdmin = await teamService.isAdmin(teamId, user.sub);
+
+    if (!isAdmin)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
+
+    const teamFromDB = await Team.query().where('eteamid', teamId).first()
+
+    if (!teamFromDB)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TEAM_NOT_FOUND)
+
+    const newTeam = await teamFromDB.$query()
+        .updateByUserId(teamDTO, user.sub)
+        .returning('*')
+
+    if (!newTeam)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.UPDATE_FAILED)
+
+    // remove all industry mapping from the team
+    await TeamIndustryMapping.query().where('eteameteamid', teamId).delete();
+
+    const teamIndustryMapping = industryIds.map(industryId => {
+        return {
+            eindustryeindustryid: industryId,
+            eteameteamid: teamId
+        }
+    });
+
+    // insert new industry mapping to team
+    await TeamIndustryMapping.query().insertToTable(teamIndustryMapping, user.sub);
+
+    return newTeam;
+
+}
+
 teamService.getTeams = async (keyword, page = 0, size = 10, user) => {
 
     let newKeyword = ''
@@ -120,7 +160,7 @@ teamService.getTeamDetail = async (teamId, user) => {
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.UNAUTHORIZED)
 
     const team = await Team.query()
-    .select('eteamname', 'eteamdescription', 'efileefileid')
+    .select('eteamid', 'eteamname', 'eteamdescription', 'efileefileid')
     .where('ecompanyecompanyid', user.companyId)
     .where('eteamid', teamId)
     .first()
@@ -128,7 +168,7 @@ teamService.getTeamDetail = async (teamId, user) => {
     if (!team)
         throw new NotFoundError()
 
-    const teamIndustries = TeamIndustryMapping.query()
+    const teamIndustries = await TeamIndustryMapping.query()
     .select('eindustryid', 'eindustryname')
     .joinRelated('industry')
     .where('eteameteamid', team.eteamid);

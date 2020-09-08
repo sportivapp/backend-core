@@ -179,8 +179,9 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
     else if (companyDTO.ecompanyparentid) {
         const parent = await Company.query().findById(companyDTO.ecompanyparentid).withGraphFetched('parent')
         if (!parent) return
-        else if (parent.parent && companyIds.indexOf(parent.parent.ecompanyid) === -1) return
-        else if (companyIds.indexOf(parent.ecompanyid) === -1) return
+        else if (companyIds.indexOf(parent.ecompanyid) === -1) {
+            if (parent.parent && companyIds.indexOf(parent.parent.ecompanyid) === -1) return
+        }
     }
 
     if (companyDTO.eindustryeindustryid) {

@@ -1,12 +1,12 @@
 const Model = require('./Model');
 
-class CompanyUserMapping extends Model {
+class Class extends Model {
     static get tableName() {
-        return 'ecompanyusermapping';
+        return 'eclass';
     };
 
     static get idColumn() {
-        return 'ecompanyecompanyid';
+        return 'eclassid'
     };
 
     static get jsonSchema() {
@@ -14,42 +14,43 @@ class CompanyUserMapping extends Model {
             type: 'object',
             required: [],
             properties: {
-                ecompanyecompanyid: { type: 'integer' },
-                eusereuserid: { type: 'integer' }
+
             }
         };
     }
 
     static get modifiers() {
         return {
-            ...this.baseModifiers()
+            baseAttributes(builder) {
+                builder.select('eclassid', 'eclassname', 'eclassstartdate')
+            }
         }
     }
 
     static get relationMappings() {
 
-        const User = require('./User')
         const Company = require('./Company')
+        const Industry = require('./Industry')
 
         return {
-            user: {
-                relation: Model.BelongsToOneRelation,
-                modelClass: User,
-                join: {
-                    from: 'ecompanyusermapping.eusereuserid',
-                    to: 'euser.euserid'
-                }
-            },
             company: {
                 relation: Model.BelongsToOneRelation,
                 modelClass: Company,
                 join: {
-                    from: 'ecompanyusermapping.ecompanyecompanyid',
+                    from: 'eclass.ecompanyecompanyid',
                     to: 'ecompany.ecompanyid'
+                }
+            },
+            industry: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Industry,
+                join: {
+                    from: 'eclass.eindustryeindustryid',
+                    to: 'eindustry.eindustryid'
                 }
             }
         }
     }
 }
 
-module.exports = CompanyUserMapping;
+module.exports = Class;
