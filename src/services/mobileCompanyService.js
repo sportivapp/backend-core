@@ -21,7 +21,9 @@ const CompanyLogStatusEnum = {
 
 const companyService = {}
 
-companyService.getCompany = async (companyId) => {
+companyService.getCompany = async (companyId, user) => {
+
+    let isInCompany = true
 
     const companyDetailPromise = Company.query()
     .select('efileefileid', 'ecompanyname', 'eindustryname', 'eaddressstreet', 'ecompanyphonenumber', 'ecompanyemailaddress')
@@ -41,6 +43,13 @@ companyService.getCompany = async (companyId) => {
     .joinRelated('branches')
     .where('ecompany.ecompanyid', companyId);
 
+    const userInCompany = await CompanyUserMapping.query()
+    .where('ecompanyecompanyid', companyId)
+    .where('eusereuserid', user.sub)
+    .first()
+
+    if(!userInCompany) isInCompany = false
+
     const result = await Promise.all([companyDetailPromise, departmentWithHeadPromise, branchesPromise]);
 
     let departmentWithHead = [];
@@ -54,7 +63,8 @@ companyService.getCompany = async (companyId) => {
     returnedData = {
         company: result[0],
         departments: departmentWithHead,
-        branches: result[2]
+        branches: result[2],
+        isuserincompany: isInCompany
     }
 
     return returnedData;
