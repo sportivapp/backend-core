@@ -1,12 +1,12 @@
 const Model = require('./Model');
 
-class UserPositionMapping extends Model {
+class ApprovalUser extends Model {
     static get tableName() {
-        return 'euserpositionmapping';
+        return 'eapprovaluser';
     };
 
     static get idColumn() {
-        return 'eusereuserid';
+        return 'eapprovaluserid';
     };
 
     static get jsonSchema() {
@@ -15,35 +15,36 @@ class UserPositionMapping extends Model {
             required: [],
             properties: {
                 eusereuserid: { type: 'integer' },
-                egradeegradeid: { type: 'integer' }
+                ecompanyecompanyid: { type: 'integer' }
             }
         };
     }
 
     static get relationMappings() {
 
-        const User = require('./User')
-        const Grades = require('./Grades')
+        const User = require('./User');
+        const Approval = require('./Approval');
 
         return {
             user: {
                 relation: Model.BelongsToOneRelation,
                 modelClass: User,
                 join: {
-                    from: 'euserpositionmapping.eusereuserid',
+                    from: 'eapprovaluser.eusereuserid',
                     to: 'euser.euserid'
                 }
             },
-            grade: {
+            approval: {
                 relation: Model.BelongsToOneRelation,
-                modelClass: Grades,
+                modelClass: Approval,
                 join: {
-                    from: 'euserpositionmapping.egradeegradeid',
-                    to: 'egrade.egradeid'
+                    from: 'eapprovaluser.eapprovaleapprovalid',
+                    to: 'eapproval.eapprovalid'
                 }
-            },
+            }
         }
     }
+
 }
 
-module.exports = UserPositionMapping;
+module.exports = ApprovalUser;

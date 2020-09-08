@@ -23,6 +23,7 @@ class PermitApprovalMapping extends Model {
     static get relationMappings() {
 
         const Permit = require('./Permit')
+        const Approval = require('./Approval')
 
         return {
             permits: {
@@ -31,6 +32,14 @@ class PermitApprovalMapping extends Model {
                 join: {
                     from: 'epermitapprovalmapping.epermitepermitid',
                     to: 'epermit.epermitid'
+                }
+            },
+            approval: {
+                modelClass: Approval,
+                relation: Model.BelongsToOneRelation,
+                join: {
+                    from: 'epermitapprovalmapping.eapprovaleapprovalid',
+                    to: 'eapproval.eapprovalid'
                 }
             }
         }
