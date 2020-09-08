@@ -3,10 +3,10 @@ exports.up = (knex, Promise) => knex.schema.createTable('eclass', t => {
     t.string('eclassname').notNullable();
     t.bigInteger('eclassstartdate').notNullable();
     t.bigInteger('eclassenddate').notNullable();
-    t.bigInteger('eclassstarthour').notNullable();
-    t.bigInteger('eclassstartminute').notNullable();
-    t.bigInteger('eclassendhour').notNullable();
-    t.bigInteger('eclassendminute').notNullable();
+    t.integer('eclassstarthour').notNullable().defaultTo(0);
+    t.integer('eclassstartminute').notNullable().defaultTo(0);
+    t.integer('eclassendhour').notNullable().defaultTo(0);
+    t.integer('eclassendminute').notNullable().defaultTo(0);
     t.string('eclassrequirement');
     t.string('eclassdescription');
     t.enum('eclasstype', ['PUBLIC', 'PRIVATE']);

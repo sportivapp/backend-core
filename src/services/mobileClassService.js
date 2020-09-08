@@ -3,6 +3,7 @@ const Industry = require('../models/Industry')
 const Company = require('../models/Company')
 const ServiceHelper = require('../helper/ServiceHelper')
 const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
+const ClassTypeEnum = require('../models/enum/ClassTypeEnum')
 
 const mobileClassService = {}
 
@@ -15,6 +16,8 @@ mobileClassService.createClass = async (classDTO, user) => {
     if (!company) throw new UnsupportedOperationError('COMPANY_NOT_FOUND')
 
     if (!industry) throw new UnsupportedOperationError('INDUSTRY_NOT_FOUND')
+
+    if (!ClassTypeEnum.hasOwnProperty(classDTO.eclasstype)) throw new UnsupportedOperationError('TYPE_INVALID')
 
     return Class.query().insertToTable(classDTO, user.sub)
 }
@@ -43,6 +46,8 @@ mobileClassService.updateClassById = async (classId, classDTO, user) => {
     const industry = await Industry.query().findById(classDTO.eindustryeindustryid)
 
     if (!industry) throw new UnsupportedOperationError('INDUSTRY_NOT_FOUND')
+
+    if (!ClassTypeEnum.hasOwnProperty(classDTO.eclasstype)) throw new UnsupportedOperationError('TYPE_INVALID')
 
     return mobileClassService.getClassById(classId)
         .then(foundClass => foundClass.$query().updateByUserId(classDTO, user.sub).returning('*'))
