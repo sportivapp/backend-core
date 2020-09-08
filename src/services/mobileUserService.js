@@ -107,7 +107,8 @@ UserService.getOtherUserById = async (userId, type) => {
 
     return User.query()
     .withGraphFetched("[" + relatedIndustry + ", companies, teams, experiences, licenses]")
-    .where('euserid', userId);
+    .where('euserid', userId)
+    .first();
 
 }
 
