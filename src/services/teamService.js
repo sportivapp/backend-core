@@ -95,6 +95,37 @@ teamService.createTeam = async (teamDTO, user, industryIds) => {
 
 }
 
+teamService.updateTeam = async (teamDTO, user, teamId, industryIds) => {
+
+    const isAdmin = await teamService.isAdmin(teamId, user.sub);
+
+    if (!isAdmin)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
+
+    const newTeam = await Team.query()
+    .where('eteamid', teamId)
+    .updateByUserId(teamDTO, user.sub);
+
+    if (!newTeam)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.UPDATE_FAILED)
+
+    // remove all industry mapping from the team
+    await TeamIndustryMapping.query().where('eteameteamid', teamId).delete();
+
+    const teamIndustryMapping = industryIds.map(industryId => {
+        return {
+            eindustryeindustryid: industryId,
+            eteameteamid: teamId
+        }
+    });
+
+    // insert new industry mapping to team
+    await TeamIndustryMapping.query().insertToTable(teamIndustryMapping, user.sub);
+
+    return newTeam;
+
+}
+
 teamService.getTeams = async (keyword, page = 0, size = 10, user) => {
 
     let newKeyword = ''
