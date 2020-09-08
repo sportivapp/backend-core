@@ -191,7 +191,6 @@ controller.changePassword = async (req, res, next) => {
 
 }
 
-
 controller.changeIndustryByUserId = async (req, res, next) => {
 
     const { type } = req.query
