@@ -139,6 +139,9 @@ UserService.updateUserCoachData = async (userCoachDTO, user, industryIds) => {
 
     if (!userFromDB)
         return
+
+    if (userFromDB.euseriscoach)
+        return
     
     userCoachDTO.euserdob = new Date(userCoachDTO.euserdob).getTime();
 
