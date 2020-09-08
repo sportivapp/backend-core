@@ -23,7 +23,7 @@ const companyService = {}
 
 companyService.getCompany = async (companyId, user) => {
 
-    let isInCompany = false
+    let isInCompany
 
     const companyDetailPromise = Company.query()
     .select('efileefileid', 'ecompanyname', 'eindustryname', 'eaddressstreet', 'ecompanyphonenumber', 'ecompanyemailaddress')
@@ -43,31 +43,32 @@ companyService.getCompany = async (companyId, user) => {
     .joinRelated('branches')
     .where('ecompany.ecompanyid', companyId);
 
-    const userInCompany = await CompanyUserMapping.query()
+    const userInCompany = CompanyUserMapping.query()
     .where('ecompanyecompanyid', companyId)
     .where('eusereuserid', user.sub)
     .first()
 
-    if(userInCompany) isInCompany = true
+    return Promise.all([companyDetailPromise, departmentWithHeadPromise, branchesPromise, userInCompany])
+    .then(arr => {
+        let departmentWithHead = [];
 
-    const result = await Promise.all([companyDetailPromise, departmentWithHeadPromise, branchesPromise]);
+        for (let i=0; i < arr[1].length; i++) {
+            departmentWithHead.push({
+                edepartmentname: arr[1][i].edepartmentname,
+                eusername: arr[1][i].eusername
+            })
+        }
 
-    let departmentWithHead = [];
-    for (let i=0; i<result[1].length; i++) {
-        departmentWithHead.push({
-            edepartmentname: result[1][i].edepartmentname,
-            eusername: result[1][i].eusername
-        })
-    }
+        return [arr[0], departmentWithHead, arr[2], arr[3]]
 
-    returnedData = {
+    }).then(result => ({
+        
         company: result[0],
-        departments: departmentWithHead,
+        departments: result[1],
         branches: result[2],
-        isuserincompany: isInCompany
-    }
+        isuserincompany: (result[3]) ? isInCompany = true : isInCompany = false
 
-    return returnedData;
+    }));
 
 }
 
