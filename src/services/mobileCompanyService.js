@@ -21,7 +21,7 @@ const CompanyLogStatusEnum = {
 
 const companyService = {}
 
-companyService.getCompany = async (companyId) => {
+companyService.getCompany = async (companyId, user) => {
 
     const companyDetailPromise = Company.query()
     .select('efileefileid', 'ecompanyname', 'eindustryname', 'eaddressstreet', 'ecompanyphonenumber', 'ecompanyemailaddress')
@@ -41,23 +41,33 @@ companyService.getCompany = async (companyId) => {
     .joinRelated('branches')
     .where('ecompany.ecompanyid', companyId);
 
-    const result = await Promise.all([companyDetailPromise, departmentWithHeadPromise, branchesPromise]);
+    const userInCompany = CompanyUserMapping.query()
+    .where('ecompanyecompanyid', companyId)
+    .where('eusereuserid', user.sub)
+    .first()
 
-    let departmentWithHead = [];
-    for (let i=0; i<result[1].length; i++) {
-        departmentWithHead.push({
-            edepartmentname: result[1][i].edepartmentname,
-            eusername: result[1][i].eusername
-        })
-    }
+    const isPendingApply = companyService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.APPLY])
 
-    returnedData = {
-        company: result[0],
-        departments: departmentWithHead,
-        branches: result[2]
-    }
+    return Promise.all([companyDetailPromise, departmentWithHeadPromise, branchesPromise, userInCompany, isPendingApply])
+    .then(arr => {
+        let departmentWithHead = [];
 
-    return returnedData;
+        for (let i=0; i < arr[1].length; i++) {
+            departmentWithHead.push({
+                edepartmentname: arr[1][i].edepartmentname,
+                eusername: arr[1][i].eusername
+            })
+        }
+
+        return {
+            company: arr[0],
+            departments: departmentWithHead,
+            branches: arr[2],
+            isuserincompany: (arr[3]) ? true : false,
+            isapply: (arr[4]) ? true : false
+        }
+
+    })
 
 }
 

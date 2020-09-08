@@ -9,7 +9,7 @@ controller.getCompany = async (req, res, next) => {
 
     try {
 
-        const result = await companyService.getCompany(parseInt(companyId));
+        const result = await companyService.getCompany(parseInt(companyId), req.user);
 
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404));
