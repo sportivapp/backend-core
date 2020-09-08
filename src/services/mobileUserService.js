@@ -8,6 +8,9 @@ const fileService = require('./fileService');
 const Otp = require('../models/Otp');
 const emailService = require('../helper/emailService');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
+const CompanyUserMapping = require('../models/CompanyUserMapping');
+const TeamUserMapping = require('../models/TeamUserMapping');
+const License = require('../models/License');
 
 const UserService = {};
 
@@ -83,13 +86,29 @@ UserService.getUserById = async (userId) => {
     .select('euserid', 'eusername', 'eusermobilenumber', 'euseremail', 'euseridentitynumber', 'euserdob', 'euseraddress', 'eusergender', 
     'euserhobby', 'euserfacebook', 'euserinstagram', 'euserlinkedin', 'ecountryname', 'efileefileid', 'euseriscoach')
     .leftJoinRelated('country')
-    .where('euserid', userId).first();
+    .where('euserid', userId)
+    .first();
 
     if (!user)
         return
 
     return user;
     
+}
+
+UserService.getOtherUserById = async (userId, type) => {
+
+    if (type !== 'USER' && type !== 'COACH')
+        return
+
+    let relatedIndustry = 'coachIndustries'
+    if (type === 'USER')
+        relatedIndustry = 'userIndustries'
+
+    return User.query()
+    .withGraphFetched("[" + relatedIndustry + ", companies, teams, experiences, licenses]")
+    .where('euserid', userId);
+
 }
 
 async function updateUserAndIndustries(userFromDB, userDTO, industryIds, user, trx) {

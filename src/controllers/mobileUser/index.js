@@ -49,12 +49,14 @@ controller.createUser = async (req, res, next) => {
 
 }
 
-controller.getUserById = async (req, res, next) => {
+controller.getOtherUserById = async (req, res, next) => {
 
     const { userId } = req.body;
+    const { type } = req.query;
 
     try {
-        const result = await mobileUserService.getUserById(userId);
+        
+        const result = await mobileUserService.getOtherUserById(userId, type.toUpperCase());
 
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404));
