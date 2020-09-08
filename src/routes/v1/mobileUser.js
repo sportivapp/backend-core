@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const controller = require('../../controllers/mobileUser');
 const auth = require('../../middlewares/authentication');
-const { routes } = require('../../constant')
+const { routes } = require('../../constant');
+const { getIndustryByUserId } = require('../../services/mobileUserService');
 
 router.post('/user', controller.createUser);
 router.post('/user-login', controller.login);
@@ -11,7 +12,8 @@ router.delete( routes.user.removeCoach, auth.authenticateToken, controller.remov
 router.post('/user-profile', auth.authenticateToken, controller.getUserById);
 router.get('/user-self-profile', auth.authenticateToken, controller.getSelf);
 router.put('/user', auth.authenticateToken, controller.updateUser);
-router.put( routes.user.changeIndustry, auth.authenticateToken, controller.changeIndustryByUserId);
+router.get( routes.user.industry, auth.authenticateToken, controller.getIndustryByUserId );
+router.put( routes.user.industry, auth.authenticateToken, controller.changeIndustryByUserId);
 router.post('/user-change-password', auth.authenticateToken, controller.changePassword);
 
 module.exports = router;

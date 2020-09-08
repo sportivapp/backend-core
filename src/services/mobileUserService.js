@@ -139,6 +139,9 @@ UserService.updateUserCoachData = async (userCoachDTO, user, industryIds) => {
 
     if (!userFromDB)
         return
+
+    if (userFromDB.euseriscoach)
+        return
     
     userCoachDTO.euserdob = new Date(userCoachDTO.euserdob).getTime();
 
@@ -162,7 +165,10 @@ UserService.removeCoach = async (user) => {
     const userFromDB = await UserService.getUserById(user.sub);
 
     if (!userFromDB)
-        return 
+        return
+
+    if (userFromDB.euseriscoach === false)
+        return
 
     await CoachIndustryMapping.query()
     .delete()
@@ -188,6 +194,30 @@ UserService.changePassword = async (oldPassword, newPassword, user) => {
     const hashedNewPassword = await bcrypt.hash(newPassword);
 
     return userFromDB.$query().updateByUserId({euserpassword: hashedNewPassword}, user.sub);
+
+}
+
+UserService.getIndustryByUserId = async (user, type) => {
+
+    const userFromDB = await UserService.getUserById(user.sub)
+
+    if(!userFromDB)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
+
+    if(type === 'USER') {
+
+        return UserIndustryMapping.query()
+            .select('eindustryid', 'eindustryname')
+            .joinRelated('industry')
+            .where('eusereuserid', user.sub);
+
+    } else if ( type === 'COACH') {
+
+        return CoachIndustryMapping.query()
+            .select('eindustryid', 'eindustryname')
+            .joinRelated('industry')
+            .where('eusereuserid', user.sub);
+    }
 
 }
 
