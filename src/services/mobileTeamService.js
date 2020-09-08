@@ -200,8 +200,7 @@ teamService.processIntoTeam = async (teamId, user, userId) => {
 
     const teamLogPromise = teamService.updateTeamLog(teamId, user, userId, TeamLogStatusEnum.ACCEPTED);
 
-    return Promise.all([teamUserMappingPromise, teamLogPromise])
-    .then();
+    return Promise.all([teamUserMappingPromise, teamLogPromise]);
 
 }
 
