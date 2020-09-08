@@ -40,7 +40,10 @@ mobileClassService.getClassById = async (classId) => {
     return Class.query()
         .findById(classId)
         .withGraphFetched('[company(baseAttributes), industry(baseAttributes)]')
-        .catch(ignored => throw new NotFoundError())
+        .then(foundClass => {
+            if (!foundClass) throw new NotFoundError()
+            return foundClass
+        })
 }
 
 mobileClassService.updateClassById = async (classId, classDTO, user) => {
