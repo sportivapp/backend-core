@@ -59,16 +59,14 @@ companyService.getCompany = async (companyId, user) => {
             })
         }
 
-        return [arr[0], departmentWithHead, arr[2], arr[3]]
+        return {
+            company: arr[0],
+            departments: departmentWithHead,
+            branches: arr[2],
+            isuserincompany: (arr[3]) ? isInCompany = true : isInCompany = false
+        }
 
-    }).then(result => ({
-        
-        company: result[0],
-        departments: result[1],
-        branches: result[2],
-        isuserincompany: (result[3]) ? isInCompany = true : isInCompany = false
-
-    }));
+    })
 
 }
 
