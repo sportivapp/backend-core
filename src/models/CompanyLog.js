@@ -1,12 +1,12 @@
 const Model = require('./Model');
 
-class ApplyInvite extends Model {
+class CompanyLog extends Model {
     static get tableName() {
-        return 'eapplyinvite';
+        return 'ecompanylog';
     };
 
     static get idColumn() {
-        return 'eapplyinviteid';
+        return 'ecompanylogid';
     };
 
     static get jsonSchema() {
@@ -30,7 +30,7 @@ class ApplyInvite extends Model {
                 relation: Model.BelongsToOneRelation,
                 modelClass: Company,
                 join: {
-                    from: 'eapplyinvite.ecompanyecompanyid',
+                    from: 'ecompanylog.ecompanyecompanyid',
                     to: 'ecompany.ecompanyid'
                 }
             },
@@ -38,7 +38,7 @@ class ApplyInvite extends Model {
                 relation: Model.BelongsToOneRelation,
                 modelClass: User,
                 join: {
-                    from: 'eapplyinvite.eusereuserid',
+                    from: 'ecompanylog.eusereuserid',
                     to: 'euser.euserid'
                 }
             }
@@ -47,4 +47,4 @@ class ApplyInvite extends Model {
 
 }
 
-module.exports = ApplyInvite;
+module.exports = CompanyLog;

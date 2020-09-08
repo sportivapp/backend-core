@@ -55,4 +55,20 @@ controller.getVirtualMemberCard = async (req, res, next) => {
 
 }
 
+controller.joinCompany = async (req, res, next) => {
+
+    const { companyId } = req.body;
+    
+    try {
+
+        const result = await companyService.joinTeam(companyId, req.user);
+
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = controller;
