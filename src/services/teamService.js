@@ -24,7 +24,8 @@ const UnsupportedOperationErrorEnum = {
     USER_NOT_EXIST: 'USER_NOT_EXIST',
     FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
     POSITION_UNACCEPTED: 'POSITION_UNACCEPTED',
-    INDUSTRY_NOT_FILLED: 'INDUSTRY_NOT_FILLED'
+    INDUSTRY_NOT_FILLED: 'INDUSTRY_NOT_FILLED',
+    TEAM_NOT_FOUND: 'TEAM_NOT_FOUND'
 
 }
 
@@ -97,13 +98,20 @@ teamService.createTeam = async (teamDTO, user, industryIds) => {
 
 teamService.updateTeam = async (teamDTO, user, teamId, industryIds) => {
 
+    if (!industryIds || industryIds.length <= 0)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INDUSTRY_NOT_FILLED)
+
     const isAdmin = await teamService.isAdmin(teamId, user.sub);
 
     if (!isAdmin)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
-    const newTeam = await Team.query()
-    .where('eteamid', teamId)
+    const teamFromDB = await Team.query().where('eteamid', teamId).first()
+
+    if (!teamFromDB)
+    throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TEAM_NOT_FOUND)
+
+    const newTeam = teamFromDB.$query()
     .updateByUserId(teamDTO, user.sub);
 
     if (!newTeam)
