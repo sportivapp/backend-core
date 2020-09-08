@@ -23,8 +23,6 @@ const companyService = {}
 
 companyService.getCompany = async (companyId, user) => {
 
-    let isInCompany
-
     const companyDetailPromise = Company.query()
     .select('efileefileid', 'ecompanyname', 'eindustryname', 'eaddressstreet', 'ecompanyphonenumber', 'ecompanyemailaddress')
     .joinRelated('address')
@@ -48,7 +46,9 @@ companyService.getCompany = async (companyId, user) => {
     .where('eusereuserid', user.sub)
     .first()
 
-    return Promise.all([companyDetailPromise, departmentWithHeadPromise, branchesPromise, userInCompany])
+    const isPendingApply = companyService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.APPLY])
+
+    return Promise.all([companyDetailPromise, departmentWithHeadPromise, branchesPromise, userInCompany, isPendingApply])
     .then(arr => {
         let departmentWithHead = [];
 
@@ -63,7 +63,8 @@ companyService.getCompany = async (companyId, user) => {
             company: arr[0],
             departments: departmentWithHead,
             branches: arr[2],
-            isuserincompany: (arr[3]) ? isInCompany = true : isInCompany = false
+            isuserincompany: (arr[3]) ? true : false,
+            isapply: (arr[4]) ? true : false
         }
 
     })
