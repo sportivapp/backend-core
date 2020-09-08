@@ -22,9 +22,7 @@ mobileClassService.createClass = async (classDTO, user) => {
     return Class.query().insertToTable(classDTO, user.sub)
 }
 
-mobileClassService.getAllClassByCompanyId = async (companyId, page, size) => {
-
-    if (!companyId) return ServiceHelper.toEmptyPage(page, size)
+mobileClassService.getAllClassByCompanyId = async (companyId = null, page, size) => {
 
     return Class.query()
         .where('ecompanyecompanyid', companyId)

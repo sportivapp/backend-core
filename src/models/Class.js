@@ -22,27 +22,23 @@ class Class extends Model {
     static get modifiers() {
         return {
             baseAttributes(builder) {
-                builder.select('eclassid', 'eclassname', 'eclasslogo')
+                builder.select('eclassid', 'eclassname', 'eclassstartdate')
             }
         }
     }
 
     static get relationMappings() {
 
-        const User = require('./User')
+        const Company = require('./Company')
         const Industry = require('./Industry')
 
         return {
-            users: {
-                relation: Model.ManyToManyRelation,
-                modelClass: User,
+            company: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Company,
                 join: {
-                    from: 'eclass.eclassid',
-                    through: {
-                        from: 'eclassusermapping.eclasseclassid',
-                        to: 'eclassusermapping.eusereuserid'
-                    },
-                    to: 'euser.euserid'
+                    from: 'eclass.ecompanyecompanyid',
+                    to: 'ecompany.ecompanyid'
                 }
             },
             industry: {
