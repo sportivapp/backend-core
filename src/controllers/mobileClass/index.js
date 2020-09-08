@@ -1,4 +1,4 @@
-const classService = require('../../services/classService')
+const classService = require('../../services/mobileClassService')
 const ResponseHelper = require('../../helper/ResponseHelper')
 
 const classController = {}

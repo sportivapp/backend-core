@@ -4,9 +4,9 @@ const Company = require('../models/Company')
 const ServiceHelper = require('../helper/ServiceHelper')
 const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
 
-const classService = {}
+const mobileClassService = {}
 
-classService.createClass = async (classDTO, user) => {
+mobileClassService.createClass = async (classDTO, user) => {
 
     const industry = await Industry.query().findById(classDTO.eindustryeindustryid)
 
@@ -19,7 +19,7 @@ classService.createClass = async (classDTO, user) => {
     return Class.query().insertToTable(classDTO, user.sub)
 }
 
-classService.getAllClassByCompanyId = async (companyId, page, size) => {
+mobileClassService.getAllClassByCompanyId = async (companyId, page, size) => {
 
     if (!companyId) return ServiceHelper.toEmptyPage(page, size)
 
@@ -30,7 +30,7 @@ classService.getAllClassByCompanyId = async (companyId, page, size) => {
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
 
-classService.getClassById = async (classId) => {
+mobileClassService.getClassById = async (classId) => {
 
     return Class.query()
         .findById(classId)
@@ -38,17 +38,17 @@ classService.getClassById = async (classId) => {
         .catch(ignored => throw new NotFoundError())
 }
 
-classService.updateClassById = async (classId, classDTO, user) => {
+mobileClassService.updateClassById = async (classId, classDTO, user) => {
 
     const industry = await Industry.query().findById(classDTO.eindustryeindustryid)
 
     if (!industry) throw new UnsupportedOperationError('INDUSTRY_NOT_FOUND')
 
-    return classService.getClassById(classId)
+    return mobileClassService.getClassById(classId)
         .then(foundClass => foundClass.$query().updateByUserId(classDTO, user.sub).returning('*'))
 }
 
-classService.deleteClassById = async (classId) => {
+mobileClassService.deleteClassById = async (classId) => {
 
     return Class.query()
         .findById(classId)
@@ -56,4 +56,4 @@ classService.deleteClassById = async (classId) => {
         .then(rowsAffected => rowsAffected === 1)
 }
 
-module.exports = classService
+module.exports = mobileClassService
