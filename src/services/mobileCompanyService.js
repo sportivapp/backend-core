@@ -23,7 +23,7 @@ const companyService = {}
 
 companyService.getCompany = async (companyId, user) => {
 
-    let isInCompany = true
+    let isInCompany = false
 
     const companyDetailPromise = Company.query()
     .select('efileefileid', 'ecompanyname', 'eindustryname', 'eaddressstreet', 'ecompanyphonenumber', 'ecompanyemailaddress')
@@ -48,7 +48,7 @@ companyService.getCompany = async (companyId, user) => {
     .where('eusereuserid', user.sub)
     .first()
 
-    if(!userInCompany) isInCompany = false
+    if(userInCompany) isInCompany = true
 
     const result = await Promise.all([companyDetailPromise, departmentWithHeadPromise, branchesPromise]);
 
