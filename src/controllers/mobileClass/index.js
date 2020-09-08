@@ -30,11 +30,11 @@ classController.createClass = async (req, res, next) => {
 
 classController.getAllClassByCompanyId = async (req, res, next) => {
 
-    const { companyId, page, size } = req.query
+    const { companyId, page, size, keyword } = req.query
 
     try {
 
-        const pageObj = await classService.getAllClassByCompanyId(companyId, page, size)
+        const pageObj = await classService.getAllClassByCompanyId(companyId, page, size, keyword)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
     } catch(e) {
         next(e)
