@@ -109,10 +109,11 @@ teamService.updateTeam = async (teamDTO, user, teamId, industryIds) => {
     const teamFromDB = await Team.query().where('eteamid', teamId).first()
 
     if (!teamFromDB)
-    throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TEAM_NOT_FOUND)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TEAM_NOT_FOUND)
 
-    const newTeam = teamFromDB.$query()
-    .updateByUserId(teamDTO, user.sub);
+    const newTeam = await teamFromDB.$query()
+        .updateByUserId(teamDTO, user.sub)
+        .returning('*')
 
     if (!newTeam)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.UPDATE_FAILED)
