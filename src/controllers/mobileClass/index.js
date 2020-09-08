@@ -19,30 +19,39 @@ classController.createClass = async (req, res, next) => {
         ecompanyecompanyid: companyId
     }
 
-    return classService.createClass(classDTO, req.user)
-        .then(ResponseHelper.toBaseResponse)
-        .then(response => res.status(200).json(response))
-        .catch(next)
+    try {
+
+        const result = await classService.createClass(classDTO, req.user)
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+    } catch(e) {
+        next(e)
+    }
 }
 
 classController.getAllClassByCompanyId = async (req, res, next) => {
 
     const { companyId, page, size } = req.query
 
-    return classService.getAllClassByCompanyId(companyId, page, size)
-        .then(pageObj => ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
-        .then(response => res.status(200).json(response))
-        .catch(next)
+    try {
+
+        const pageObj = await classService.getAllClassByCompanyId(companyId, page, size)
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+    } catch(e) {
+        next(e)
+    }
 }
 
 classController.getClassById = async (req, res, next) => {
 
     const { classId } = req.params
 
-    return classService.getClassById(classId)
-        .then(ResponseHelper.toBaseResponse)
-        .then(response => res.status(200).json(response))
-        .catch(next)
+    try {
+
+        const result = await classService.getClassById(classId)
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+    } catch(e) {
+        next(e)
+    }
 }
 
 classController.updateClassById = async (req, res, next) => {
@@ -62,20 +71,26 @@ classController.updateClassById = async (req, res, next) => {
         eindustryeindustryid: industryId
     }
 
-    return classService.updateClassById(classId, classDTO, req.user)
-        .then(ResponseHelper.toBaseResponse)
-        .then(response => res.status(200).json(response))
-        .catch(next)
+    try {
+
+        const result = await classService.updateClassById(classId, classDTO, req.user)
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+    } catch (e) {
+        next(e)
+    }
 }
 
 classController.deleteClassById = async (req, res, next) => {
 
     const { classId } = req.params
 
-    return classService.deleteClassById(classId)
-        .then(ResponseHelper.toBaseResponse)
-        .then(response => res.status(200).json(response))
-        .catch(next)
+    try {
+
+        const result = classService.deleteClassById(classId)
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+     } catch(e) {
+        next(e)
+    }
 }
 
 module.exports = classController
