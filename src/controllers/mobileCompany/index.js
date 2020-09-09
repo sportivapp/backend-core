@@ -87,7 +87,6 @@ controller.userCancelJoin = async (req, res, next) => {
 
 }
 
-
 controller.getListPendingInviteByUserId = async (req, res, next) => {
 
     const {page, size} = req.query
@@ -135,6 +134,20 @@ controller.processInvitation = async (req, res, next) => {
         next(e);
     }
 
+}
+
+controller.uploadFile = async (req, res, next) => {
+
+    const { companyId } = req.body
+    try {
+        
+        const result = await companyService.uploadFile(parseInt(companyId), req.file, req.user)
+
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+        
+    } catch (e) {
+        next(e)
+    }
 }
 
 module.exports = controller;
