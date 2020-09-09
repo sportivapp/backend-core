@@ -42,24 +42,13 @@ experienceService.getExperienceList = async (page = 0, size = 10, loggedInUser, 
 
 experienceService.getExperienceById = async (experienceId, loggedInUser) => {
 
-    const experience = await Experience.query()
-    .select('eexperienceid','eexperiencename', 'eexperiencestartdate', 'eexperienceenddate', 'eexperiencelocation', 'eexperienceposition', 'eexperiencedescription', 'eindustryname')
-    .joinRelated('industries')
+    return Experience.query()
+    .select('eexperienceid','eexperiencename', 'eexperiencestartdate', 'eexperienceenddate', 'eexperiencelocation', 
+    'eexperienceposition', 'eexperiencedescription', 'eindustryname', 'efilename')
+    .joinRelated('[industries, files]')
     .where('eexperienceid', experienceId)
     .where('eusereuserid', loggedInUser.sub)
     .first()
-
-    const files = await FileExperienceMapping.query()
-    .select('efileefileid')
-    .where('eexperienceeexperienceid', experienceId)
-    .where('efileexperiencemappingcreateby', loggedInUser.sub)
-
-    const result = {
-        ...experience,
-        files
-    }
-
-    return result
 
 }
 
