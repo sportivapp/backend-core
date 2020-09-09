@@ -20,6 +20,19 @@ class AnnouncementUserMapping extends Model {
     };
   }
 
+  static get relationMappings() {
+    return {
+      announcement: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Announcement,
+        join: {
+          from: 'eannouncementusermapping.eannouncementeannouncementid',
+          to: 'eannouncement.eannouncementid'
+        }
+      }
+    }
+  }
+
 }
 
 module.exports = AnnouncementUserMapping;

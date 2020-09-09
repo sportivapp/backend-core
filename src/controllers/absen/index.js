@@ -5,7 +5,7 @@ absenController = {}
 
 absenController.createAbsenByPOS = async (req, res, next) => {
 
-    const { absenTime, fileId, deviceImei, userId, day } = req.body;
+    const { absenTime, fileId, deviceImei, userId } = req.body;
 
     try {
 

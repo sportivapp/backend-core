@@ -34,6 +34,18 @@ class Industry extends Model {
             }
         }
     }
+
+    static get modifiers() {
+
+        return {
+            // ...this.baseModifiers(),
+            baseAttributes(builder) {
+                builder.select('eindustryid', 'eindustryname')
+            }
+        }
+
+    }
+
 }
 
 module.exports = Industry;

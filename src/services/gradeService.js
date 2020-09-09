@@ -63,13 +63,15 @@ gradeService.createGrade = async (gradeDTO, userId) => {
     const company = await Company.query().findById(gradeDTO.ecompanyecompanyid)
     if (!company) return
 
-    const department = await Department.query().findById(gradeDTO.edepartmentedepartmentid)
-    if (!department) return
+    if (gradeDTO.edepartmentedepartmentid) {
+        const department = await Department.query().findById(gradeDTO.edepartmentedepartmentid)
+        if (!department) return
+    }
 
     return Grade.query().insertToTable(gradeDTO, userId)
 }
 
-gradeService.updateGradeById = async (gradeId, gradeDTO) => {
+gradeService.updateGradeById = async (gradeId, gradeDTO, user) => {
 
     if (gradeDTO.egradesuperiorid) {
         const superior = await gradeService.getGradeById(gradeDTO.egradesuperiorid)
@@ -80,47 +82,51 @@ gradeService.updateGradeById = async (gradeId, gradeDTO) => {
         const company = await Company.query().findById(gradeDTO.ecompanyecompanyid)
         if (!company) return
     }
+
     const grade = await gradeService.getGradeById(gradeId)
-    return grade.$query().patchAndFetch(gradeDTO)
+
+    if (grade.edepartmentedepartmentid !== gradeDTO.edepartmentedepartmentid) {
+
+        if (gradeDTO.edepartmentedepartmentid !== null) {
+
+            const department = await Department.query().findById(gradeDTO.edepartmentedepartmentid)
+
+            if (!department) return
+        }
+
+        return UserPositionMapping.query().where('egradeegradeid', grade.egradeid)
+            .updateByUserId({ edepartmentedepartmentid: gradeDTO.edepartmentedepartmentid }, user.sub)
+            .then(ignored => grade.$query().updateByUserId(gradeDTO, user.sub).returning('*'))
+    }
+
+    return grade.$query().updateByUserId(gradeDTO, user.sub).returning('*')
 }
 
 gradeService.deleteGradeById = async (gradeId, user) => {
 
-    const grade = await Grade.query().select().where('egradeid', gradeId).first()
+    const grade = await Grade.query().findById(gradeId)
     
     if(!grade)
         return false
 
-    if( grade.egradesuperiorid !== null) {
-        const superior = await Grade.query().select()
-            .where('egradeid', grade.egradesuperiorid)
-            .first()
-
-        const subordinates = await Grade.relatedQuery('subordinates')
+    const subordinates = await Grade.relatedQuery('subordinates')
         .for(grade.egradeid)
 
-        const gradeIds = subordinates
-                .map(subordinate => subordinate.egradeid)
-        if ( grade.egradesuperiorid !== null) {
+    const gradeIds = subordinates
+        .map(subordinate => subordinate.egradeid)
 
-            await Grade.query()
-            .whereIn('egradeid', gradeIds)
-            .updateByUserId({egradesuperiorid: superior.egradeid}, user.sub)
+    let superiorId = null
 
-        } else {
-
-            await Grade.query()
-            .whereIn('egradeid', gradeIds)
-            .updateByUserId({egradesuperiorid: null}, user.sub)
-
-        }
-
-    }
+    if( grade.egradesuperiorid !== null)
+        superiorId = await Grade.query().select()
+            .where('egradeid', grade.egradesuperiorid)
+            .first()
+            .then(superior => superior ? superior.egradeid : null)
 
     return Grade.query()
-        .delete()
-        .where('egradeid', gradeId)
-        .then(rowsAffected => rowsAffected === 1)
+        .whereIn('egradeid', gradeIds)
+        .updateByUserId({ egradesuperiorid: superiorId }, user.sub)
+        .then(ignored => grade.$query().delete().then(rowsAffected => rowsAffected === 1))
 }
 
 gradeService.saveUserPositions = async (userIds, positionId, loggedInUser) => {
@@ -129,10 +135,15 @@ gradeService.saveUserPositions = async (userIds, positionId, loggedInUser) => {
     .where('egradeegradeid', positionId)
     .delete()
 
+    const grade = await gradeService.getGradeById(positionId)
+
+    if (!grade) return
+
     const users = userIds.map(userId => 
         ({ 
             eusereuserid: parseInt(userId),
-            egradeegradeid: positionId
+            egradeegradeid: positionId,
+            edepartmentedepartmentid: grade.edepartmentedepartmentid
         }));
 
     return UserPositionMapping.query()
@@ -152,8 +163,6 @@ gradeService.getUsersByPositionId = async (page, size, positionId) => {
             .where('euserpositionmappingdeletestatus', false)
         )
         .page(page, size)
-
-    console.log(userPage.results)
 
     return ServiceHelper.toPageObj(page, size, userPage)
 

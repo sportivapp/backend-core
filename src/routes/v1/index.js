@@ -20,8 +20,11 @@ const timesheetRoutes = require('./timesheet')
 const shiftRoutes = require('./shift')
 const shiftPatternRoutes = require('./shiftPattern')
 const todoListRoutes = require('./todolist')
+const profileRoutes = require('./profile')
+const approvalRoutes = require('./approval')
 const otpRoutes = require('./otp');
-
+const teamRoutes = require('./team');
+const fileRoutes = require('./file');
 
 router.use('/api/v1', [
     userRoutes,
@@ -42,27 +45,29 @@ router.use('/api/v1', [
     shiftRoutes,
     shiftPatternRoutes,
     todoListRoutes,
-    otpRoutes
+    profileRoutes,
+    approvalRoutes,
+    otpRoutes,
+    teamRoutes,
+    fileRoutes,
 ]);
 
 const mobileUserRoutes = require('./mobileUser');
-const mobileFileRoutes = require('./mobileFile');
 const mobileLicenseRoutes = require('./mobileLicense');
 const mobileCompanyRoutes = require('./mobileCompany');
 const mobileAnnouncementRoutes = require('./mobileAnnouncement');
-const mobileApplyInviteRoutes = require('./mobileApplyInvite');
 const mobileTeamRoutes = require('./mobileTeam');
 const mobileExperienceRoutes = require('./mobileExperience');
+const mobileClassRoutes = require('./mobileClass');
 
 router.use('/api/v1/mobile', [
     mobileUserRoutes,
-    mobileFileRoutes,
     mobileLicenseRoutes,
     mobileCompanyRoutes,
     mobileAnnouncementRoutes,
-    mobileApplyInviteRoutes,
     mobileTeamRoutes,
-    mobileExperienceRoutes
+    mobileExperienceRoutes,
+    mobileClassRoutes
 ]);
 
 module.exports = router;

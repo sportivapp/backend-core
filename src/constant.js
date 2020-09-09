@@ -12,14 +12,19 @@ module.exports = {
             register: '/user',
             forgot: '/user-forgot-password',
             create: '/user-create',
-            password: '/user-change-password',
             list: '/user/company/:companyId',
             import: '/user-import-template',
             id: '/user/:userId',
             approval: '/user/approval',
-            changeCompany: '/user/change-company',
-            currentCompany: '/user/current-company',
-            coach: '/user/coach'
+            coach: '/user/coach',
+            removeCoach: '/user/coach-remove',
+            industry: '/user/industry'
+        },
+        profile: {
+            changeCompany: '/change-company',
+            currentCompany: '/current-company',
+            changePassword: '/change-password',
+            profile: '/profile'
         },
         grade: {
             list: '/grades',
@@ -36,6 +41,12 @@ module.exports = {
             create: '/announcement',
             id: '/announcement/:announcementId',
             list: '/announcement-list'
+        },
+        approval: {
+            find: '/approval/find',
+            list: '/approval',
+            id: '/approval/:approvalId',
+            user: '/approval/:approvalId/user/:userId'
         },
         department: {
             list: '/department',
@@ -90,6 +101,30 @@ module.exports = {
         experience: {
             list: '/experience',
             id: '/experience/:experienceId'
+        },
+        team: {
+            list: '/team',
+            id: '/team/:teamId',
+            member: '/team-member',
+            invite: '/team-invite',
+            processInvitation: '/team-process-invitation',
+            processRequest: '/team-process-request',
+            join: '/team-join',
+            position: '/team-member-position',
+            cancelInvitation: '/team-cancel-invite',
+            cancelRequest: '/team-cancel-request',
+            exit: '/team-exit',
+        },
+        class: {
+            list: '/class',
+            id: '/class/:classId'
+        },
+        permit: {
+            list: '/permit',
+            id: '/permit/:permitId',
+            action: '/permit/action',
+            request: '/permit/:permitId/request',
+            subordinate: '/permit/subordinate'
         }
     }
 }

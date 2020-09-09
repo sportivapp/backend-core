@@ -1,4 +1,8 @@
 const Model = require('./Model');
+const Team = require('./Team');
+const Industry = require('./Industry');
+const License = require('./License');
+const Experience = require('./Experience');
 
 class User extends Model {
   static get tableName() {
@@ -32,6 +36,8 @@ class User extends Model {
     const File = require('./File')
     const Project =require('./Project')
     const Announcement = require('./Announcement');
+    const Department = require('./Department')
+    const UserIndustryMapping = require('./UserIndustryMapping')
 
     return {
       permits: {
@@ -64,6 +70,18 @@ class User extends Model {
             to: 'euserpositionmapping.egradeegradeid'
           },
           to: 'egrade.egradeid'
+        }
+      },
+      departments: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Department,
+        join: {
+          from: 'euser.euserid',
+          through: {
+            from: 'euserpositionmapping.eusereuserid',
+            to: 'euserpositionmapping.edepartmentedepartmentid'
+          },
+          to: 'edepartment.edepartmentid'
         }
       },
       country: {
@@ -136,6 +154,86 @@ class User extends Model {
             to: 'eapplyinvite.ecompanyecompanyid'
           },
           to: 'ecompany.ecompanyid'
+        }
+      },
+      teams: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Team,
+        join: {
+            from: 'euser.euserid',
+            through: {
+                from: 'eteamusermapping.eusereuserid',
+                to: 'eteamusermapping.eteameteamid'
+            },
+            to: 'eteam.eteamid'
+        }
+      },
+      // userIndustries: {
+      //   relation: Model.ManyToManyRelation,
+      //   modelClass: Industry,
+      //   join: {
+      //     from: 'euser.euserid',
+      //     through: {
+      //       from: 'euserindustrymapping.eusereuserid',
+      //       to: 'euserindustrymapping.eindustryeindustryid'
+      //     },
+      //     to: 'eindustry.eindustryid'
+      //   }
+      // }
+      userIndustriesMapping: {
+        relation: Model.HasManyRelation,
+        modelClass: UserIndustryMapping,
+        join: {
+          from: 'euser.euserid',
+          to: 'euserindustrymapping.eusereuserid'
+        }
+      },
+      userIndustries: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Industry,
+        join: {
+          from: 'euser.euserid',
+          through: {
+            from: 'euserindustrymapping.eusereuserid',
+            to: 'euserindustrymapping.eindustryeindustryid'
+          },
+          to: 'eindustry.eindustryid'
+        }
+      },
+      coachIndustriesMapping: {
+        relation: Model.HasManyRelation,
+        modelClass: UserIndustryMapping,
+        join: {
+          from: 'euser.euserid',
+          to: 'ecoachindustrymapping.eusereuserid'
+        }
+      },
+      coachIndustries: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Industry,
+        join: {
+          from: 'euser.euserid',
+          through: {
+            from: 'ecoachindustrymapping.eusereuserid',
+            to: 'ecoachindustrymapping.eindustryeindustryid'
+          },
+          to: 'eindustry.eindustryid'
+        }
+      },
+      licenses: {
+        relation: Model.HasManyRelation,
+        modelClass: License,
+        join: {
+          from: 'euser.euserid',
+          to: 'elicense.elicensecreateby'
+        }
+      },
+      experiences: {
+        relation: Model.HasManyRelation,
+        modelClass: Experience,
+        join: {
+          from: 'euser.euserid',
+          to: 'eexperience.eusereuserid'
         }
       }
     }

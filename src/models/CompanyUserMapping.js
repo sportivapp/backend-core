@@ -29,14 +29,23 @@ class CompanyUserMapping extends Model {
     static get relationMappings() {
 
         const User = require('./User')
+        const Company = require('./Company')
 
         return {
-            users: {
+            user: {
                 relation: Model.BelongsToOneRelation,
                 modelClass: User,
                 join: {
                     from: 'ecompanyusermapping.eusereuserid',
                     to: 'euser.euserid'
+                }
+            },
+            company: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Company,
+                join: {
+                    from: 'ecompanyusermapping.ecompanyecompanyid',
+                    to: 'ecompany.ecompanyid'
                 }
             }
         }

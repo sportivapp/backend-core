@@ -78,16 +78,17 @@ departmentService.getDepartmentByDepartmentId = async (departmentId) => {
     const userData = await Grade.relatedQuery('users')
         .for(Grade.query().where('edepartmentedepartmentid', departmentId))
 
-    const data = {
+    return {
         edepartmentid: department.edepartmentid,
         edepartmentname: department.edepartmentname,
+        edepartmentdescription: department.edepartmentdescription,
+        edepartmentsuperiorid: department.edepartmentsuperiorid,
+        ecompanyecompanyid: department.ecompanyecompanyid,
         childrenCount: parseInt(subDepartment[0].count),
         ecompanyname: company.ecompanyname,
         eusername: user.eusername,
         userCount: userData.length
     }
-
-    return data
 
 }
 
@@ -102,7 +103,7 @@ departmentService.createDepartment = async (departmentDTO, user) => {
 
     const headDepartmentDTO = {
         egradename: 'Head of '  + departmentDTO.edepartmentname,
-        egradedescription: 'The Head of ' + departmentDTO.edepartmentname,
+        egradedescription: 'The Head of ' + departmentDTO.edepartmentdescription,
         ecompanyecompanyid: departmentDTO.ecompanyecompanyid,
         edepartmentedepartmentid: result.edepartmentid
     }

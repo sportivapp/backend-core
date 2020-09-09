@@ -49,12 +49,14 @@ controller.createUser = async (req, res, next) => {
 
 }
 
-controller.getUserById = async (req, res, next) => {
+controller.getOtherUserById = async (req, res, next) => {
 
     const { userId } = req.body;
+    const { type } = req.query;
 
     try {
-        const result = await mobileUserService.getUserById(userId);
+        
+        const result = await mobileUserService.getOtherUserById(userId, type.toUpperCase());
 
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404));
@@ -90,7 +92,7 @@ controller.getSelf = async (req, res, next) => {
 
 controller.updateUser = async (req, res, next) => {
 
-    const { name, mobileNumber, identityNumber, dob, gender, hobby, countryId, fileId, address, facebook, instagram, linkedin } = req.body;
+    const { name, mobileNumber, identityNumber, dob, gender, hobby, countryId, fileId, address, industryIds, facebook, instagram, linkedin } = req.body;
 
     const userDTO = {
         eusername: name,
@@ -109,7 +111,7 @@ controller.updateUser = async (req, res, next) => {
 
     try {
 
-        const result = await mobileUserService.updateUser(userDTO, req.user);
+        const result = await mobileUserService.updateUser(userDTO, industryIds, req.user);
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
@@ -123,7 +125,7 @@ controller.updateUser = async (req, res, next) => {
 
 controller.updateUserCoachData = async (req, res, next) => {
 
-    const { name, mobileNumber, dob, gender, hobby, countryId, fileId, address, facebook, instagram, linkedin, industries } = req.body;
+    const { name, mobileNumber, dob, gender, hobby, countryId, fileId, address, facebook, instagram, linkedin, industryIds } = req.body;
 
     const userCoachDTO = {
         eusername: name,
@@ -132,7 +134,7 @@ controller.updateUserCoachData = async (req, res, next) => {
         eusergender: gender,
         euserhobby: hobby,
         ecountryecountryid : countryId,
-        efileefileid: fileId,
+        efileefileid: fileId === 0 ? null : fileId,
         euseraddress: address,
         euserfacebook: facebook,
         euserinstagram: instagram,
@@ -142,7 +144,23 @@ controller.updateUserCoachData = async (req, res, next) => {
 
     try {
 
-        const result = await mobileUserService.updateUserCoachData(userCoachDTO, req.user, industries);
+        const result = await mobileUserService.updateUserCoachData(userCoachDTO, req.user, industryIds);
+
+        if (!result)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.removeCoach = async (req, res, next) => {
+
+    try {
+
+        const result = await mobileUserService.removeCoach(req.user);
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
@@ -171,6 +189,32 @@ controller.changePassword = async (req, res, next) => {
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
     } catch(e) {
         next(e);
+    }
+
+}
+
+controller.getIndustryByUserId = async (req, res, next) => {
+
+    const { type } = req.query
+
+    try {
+        const result = await mobileUserService.getIndustryByUserId(req.user, type.toUpperCase())
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+    } catch (e) {
+        next(e)
+    }
+
+}
+
+controller.changeIndustryByUserId = async (req, res, next) => {
+
+    const { type } = req.query
+
+    try {
+        const result = await mobileUserService.changeIndustryByUserId(req.user, type.toUpperCase(), req.body.industryIds)
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+    } catch (e) {
+        next(e)
     }
 
 }

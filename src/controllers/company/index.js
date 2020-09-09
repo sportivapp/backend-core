@@ -9,7 +9,7 @@ function isUserNotValid(user) {
 
 companyController.registerCompany = async (req, res, next) => {
 
-    const { nik, name, password, mobileNumber, companyName, companyEmail, street, postalCode, countryId, stateId } = req.body;
+    const { nik, name, password, mobileNumber, companyName, companyEmail, street, postalCode, industryId, countryId, stateId } = req.body;
 
     try {
 
@@ -23,7 +23,8 @@ companyController.registerCompany = async (req, res, next) => {
         const companyDTO = {
             ecompanyname: companyName,
             ecompanyemailaddress: companyEmail,
-            ecompanyphonenumber: mobileNumber
+            ecompanyphonenumber: mobileNumber,
+            eindustryeindustryid: industryId
         }
         const addressDTO = {
             eaddressstreet: street,

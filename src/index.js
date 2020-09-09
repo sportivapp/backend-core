@@ -2,11 +2,13 @@ const   express     = require('express'),
         cors        = require('cors'),
         morgan      = require('morgan'),
         fs          = require('fs'),
-        https       = require('https')
+        https       = require('https'),
+        path        = require('path')
 
 const app = express();
 const routes = require('./routes/v1');
 const slackLoggingService = require('./helper/slackLoggingService');
+const errorHandler = require('./middlewares/errorHandler');
 
 const webHookURL = 'https://hooks.slack.com/services/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';
 let errorMsg = {};
@@ -24,34 +26,37 @@ app.use((_, res, next) => {
 app.use(express.json({limit: '1000mb'}));
 app.use(express.urlencoded({limit: '1000mb', extended: true }));
 app.use(morgan('dev'));
+app.use(express.static(path.resolve(__dirname + '/../temp')));
 
 app.use(routes)
 
 app.use((_, __, next) => {
-    const err = new Error('Not Found');
+    const err = new Error('Path Not Found');
     err.status = 404;
     next(err);
 });
 
-app.use((error, req, res, next) => {
-    // errorMsg = error;
-    console.log(error)
-    const status = error.status || 500;
-    res.status(status).send({
-        error: {
-            status: status,
-            message: error.message || 'Internal Server Error',
-        },
-    });
-    
-    errorMsg = {
-        status: status,
-        message: error.message || 'Internal Server Error',
-        errStack: error.stack
-    }
+// app.use((error, req, res, next) => {
+//     // errorMsg = error;
+//     console.log(error)
+//     const status = error.status || 500;
+//     res.status(status).send({
+//         error: {
+//             status: status,
+//             message: error.message || 'Internal Server Error',
+//         },
+//     });
+//
+//     errorMsg = {
+//         status: status,
+//         message: error.message || 'Internal Server Error',
+//         errStack: error.stack
+//     }
+//
+//     slackLoggingService.sendSlackMessage(webHookURL, slackLoggingService.setLogMessage(errorMsg));
+// });
 
-    slackLoggingService.sendSlackMessage(webHookURL, slackLoggingService.setLogMessage(errorMsg));
-});
+app.use(errorHandler)
 
 require('dotenv').config();
 const httpPORT = process.env.PORT || 5100;

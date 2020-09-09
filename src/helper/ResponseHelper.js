@@ -1,3 +1,5 @@
+const ErrorTypeEnum = require('../models/enum/ErrorTypeEnum')
+
 function toBaseResponse(data) {
     return {
         code: 200,
@@ -15,7 +17,7 @@ function toPageResponse(data, paging) {
     }
 }
 
-function toErrorResponse(code, error) {
+function toErrorResponse(code, error, type = ErrorTypeEnum.SERVER) {
     let status
     switch (code) {
         case 400:
@@ -39,7 +41,8 @@ function toErrorResponse(code, error) {
         status: status
     }
 
-    return error ? { ...response, errors: error } : response
+    return error && type === ErrorTypeEnum.VALIDATION ? { ...response, errors: error } :
+        error && type === ErrorTypeEnum.SERVER ? { ...response, errorMessage: error } : response
 }
 
 module.exports = { toBaseResponse, toPageResponse, toErrorResponse }
