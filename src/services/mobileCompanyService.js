@@ -2,8 +2,12 @@ const Company = require('../models/Company')
 const CompanyUserMapping = require('../models/CompanyUserMapping')
 const CompanyFileMapping = require('../models/CompanyFileMapping')
 const File = require('../models/File')
+const Approval = require('../models/Approval')
 const CompanyLog = require('../models/CompanyLog')
 const User = require('../models/User')
+const RosterUserMapping = require('../models/RosterUserMapping')
+const ShiftRosterUserMapping = require('../models/ShiftRosterUserMapping')
+const TeamUserMapping = require('../models/TeamUserMapping')
 const { raw } = require('objection');
 const ServiceHelper = require('../helper/ServiceHelper')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
@@ -263,6 +267,46 @@ companyService.exitCompany = async (companyId, user) => {
 
     const removeUser = await companyService.removeUserFromCompany(userInCompany, user.sub, companyId);
 
+    // delete approval user mapping
+    const removeApprovalUser =  Approval.relatedQuery('approvalUsers')
+        .for(Approval.query().where('ecompanyecompanyid', companyId))
+        .where('eusereuserid', user.sub)
+        .delete()
+
+    // delete approval
+    const removeApproval =  Approval.query()
+    .where('ecompanyecompanyid', companyId)
+    .andWhere('etargetuserid', user.sub)
+    .delete()
+
+    // delete user position mapping
+    const removePositionUserMapping = User.relatedQuery('grades')
+    .for(user.sub)
+    .where('eusereuserid', user.sub)
+    .delete()
+
+    // delete user in permits
+    const removePermits =  User.relatedQuery('permits')
+    .for(user.sub)
+    .where('eusereuserid', user.sub)
+    .delete()
+
+    // delete user in rosterusermapping
+    const removeRosterUserMapping =  RosterUserMapping.query()
+    .where('eusereuserid', user.sub)
+    .delete()
+
+    // delete user in shift user mapping
+    const removeShiftRoster = ShiftRosterUserMapping.query()
+    .where('eusereuserid', user.sub)
+    .delete()
+
+    const removeUserFromTeam = TeamUserMapping.query()
+    .where('eusereuserid', user.sub)
+    .delete()
+
+    await Promise.all([removeApprovalUser, removeApproval, removePermits, removePositionUserMapping, removeRosterUserMapping, removeShiftRoster, removeUserFromTeam])
+    // .then(arr => console.log(arr[0] + ' ' + arr[1] + ' ' + arr[2] + ' ' + arr[3] + ' ' + arr[4] + ' ' + arr[5] + ' ' + arr[6]))
     const companyMemberCount = await companyService.getCompanyMemberCount(companyId);
 
     // If company has no member after user leaving
