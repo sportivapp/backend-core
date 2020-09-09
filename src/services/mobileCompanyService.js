@@ -34,7 +34,7 @@ const companyService = {}
 companyService.getCompany = async (companyId, user) => {
 
     const companyDetailPromise = Company.query()
-    .withGraphFetched('[address, industry, news]')
+    .withGraphFetched('[carousel, address, industry, news]')
     .where('ecompanyid', companyId)
     .first();
     

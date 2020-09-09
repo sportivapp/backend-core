@@ -132,6 +132,18 @@ class Company extends Model {
           from: 'ecompany.ecompanyid',
           to: 'enews.ecompanyecompanyid'
         }
+      },
+      carousel: {
+        relation: Model.ManyToManyRelation,
+        modelClass: File,
+        join: {
+          from: 'ecompany.ecompanyid',
+          through: {
+            from: 'ecompanycarouselmapping.ecompanyecompanyid',
+            to: 'ecompanycarouselmapping.efileefileid'
+          },
+          to: 'efile.efileid'
+        }
       }
     }
   }
