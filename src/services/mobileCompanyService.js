@@ -294,24 +294,14 @@ companyService.processInvitation = async (companyId, user, status) => {
 
 }
 
-companyService.uploadFile = async (companyId, file, user) => {
-
-    const fileDTO = {
-        efilename: file.filename,
-        efilepath: file.path,
-        efiletype: file.mimetype
-    }
-
-    const uploadPromise = await File.query()
-    .insertToTable(fileDTO, user.sub)
+companyService.uploadFile = async (companyId, fileId, user) => {
 
     return CompanyFileMapping.query()
     .insertToTable({
         ecompanyecompanyid: companyId,
-        efileefileid: uploadPromise.efileid
+        efileefileid: fileId
     }, user.sub)
 
 }
-
 
 module.exports = companyService
