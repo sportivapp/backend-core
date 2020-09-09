@@ -90,7 +90,7 @@ experienceController.getExperienceById = async (req, res, next) => {
     
     try {
 
-        const result = await mobileExperienceService.getExperienceById(experienceId, req.user)
+        const result = await mobileExperienceService.getExperienceById(experienceId)
 
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404))

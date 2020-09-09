@@ -56,7 +56,7 @@ experienceService.getExperienceList = async (page = 0, size = 10, loggedInUser, 
     return ServiceHelper.toPageObj(page, size, pageObj)
 }
 
-experienceService.getExperienceById = async (experienceId, loggedInUser) => {
+experienceService.getExperienceById = async (experienceId) => {
 
     return Experience.query()
     .select('eexperienceid','eexperiencename', 'eexperiencestartdate', 'eexperienceenddate', 'eexperiencelocation', 
