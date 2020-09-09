@@ -46,6 +46,12 @@ module.exports = {
             id: '/announcement/:announcementId',
             list: '/announcement-list'
         },
+        approval: {
+            find: '/approval/find',
+            list: '/approval',
+            id: '/approval/:approvalId',
+            user: '/approval/:approvalId/user/:userId'
+        },
         department: {
             list: '/department',
             id: '/department/:departmentId',
@@ -116,6 +122,13 @@ module.exports = {
         class: {
             list: '/class',
             id: '/class/:classId'
+        },
+        permit: {
+            list: '/permit',
+            id: '/permit/:permitId',
+            action: '/permit/action',
+            request: '/permit/:permitId/request',
+            subordinate: '/permit/subordinate'
         }
     }
 }

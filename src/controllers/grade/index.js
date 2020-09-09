@@ -82,7 +82,7 @@ controller.updateGradeById = async (req, res, next) => {
     }
 
     try {
-        const grade = await gradeService.updateGradeById(gradeId, gradeDTO)
+        const grade = await gradeService.updateGradeById(gradeId, gradeDTO, req.user)
         if (!grade)
             return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(grade))
