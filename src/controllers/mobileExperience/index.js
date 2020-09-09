@@ -22,7 +22,7 @@ experienceController.createExperience = async (req, res, next) => {
 
         experienceDTO.eexperienceenddate = experienceDTO.eexperienceenddate === 0 ? null : request.endDate
 
-        const result = await mobileExperienceService.createExperience(experienceDTO, req.user, req.body.fileIds)
+        const result = await mobileExperienceService.createExperience(experienceDTO, req.user, req.body.fileId)
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
