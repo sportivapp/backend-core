@@ -63,7 +63,6 @@ experienceService.getExperienceById = async (experienceId, loggedInUser) => {
     'eexperienceposition', 'eexperiencedescription', 'eindustryname', 'efilename')
     .joinRelated('[industries, files]')
     .where('eexperienceid', experienceId)
-    .where('eusereuserid', loggedInUser.sub)
     .first()
 
 }
