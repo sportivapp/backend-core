@@ -144,7 +144,7 @@ teamService.getTeams = async (keyword, page = 0, size = 10, user) => {
     const teamsPage = await Team.query()
     .select('eteamid', 'ecompanyecompanyid', 'efileefileid', 'eteamname', 'eteamcreatetime', 
     Team.relatedQuery('members').count().as('membersCount'))
-    .withGraphJoined('industries(selectName)')
+    .withGraphJoined('industries(baseAttributes)')
     .where('ecompanyecompanyid', user.companyId)
     .where(raw('lower("eteamname")'), 'like', `%${newKeyword}%`)
     .page(page, size);
