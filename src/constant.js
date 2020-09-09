@@ -9,7 +9,8 @@ module.exports = {
             exit: '/company-exit',
             pending: '/company-user-pending',
             cancelJoin: '/company-cancel-join/:companyId',
-            processInvitation: '/company-process-invitation'
+            processInvitation: '/company-process-invitation',
+            upload: '/company-upload-file'
         },
         user: {
             login: '/user-login',
