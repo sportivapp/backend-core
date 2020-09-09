@@ -1,5 +1,7 @@
 const Company = require('../models/Company')
 const CompanyUserMapping = require('../models/CompanyUserMapping')
+const CompanyFileMapping = require('../models/CompanyFileMapping')
+const File = require('../models/File')
 const CompanyLog = require('../models/CompanyLog')
 const User = require('../models/User')
 const { raw } = require('objection');
@@ -232,7 +234,6 @@ companyService.removeUserFromCompany = async (userInCompany, userId, companyId) 
 
 }
 
-
 companyService.userCancelJoin = async (companyId, userId) => {
     const userFromDB = User.query()
     .select()
@@ -292,5 +293,25 @@ companyService.processInvitation = async (companyId, user, status) => {
         return companyService.processIntoCompany(companyId, user, user.sub);
 
 }
+
+companyService.uploadFile = async (companyId, file, user) => {
+
+    const fileDTO = {
+        efilename: file.filename,
+        efilepath: file.path,
+        efiletype: file.mimetype
+    }
+
+    const uploadPromise = await File.query()
+    .insertToTable(fileDTO, user.sub)
+
+    return CompanyFileMapping.query()
+    .insertToTable({
+        ecompanyecompanyid: companyId,
+        efileefileid: uploadPromise.efileid
+    }, user.sub)
+
+}
+
 
 module.exports = companyService
