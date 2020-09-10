@@ -7,7 +7,6 @@ module.exports = {
             id: '/company/:companyId',
             users: '/company/:companyId/users',
             exit: '/company-exit',
-            pending: '/company-user-pending',
             cancelJoin: '/company-cancel-join/:companyId',
             processInvitation: '/company-process-invitation',
             upload: '/company-upload-file'
@@ -23,7 +22,9 @@ module.exports = {
             approval: '/user/approval',
             coach: '/user/coach',
             removeCoach: '/user/coach-remove',
-            industry: '/user/industry'
+            industry: '/user/industry',
+            pending: '/user-pending-log',
+
         },
         profile: {
             changeCompany: '/change-company',
