@@ -11,9 +11,7 @@ const companyLogService = {}
 
 companyLogService.processRequest = async (companyLogId, status, user) => {
 
-    if (!CompanyLogStatusEnum.hasOwnProperty(status)) throw new UnsupportedOperationError('STATUS_INVALID')
-
-    else if (status !== CompanyLogStatusEnum.ACCEPTED && status !== CompanyLogStatusEnum.REJECTED)
+    if (status !== CompanyLogStatusEnum.ACCEPTED && status !== CompanyLogStatusEnum.REJECTED)
         throw new UnsupportedOperationError('STATUS_INVALID')
 
     const companyLog = await CompanyLog.query()
@@ -23,9 +21,8 @@ companyLogService.processRequest = async (companyLogId, status, user) => {
 
     else if (companyLog.ecompanylogtype !== CompanyLogTypeEnum.APPLY) throw new UnsupportedOperationError('TYPE_INVALID')
 
-    if (status === CompanyLogStatusEnum.ACCEPTED) {
+    if (status === CompanyLogStatusEnum.ACCEPTED)
 
-        console.log('in')
         return CompanyLog.transaction(async trx => {
 
             return companyLog.$query(trx)
@@ -39,9 +36,6 @@ companyLogService.processRequest = async (companyLogId, status, user) => {
                     }, user.sub).then(ignored => updatedCompanyLog)
                 )
         })
-    }
-
-
 
     else
 
