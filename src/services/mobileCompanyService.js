@@ -7,7 +7,7 @@ const CompanyLog = require('../models/CompanyLog')
 const User = require('../models/User')
 const RosterUserMapping = require('../models/RosterUserMapping')
 const ShiftRosterUserMapping = require('../models/ShiftRosterUserMapping')
-const TeamUserMapping = require('../models/TeamUserMapping')
+const Team = require('../models/Team')
 const { raw } = require('objection');
 const ServiceHelper = require('../helper/ServiceHelper')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
@@ -301,12 +301,17 @@ companyService.exitCompany = async (companyId, user) => {
     .where('eusereuserid', user.sub)
     .delete()
 
-    const removeUserFromTeam = TeamUserMapping.query()
+    const removeUserFromTeam = Team.relatedQuery('members')
+    .for(companyId)
     .where('eusereuserid', user.sub)
     .delete()
 
-    await Promise.all([removeApprovalUser, removeApproval, removePermits, removePositionUserMapping, removeRosterUserMapping, removeShiftRoster, removeUserFromTeam])
-    // .then(arr => console.log(arr[0] + ' ' + arr[1] + ' ' + arr[2] + ' ' + arr[3] + ' ' + arr[4] + ' ' + arr[5] + ' ' + arr[6]))
+    const removeCompanyLog = CompanyLog.query()
+    .where('eusereuserid', user.sub)
+    .where('ecompanyecompanyid', companyId)
+    .delete()
+
+    await Promise.all([removeApprovalUser, removeApproval, removePermits, removePositionUserMapping, removeRosterUserMapping, removeShiftRoster, removeUserFromTeam, removeCompanyLog])
     const companyMemberCount = await companyService.getCompanyMemberCount(companyId);
 
     // If company has no member after user leaving
