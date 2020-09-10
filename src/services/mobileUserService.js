@@ -8,6 +8,7 @@ const fileService = require('./fileService');
 const Otp = require('../models/Otp');
 const emailService = require('../helper/emailService');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
+const CompanyLog = require('../models/CompanyLog')
 const CompanyUserMapping = require('../models/CompanyUserMapping');
 const TeamUserMapping = require('../models/TeamUserMapping');
 const License = require('../models/License');
@@ -276,6 +277,31 @@ UserService.changeIndustryByUserId = async (user, type, industryIds) => {
                     .insertToTable(mapping, user.sub)
                 })
     }
+
+}
+
+UserService.getListPendingInviteByUserId = async (page, size, userId) => {
+
+    if(isNaN(page) || isNaN(size)) {
+        page = 0
+        size = 10
+    }
+
+    const userFromDB = User.query()
+        .select()
+        .where('euserid', userId)
+        .first()
+    
+    if(!userFromDB)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
+
+    return CompanyLog.query()
+    .where('eusereuserid', userId)
+    .where('ecompanylogtype', CompanyLogTypeEnum.INVITE)
+    .andWhere('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
+    .orderBy('ecompanylogcreatetime', 'DESC')
+    .page(page, size)
+    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
 }
 
