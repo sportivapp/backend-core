@@ -201,7 +201,7 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
     }
 
     if (companyDTO.efileefileid) {
-        const logo = fileService.getFileById(companyDTO.efileefileid)
+        const logo = await fileService.getFileById(companyDTO.efileefileid)
         if (!logo) throw new UnsupportedOperationError('FILE_NOT_FOUND')
     }
 
