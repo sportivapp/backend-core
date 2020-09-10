@@ -1,4 +1,5 @@
 const Model = require('./Model');
+const CompanyFileMapping = require('./CompanyFileMapping');
 
 class File extends Model {
   static get tableName() {
@@ -19,6 +20,21 @@ class File extends Model {
         efiletype: { type: 'string', minLength: 1, maxLength: 256 }
       }
     };
+  }
+
+  static get relationMappings() {
+
+    return {
+      companyMappings: {
+        relation: Model.HasManyRelation,
+        modelClass: CompanyFileMapping,
+        join: {
+          from: 'efile.efileid',
+          to: 'ecompanyfilemapping.efileefileid'
+        }
+      }
+    }
+
   }
 
   static get modifiers() {

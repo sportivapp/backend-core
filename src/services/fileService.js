@@ -1,9 +1,6 @@
 require('dotenv').config();
 const fs = require('fs');
 const util = require('util');
-const access = util.promisify(fs.access);
-const mkdir = util.promisify(fs.mkdir);
-const rename = util.promisify(fs.rename);
 const unlink = util.promisify(fs.unlink);
 const File = require('../models/File');
 
@@ -14,7 +11,8 @@ FileService.createFile = async (file, user) => {
     const fileDTO = {
         efilename: file.filename,
         efilepath: file.path,
-        efiletype: file.mimetype
+        efiletype: file.mimetype,
+        efilesize: file.size
     }
     
     return File.query().insertToTable(fileDTO, user.sub);

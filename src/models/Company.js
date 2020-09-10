@@ -144,6 +144,18 @@ class Company extends Model {
           },
           to: 'efile.efileid'
         }
+      },
+      theories: {
+        relation: Model.ManyToManyRelation,
+        modelClass: File,
+        join: {
+          from: 'ecompany.ecompanyid',
+          through: {
+            from: 'ecompanyfilemapping.ecompanyecompanyid',
+            to: 'ecompanyfilemapping.efileefileid'
+          },
+          to: 'efile.efileid'
+        }
       }
     }
   }
