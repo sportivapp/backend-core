@@ -16,7 +16,8 @@ const UnsupportedOperationErrorEnum = {
     USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY',
     USER_NOT_EXIST: 'USER_NOT_EXIST',
     STATUS_UNACCEPTED: 'STATUS_UNACCEPTED',
-    USER_NOT_INVITED: 'USER_NOT_INVITED'
+    USER_NOT_INVITED: 'USER_NOT_INVITED',
+    USER_NOT_APPLIED: 'USER_NOT_APPLIED'
 
 }
 
@@ -220,13 +221,17 @@ companyService.userCancelJoin = async (companyId, userId) => {
     if(!userFromDB)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
 
-    return CompanyLog.query()
+    const deleteLog = await CompanyLog.query()
     .delete()
     .where('eusereuserid', userId)
     .where('ecompanyecompanyid', companyId)
     .where('ecompanylogtype', CompanyLogTypeEnum.APPLY)
     .where('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
     .first()
+    .then(rowsAffected => rowsAffected === 1)
+
+    if (!deleteLog)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_APPLIED)
 
 }
 
