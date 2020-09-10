@@ -61,7 +61,7 @@ experienceService.getExperienceById = async (experienceId) => {
     return Experience.query()
     .select('eexperienceid','eexperiencename', 'eexperiencestartdate', 'eexperienceenddate', 'eexperiencelocation', 
     'eexperienceposition', 'eexperiencedescription', 'eindustryname', 'efilename')
-    .joinRelated('[industries, files]')
+    .leftJoinRelated('[industries, files]')
     .where('eexperienceid', experienceId)
     .first()
 
