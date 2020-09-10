@@ -21,6 +21,14 @@ class File extends Model {
     };
   }
 
+  static get modifiers() {
+    return {
+      baseAttributes(builder) {
+        builder.select('efileid', 'efilename', 'efilepath', 'efiletype')
+      }
+    }
+  }
+
 }
 
 module.exports = File;

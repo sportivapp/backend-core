@@ -22,7 +22,9 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
 
     companyDTO.eaddresseaddressid = address.eaddressid;
     companyDTO.ecompanycreateby = 0;
-    const company = await Company.query().insertToTable(companyDTO, user.euserid);
+    const company = await Company.query()
+        .insertToTable(companyDTO, user.euserid)
+        .withGraphFetched('logo(baseAttributes)');
 
     if (companyDTO.ecompanyautonik) {
         if (!companyDTO.ecompanynik) return
@@ -70,14 +72,12 @@ CompanyService.getUsersByCompanyId = async(companyId, page, size) => {
 
 CompanyService.getAllCompanyByUserId = async(userId) => {
 
-    const result = await User.relatedQuery('companies')
-    .for(userId)
-    .modify({ ecompanyusermappingdeletestatus: false })
-    .where('ecompanyparentid', null)
-    .orderBy('ecompanyusermappingcreatetime', 'ASC')
-    .withGraphFetched('[branches, sisters]')
-
-    return result
+    return User.relatedQuery('companies')
+        .for(userId)
+        .modify({ecompanyusermappingdeletestatus: false})
+        .where('ecompanyparentid', null)
+        .orderBy('ecompanyusermappingcreatetime', 'ASC')
+        .withGraphFetched('[branches(baseAttributes), sisters(baseAttributes), logo(baseAttributes)]');
 
 }
 
@@ -190,7 +190,9 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
     }
 
     companyDTO.eaddresseaddressid = address.eaddressid;
-    const company = await Company.query().insertToTable(companyDTO, user.sub);
+    const company = await Company.query()
+        .insertToTable(companyDTO, user.sub)
+        .withGraphFetched('logo(baseAttributes)');
 
     if (companyDTO.ecompanyautonik) {
         if (!companyDTO.ecompanynik) return
@@ -230,7 +232,6 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
             departments: 1,
             childrenCount: 0
         }))
-
 }
 
 CompanyService.getCompanyList = async (page, size, type, keyword, companyId, user) => {
@@ -263,7 +264,10 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
             query = query
             .where('ecompanyparentid', companyId)
             .whereNull('ecompanyolderid')
-            .withGraphFetched('[branches, industry, address.[state, country]]')
+            .withGraphFetched('[branches(baseAttributes), ' +
+                'industry(baseAttributes), ' +
+                'address.[state, country], ' +
+                'logo(baseAttributes)]')
 
         }
 
@@ -272,7 +276,11 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
             query = query
                 .where('ecompanyolderid', companyId)
                 .whereNull('ecompanyparentid')
-                .withGraphFetched('[branches, sisters.industry, industry, address.[state, country]]')
+                .withGraphFetched('[branches(baseAttributes), ' +
+                    'sisters(baseAttributes).industry(baseAttributes), ' +
+                    'industry(baseAttributes), ' +
+                    'address.[state, country],' +
+                    'logo(baseAttributes)]')
         }
 
     } else {
@@ -284,7 +292,10 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
             .whereNull('ecompanyparentid')
             .whereNull('ecompanyolderid')
             .whereIn('ecompanyid', companyIds)
-            .withGraphFetched('[branches, sisters.industry, industry, address.[state, country]]')
+            .withGraphFetched('[branches(baseAttributes), ' +
+                'sisters(baseAttributes).industry(baseAttributes), ' +
+                'industry(baseAttributes), address.[state, country],' +
+                'logo(baseAttributes)]')
             .orderBy('ecompanyusermappingcreatetime', 'ASC')
     }
 
@@ -309,7 +320,10 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
 
 CompanyService.getCompanyById = async (companyId) => {
 
-    const company = await Company.query().findById(companyId).withGraphFetched('[industry,address.[country,state]]')
+    const company = await Company.query().findById(companyId)
+        .withGraphFetched('[industry(baseAttributes), ' +
+        'address.[country,state], ' +
+        'logo(baseAttributes)]')
 
     const headUserId = await CompanyUserMapping.query()
         .where('ecompanyecompanyid', companyId)
@@ -401,7 +415,7 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, address
 
     const getUserQuery = User.query().findById(headUserId)
     const getCompanyQuery = Company.query().findById(companyId)
-        .withGraphFetched('[industry,address]')
+        .withGraphFetched('[industry(baseAttributes), address.[country, state], logo(baseAttributes)]')
 
     return Promise.all([getCompanyQuery, employeeCount, departmentCount, branchCount, getUserQuery])
         .then(resultArr => ({
