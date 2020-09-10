@@ -316,14 +316,4 @@ companyService.processInvitation = async (companyId, user, status) => {
 
 }
 
-companyService.uploadFile = async (companyId, fileId, user) => {
-
-    return CompanyFileMapping.query()
-    .insertToTable({
-        ecompanyecompanyid: companyId,
-        efileefileid: fileId
-    }, user.sub)
-
-}
-
 module.exports = companyService

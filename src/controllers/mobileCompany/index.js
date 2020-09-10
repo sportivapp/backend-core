@@ -120,18 +120,4 @@ controller.processInvitation = async (req, res, next) => {
 
 }
 
-controller.uploadFile = async (req, res, next) => {
-
-    const { companyId, fileId } = req.body
-    try {
-        
-        const result = await companyService.uploadFile(parseInt(companyId), fileId, req.user)
-
-        return res.status(200).json(ResponseHelper.toBaseResponse(result));
-        
-    } catch (e) {
-        next(e)
-    }
-}
-
 module.exports = controller;
