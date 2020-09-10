@@ -40,8 +40,8 @@ companyService.getCompany = async (companyId, user) => {
 
         return {
             ...result[0],
-            isInCompany: result[3] ? true : false,
-            isPendingApply: result[4] ? true : false
+            isInCompany: result[1] ? true : false,
+            isPendingApply: result[2] ? true : false
         }
 
     })
