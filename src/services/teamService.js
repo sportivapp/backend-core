@@ -53,6 +53,8 @@ teamService.isAdmin = async (teamId, userId) => {
     .andWhere('eteamusermappingposition', TeamUserMappingPositionEnum.ADMIN)
     .first()
     .then(user => {
+        if(user === undefined)
+            return false
         return user.eteamusermappingposition === TeamUserMappingPositionEnum.ADMIN
     })
 }
