@@ -22,7 +22,7 @@ class Company extends Model {
   static get modifiers() {
     return {
       baseAttributes(builder) {
-        builder.select('ecompanyid', 'ecompanyname', 'ecompanylogo')
+        builder.select('ecompanyid', 'ecompanyname')
       }
     }
   }
@@ -105,7 +105,7 @@ class Company extends Model {
           to: 'eindustry.eindustryid'
         }
       },
-      file: {
+      logo: {
         relation: Model.BelongsToOneRelation,
         modelClass: File,
         join: {
