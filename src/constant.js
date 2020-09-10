@@ -8,8 +8,7 @@ module.exports = {
             users: '/company/:companyId/users',
             exit: '/company-exit',
             cancelJoin: '/company-cancel-join/:companyId',
-            processInvitation: '/company-process-invitation',
-            upload: '/company-upload-file'
+            processInvitation: '/company-process-invitation'
         },
         user: {
             login: '/user-login',
@@ -24,7 +23,6 @@ module.exports = {
             removeCoach: '/user/coach-remove',
             industry: '/user/industry',
             pending: '/user-pending-log',
-
         },
         profile: {
             changeCompany: '/change-company',
