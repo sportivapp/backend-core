@@ -12,8 +12,16 @@ const CompanyLog = require('../models/CompanyLog')
 const CompanyUserMapping = require('../models/CompanyUserMapping');
 const TeamUserMapping = require('../models/TeamUserMapping');
 const License = require('../models/License');
+const ServiceHelper = require('../helper/ServiceHelper')
 
 const UserService = {};
+
+const CompanyLogTypeEnum = {
+    INVITE: 'INVITE'
+}
+const CompanyLogStatusEnum = {
+    PENDING: 'PENDING'
+}
 
 const UnsupportedOperationErrorEnum = {
     NOT_ADMIN: 'NOT_ADMIN',
