@@ -46,7 +46,8 @@ userController.createUser = async (req, res, next) => {
         address,
         isMultiApproval,
         permission,
-        identityNumber
+        identityNumber,
+        fileId
     } = req.body
 
     try {
@@ -60,7 +61,8 @@ userController.createUser = async (req, res, next) => {
             eusergender: gender,
             euserhobby: hobby,
             euseridentitynumber: identityNumber,
-            euseraddress: address
+            euseraddress: address,
+            efileefileid: fileId === 0 ? null : fileId
         }
 
         const data = await userService.createUser(userDTO, permission, user)

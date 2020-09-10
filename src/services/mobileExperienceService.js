@@ -60,7 +60,7 @@ experienceService.getExperienceById = async (experienceId) => {
 
     return Experience.query()
     .select('eexperienceid','eexperiencename', 'eexperiencestartdate', 'eexperienceenddate', 'eexperiencelocation', 
-    'eexperienceposition', 'eexperiencedescription', 'eindustryname', 'efilename')
+    'eexperienceposition', 'eexperiencedescription', 'eindustryname', 'efileid', 'efilename')
     .leftJoinRelated('[industries, files]')
     .where('eexperienceid', experienceId)
     .first()
@@ -68,6 +68,11 @@ experienceService.getExperienceById = async (experienceId) => {
 }
 
 experienceService.editExperience = async (experienceDTO, experienceId, loggedInUser, fileId) => {
+
+    const experience = await experience.getExperienceById(experienceId);
+
+    if (!experience)
+        throw new NotFoundError()
 
     let promises = []
 
