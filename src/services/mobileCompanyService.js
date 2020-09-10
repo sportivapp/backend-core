@@ -7,6 +7,8 @@ const User = require('../models/User')
 const RosterUserMapping = require('../models/RosterUserMapping')
 const ShiftRosterUserMapping = require('../models/ShiftRosterUserMapping')
 const Team = require('../models/Team')
+const CompanyLogTypeEnum = require('../models/enum/CompanyLogTypeEnum')
+const CompanyLogStatusEnum = require('../models/enum/CompanyLogStatusEnum')
 const { raw } = require('objection');
 const ServiceHelper = require('../helper/ServiceHelper')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
@@ -19,17 +21,6 @@ const UnsupportedOperationErrorEnum = {
     USER_NOT_INVITED: 'USER_NOT_INVITED',
     USER_NOT_APPLIED: 'USER_NOT_APPLIED'
 
-}
-
-const CompanyLogTypeEnum = {
-    APPLY: 'APPLY',
-    INVITE: 'INVITE'
-}
-
-const CompanyLogStatusEnum = {
-    PENDING: 'PENDING',
-    ACCEPTED: 'ACCEPTED',
-    REJECTED: 'REJECTED'
 }
 
 const companyService = {}
@@ -199,7 +190,7 @@ companyService.getCompanyMemberCount = async (companyId) => {
     .first();
 
     return parseInt(companyMemberCount.count);
-    
+
 }
 
 companyService.removeUserFromCompany = async (userInCompany, userId, companyId) => {

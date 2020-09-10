@@ -1,6 +1,6 @@
 exports.up = (knex) => knex.schema.createTable('epermit', t => {
     t.increments('epermitid').primary().unsigned();
-    t.integer('epermitstatus').notNullable();
+    t.integer('epermitstatus').notNullable().defaultTo(0);
     t.string('epermitdescription').notNullable();
     t.bigInteger('epermitstartdate').notNullable();
     t.bigInteger('epermitenddate').notNullable();

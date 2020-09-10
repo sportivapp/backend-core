@@ -129,6 +129,10 @@ module.exports = {
             action: '/permit/action',
             request: '/permit/:permitId/request',
             subordinate: '/permit/subordinate'
+        },
+        companyLog: {
+            list: '/company/:companyId/log',
+            id: '/company/:companyId/log/:companyLogId'
         }
     }
 }
