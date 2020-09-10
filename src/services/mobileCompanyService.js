@@ -14,47 +14,24 @@ const companyService = {}
 companyService.getCompany = async (companyId, user) => {
 
     const companyDetailPromise = Company.query()
-    .select('efileefileid', 'ecompanyname', 'eindustryname', 'eaddressstreet', 'ecompanyphonenumber', 'ecompanyemailaddress')
-    .joinRelated('address')
-    .joinRelated('industry')
+    .withGraphFetched('[carousel, address, industry, news]')
     .where('ecompanyid', companyId)
     .first();
     
-    const departmentWithHeadPromise = Company.query()
-    .select('edepartmentname', 'eusername')
-    .withGraphJoined('departments.positions.users')
-    .where('ecompany.ecompanyid', companyId)
-    .andWhere('egradesuperiorid', null);
-
-    const branchesPromise = Company.query()
-    .select('branches.ecompanyid', 'branches.ecompanyname')
-    .joinRelated('branches')
-    .where('ecompany.ecompanyid', companyId);
-
-    const userInCompany = CompanyUserMapping.query()
+    const isInCompany = CompanyUserMapping.query()
     .where('ecompanyecompanyid', companyId)
     .where('eusereuserid', user.sub)
     .first()
 
-    const isPendingApply = companyService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.APPLY])
+    const isPendingApply = companyService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.APPLY]);
 
-    return Promise.all([companyDetailPromise, departmentWithHeadPromise, branchesPromise, userInCompany, isPendingApply])
-    .then(arr => {
-        let departmentWithHead = [];
-
-        for (let i=0; i < arr[1].length; i++) {
-            departmentWithHead.push({
-                edepartmentname: arr[1][i].edepartmentname,
-                eusername: arr[1][i].eusername
-            })
-        }
+    return Promise.all([companyDetailPromise, isInCompany, isPendingApply])
+    .then(result => {
 
         return {
-            company: arr[0],
-            departments: departmentWithHead,
-            branches: arr[2],
-            isuserincompany: (arr[3]) ? true : false,
-            isapply: (arr[4]) ? true : false
+            ...result[0],
+            isInCompany: result[3] ? true : false,
+            isPendingApply: result[4] ? true : false
         }
 
     })

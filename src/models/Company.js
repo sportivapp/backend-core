@@ -34,6 +34,7 @@ class Company extends Model {
     const Address = require('./Address')
     const Industry = require('./Industry')
     const File = require('./File')
+    const News = require('./News')
 
     return {
       address: {
@@ -122,6 +123,26 @@ class Company extends Model {
             to: 'eapplyinvite.eusereuserid'
           },
           to: 'euser.euserid'
+        }
+      },
+      news: {
+        relation: Model.HasManyRelation,
+        modelClass: News,
+        join: {
+          from: 'ecompany.ecompanyid',
+          to: 'enews.ecompanyecompanyid'
+        }
+      },
+      carousel: {
+        relation: Model.ManyToManyRelation,
+        modelClass: File,
+        join: {
+          from: 'ecompany.ecompanyid',
+          through: {
+            from: 'ecompanycarouselmapping.ecompanyecompanyid',
+            to: 'ecompanycarouselmapping.efileefileid'
+          },
+          to: 'efile.efileid'
         }
       }
     }
