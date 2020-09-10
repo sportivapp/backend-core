@@ -1,7 +1,6 @@
 const Company = require('../models/Company')
 const CompanyUserMapping = require('../models/CompanyUserMapping')
 const CompanyFileMapping = require('../models/CompanyFileMapping')
-const File = require('../models/File')
 const Approval = require('../models/Approval')
 const CompanyLog = require('../models/CompanyLog')
 const User = require('../models/User')
@@ -23,8 +22,7 @@ const UnsupportedOperationErrorEnum = {
 
 const CompanyLogTypeEnum = {
     APPLY: 'APPLY',
-    INVITE: 'INVITE',
-    MEMBER: 'MEMBER'
+    INVITE: 'INVITE'
 }
 
 const CompanyLogStatusEnum = {
@@ -189,31 +187,6 @@ companyService.joinCompany = async (companyId, user) => {
     // If invited, then auto join
     if (pendingInviteApply.ecompanylogtype === CompanyLogTypeEnum.INVITE && pendingInviteApply.ecompanylogstatus === CompanyLogStatusEnum.PENDING)
         return companyService.processIntoCompany(companyId, user, user.sub);
-
-}
-
-companyService.getListPendingInviteByUserId = async (page, size, userId) => {
-
-    if(isNaN(page) || isNaN(size)) {
-        page = 0
-        size = 10
-    }
-
-    const userFromDB = User.query()
-        .select()
-        .where('euserid', userId)
-        .first()
-    
-    if(!userFromDB)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
-
-    return CompanyLog.query()
-    .where('eusereuserid', userId)
-    .where('ecompanylogtype', CompanyLogTypeEnum.INVITE)
-    .andWhere('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
-    .orderBy('ecompanylogcreatetime', 'DESC')
-    .page(page, size)
-    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
 }
 
