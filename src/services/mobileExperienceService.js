@@ -68,30 +68,52 @@ experienceService.getExperienceById = async (experienceId, loggedInUser) => {
 
 }
 
-experienceService.editExperience = async (experienceDTO, experienceId, loggedInUser, fileIds) => {
+experienceService.editExperience = async (experienceDTO, experienceId, loggedInUser, fileId) => {
 
-    // remove file experience mapping by experienceid
+    let promises = []
+
+    // remove previous file, so when edit file to 'no file', file already deleted
     await FileExperienceMapping.query()
     .delete()
     .where('eexperienceeexperienceid', experienceId)
 
-    if( fileIds !== undefined ) {
-        const mapping = fileIds.map(fileId => ({
-            efileefileid: fileId,
-            eexperienceeexperienceid: experienceId
-        }))
-    
-        // add file experience mapping
-        await FileExperienceMapping.query()
-        .insertToTable(mapping, loggedInUser.sub)
+    let file 
+
+    if( fileId !== 0 ) {
+        
+        file = await fileService.getFileByIdAndCreateBy(fileId, loggedInUser.sub)
+
+        if(!file)
+            throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FILE_NOT_FOUND)
+
     }
 
-    return Experience.query()
-    .where('eexperienceid', experienceId)
-    .where('eusereuserid', loggedInUser.sub)
-    .first()
-    .updateByUserId(experienceDTO, loggedInUser.sub)
-    .returning('*')
+    if(file) {
+        promises.push( 
+            FileExperienceMapping.query()
+            .insertToTable({
+                efileefileid: fileId,
+                eexperienceeexperienceid: experienceId
+            }, loggedInUser.sub)
+        ) 
+    }
+
+    promises.push(
+        Experience.query()
+        .where('eexperienceid', experienceId)
+        .where('eusereuserid', loggedInUser.sub)
+        .first()
+        .updateByUserId(experienceDTO, loggedInUser.sub)
+        .returning('*')
+    )
+
+    return Promise.all(promises)
+    .then(arr => {
+        // if promises length = 1, it means no FileExperienceMapping promise pushed
+        if(promises.length === 1)
+            return arr[0]
+        return arr[1]
+    })
 
 }
 
