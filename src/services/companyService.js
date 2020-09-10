@@ -10,6 +10,7 @@ const CompanySequence = require('../models/CompanySequence')
 const { raw } = require('objection')
 const ServiceHelper = require('../helper/ServiceHelper')
 const fileService = require('./fileService');
+const { UnsupportedOperationError } = require('../models/errors')
 
 const CompanyService = {};
 
@@ -197,6 +198,11 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
     if (companyDTO.ecompanyautonik) {
         if (!companyDTO.ecompanynik) return
         await CompanySequence.createSequence(company.ecompanyid)
+    }
+
+    if (companyDTO.efileefileid) {
+        const logo = fileService.getFileById(companyDTO.efileefileid)
+        if (!logo) throw new UnsupportedOperationError('FILE_NOT_FOUND')
     }
 
     const id = ( isNaN(userId) ) ? parseInt(user.sub) : userId
