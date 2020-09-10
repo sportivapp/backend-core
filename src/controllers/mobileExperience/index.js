@@ -41,8 +41,6 @@ experienceController.editExperience = async (req, res, next) => {
     
     const request = req.body
 
-    let fileId = request.fileId
-
     try {
 
         const experienceDTO = {
@@ -56,7 +54,7 @@ experienceController.editExperience = async (req, res, next) => {
         }
 
         experienceDTO.eexperienceenddate = experienceDTO.eexperienceenddate === 0 ? null : request.endDate
-        fileId = fileId === undefined ? 0 : req.body.fileId
+        const fileId = request.fileId === undefined ? 0 : request.fileId;
 
         const result = await mobileExperienceService.editExperience(experienceDTO, parseInt(experienceId), req.user, fileId)
 
