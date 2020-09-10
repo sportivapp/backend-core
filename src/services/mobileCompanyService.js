@@ -1,16 +1,28 @@
 const Company = require('../models/Company')
 const CompanyUserMapping = require('../models/CompanyUserMapping')
+const CompanyFileMapping = require('../models/CompanyFileMapping')
+const Approval = require('../models/Approval')
 const CompanyLog = require('../models/CompanyLog')
+const User = require('../models/User')
+const RosterUserMapping = require('../models/RosterUserMapping')
+const ShiftRosterUserMapping = require('../models/ShiftRosterUserMapping')
+const Team = require('../models/Team')
 const { raw } = require('objection');
+const ServiceHelper = require('../helper/ServiceHelper')
+const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
 const UnsupportedOperationErrorEnum = {
     USER_IN_COMPANY: 'USER_IN_COMPANY',
+    USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY',
+    USER_NOT_EXIST: 'USER_NOT_EXIST',
+    STATUS_UNACCEPTED: 'STATUS_UNACCEPTED',
+    USER_NOT_INVITED: 'USER_NOT_INVITED'
+
 }
 
 const CompanyLogTypeEnum = {
     APPLY: 'APPLY',
-    INVITE: 'INVITE',
-    MEMBER: 'MEMBER'
+    INVITE: 'INVITE'
 }
 
 const CompanyLogStatusEnum = {
@@ -48,7 +60,12 @@ companyService.getCompany = async (companyId, user) => {
 
 }
 
-companyService.getCompanies = async (keyword) => {
+companyService.getCompanies = async (page, size, keyword) => {
+
+    if(isNaN(page) || isNaN(size)) {
+        page = 0
+        size = 10
+    }
 
     let newKeyword = ''
 
@@ -61,6 +78,8 @@ companyService.getCompanies = async (keyword) => {
         .where('ecompanyolderid', null)
         .andWhere('ecompanyparentid', null)
         .andWhere(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
+        .page(page, size)
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
 
 companyService.getVirtualMemberCard = async (companyId, user) => {
@@ -92,7 +111,7 @@ companyService.getVirtualMemberCard = async (companyId, user) => {
 
 companyService.checkUserInCompany = async (companyId, userId) => {
 
-    await CompanyUserMapping.query()
+    return CompanyUserMapping.query()
     .where('ecompanyecompanyid', companyId)
     .andWhere('eusereuserid', userId)
     .first();
@@ -136,7 +155,8 @@ companyService.processIntoCompany = async (companyId, user, userId) => {
 
     const companyUserMappingPromise = CompanyUserMapping.query().insertToTable({
         eusereuserid: userId,
-        ecompanyecompanyid: companyId
+        ecompanyecompanyid: companyId,
+        ecompanyusermappingpermission: 1
     }, user.sub);
 
     const companyLogPromise = companyService.updateCompanyLog(companyId, user, userId, CompanyLogStatusEnum.ACCEPTED);
@@ -166,6 +186,132 @@ companyService.joinCompany = async (companyId, user) => {
 
     // If invited, then auto join
     if (pendingInviteApply.ecompanylogtype === CompanyLogTypeEnum.INVITE && pendingInviteApply.ecompanylogstatus === CompanyLogStatusEnum.PENDING)
+        return companyService.processIntoCompany(companyId, user, user.sub);
+
+}
+
+companyService.getCompanyMemberCount = async (companyId) => {
+
+    const companyMemberCount = await CompanyUserMapping.query()
+    .where('ecompanyecompanyid', companyId)
+    .count()
+    .first();
+
+    return parseInt(companyMemberCount.count);
+    
+}
+
+companyService.removeUserFromCompany = async (userInCompany, userId, companyId) => {
+
+    return userInCompany.$query()
+    .delete()
+    .where('eusereuserid', userId)
+    .where('ecompanyecompanyid', companyId)
+    .then(rowsAffected => rowsAffected === 1);
+
+}
+
+companyService.userCancelJoin = async (companyId, userId) => {
+    const userFromDB = User.query()
+    .select()
+    .where('euserid', userId)
+    .first()
+
+    if(!userFromDB)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
+
+    return CompanyLog.query()
+    .delete()
+    .where('eusereuserid', userId)
+    .where('ecompanyecompanyid', companyId)
+    .where('ecompanylogtype', CompanyLogTypeEnum.APPLY)
+    .where('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
+    .first()
+
+}
+
+companyService.exitCompany = async (companyId, user) => {
+
+    // If user already in Company
+    const userInCompany = await companyService.checkUserInCompany(companyId, user.sub);
+
+    if (!userInCompany)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
+
+    const removeUser = await companyService.removeUserFromCompany(userInCompany, user.sub, companyId);
+
+    // delete approval user mapping
+    const removeApprovalUser =  Approval.relatedQuery('approvalUsers')
+        .for(Approval.query().where('ecompanyecompanyid', companyId))
+        .where('eusereuserid', user.sub)
+        .delete()
+
+    // delete approval
+    const removeApproval =  Approval.query()
+    .where('ecompanyecompanyid', companyId)
+    .andWhere('etargetuserid', user.sub)
+    .delete()
+
+    // delete user position mapping
+    const removePositionUserMapping = User.relatedQuery('grades')
+    .for(user.sub)
+    .where('eusereuserid', user.sub)
+    .delete()
+
+    // delete user in permits
+    const removePermits =  User.relatedQuery('permits')
+    .for(user.sub)
+    .where('eusereuserid', user.sub)
+    .delete()
+
+    // delete user in rosterusermapping
+    const removeRosterUserMapping =  RosterUserMapping.query()
+    .where('eusereuserid', user.sub)
+    .delete()
+
+    // delete user in shift user mapping
+    const removeShiftRoster = ShiftRosterUserMapping.query()
+    .where('eusereuserid', user.sub)
+    .delete()
+
+    const removeUserFromTeam = Team.relatedQuery('members')
+    .for(companyId)
+    .where('eusereuserid', user.sub)
+    .delete()
+
+    const removeCompanyLog = CompanyLog.query()
+    .where('eusereuserid', user.sub)
+    .where('ecompanyecompanyid', companyId)
+    .delete()
+
+    await Promise.all([removeApprovalUser, removeApproval, removePermits, removePositionUserMapping, removeRosterUserMapping, removeShiftRoster, removeUserFromTeam, removeCompanyLog])
+    const companyMemberCount = await companyService.getCompanyMemberCount(companyId);
+
+    // If company has no member after user leaving
+    if (companyMemberCount === 0) {
+        await Company.query()
+        .where('ecompanyid', companyId)
+        .delete();
+    }
+
+    return removeUser
+
+}
+
+companyService.processInvitation = async (companyId, user, status) => {
+
+    if (status !== CompanyLogStatusEnum.ACCEPTED && status !== CompanyLogStatusEnum.REJECTED)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.STATUS_UNACCEPTED)
+
+    const pendingInvite = await companyService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.INVITE]);
+
+    if (!pendingInvite)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_INVITED)
+
+    if (status === CompanyLogStatusEnum.REJECTED)
+        return companyService.updateCompanyLog(companyId, user, user.sub, CompanyLogStatusEnum.REJECTED)
+
+    if (status === CompanyLogStatusEnum.ACCEPTED)
         return companyService.processIntoCompany(companyId, user, user.sub);
 
 }

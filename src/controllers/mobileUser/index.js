@@ -219,4 +219,21 @@ controller.changeIndustryByUserId = async (req, res, next) => {
 
 }
 
+controller.getListPendingInviteByUserId = async (req, res, next) => {
+
+    const {page, size} = req.query
+
+    try {
+
+        const pageObj = await mobileUserService.getListPendingInviteByUserId(parseInt(page), parseInt(size),req.user.sub);
+
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+
 module.exports = controller;
