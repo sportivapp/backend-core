@@ -17,12 +17,14 @@ companyLogController.processRequest = async (req, res, next) => {
     }
 }
 
-companyLogController.getPendingLogList = async (req, res, next) => {
+companyLogController.getLogList = async (req, res, next) => {
 
-    const { page = '0', size = '10', companyId = null, type = 'APPLY' } = req.query
+    const { page = '0', size = '10', type = 'APPLY', status = 'PENDING' } = req.query
+
+    const { companyId } = req.params
 
     try {
-        const pageObj = await companyLogService.getPendingLogList(parseInt(page), parseInt(size), companyId, type)
+        const pageObj = await companyLogService.getLogList(parseInt(page), parseInt(size), companyId, type, status)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
     } catch (e) {
         next(e)
@@ -36,7 +38,7 @@ companyLogController.inviteMember = async (req, res, next) => {
     const { email } = req.body
 
     try {
-        const result = await companyLogService.inviteMember(companyId, email, req.user)
+        const result = await companyLogService.inviteMember(parseInt(companyId), email, req.user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)

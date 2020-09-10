@@ -1,22 +1,12 @@
 const Company = require('../models/Company')
 const CompanyUserMapping = require('../models/CompanyUserMapping')
 const CompanyLog = require('../models/CompanyLog')
+const CompanyLogTypeEnum = require('../models/enum/CompanyLogTypeEnum')
+const CompanyLogStatusEnum = require('../models/enum/CompanyLogStatusEnum')
 const { raw } = require('objection');
 
 const UnsupportedOperationErrorEnum = {
     USER_IN_COMPANY: 'USER_IN_COMPANY',
-}
-
-const CompanyLogTypeEnum = {
-    APPLY: 'APPLY',
-    INVITE: 'INVITE',
-    MEMBER: 'MEMBER'
-}
-
-const CompanyLogStatusEnum = {
-    PENDING: 'PENDING',
-    ACCEPTED: 'ACCEPTED',
-    REJECTED: 'REJECTED'
 }
 
 const companyService = {}
