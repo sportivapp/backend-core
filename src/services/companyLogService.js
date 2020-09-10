@@ -6,7 +6,6 @@ const CompanyLogStatusEnum = require('../models/enum/CompanyLogStatusEnum')
 const CompanyLogTypeEnum = require('../models/enum/CompanyLogTypeEnum')
 const ServiceHelper = require('../helper/ServiceHelper')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
-const { transaction } = require('objection')
 
 const companyLogService = {}
 
@@ -24,27 +23,32 @@ companyLogService.processRequest = async (companyLogId, status, user) => {
 
     else if (companyLog.ecompanylogtype !== CompanyLogTypeEnum.APPLY) throw new UnsupportedOperationError('TYPE_INVALID')
 
-    if (status === CompanyLogStatusEnum.ACCEPTED)
+    if (status === CompanyLogStatusEnum.ACCEPTED) {
 
-        return transaction(CompanyUserMapping, async (CompanyUserMapping, trx) => {
+        console.log('in')
+        return CompanyLog.transaction(async trx => {
 
             return companyLog.$query(trx)
                 .updateByUserId({ ecompanylogstatus: status }, user.sub)
                 .returning('*')
-                .withGraphFetched('user')
-                .then(ignored => CompanyUserMapping.query().insertToTable({
+                .withGraphFetched('user(baseAttributes)')
+                .then(updatedCompanyLog => CompanyUserMapping.query(trx).insertToTable({
                     ecompanyecompanyid: companyLog.ecompanyecompanyid,
                     eusereuserid: companyLog.eusereuserid,
                     ecompanyusermappingpermission: 1
-                }, user.sub))
+                    }, user.sub).then(ignored => updatedCompanyLog)
+                )
         })
+    }
+
+
 
     else
 
         return companyLog.$query()
             .updateByUserId({ ecompanylogstatus: status }, user.sub)
             .returning('*')
-            .withGraphFetched('user')
+            .withGraphFetched('user(baseAttributes)')
 }
 
 companyLogService.getLogList = async (page, size, companyId, type, status) => {
@@ -55,7 +59,7 @@ companyLogService.getLogList = async (page, size, companyId, type, status) => {
         .where('ecompanyecompanyid', companyId)
         .andWhere('ecompanylogtype', type.toUpperCase())
         .andWhere('ecompanylogstatus', status.toUpperCase())
-        .withGraphFetched('user')
+        .withGraphFetched('user(baseAttributes)')
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
@@ -71,6 +75,7 @@ companyLogService.inviteMember = async (companyId, email, loggedInUser) => {
     const companyLog = await CompanyLog.query()
         .where('eusereuserid', user.euserid)
         .where('ecompanyecompanyid', companyId)
+        .withGraphFetched('user(baseAttributes)')
         .first()
 
     if (!companyLog)
@@ -81,6 +86,7 @@ companyLogService.inviteMember = async (companyId, email, loggedInUser) => {
             ecompanylogtype: CompanyLogTypeEnum.INVITE,
             ecompanylogstatus: CompanyLogStatusEnum.PENDING
         }, loggedInUser.sub)
+            .withGraphFetched('user(baseAttributes)')
 
     else if (companyLog.ecompanylogtype === CompanyLogTypeEnum.APPLY && companyLog.ecompanylogstatus === CompanyLogStatusEnum.PENDING)
 
@@ -92,6 +98,8 @@ companyLogService.inviteMember = async (companyId, email, loggedInUser) => {
             ecompanylogtype: CompanyLogTypeEnum.INVITE,
             ecompanylogstatus: CompanyLogStatusEnum.PENDING
         }, loggedInUser.sub)
+            .returning('*')
+            .withGraphFetched('user(baseAttributes)')
 
     else
 
