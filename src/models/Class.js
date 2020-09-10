@@ -22,7 +22,22 @@ class Class extends Model {
     static get modifiers() {
         return {
             baseAttributes(builder) {
-                builder.select('eclassid', 'eclassname', 'eclassstartdate')
+                builder.select('eclassid',
+                    'eclassname',
+                    'eclassstartdate',
+                    'eclassenddate',
+                    'eclassstarthour',
+                    'eclassstartminute',
+                    'eclassendhour',
+                    'eclassendminute',
+                    'eclassrequirement',
+                    'eclassdescription',
+                    'eclassaddress',
+                    'eclasstype',
+                    'eclassprice',
+                    'eclasspicname',
+                    'eclasspicmobilenumber'
+                )
             }
         }
     }
@@ -31,7 +46,6 @@ class Class extends Model {
 
         const Company = require('./Company')
         const Industry = require('./Industry')
-        const User = require('./User')
 
         return {
             company: {
@@ -48,14 +62,6 @@ class Class extends Model {
                 join: {
                     from: 'eclass.eindustryeindustryid',
                     to: 'eindustry.eindustryid'
-                }
-            },
-            supervisor: {
-                relation: Model.BelongsToOneRelation,
-                modelClass: User,
-                join: {
-                    from: 'eclass.eclasssupervisorid',
-                    to: 'euser.euserid'
                 }
             }
         }

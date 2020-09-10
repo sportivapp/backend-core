@@ -12,13 +12,14 @@ exports.up = (knex, Promise) => knex.schema.createTable('eclass', t => {
     t.string('eclassaddress');
     t.enum('eclasstype', ['PUBLIC', 'PRIVATE']);
     t.integer('eclassprice').notNullable();
+    t.string('eclasspicname')
+    t.string('eclasspicmobilenumber')
     t.integer('eclasscreateby').notNullable();
     t.bigInteger('eclasscreatetime').notNullable().defaultTo(Date.now());
     t.integer('eclasschangeby');
     t.bigInteger('eclasschangetime');
     t.boolean('eclassdeletestatus').defaultTo(false);
     t.integer('eclasstablestatus').notNullable().defaultTo(1);
-    t.integer('eclasssupervisorid').notNullable().references('euser.euserid')
     t.integer('ecompanyecompanyid').notNullable().references('ecompany.ecompanyid').onDelete('CASCADE')
     t.integer('eindustryeindustryid').notNullable().references('eindustry.eindustryid').onDelete('CASCADE')
 });
