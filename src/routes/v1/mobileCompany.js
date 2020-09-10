@@ -5,7 +5,6 @@ const auth = require('../../middlewares/authentication');
 const { routes } = require('../../constant')
 
 router.get('/company/:companyId', auth.authenticateToken, controller.getCompany);
-router.get( routes.company.pending, auth.authenticateToken, controller.getListPendingInviteByUserId);
 router.get('/company', auth.authenticateToken, controller.getCompanies);
 router.get('/virtual-member-company/:companyId', auth.authenticateToken, controller.getVirtualMemberCard);
 router.post('/company-join', auth.authenticateToken, controller.joinCompany);
