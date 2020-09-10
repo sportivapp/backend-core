@@ -54,7 +54,7 @@ userController.createUser = async (req, res, next) => {
         const userDTO = {
             eusernik: userNik,
             eusername: username,
-            euseremail: userEmail,
+            euseremail: userEmail.toLowerCase(),
             eusermobilenumber: userMobileNumber,
             eusermultiapproval: isMultiApproval,
             eusergender: gender,
@@ -65,6 +65,8 @@ userController.createUser = async (req, res, next) => {
 
         const data = await userService.createUser(userDTO, permission, user)
 
+        if (!data)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
 
     } catch (e) {

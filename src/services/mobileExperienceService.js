@@ -2,22 +2,38 @@ const Experience = require('../models/Experience')
 const FileExperienceMapping = require('../models/FileExperienceMapping')
 const ServiceHelper = require('../helper/ServiceHelper')
 const { raw } = require('objection');
+const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
+const fileService = require('../services/fileService')
 
 const experienceService = {}
 
-experienceService.createExperience = async (experienceDTO, loggedInUser, fileIds) => {
+const UnsupportedOperationErrorEnum = {
+    FILE_NOT_FOUND: 'FILE_NOT_FOUND'
+}
 
+experienceService.createExperience = async (experienceDTO, loggedInUser, fileId) => {
+
+    let file 
+    if( fileId !== 0 ) {
+        
+        file = await fileService.getFileByIdAndCreateBy(fileId, loggedInUser.sub)
+
+        if(!file)
+            throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FILE_NOT_FOUND)
+
+    }
+  
+    // insert file to mapping
     const experience = await Experience.query()
     .insertToTable(experienceDTO, loggedInUser.sub)
 
-    if( fileIds !== undefined ) {
-        const mapping = fileIds.map(fileId => ({
+    // if file exist
+    if(file) {
+        await FileExperienceMapping.query()
+        .insertToTable({
             efileefileid: fileId,
             eexperienceeexperienceid: experience.eexperienceid
-        }))
-        
-        // insert file to mapping
-        await FileExperienceMapping.query().insertToTable(mapping, loggedInUser.sub)
+        }, loggedInUser.sub)
     }
 
     return experience
@@ -42,24 +58,13 @@ experienceService.getExperienceList = async (page = 0, size = 10, loggedInUser, 
 
 experienceService.getExperienceById = async (experienceId, loggedInUser) => {
 
-    const experience = await Experience.query()
-    .select('eexperienceid','eexperiencename', 'eexperiencestartdate', 'eexperienceenddate', 'eexperiencelocation', 'eexperienceposition', 'eexperiencedescription', 'eindustryname')
-    .joinRelated('industries')
+    return Experience.query()
+    .select('eexperienceid','eexperiencename', 'eexperiencestartdate', 'eexperienceenddate', 'eexperiencelocation', 
+    'eexperienceposition', 'eexperiencedescription', 'eindustryname', 'efilename')
+    .joinRelated('[industries, files]')
     .where('eexperienceid', experienceId)
     .where('eusereuserid', loggedInUser.sub)
     .first()
-
-    const files = await FileExperienceMapping.query()
-    .select('efileefileid')
-    .where('eexperienceeexperienceid', experienceId)
-    .where('efileexperiencemappingcreateby', loggedInUser.sub)
-
-    const result = {
-        ...experience,
-        files
-    }
-
-    return result
 
 }
 

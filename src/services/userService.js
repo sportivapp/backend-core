@@ -71,6 +71,11 @@ UsersService.registerEmployees = async (user, path) => {
 
 UsersService.createUser = async (userDTO, permission, user) => {
 
+    const getUserByEmail = await User.query().where('euseremail', userDTO.euseremail).first();
+
+    if (getUserByEmail)
+        return
+
     const trimmedName = userDTO.eusername.replace(/\s+/g, '')
 
     userDTO.euserpassword = await bcrypt.hash('qplay'.concat(trimmedName.toLowerCase()));
