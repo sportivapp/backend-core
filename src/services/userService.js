@@ -107,6 +107,7 @@ UsersService.createUser = async (userDTO, permission, user) => {
 UsersService.getUserById = async ( userId, user ) => {
 
     const result = await User.query()
+        .withGraphFetched('file')
         .findById(userId)
 
     if (!result) return
