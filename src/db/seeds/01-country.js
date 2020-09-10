@@ -3,10 +3,10 @@ exports.seed = (knex, Promise) => knex('ecountry').del()
     knex('ecountry').insert(
       [
         {
-          ecountryname: 'Brunei Darussalam'
+          ecountryname: 'Indonesia'
         },
         {
-          ecountryname: 'Indonesia'
+          ecountryname: 'Brunei Darussalam'
         },
         {
           ecountryname: 'Kamboja'

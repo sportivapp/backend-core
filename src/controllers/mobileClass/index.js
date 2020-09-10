@@ -5,7 +5,7 @@ const classController = {}
 
 classController.createClass = async (req, res, next) => {
     
-    const { name, requirement, description, startDate, endDate, type, price, industryId, companyId } = req.body
+    const { name, requirement, description, startDate, endDate, type, price, address, industryId, companyId } = req.body
     
     const classDTO = {
         eclassname: name,
@@ -15,6 +15,7 @@ classController.createClass = async (req, res, next) => {
         eclassenddate: endDate,
         eclassprice: price,
         eclasstype: type,
+        eclassaddress: address,
         eindustryeindustryid: industryId,
         ecompanyecompanyid: companyId
     }
@@ -56,7 +57,7 @@ classController.getClassById = async (req, res, next) => {
 
 classController.updateClassById = async (req, res, next) => {
 
-    const { name, requirement, description, startDate, endDate, type, price, industryId } = req.body
+    const { name, requirement, description, startDate, endDate, type, price, address, industryId } = req.body
 
     const { classId } = req.params
 
@@ -68,6 +69,7 @@ classController.updateClassById = async (req, res, next) => {
         eclassenddate: endDate,
         eclassprice: price,
         eclasstype: type,
+        eclassaddress: address,
         eindustryeindustryid: industryId
     }
 
