@@ -23,7 +23,6 @@ experienceController.createExperience = async (req, res, next) => {
         experienceDTO.eexperienceenddate = experienceDTO.eexperienceenddate === 0 ? null : request.endDate
 
         const fileId = req.body.fileId === undefined ? 0 : req.body.fileId;
-
         const result = await mobileExperienceService.createExperience(experienceDTO, req.user, fileId)
 
         if (!result)
@@ -42,6 +41,8 @@ experienceController.editExperience = async (req, res, next) => {
     
     const request = req.body
 
+    let fileId = request.fileId
+
     try {
 
         const experienceDTO = {
@@ -55,8 +56,9 @@ experienceController.editExperience = async (req, res, next) => {
         }
 
         experienceDTO.eexperienceenddate = experienceDTO.eexperienceenddate === 0 ? null : request.endDate
+        fileId = fileId === undefined ? 0 : req.body.fileId
 
-        const result = await mobileExperienceService.editExperience(experienceDTO, parseInt(experienceId), req.user, req.body.fileIds)
+        const result = await mobileExperienceService.editExperience(experienceDTO, parseInt(experienceId), req.user, fileId)
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
