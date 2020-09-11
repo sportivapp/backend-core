@@ -102,8 +102,6 @@ mobileClassService.getClassById = async (classId, user) => {
         .orderBy('eclassusermappingcreatetime', 'DESC')
         .first()
 
-    console.log(classUser)
-
 
     if (classUser && classUser.eclassusermappingstatus !== ClassUserStatusEnum.CANCELED
         && classUser.eclassusermappingstatus !== ClassUserStatusEnum.REJECTED) {
@@ -175,8 +173,6 @@ mobileClassService.getOnlyClassById = async (classId) => {
 }
 
 mobileClassService.updateClassById = async (classId, classDTO, requirements, user) => {
-
-    console.log('abc')
 
     const industry = await Industry.query().findById(classDTO.eindustryeindustryid)
 
