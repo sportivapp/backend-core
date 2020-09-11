@@ -29,11 +29,13 @@ mobileClassService.createClass = async (classDTO, user) => {
 
 mobileClassService.getAllClassByCompanyId = async (companyId, page, size, keyword) => {
 
+    console.log(companyId)
+
     if (companyId < 1) companyId = null
 
     let pageQuery = Class.query()
 
-    if (companyId !== null) pageQuery = pageQuery.where('ecompanyecompanyid', companyId)
+    if (companyId !== null && companyId !== '') pageQuery = pageQuery.where('ecompanyecompanyid', companyId)
 
     return pageQuery
         .andWhere(raw('lower("eclassname")'), 'like', `%${keyword.toLowerCase()}%`)
@@ -48,7 +50,7 @@ mobileClassService.getClassById = async (classId, user) => {
     const classUser = await ClassUserMapping.query()
         .where('eclasseclassid', classId)
         .andWhere('eusereuserid', user.sub)
-        .withGraphFetched('class')
+        .withGraphFetched('class(baseAttributes).[company(baseAttributes), industry(baseAttributes)]')
         .first()
 
     if (classUser)
@@ -80,7 +82,9 @@ mobileClassService.updateClassById = async (classId, classDTO, user) => {
     if (!ClassTypeEnum.hasOwnProperty(classDTO.eclasstype)) throw new UnsupportedOperationError('TYPE_INVALID')
 
     return mobileClassService.getClassById(classId)
-        .then(foundClass => foundClass.$query().updateByUserId(classDTO, user.sub).returning('*')
+        .then(foundClass => foundClass.$query().updateByUserId(classDTO, user.sub)
+            .returning('*')
+            .modify('baseAttributes')
             .withGraphFetched('[company(baseAttributes), industry(baseAttributes)]'))
 }
 

@@ -79,14 +79,25 @@ mobileClassUserService.processRegistration = async (classUserId, status, user) =
         .withGraphFetched('class')
 }
 
-mobileClassUserService.getMyClasses = async (page, size, user) => {
+mobileClassUserService.getMyClasses = async (companyId, page, size, user) => {
 
-    return ClassUserMapping.query()
+    const query = ClassUserMapping.query()
         .select('class.*', 'eclassusermapping.eclassusermappingstatus', 'eclassusermapping.eclassusermappingid')
         .joinRelated('class')
         .where('eclassusermapping.eusereuserid', user.sub)
-        .page(page, size)
-        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+
+    if (companyId && companyId !== '')
+
+        return query
+            .andWhere('class.ecompanyecompanyid', companyId)
+            .page(page, size)
+            .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+
+    else
+
+        return query
+            .page(page, size)
+            .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
 
 module.exports = mobileClassUserService
