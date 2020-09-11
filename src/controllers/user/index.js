@@ -44,7 +44,6 @@ userController.createUser = async (req, res, next) => {
         gender,
         hobby,
         address,
-        isMultiApproval,
         permission,
         identityNumber,
         fileId
@@ -57,7 +56,6 @@ userController.createUser = async (req, res, next) => {
             eusername: username,
             euseremail: userEmail.toLowerCase(),
             eusermobilenumber: userMobileNumber,
-            eusermultiapproval: isMultiApproval,
             eusergender: gender,
             euserhobby: hobby,
             euseridentitynumber: identityNumber,
@@ -105,7 +103,6 @@ userController.updateUserById = async (req, res, next) => {
         gender,
         hobby,
         address,
-        isMultiApproval,
         permission,
         identityNumber
     } = req.body
@@ -117,7 +114,6 @@ userController.updateUserById = async (req, res, next) => {
             eusernik: userNik,
             eusername: username,
             eusermobilenumber: userMobileNumber,
-            eusermultiapproval: isMultiApproval,
             eusergender: gender,
             euserhobby: hobby,
             euseridentitynumber: identityNumber,
