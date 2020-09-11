@@ -51,7 +51,7 @@ classController.getClassById = async (req, res, next) => {
 
     try {
 
-        const result = await classService.getClassById(classId)
+        const result = await classService.getClassById(classId, req.user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch(e) {
         next(e)

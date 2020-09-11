@@ -29,6 +29,9 @@ mobileClassUserService.registerByClassId = async (classId, user) => {
     const classUserMapping = await ClassUserMapping.query()
         .where('eclasseclassid', classId)
         .where('eusereuserid', user.sub)
+        .whereNot('eclassusermappingstatus', ClassUserStatusEnum.REJECTED)
+        .andWhereNot('eclassusermappingstatus', ClassUserStatusEnum.CANCELED)
+        .orderBy('eclassusermappingcreatetime', 'DESC')
         .first()
     
     if (!classUserMapping)
@@ -43,11 +46,14 @@ mobileClassUserService.registerByClassId = async (classId, user) => {
     else return mobileClassService.getClassById(classUserMapping.eclasseclassid, user)
 }
 
-mobileClassUserService.cancelRegistrationByClassUserId = async (classUserId) => {
+mobileClassUserService.cancelRegistrationByClassUserId = async (classUserId, user) => {
 
-    return ClassUserMapping.query()
-        .findById(classUserId)
-        .delete()
+    const classUser = await ClassUserMapping.query().findById(classUserId)
+
+    if (classUser.eclassusermappingstatus === 'APPROVED') return false
+
+    return classUser.$query()
+        .updateByUserId({ eclassusermappingstatus: ClassUserStatusEnum.CANCELED }, user.sub)
         .then(rowsAffected => rowsAffected === 1)
 }
 
@@ -59,6 +65,7 @@ mobileClassUserService.processRegistration = async (classUserId, status, user) =
     const classUser = await ClassUserMapping.query()
         .where('eclasseclassid', classId)
         .where('eusereuserid', user.sub)
+        .orderBy('eclassusermappingcreatetime', 'DESC')
         .withGraphFetched('class')
         .first()
 
@@ -73,17 +80,22 @@ mobileClassUserService.processRegistration = async (classUserId, status, user) =
     if (loggedInUserCompanies.indexOf(classUser.class.ecompanyecompanyid) === -1)
         throw new UnsupportedOperationError('USER_NOT_IN_ORGANIZATION')
 
-    return classUser.$query()
-        .updateByUserId({ eclassusermappingstatus: status }, user.sub)
-        .returning('*')
-        .withGraphFetched('class')
+    if (classUser.eclassusermappingstatus === ClassUserStatusEnum.PENDING)
+
+        return classUser.$query()
+            .updateByUserId({ eclassusermappingstatus: status }, user.sub)
+            .returning('*')
+            .withGraphFetched('class')
+
+    else return classUser
 }
 
 mobileClassUserService.getMyClasses = async (companyId, page, size, user) => {
 
     const query = ClassUserMapping.query()
-        .select('class.*', 'eclassusermapping.eclassusermappingstatus', 'eclassusermapping.eclassusermappingid')
-        .joinRelated('class')
+        .select('class.*', 'class:company.ecompanyname', 'class:industry.eindustryname',
+            'eclassusermapping.eclassusermappingstatus', 'eclassusermapping.eclassusermappingid')
+        .joinRelated('class.[company(baseAttributes), industry(baseAttributes)]')
         .where('eclassusermapping.eusereuserid', user.sub)
 
     if (companyId && companyId !== '')

@@ -51,13 +51,14 @@ mobileClassService.getAllClassByCompanyId = async (companyId, page, size, keywor
     if (companyId < 1) companyId = null
 
     let pageQuery = Class.query()
+        .select('eclass.*', 'company.ecompanyname', 'industry.eindustryname')
+        .joinRelated('[company(baseAttributes), industry(baseAttributes)]')
 
-    if (companyId !== null && companyId !== '') pageQuery = pageQuery.where('ecompanyecompanyid', companyId)
+    if (companyId && companyId !== '') pageQuery = pageQuery.where('ecompanyecompanyid', companyId)
 
     return pageQuery
-        .andWhere(raw('lower("eclassname")'), 'like', `%${keyword.toLowerCase()}%`)
+        .where(raw('lower("eclassname")'), 'like', `%${keyword.toLowerCase()}%`)
         .modify('baseAttributes')
-        .withGraphFetched('[company(baseAttributes), industry(baseAttributes)]')
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
@@ -75,7 +76,8 @@ mobileClassService.getClassById = async (classId, user) => {
         return {
             ...classUser.class,
             eclassusermappingid: classUser.eclassusermappingid,
-            eclassusermappingstatus: classUser.eclassusermappingstatus
+            eclassusermappingstatus: classUser.eclassusermappingstatus,
+            isRegistered: true
         }
 
     else
@@ -86,7 +88,10 @@ mobileClassService.getClassById = async (classId, user) => {
             .withGraphFetched('[company(baseAttributes), industry(baseAttributes)]')
             .then(foundClass => {
                 if (!foundClass) throw new NotFoundError()
-                return foundClass
+                return {
+                    ...foundClass,
+                    isRegistered: false
+                }
             })
 }
 
