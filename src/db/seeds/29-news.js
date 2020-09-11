@@ -28,7 +28,7 @@ exports.seed = (knex, Promise) => knex('enews').del()
           enewscreateby: 1,
           enewschangetime: Date.now(),
           enewschangeby: 1,
-          efileefileid: 14,
+          efileefileid: 19,
           ecompanyecompanyid: 1
       }
     ]
