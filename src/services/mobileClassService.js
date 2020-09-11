@@ -33,6 +33,7 @@ mobileClassService.getAllClassByCompanyId = async (companyId, page, size, keywor
 
     return pageQuery
         .andWhere(raw('lower("eclassname")'), 'like', `%${keyword.toLowerCase()}%`)
+        .modify('baseAttributes')
         .withGraphFetched('[company(baseAttributes), industry(baseAttributes)]')
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
@@ -42,7 +43,8 @@ mobileClassService.getClassById = async (classId) => {
 
     return Class.query()
         .findById(classId)
-        .withGraphFetched('[company(baseAttributes), industry(baseAttributes)]')
+        .modify('baseAttributes')
+        .withGraphFetched('[company(baseAttributes), industry(baseAttributes), supervisor(baseAttributes)]')
         .then(foundClass => {
             if (!foundClass) throw new NotFoundError()
             return foundClass
@@ -59,7 +61,7 @@ mobileClassService.updateClassById = async (classId, classDTO, user) => {
 
     return mobileClassService.getClassById(classId)
         .then(foundClass => foundClass.$query().updateByUserId(classDTO, user.sub).returning('*')
-            .withGraphFetched('[company(baseAttributes), industry(baseAttributes)]'))
+            .withGraphFetched('[company(baseAttributes), industry(baseAttributes), supervisor(baseAttributes)]'))
 }
 
 mobileClassService.deleteClassById = async (classId) => {

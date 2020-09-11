@@ -5,7 +5,10 @@ module.exports = {
             list: '/company',
             register: '/company-register',
             id: '/company/:companyId',
-            users: '/company/:companyId/users'
+            users: '/company/:companyId/users',
+            exit: '/company-exit',
+            cancelJoin: '/company-cancel-join/:companyId',
+            processInvitation: '/company-process-invitation'
         },
         user: {
             login: '/user-login',
@@ -18,7 +21,8 @@ module.exports = {
             approval: '/user/approval',
             coach: '/user/coach',
             removeCoach: '/user/coach-remove',
-            industry: '/user/industry'
+            industry: '/user/industry',
+            pending: '/user-pending-log',
         },
         profile: {
             changeCompany: '/change-company',
@@ -125,6 +129,10 @@ module.exports = {
             action: '/permit/action',
             request: '/permit/:permitId/request',
             subordinate: '/permit/subordinate'
+        },
+        companyLog: {
+            list: '/company/:companyId/log',
+            id: '/company/:companyId/log/:companyLogId'
         }
     }
 }

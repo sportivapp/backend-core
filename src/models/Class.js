@@ -22,7 +22,22 @@ class Class extends Model {
     static get modifiers() {
         return {
             baseAttributes(builder) {
-                builder.select('eclassid', 'eclassname', 'eclassstartdate')
+                builder.select('eclassid',
+                    'eclassname',
+                    'eclassstartdate',
+                    'eclassenddate',
+                    'eclassstarthour',
+                    'eclassstartminute',
+                    'eclassendhour',
+                    'eclassendminute',
+                    'eclassrequirement',
+                    'eclassdescription',
+                    'eclassaddress',
+                    'eclasstype',
+                    'eclassprice',
+                    'eclasspicname',
+                    'eclasspicmobilenumber'
+                )
             }
         }
     }

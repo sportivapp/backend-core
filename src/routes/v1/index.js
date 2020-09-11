@@ -25,6 +25,8 @@ const approvalRoutes = require('./approval')
 const otpRoutes = require('./otp');
 const teamRoutes = require('./team');
 const fileRoutes = require('./file');
+const companyLogRoutes = require('./companyLog');
+const theoryRoutes = require('./theory');
 
 router.use('/api/v1', [
     userRoutes,
@@ -50,6 +52,8 @@ router.use('/api/v1', [
     otpRoutes,
     teamRoutes,
     fileRoutes,
+    companyLogRoutes,
+    theoryRoutes
 ]);
 
 const mobileUserRoutes = require('./mobileUser');
