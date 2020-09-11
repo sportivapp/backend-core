@@ -29,20 +29,19 @@
                 modelClass: User,
                 relation: Model.BelongsToOneRelation,
                 join: {
-                    from: 'eclassusermapping.euseruserid',
+                    from: 'eclassusermapping.eusereuserid',
                     to: 'euser.euserid'
                 }
             },
             class: {
                 relation: Model.BelongsToOneRelation,
                 modelClass: Class,
-                from: 'eclassusermapping.eclasseclassid',
-                to: 'eclass.eclassid'
-
+                join: {
+                    from: 'eclassusermapping.eclasseclassid',
+                    to: 'eclass.eclassid'
+                }
             }
-        
         }
-
      }
  }
 

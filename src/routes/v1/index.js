@@ -63,6 +63,7 @@ const mobileAnnouncementRoutes = require('./mobileAnnouncement');
 const mobileTeamRoutes = require('./mobileTeam');
 const mobileExperienceRoutes = require('./mobileExperience');
 const mobileClassRoutes = require('./mobileClass');
+const mobileClassUserRoutes = require('./mobileClassUser');
 
 router.use('/api/v1/mobile', [
     mobileUserRoutes,
@@ -71,7 +72,8 @@ router.use('/api/v1/mobile', [
     mobileAnnouncementRoutes,
     mobileTeamRoutes,
     mobileExperienceRoutes,
-    mobileClassRoutes
+    mobileClassRoutes,
+    mobileClassUserRoutes
 ]);
 
 module.exports = router;
