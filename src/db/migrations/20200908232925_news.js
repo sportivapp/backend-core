@@ -2,7 +2,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('enews', t => {
     t.increments('enewsid').primary().unsigned();
     t.bigInteger('enewsdate').notNullable();
     t.string('enewstitle').notNullable();
-    t.string('enewscontent').notNullable();
+    t.text('enewscontent').notNullable();
     t.integer('enewscreateby').notNullable();
     t.bigInteger('enewscreatetime').notNullable().defaultTo(Date.now());
     t.integer('enewschangeby');

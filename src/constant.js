@@ -139,6 +139,9 @@ module.exports = {
         companyLog: {
             list: '/company/:companyId/log',
             id: '/company/:companyId/log/:companyLogId'
+        },
+        app: {
+            version: '/app/version'
         }
     }
 }
