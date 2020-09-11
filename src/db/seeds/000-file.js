@@ -108,5 +108,21 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
+        {
+          efilename: '20-APSSI Kongres Pertama.jpg',
+          efilepath: process.env.TEMP_DIRECTORY + '/20-APSSI Kongres Pertama.jpg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '21-APSSI 10 maret.jpg',
+          efilepath: process.env.TEMP_DIRECTORY + '/21-APSSI 10 maret.jpg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
       ]
 ));
