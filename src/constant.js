@@ -123,6 +123,11 @@ module.exports = {
             list: '/class',
             id: '/class/:classId'
         },
+        classUser: {
+            registration: '/user-class/registration',
+            list: '/user-class',
+            id: '/user-class/:classUserId'
+        },
         permit: {
             list: '/permit',
             id: '/permit/:permitId',

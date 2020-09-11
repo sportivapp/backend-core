@@ -46,7 +46,8 @@ class Class extends Model {
         const Company = require('./Company')
         const Industry = require('./Industry')
         const ClassRequirement = require('./ClassRequirement')
-
+        const User = require('./User')
+ 
         return {
             company: {
                 relation: Model.BelongsToOneRelation,
@@ -64,6 +65,7 @@ class Class extends Model {
                     to: 'eindustry.eindustryid'
                 }
             },
+
             requirements: {
                 relation: Model.HasManyRelation,
                 modelClass: ClassRequirement,
@@ -71,7 +73,19 @@ class Class extends Model {
                     from: 'eclass.eclassid',
                     to: 'eclassrequirement.eclasseclassid'
                 }
-            }
+            },
+            users: {
+                relation: Model.ManyToManyRelation,
+                modelClass: User,
+                join: { 
+                  from : 'eclass.eclassid',
+                  through: {
+                    from: 'eclassusermapping.eclasseclassid',
+                    to: 'eclassusermapping.eusereuserid'
+                  },
+                  to: 'euser.euserid'
+                }
+              }
         }
     }
 }

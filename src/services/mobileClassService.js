@@ -1,4 +1,5 @@
 const Class = require('../models/Class')
+const ClassUserMapping = require('../models/ClassUserMapping')
 const Industry = require('../models/Industry')
 const Company = require('../models/Company')
 const ClassRequirement = require('../models/ClassRequirement')
@@ -20,6 +21,9 @@ mobileClassService.createClass = async (classDTO, requirements, user) => {
     if (!industry) throw new UnsupportedOperationError('INDUSTRY_NOT_FOUND')
 
     if (!ClassTypeEnum.hasOwnProperty(classDTO.eclasstype)) throw new UnsupportedOperationError('TYPE_INVALID')
+
+    if (ClassTypeEnum.PRIVATE === classDTO.eclasstype && !classDTO.ecompanyecompanyid)
+        throw new UnsupportedOperationError('TYPE_INVALID')
 
     return Class.transaction(async trx => {
 
@@ -58,16 +62,32 @@ mobileClassService.getAllClassByCompanyId = async (companyId, page, size, keywor
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
 
-mobileClassService.getClassById = async (classId) => {
+mobileClassService.getClassById = async (classId, user) => {
 
-    return Class.query()
-        .findById(classId)
-        .modify('baseAttributes')
-        .withGraphFetched('[company(baseAttributes), industry(baseAttributes), requirements(baseAttributes)]')
-        .then(foundClass => {
-            if (!foundClass) throw new NotFoundError()
-            return foundClass
-        })
+    const classUser = await ClassUserMapping.query()
+        .where('eclasseclassid', classId)
+        .andWhere('eusereuserid', user.sub)
+        .withGraphFetched('class')
+        .first()
+
+    if (classUser) {
+
+        return {
+            ...classUser.class,
+            eclassusermappingid: classUser.eclassusermappingid,
+            eclassusermappingstatus: classUser.eclassusermappingstatus
+        }
+
+    } else
+
+        return Class.query()
+            .findById(classId)
+            .modify('baseAttributes')
+            .withGraphFetched('[company(baseAttributes), industry(baseAttributes)]')
+            .then(foundClass => {
+                if (!foundClass) throw new NotFoundError()
+                return foundClass
+            })
 }
 
 mobileClassService.updateClassById = async (classId, classDTO, requirements, user) => {

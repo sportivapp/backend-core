@@ -4,6 +4,7 @@ const Industry = require('./Industry');
 const License = require('./License');
 const Experience = require('./Experience');
 
+
 class User extends Model {
   static get tableName() {
     return 'euser';
@@ -38,6 +39,8 @@ class User extends Model {
     const Announcement = require('./Announcement');
     const Department = require('./Department')
     const UserIndustryMapping = require('./UserIndustryMapping')
+    const Class = require('./Class')
+    const ClassUserMapping = require('./ClassUserMapping')
 
     return {
       permits: {
@@ -235,7 +238,20 @@ class User extends Model {
           from: 'euser.euserid',
           to: 'eexperience.eusereuserid'
         }
+      },
+      classes: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Class,
+        join: { 
+          from : 'euser.euserid',
+          through: {
+            from: 'eclassusermapping.eusereuserid',
+            to: 'eclassusermapping.eclasseclassid'
+          },
+          to: 'eclass.eclassid'
+        }
       }
+
     }
   }
 
