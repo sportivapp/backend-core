@@ -92,15 +92,13 @@ mobileClassService.getClassById = async (classId, user) => {
 
 mobileClassService.updateClassById = async (classId, classDTO, requirements, user) => {
 
-    console.log(user);
-
     const industry = await Industry.query().findById(classDTO.eindustryeindustryid)
 
     if (!industry) throw new UnsupportedOperationError('INDUSTRY_NOT_FOUND')
 
     if (!ClassTypeEnum.hasOwnProperty(classDTO.eclasstype)) throw new UnsupportedOperationError('TYPE_INVALID')
 
-    const cls = await mobileClassService.getClassById(classId);    
+    const cls = await mobileClassService.getClassById(classId, user);    
 
     return Class.transaction(async trx => {
 
@@ -113,11 +111,9 @@ mobileClassService.updateClassById = async (classId, classDTO, requirements, use
 
         await ClassRequirement.query().where('eclasseclassid', classId).delete();
 
-        console.log(user);
         await cls.$relatedQuery('requirements', trx)
             .insertToTable(classRequirements, user.sub);
-
-        console.log(user);
+            
         return cls.$query(trx).updateByUserId(classDTO, user.sub).returning('*')
         .withGraphFetched('[company(baseAttributes), industry(baseAttributes), requirements(baseAttributes)]');
 
