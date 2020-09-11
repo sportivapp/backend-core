@@ -5,6 +5,7 @@ const Company = require('../models/Company')
 const ClassRequirement = require('../models/ClassRequirement')
 const fileService = require('./fileService')
 const ServiceHelper = require('../helper/ServiceHelper')
+const CompanyUserMapping = require('../models/CompanyUserMapping')
 const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
 const ClassTypeEnum = require('../models/enum/ClassTypeEnum')
 const ClassUserStatusEnum = require('../models/enum/ClassUserStatusEnum')
@@ -101,17 +102,26 @@ mobileClassService.getClassById = async (classId, user) => {
         .orderBy('eclassusermappingcreatetime', 'DESC')
         .first()
 
+
     if (classUser && classUser.eclassusermappingstatus !== ClassUserStatusEnum.CANCELED
-        && classUser.eclassusermappingstatus !== ClassUserStatusEnum.REJECTED)
+        && classUser.eclassusermappingstatus !== ClassUserStatusEnum.REJECTED) {
+
+        const mapping = await CompanyUserMapping.query()
+            .where('ecompanyecompanyid', classUser.ecompanyid)
+            .where('eusereuserid', user.sub)
+            .first()
 
         return {
             ...classUser,
-            isRegistered: true
+            isRegistered: true,
+            isInCompany: !!mapping
         }
 
-    else
+    }
 
-        return Class.query()
+    else {
+
+        const foundClass = await Class.query()
             .findById(classId)
             .select('company.ecompanyid','company.ecompanyname')
             .select('industry.eindustryid', 'industry.eindustryname')
@@ -120,11 +130,21 @@ mobileClassService.getClassById = async (classId, user) => {
             .modify('baseAttributes')
             .then(foundClass => {
                 if (!foundClass) throw new NotFoundError()
-                return {
-                    ...foundClass,
-                    isRegistered: false
-                }
+                return foundClass
             })
+
+        const mapping = await CompanyUserMapping.query()
+            .where('ecompanyecompanyid', foundClass.ecompanyecompanyid)
+            .where('eusereuserid', user.sub)
+            .first()
+
+        return {
+            ...foundClass,
+            isRegistered: false,
+            isInCompany: !!mapping
+        }
+
+    }
 }
 
 mobileClassService.getOnlyClassById = async (classId) => {
