@@ -6,6 +6,7 @@ mobileAppVersionService.getVersion = () => {
 
     return MobileAppVersion.query()
     .select()
+    .orderBy('emobileappversionchangetime', 'DESC')
     .first()
 
 }
