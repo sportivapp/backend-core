@@ -19,6 +19,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('eclass', t => {
     t.bigInteger('eclasschangetime');
     t.boolean('eclassdeletestatus').defaultTo(false);
     t.integer('eclasstablestatus').notNullable().defaultTo(1);
+    t.integer('efileefileid').notNullable().references('efile.efileid').onDelete('SET NULL')
     t.integer('ecompanyecompanyid').notNullable().references('ecompany.ecompanyid').onDelete('CASCADE')
     t.integer('eindustryeindustryid').notNullable().references('eindustry.eindustryid').onDelete('CASCADE')
 });

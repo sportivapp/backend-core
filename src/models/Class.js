@@ -35,7 +35,10 @@ class Class extends Model {
                     'eclasstype',
                     'eclassprice',
                     'eclasspicname',
-                    'eclasspicmobilenumber'
+                    'eclasspicmobilenumber',
+                    'ecompanyecompanyid',
+                    'eindustryeindustryid',
+                    'efileefileid'
                 )
             }
         }
@@ -47,6 +50,7 @@ class Class extends Model {
         const Industry = require('./Industry')
         const ClassRequirement = require('./ClassRequirement')
         const User = require('./User')
+        const File = require('./File')
  
         return {
             company: {
@@ -85,7 +89,15 @@ class Class extends Model {
                   },
                   to: 'euser.euserid'
                 }
-              }
+            },
+            picture: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: File,
+                join: {
+                    from: 'eclass.efileefileid',
+                    to: 'efile.efileid'
+                }
+            }
         }
     }
 }
