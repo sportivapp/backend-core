@@ -51,9 +51,7 @@ mobileClassService.getClassById = async (classId, user) => {
         .withGraphFetched('class')
         .first()
 
-    if (classUser) {
-
-        console.log(classUser)
+    if (classUser)
 
         return {
             ...classUser.class,
@@ -61,7 +59,7 @@ mobileClassService.getClassById = async (classId, user) => {
             eclassusermappingstatus: classUser.eclassusermappingstatus
         }
 
-    } else
+    else
 
         return Class.query()
             .findById(classId)
