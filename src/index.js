@@ -65,7 +65,7 @@ const httpServer = app.listen(httpPORT, function() {
 })
 
 // configuration for https
-const options = {
+ const options = {
     key: fs.readFileSync('../../../etc/ssl/private/quickplay.key', 'utf8'),
     cert: fs.readFileSync('../../../etc/ssl/certs/quickplay.crt', 'utf8')
 };
