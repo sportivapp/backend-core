@@ -92,6 +92,8 @@ mobileClassService.getClassById = async (classId, user) => {
 
 mobileClassService.updateClassById = async (classId, classDTO, requirements, user) => {
 
+    console.log(user);
+
     const industry = await Industry.query().findById(classDTO.eindustryeindustryid)
 
     if (!industry) throw new UnsupportedOperationError('INDUSTRY_NOT_FOUND')
