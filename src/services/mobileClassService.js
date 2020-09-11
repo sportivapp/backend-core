@@ -108,7 +108,6 @@ mobileClassService.getClassById = async (classId, user) => {
 
         const requirements = await ClassRequirement.query()
             .where('eclasseclassid', classUser.eclassid)
-            .then(list => list.map(requirement => requirement.eclassrequirementname))
 
         const mapping = await CompanyUserMapping.query()
             .where('ecompanyecompanyid', classUser.ecompanyid)
@@ -138,11 +137,8 @@ mobileClassService.getClassById = async (classId, user) => {
                 return foundClass
             })
 
-        console.log(foundClass)
-
         const requirements = await ClassRequirement.query()
             .where('eclasseclassid', foundClass.eclassid)
-            .then(list => list.map(requirement => requirement.eclassrequirementname))
 
         const mapping = await CompanyUserMapping.query()
             .where('ecompanyecompanyid', foundClass.ecompanyecompanyid)
