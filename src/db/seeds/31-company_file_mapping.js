@@ -82,5 +82,37 @@ exports.seed = (knex, Promise) => knex('ecompanyfilemapping').del()
           ecompanyfilemappingchangetime: Date.now(),
           ecompanyfilemappingchangeby: 0
         },
+        {
+          ecompanyecompanyid: 1,
+          efileefileid: 14,
+          ecompanyfilemappingcreatetime: Date.now(),
+          ecompanyfilemappingcreateby: 0,
+          ecompanyfilemappingchangetime: Date.now(),
+          ecompanyfilemappingchangeby: 0
+        },
+        {
+          ecompanyecompanyid: 1,
+          efileefileid: 15,
+          ecompanyfilemappingcreatetime: Date.now(),
+          ecompanyfilemappingcreateby: 0,
+          ecompanyfilemappingchangetime: Date.now(),
+          ecompanyfilemappingchangeby: 0
+        },
+        {
+          ecompanyecompanyid: 1,
+          efileefileid: 16,
+          ecompanyfilemappingcreatetime: Date.now(),
+          ecompanyfilemappingcreateby: 0,
+          ecompanyfilemappingchangetime: Date.now(),
+          ecompanyfilemappingchangeby: 0
+        },
+        {
+          ecompanyecompanyid: 1,
+          efileefileid: 17,
+          ecompanyfilemappingcreatetime: Date.now(),
+          ecompanyfilemappingcreateby: 0,
+          ecompanyfilemappingchangetime: Date.now(),
+          ecompanyfilemappingchangeby: 0
+        },
     ]
   ));

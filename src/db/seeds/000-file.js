@@ -108,5 +108,37 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
+        {
+          efilename: '20-defend a.mp4',
+          efilepath: process.env.TEMP_DIRECTORY + '/20-defend a.mp4',
+          efiletype: 'video/mp4',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '21-defend b.mp4',
+          efilepath: process.env.TEMP_DIRECTORY + '/21-defend b.mp4',
+          efiletype: 'video/mp4',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '22-dribbling and running with the ball 1.mp4',
+          efilepath: process.env.TEMP_DIRECTORY + '/22-dribbling and running with the ball 1.mp4',
+          efiletype: 'video/mp4',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '23-dribbling and running with the ball 2.mp4',
+          efilepath: process.env.TEMP_DIRECTORY + '/23-dribbling and running with the ball 2.mp4',
+          efiletype: 'video/mp4',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
       ]
 ));
