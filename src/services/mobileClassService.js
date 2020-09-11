@@ -1,4 +1,5 @@
 const Class = require('../models/Class')
+const ClassUserMapping = require('../models/ClassUserMapping')
 const Industry = require('../models/Industry')
 const Company = require('../models/Company')
 const ServiceHelper = require('../helper/ServiceHelper')
@@ -20,6 +21,9 @@ mobileClassService.createClass = async (classDTO, user) => {
 
     if (!ClassTypeEnum.hasOwnProperty(classDTO.eclasstype)) throw new UnsupportedOperationError('TYPE_INVALID')
 
+    if (ClassTypeEnum.PRIVATE === classDTO.eclasstype && !classDTO.ecompanyecompanyid)
+        throw new UnsupportedOperationError('TYPE_INVALID')
+
     return Class.query().insertToTable(classDTO, user.sub)
 }
 
@@ -39,16 +43,34 @@ mobileClassService.getAllClassByCompanyId = async (companyId, page, size, keywor
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
 
-mobileClassService.getClassById = async (classId) => {
+mobileClassService.getClassById = async (classId, user) => {
 
-    return Class.query()
-        .findById(classId)
-        .modify('baseAttributes')
-        .withGraphFetched('[company(baseAttributes), industry(baseAttributes), supervisor(baseAttributes)]')
-        .then(foundClass => {
-            if (!foundClass) throw new NotFoundError()
-            return foundClass
-        })
+    const classUser = await ClassUserMapping.query()
+        .where('eclasseclassid', classId)
+        .andWhere('eusereuserid', user.sub)
+        .withGraphFetched('class')
+        .first()
+
+    if (classUser) {
+
+        console.log(classUser)
+
+        return {
+            ...classUser.class,
+            eclassusermappingid: classUser.eclassusermappingid,
+            eclassusermappingstatus: classUser.eclassusermappingstatus
+        }
+
+    } else
+
+        return Class.query()
+            .findById(classId)
+            .modify('baseAttributes')
+            .withGraphFetched('[company(baseAttributes), industry(baseAttributes)]')
+            .then(foundClass => {
+                if (!foundClass) throw new NotFoundError()
+                return foundClass
+            })
 }
 
 mobileClassService.updateClassById = async (classId, classDTO, user) => {
@@ -61,7 +83,7 @@ mobileClassService.updateClassById = async (classId, classDTO, user) => {
 
     return mobileClassService.getClassById(classId)
         .then(foundClass => foundClass.$query().updateByUserId(classDTO, user.sub).returning('*')
-            .withGraphFetched('[company(baseAttributes), industry(baseAttributes), supervisor(baseAttributes)]'))
+            .withGraphFetched('[company(baseAttributes), industry(baseAttributes)]'))
 }
 
 mobileClassService.deleteClassById = async (classId) => {
