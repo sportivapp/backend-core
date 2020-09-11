@@ -82,7 +82,7 @@ mobileClassUserService.processRegistration = async (classUserId, status, user) =
 mobileClassUserService.getMyClasses = async (page, size, user) => {
 
     return ClassUserMapping.query()
-        .select('eclass.*', 'eclassusermapping.eclassusermappingstatus', 'eclassusermapping.eclassusermappingid')
+        .select('class.*', 'eclassusermapping.eclassusermappingstatus', 'eclassusermapping.eclassusermappingid')
         .joinRelated('class')
         .where('eclassusermapping.eusereuserid', user.sub)
         .page(page, size)
