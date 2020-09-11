@@ -106,6 +106,9 @@ mobileClassService.getClassById = async (classId, user) => {
     if (classUser && classUser.eclassusermappingstatus !== ClassUserStatusEnum.CANCELED
         && classUser.eclassusermappingstatus !== ClassUserStatusEnum.REJECTED) {
 
+        const requirements = await ClassRequirement.query()
+            .where('eclasseclassid', classUser.eclassid)
+
         const mapping = await CompanyUserMapping.query()
             .where('ecompanyecompanyid', classUser.ecompanyid)
             .where('eusereuserid', user.sub)
@@ -114,7 +117,8 @@ mobileClassService.getClassById = async (classId, user) => {
         return {
             ...classUser,
             isRegistered: true,
-            isInCompany: !!mapping
+            isInCompany: !!mapping,
+            requirements
         }
 
     }
@@ -133,6 +137,9 @@ mobileClassService.getClassById = async (classId, user) => {
                 return foundClass
             })
 
+        const requirements = await ClassRequirement.query()
+            .where('eclasseclassid', foundClass.eclassid)
+
         const mapping = await CompanyUserMapping.query()
             .where('ecompanyecompanyid', foundClass.ecompanyecompanyid)
             .where('eusereuserid', user.sub)
@@ -141,7 +148,8 @@ mobileClassService.getClassById = async (classId, user) => {
         return {
             ...foundClass,
             isRegistered: false,
-            isInCompany: !!mapping
+            isInCompany: !!mapping,
+            requirements
         }
 
     }

@@ -22,7 +22,7 @@ class Company extends Model {
   static get modifiers() {
     return {
       baseAttributes(builder) {
-        builder.select('ecompanyid', 'ecompanyname')
+        builder.select('ecompanyid', 'ecompanyname').withGraphFetched('logo(baseAttributes)')
       }
     }
   }

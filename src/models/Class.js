@@ -38,7 +38,7 @@ class Class extends Model {
                     'eclasspicmobilenumber',
                     'ecompanyecompanyid',
                     'eindustryeindustryid',
-                    'efileefileid'
+                    'eclass.efileefileid'
                 )
             }
         }
