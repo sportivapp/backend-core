@@ -9,12 +9,20 @@ const { UnsupportedOperationError } = require('../models/errors')
 
 const mobileClassUserService = {}
 
+const ErrorEnum = {
+    CLASS_ID_REQUIRED: 'CLASS_ID_REQUIRED',
+    CLASS_NOT_FOUND: 'CLASS_NOT_FOUND',
+    USER_NOT_IN_ORGANIZATION: 'USER_NOT_IN_ORGANIZATION',
+    STATUS_INVALID: 'STATUS_INVALID',
+
+}
+
 mobileClassUserService.registerByClassId = async (classId, user) => {
 
-    if (!classId) throw new UnsupportedOperationError('CLASS_ID_REQUIRED')
+    if (!classId) throw new UnsupportedOperationError(ErrorEnum.CLASS_ID_REQUIRED)
 
     const foundClass = await Class.query().findById(classId)
-    if (!foundClass) throw new UnsupportedOperationError('CLASS_NOT_FOUND')
+    if (!foundClass) throw new UnsupportedOperationError(ErrorEnum.CLASS_NOT_FOUND)
 
     if (foundClass.eclasstype === ClassTypeEnum.PRIVATE) {
 
@@ -23,12 +31,15 @@ mobileClassUserService.registerByClassId = async (classId, user) => {
             .andWhere('eusereuserid', user.sub)
             .then(list => list.length > 0)
 
-        if (!isUserInOrganization) throw new UnsupportedOperationError('USER_NOT_IN_ORGANIZATION')
+        if (!isUserInOrganization) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_ORGANIZATION)
     }
 
     const classUserMapping = await ClassUserMapping.query()
         .where('eclasseclassid', classId)
         .where('eusereuserid', user.sub)
+        .whereNot('eclassusermappingstatus', ClassUserStatusEnum.REJECTED)
+        .andWhereNot('eclassusermappingstatus', ClassUserStatusEnum.CANCELED)
+        .orderBy('eclassusermappingcreatetime', 'DESC')
         .first()
     
     if (!classUserMapping)
@@ -43,50 +54,70 @@ mobileClassUserService.registerByClassId = async (classId, user) => {
     else return mobileClassService.getClassById(classUserMapping.eclasseclassid, user)
 }
 
-mobileClassUserService.cancelRegistrationByClassUserId = async (classUserId) => {
+mobileClassUserService.cancelRegistrationByClassUserId = async (classUserId, user) => {
 
-    return ClassUserMapping.query()
-        .findById(classUserId)
-        .delete()
+    const classUser = await ClassUserMapping.query().findById(classUserId)
+
+    if (classUser.eclassusermappingstatus === ClassUserStatusEnum.APPROVED) return false
+
+    return classUser.$query()
+        .updateByUserId({ eclassusermappingstatus: ClassUserStatusEnum.CANCELED }, user.sub)
         .then(rowsAffected => rowsAffected === 1)
 }
 
 mobileClassUserService.processRegistration = async (classUserId, status, user) => {
 
     if (ClassUserStatusEnum.APPROVED !== status.toUpperCase() && ClassUserStatusEnum.REJECTED !== status.toUpperCase())
-        throw new UnsupportedOperationError('STATUS_INVALID')
+        throw new UnsupportedOperationError(ErrorEnum.STATUS_INVALID)
 
     const classUser = await ClassUserMapping.query()
         .where('eclasseclassid', classId)
         .where('eusereuserid', user.sub)
+        .orderBy('eclassusermappingcreatetime', 'DESC')
         .withGraphFetched('class')
         .first()
 
-    if (!classUser) throw new UnsupportedOperationError('NOT_FOUND')
-
-    if (!classUser.class) throw new UnsupportedOperationError('CLASS_NOT_FOUND')
+    if (!classUser || !classUser.class) throw new UnsupportedOperationError(ErrorEnum.CLASS_NOT_FOUND)
 
     const loggedInUserCompanies = await CompanyUserMapping.query()
         .where('eusereuserid', user.sub)
         .then(list => list.map(company => company.ecompanyid))
 
     if (loggedInUserCompanies.indexOf(classUser.class.ecompanyecompanyid) === -1)
-        throw new UnsupportedOperationError('USER_NOT_IN_ORGANIZATION')
+        throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_ORGANIZATION)
 
-    return classUser.$query()
-        .updateByUserId({ eclassusermappingstatus: status }, user.sub)
-        .returning('*')
-        .withGraphFetched('class')
+    if (classUser.eclassusermappingstatus === ClassUserStatusEnum.PENDING)
+
+        return classUser.$query()
+            .updateByUserId({ eclassusermappingstatus: status }, user.sub)
+            .returning('*')
+            .withGraphFetched('class')
+
+    else return classUser
 }
 
-mobileClassUserService.getMyClasses = async (page, size, user) => {
+mobileClassUserService.getMyClasses = async (companyId, page, size, user) => {
 
-    return ClassUserMapping.query()
-        .select('class.*', 'eclassusermapping.eclassusermappingstatus', 'eclassusermapping.eclassusermappingid')
-        .joinRelated('class')
+    const query = ClassUserMapping.query()
+        .select('class.*')
+        .select('eclassusermapping.eclassusermappingid', 'eclassusermapping.eclassusermappingstatus')
+        .select('class:company.ecompanyname')
+        .select('class:industry.eindustryname')
+        .joinRelated('class.[company(baseAttributes), industry(baseAttributes)]')
         .where('eclassusermapping.eusereuserid', user.sub)
-        .page(page, size)
-        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+
+    if (companyId && companyId !== '')
+
+        return query
+            .andWhere('class.ecompanyecompanyid', companyId)
+            .page(page, size)
+            .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+
+    else
+
+        return query
+            .page(page, size)
+            .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
 
 module.exports = mobileClassUserService

@@ -43,10 +43,10 @@ mobileClassUserController.processRegistration = async (req, res, next) => {
 
 mobileClassUserController.getMyClasses = async (req, res, next) => {
 
-    const { page = '0', size = '10' } = req.query
+    const { page = '0', size = '10', companyId } = req.query
 
     try {
-        const pageObj = await mobileClassUserService.getMyClasses(parseInt(page), parseInt(size), req.user)
+        const pageObj = await mobileClassUserService.getMyClasses(companyId, parseInt(page), parseInt(size), req.user)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
     } catch (e) {
         next(e)
