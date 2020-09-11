@@ -30,7 +30,6 @@ class Class extends Model {
                     'eclassstartminute',
                     'eclassendhour',
                     'eclassendminute',
-                    'eclassrequirement',
                     'eclassdescription',
                     'eclassaddress',
                     'eclasstype',
@@ -46,6 +45,7 @@ class Class extends Model {
 
         const Company = require('./Company')
         const Industry = require('./Industry')
+        const ClassRequirement = require('./ClassRequirement')
 
         return {
             company: {
@@ -62,6 +62,14 @@ class Class extends Model {
                 join: {
                     from: 'eclass.eindustryeindustryid',
                     to: 'eindustry.eindustryid'
+                }
+            },
+            requirements: {
+                relation: Model.HasManyRelation,
+                modelClass: ClassRequirement,
+                join: {
+                    from: 'eclass.eclassid',
+                    to: 'eclassrequirement.eclasseclassid'
                 }
             }
         }

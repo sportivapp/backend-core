@@ -127,6 +127,8 @@ async function updateUserAndIndustries(userFromDB, userDTO, industryIds, user, t
         }
     });
 
+    await UserIndustryMapping.query().where('eusereuserid', user.sub).delete();
+
     return userFromDB.$relatedQuery('userIndustriesMapping', trx).insertToTable(userIndustryMapping, user.sub);
 
 }
