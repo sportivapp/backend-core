@@ -35,9 +35,9 @@ class Class extends Model {
                     'eclasstype',
                     'eclassprice',
                     'eclasspicname',
-                    'eclasspicmobilenumber'
+                    'eclasspicmobilenumber',
+                    'efileefileid'
                 )
-                .withGraphFetched('picture')
             }
         }
     }
