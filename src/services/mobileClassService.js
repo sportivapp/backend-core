@@ -91,6 +91,7 @@ mobileClassService.getAllClassByCompanyId = async (companyId, page, size, keywor
 mobileClassService.getClassById = async (classId, user) => {
 
     const classUser = await ClassUserMapping.query()
+        .select('eclassusermappingid', 'eclassusermappingstatus')
         .select('class.*')
         .select('class:company.ecompanyid','class:company.ecompanyname')
         .select('class:industry.eindustryid', 'class:industry.eindustryname')
