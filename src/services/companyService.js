@@ -66,6 +66,7 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
 CompanyService.getUsersByCompanyId = async(companyId, page, size) => {
 
     return Company.relatedQuery('users')
+        .withGraphFetched('file')
         .for(companyId)
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
