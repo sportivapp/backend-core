@@ -6,7 +6,7 @@ const classController = {}
 classController.createClass = async (req, res, next) => {
     
     const { name, description, startDate, endDate, type, price, address, picName, picMobileNumber, 
-        industryId, companyId, requirements } = req.body
+        industryId, companyId, requirements, fileId } = req.body
     
     const classDTO = {
         eclassname: name,
@@ -19,7 +19,8 @@ classController.createClass = async (req, res, next) => {
         eclasspicname: picName,
         eclasspicmobilenumber: picMobileNumber,
         eindustryeindustryid: industryId,
-        ecompanyecompanyid: companyId
+        ecompanyecompanyid: companyId,
+        efileefileid: fileId
     }
 
     try {
@@ -61,7 +62,7 @@ classController.getClassById = async (req, res, next) => {
 classController.updateClassById = async (req, res, next) => {
 
     const { name, description, startDate, endDate, type, price, address, picName, picMobileNumber, 
-        industryId, requirements } = req.body
+        industryId, requirements, fileId } = req.body
 
     const { classId } = req.params
 
@@ -73,7 +74,10 @@ classController.updateClassById = async (req, res, next) => {
         eclassprice: price,
         eclasstype: type,
         eclassaddress: address,
-        eindustryeindustryid: industryId
+        eindustryeindustryid: industryId,
+        eclasspicname: picName,
+        eclasspicmobilenumber: picMobileNumber,
+        efileefileid: fileId
     }
 
     try {
