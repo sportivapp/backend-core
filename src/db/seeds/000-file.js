@@ -109,16 +109,48 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilecreatetime: Date.now()
         },
         {
-          efilename: '20-APSSI Kongres Pertama.jpg',
-          efilepath: process.env.TEMP_DIRECTORY + '/20-APSSI Kongres Pertama.jpg',
+          efilename: '20-defend a.mp4',
+          efilepath: process.env.TEMP_DIRECTORY + '/20-defend a.mp4',
+          efiletype: 'video/mp4',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '21-defend b.mp4',
+          efilepath: process.env.TEMP_DIRECTORY + '/21-defend b.mp4',
+          efiletype: 'video/mp4',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '22-dribbling and running with the ball 1.mp4',
+          efilepath: process.env.TEMP_DIRECTORY + '/22-dribbling and running with the ball 1.mp4',
+          efiletype: 'video/mp4',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '23-dribbling and running with the ball 2.mp4',
+          efilepath: process.env.TEMP_DIRECTORY + '/23-dribbling and running with the ball 2.mp4',
+          efiletype: 'video/mp4',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '24-APSSI 10 maret.jpg',
+          efilepath: process.env.TEMP_DIRECTORY + '/24-APSSI 10 maret.jpg',
           efiletype: 'image/jpg',
           efilesize: 1,
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
         {
-          efilename: '21-APSSI 10 maret.jpg',
-          efilepath: process.env.TEMP_DIRECTORY + '/21-APSSI 10 maret.jpg',
+          efilename: '25-APSSI Kongres Pertama.jpg',
+          efilepath: process.env.TEMP_DIRECTORY + '/25-APSSI Kongres Pertama.jpg',
           efiletype: 'image/jpg',
           efilesize: 1,
           efilecreateby: 0,

@@ -69,7 +69,7 @@ experienceService.getExperienceById = async (experienceId) => {
 
 experienceService.editExperience = async (experienceDTO, experienceId, loggedInUser, fileId) => {
 
-    const experience = await experience.getExperienceById(experienceId);
+    const experience = await experienceService.getExperienceById(experienceId);
 
     if (!experience)
         throw new NotFoundError()
