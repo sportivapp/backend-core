@@ -37,7 +37,6 @@ class Class extends Model {
                     'eclasspicname',
                     'eclasspicmobilenumber'
                 )
-                .withGraphFetched('picture')
             }
         }
     }
