@@ -5,25 +5,28 @@ const classController = {}
 
 classController.createClass = async (req, res, next) => {
     
-    const { name, requirement, description, startDate, endDate, type, price, address, industryId, companyId } = req.body
+    const { name, description, startDate, endDate, type, price, address, picName, picMobileNumber, 
+        industryId, companyId, requirements } = req.body
     
     const classDTO = {
         eclassname: name,
-        eclassrequirement: requirement,
         eclassdescription: description,
         eclassstartdate: startDate,
         eclassenddate: endDate,
         eclassprice: price,
         eclasstype: type,
         eclassaddress: address,
+        eclasspicname: picName,
+        eclasspicmobilenumber: picMobileNumber,
         eindustryeindustryid: industryId,
         ecompanyecompanyid: companyId
     }
 
     try {
 
-        const result = await classService.createClass(classDTO, req.user)
+        const result = await classService.createClass(classDTO, requirements, req.user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
+
     } catch(e) {
         next(e)
     }
@@ -57,13 +60,13 @@ classController.getClassById = async (req, res, next) => {
 
 classController.updateClassById = async (req, res, next) => {
 
-    const { name, requirement, description, startDate, endDate, type, price, address, industryId } = req.body
+    const { name, description, startDate, endDate, type, price, address, picName, picMobileNumber, 
+        industryId, requirements } = req.body
 
     const { classId } = req.params
 
     const classDTO = {
         eclassname: name,
-        eclassrequirement: requirement,
         eclassdescription: description,
         eclassstartdate: startDate,
         eclassenddate: endDate,
@@ -75,7 +78,7 @@ classController.updateClassById = async (req, res, next) => {
 
     try {
 
-        const result = await classService.updateClassById(classId, classDTO, req.user)
+        const result = await classService.updateClassById(classId, classDTO, requirements, req.user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)

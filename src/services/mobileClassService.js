@@ -2,6 +2,7 @@ const Class = require('../models/Class')
 const ClassUserMapping = require('../models/ClassUserMapping')
 const Industry = require('../models/Industry')
 const Company = require('../models/Company')
+const ClassRequirement = require('../models/ClassRequirement')
 const ServiceHelper = require('../helper/ServiceHelper')
 const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
 const ClassTypeEnum = require('../models/enum/ClassTypeEnum')
@@ -9,7 +10,7 @@ const { raw } = require('objection')
 
 const mobileClassService = {}
 
-mobileClassService.createClass = async (classDTO, user) => {
+mobileClassService.createClass = async (classDTO, requirements, user) => {
 
     const industry = await Industry.query().findById(classDTO.eindustryeindustryid)
 
@@ -24,12 +25,28 @@ mobileClassService.createClass = async (classDTO, user) => {
     if (ClassTypeEnum.PRIVATE === classDTO.eclasstype && !classDTO.ecompanyecompanyid)
         throw new UnsupportedOperationError('TYPE_INVALID')
 
-    return Class.query().insertToTable(classDTO, user.sub)
+    return Class.transaction(async trx => {
+
+        const cls = await Class.query(trx)
+            .insertToTable(classDTO, user.sub);
+
+        const classRequirements = requirements.map(requirement => {
+            return {
+                eclasseclassid: cls.eclassid,
+                eclassrequirementname: requirement
+            }
+        });
+
+        await cls.$relatedQuery('requirements', trx)
+            .insertToTable(classRequirements, user.sub);
+
+        return cls;
+
+    });
+
 }
 
 mobileClassService.getAllClassByCompanyId = async (companyId, page, size, keyword) => {
-
-    console.log(companyId)
 
     if (companyId < 1) companyId = null
 
@@ -73,7 +90,7 @@ mobileClassService.getClassById = async (classId, user) => {
             })
 }
 
-mobileClassService.updateClassById = async (classId, classDTO, user) => {
+mobileClassService.updateClassById = async (classId, classDTO, requirements, user) => {
 
     const industry = await Industry.query().findById(classDTO.eindustryeindustryid)
 
@@ -81,11 +98,26 @@ mobileClassService.updateClassById = async (classId, classDTO, user) => {
 
     if (!ClassTypeEnum.hasOwnProperty(classDTO.eclasstype)) throw new UnsupportedOperationError('TYPE_INVALID')
 
-    return mobileClassService.getClassById(classId)
-        .then(foundClass => foundClass.$query().updateByUserId(classDTO, user.sub)
-            .returning('*')
-            .modify('baseAttributes')
-            .withGraphFetched('[company(baseAttributes), industry(baseAttributes)]'))
+    const cls = await mobileClassService.getClassById(classId);
+
+    return Class.transaction(async trx => {
+
+        const classRequirements = requirements.map(requirement => {
+            return {
+                eclasseclassid: cls.eclassid,
+                eclassrequirementname: requirement
+            }
+        });
+
+        await ClassRequirement.query().where('eclasseclassid', classId).delete();
+
+        await cls.$relatedQuery('requirements', trx)
+            .insertToTable(classRequirements, user.sub);
+
+        return cls.$query(trx).updateByUserId(classDTO, user.sub).returning('*')
+        .withGraphFetched('[company(baseAttributes), industry(baseAttributes), requirements(baseAttributes)]');
+
+    });
 }
 
 mobileClassService.deleteClassById = async (classId) => {
