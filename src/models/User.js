@@ -246,7 +246,7 @@ class User extends Model {
           from : 'euser.euserid',
           through: {
             from: 'eclassusermapping.eusereuserid',
-            to: 'eclassusermapping.eclassclassid'
+            to: 'eclassusermapping.eclasseclassid'
           },
           to: 'eclass.eclassid'
         }

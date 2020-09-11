@@ -72,8 +72,8 @@ class Class extends Model {
                 join: { 
                   from : 'eclass.eclassid',
                   through: {
-                    from: 'eclassusermapping.eclassclassid',
-                    to: 'eclassusermapping.euseruserid'
+                    from: 'eclassusermapping.eclasseclassid',
+                    to: 'eclassusermapping.eusereuserid'
                   },
                   to: 'euser.euserid'
                 }
