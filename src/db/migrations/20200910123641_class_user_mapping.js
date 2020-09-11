@@ -4,7 +4,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('eclassusermapping', t =
     t.integer('eusereuserid').notNullable().references('euser.euserid').onDelete('CASCADE')
     t.enum('eclassusermappingstatus',['PENDING','APPROVED','REJECTED']).notNullable().defaultTo('PENDING');
     t.integer('eclassusermappingcreateby').notNullable();
-    t.bigInteger('eclassusermappingcreatetime').notNullable().defaultTo(0);
+    t.bigInteger('eclassusermappingcreatetime').notNullable();
     t.integer('eclassusermappingchangeby');
     t.bigInteger('eclassusermappingchangetime');
     t.integer('eclassusermappingdeleteby');
