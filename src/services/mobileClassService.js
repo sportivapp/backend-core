@@ -72,6 +72,7 @@ mobileClassService.getAllClassByCompanyId = async (companyId, page, size, keywor
     if (companyId < 1) companyId = null
 
     let pageQuery = Class.query()
+        .modify('baseAttributes')
         .select('eclass.*')
         .select('company.ecompanyname')
         .select('industry.eindustryname')
@@ -90,9 +91,12 @@ mobileClassService.getAllClassByCompanyId = async (companyId, page, size, keywor
 mobileClassService.getClassById = async (classId, user) => {
 
     const classUser = await ClassUserMapping.query()
+        .select('class.*')
+        .select('class:company.ecompanyid','class:company.ecompanyname')
+        .select('class:industry.eindustryid', 'class:industry.eindustryname')
+        .joinRelated('class(baseAttributes).[company(baseAttributes), industry(baseAttributes)]')
         .where('eclasseclassid', classId)
         .andWhere('eusereuserid', user.sub)
-        .withGraphFetched('class(baseAttributes).[company(baseAttributes), industry(baseAttributes)]')
         .orderBy('eclassusermappingcreatetime', 'DESC')
         .first()
 
@@ -100,9 +104,7 @@ mobileClassService.getClassById = async (classId, user) => {
         && classUser.eclassusermappingstatus !== ClassUserStatusEnum.REJECTED)
 
         return {
-            ...classUser.class,
-            eclassusermappingid: classUser.eclassusermappingid,
-            eclassusermappingstatus: classUser.eclassusermappingstatus,
+            ...classUser,
             isRegistered: true
         }
 
@@ -110,8 +112,11 @@ mobileClassService.getClassById = async (classId, user) => {
 
         return Class.query()
             .findById(classId)
+            .select('company.ecompanyid','company.ecompanyname')
+            .select('industry.eindustryid', 'industry.eindustryname')
+            .joinRelated('company(baseAttributes)')
+            .joinRelated('industry(baseAttributes)')
             .modify('baseAttributes')
-            .withGraphFetched('[company(baseAttributes), industry(baseAttributes)]')
             .then(foundClass => {
                 if (!foundClass) throw new NotFoundError()
                 return {

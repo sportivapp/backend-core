@@ -35,7 +35,10 @@ class Class extends Model {
                     'eclasstype',
                     'eclassprice',
                     'eclasspicname',
-                    'eclasspicmobilenumber'
+                    'eclasspicmobilenumber',
+                    'ecompanyecompanyid',
+                    'eindustryeindustryid',
+                    'efileefileid'
                 )
             }
         }

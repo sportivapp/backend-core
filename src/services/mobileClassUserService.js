@@ -74,7 +74,7 @@ mobileClassUserService.processRegistration = async (classUserId, status, user) =
         .where('eclasseclassid', classId)
         .where('eusereuserid', user.sub)
         .orderBy('eclassusermappingcreatetime', 'DESC')
-        .withGraphFetched('class')
+        .withGraphFetched('class(baseAttributes)')
         .first()
 
     if (!classUser || !classUser.class) throw new UnsupportedOperationError(ErrorEnum.CLASS_NOT_FOUND)
@@ -91,7 +91,7 @@ mobileClassUserService.processRegistration = async (classUserId, status, user) =
         return classUser.$query()
             .updateByUserId({ eclassusermappingstatus: status }, user.sub)
             .returning('*')
-            .withGraphFetched('class')
+            .withGraphFetched('class(baseAttributes)')
 
     else return classUser
 }
@@ -103,7 +103,7 @@ mobileClassUserService.getMyClasses = async (companyId, page, size, user) => {
         .select('eclassusermapping.eclassusermappingid', 'eclassusermapping.eclassusermappingstatus')
         .select('class:company.ecompanyname')
         .select('class:industry.eindustryname')
-        .joinRelated('class.[company(baseAttributes), industry(baseAttributes)]')
+        .joinRelated('class(baseAttributes).[company(baseAttributes), industry(baseAttributes)]')
         .where('eclassusermapping.eusereuserid', user.sub)
 
     if (companyId && companyId !== '')
