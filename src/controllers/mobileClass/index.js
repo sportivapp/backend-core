@@ -74,9 +74,9 @@ classController.updateClassById = async (req, res, next) => {
         eclassprice: price,
         eclasstype: type,
         eclassaddress: address,
-        eindustryeindustryid: industryId,
         eclasspicname: picName,
         eclasspicmobilenumber: picMobileNumber,
+        eindustryeindustryid: industryId,
         efileefileid: fileId
     }
 

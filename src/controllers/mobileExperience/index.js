@@ -12,7 +12,7 @@ experienceController.createExperience = async (req, res, next) => {
         const experienceDTO = {
             eexperiencename: request.name,
             eexperiencestartdate: request.startDate,
-            eexperienceenddate: request.endDate === 0 ? null : request.endDate,
+            eexperienceenddate: request.endDate,
             eexperiencelocation: request.location,
             eexperienceposition: request.position,
             eexperiencedescription: request.description,
@@ -21,8 +21,8 @@ experienceController.createExperience = async (req, res, next) => {
         }
 
         experienceDTO.eexperienceenddate = experienceDTO.eexperienceenddate === 0 ? null : request.endDate
-
         const fileId = req.body.fileId === undefined ? 0 : req.body.fileId;
+        
         const result = await mobileExperienceService.createExperience(experienceDTO, req.user, fileId)
 
         if (!result)

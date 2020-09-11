@@ -111,8 +111,7 @@ mobileClassService.getClassById = async (classId, user) => {
         return Class.query()
             .findById(classId)
             .modify('baseAttributes')
-            .withGraphFetched('company(baseAttributes)')
-            .withGraphFetched('industry(baseAttributes)')
+            .withGraphFetched('[company(baseAttributes), industry(baseAttributes)]')
             .then(foundClass => {
                 if (!foundClass) throw new NotFoundError()
                 return {
@@ -132,7 +131,8 @@ mobileClassService.updateClassById = async (classId, classDTO, requirements, use
 
     if (!classDTO.efileefileid) throw new UnsupportedOperationError(ErrorEnum.FILE_REQUIRED)
 
-    const cls = await mobileClassService.getClassById(classId);
+
+    const cls = await mobileClassService.getClassById(classId, user);
 
     if (cls.efileefileid !== classDTO.efileefileid) {
 
@@ -156,12 +156,8 @@ mobileClassService.updateClassById = async (classId, classDTO, requirements, use
         await cls.$relatedQuery('requirements', trx)
             .insertToTable(classRequirements, user.sub);
 
-        return cls.$query(trx).updateByUserId(classDTO, user.sub)
-            .returning('*')
-            .modify('baseAttributes')
-            .withGraphFetched('company(baseAttributes)')
-            .withGraphFetched('industry(baseAttributes)')
-            .withGraphFetched('requirements(baseAttributes)');
+        return cls.$query(trx).updateByUserId(classDTO, user.sub).returning('*')
+        .withGraphFetched('[company(baseAttributes), industry(baseAttributes), requirements(baseAttributes)]');
 
     });
 }
