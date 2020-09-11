@@ -102,9 +102,15 @@ mobileClassService.getClassById = async (classId, user) => {
         .orderBy('eclassusermappingcreatetime', 'DESC')
         .first()
 
+    console.log(classUser)
+
 
     if (classUser && classUser.eclassusermappingstatus !== ClassUserStatusEnum.CANCELED
         && classUser.eclassusermappingstatus !== ClassUserStatusEnum.REJECTED) {
+
+        const requirements = await ClassRequirement.query()
+            .where('eclasseclassid', classUser.eclassid)
+            .then(list => list.map(requirement => requirement.eclassrequirementname))
 
         const mapping = await CompanyUserMapping.query()
             .where('ecompanyecompanyid', classUser.ecompanyid)
@@ -114,7 +120,8 @@ mobileClassService.getClassById = async (classId, user) => {
         return {
             ...classUser,
             isRegistered: true,
-            isInCompany: !!mapping
+            isInCompany: !!mapping,
+            requirements
         }
 
     }
@@ -133,6 +140,12 @@ mobileClassService.getClassById = async (classId, user) => {
                 return foundClass
             })
 
+        console.log(foundClass)
+
+        const requirements = await ClassRequirement.query()
+            .where('eclasseclassid', foundClass.eclassid)
+            .then(list => list.map(requirement => requirement.eclassrequirementname))
+
         const mapping = await CompanyUserMapping.query()
             .where('ecompanyecompanyid', foundClass.ecompanyecompanyid)
             .where('eusereuserid', user.sub)
@@ -141,7 +154,8 @@ mobileClassService.getClassById = async (classId, user) => {
         return {
             ...foundClass,
             isRegistered: false,
-            isInCompany: !!mapping
+            isInCompany: !!mapping,
+            requirements
         }
 
     }
@@ -161,6 +175,8 @@ mobileClassService.getOnlyClassById = async (classId) => {
 }
 
 mobileClassService.updateClassById = async (classId, classDTO, requirements, user) => {
+
+    console.log('abc')
 
     const industry = await Industry.query().findById(classDTO.eindustryeindustryid)
 
