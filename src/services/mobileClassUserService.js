@@ -101,8 +101,8 @@ mobileClassUserService.getMyClasses = async (companyId, page, size, user) => {
     const query = ClassUserMapping.query()
         .select('class.*')
         .select('eclassusermapping.eclassusermappingid', 'eclassusermapping.eclassusermappingstatus')
-        .select('class:company.ecompanyname')
-        .select('class:industry.eindustryname')
+        .select('class:company.ecompanyid', 'class:company.ecompanyname')
+        .select('class:industry.eindustryid', 'class:industry.eindustryname')
         .joinRelated('class(baseAttributes).[company(baseAttributes), industry(baseAttributes)]')
         .where('eclassusermapping.eusereuserid', user.sub)
 

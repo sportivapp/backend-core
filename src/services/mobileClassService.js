@@ -126,6 +126,19 @@ mobileClassService.getClassById = async (classId, user) => {
             })
 }
 
+mobileClassService.getOnlyClassById = async (classId) => {
+
+    return Class.query()
+            .findById(classId)
+            .modify('baseAttributes')
+            .joinRelated('[company(baseAttributes), industry(baseAttributes)]')
+            .then(foundClass => {
+                if (!foundClass) throw new NotFoundError()
+                return foundClass
+            })
+
+}
+
 mobileClassService.updateClassById = async (classId, classDTO, requirements, user) => {
 
     const industry = await Industry.query().findById(classDTO.eindustryeindustryid)
@@ -136,9 +149,8 @@ mobileClassService.updateClassById = async (classId, classDTO, requirements, use
 
     if (!classDTO.efileefileid) throw new UnsupportedOperationError(ErrorEnum.FILE_REQUIRED)
 
-
-    const cls = await mobileClassService.getClassById(classId, user);
-
+    const cls = await mobileClassService.getOnlyClassById(classId);
+    
     if (cls.efileefileid !== classDTO.efileefileid) {
 
         const file = await fileService.getFileById(classDTO.efileefileid)
