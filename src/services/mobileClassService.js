@@ -83,7 +83,7 @@ mobileClassService.getClassById = async (classId, user) => {
         return Class.query()
             .findById(classId)
             .modify('baseAttributes')
-            .withGraphFetched('[company(baseAttributes), industry(baseAttributes)]')
+            .withGraphFetched('[company(baseAttributes), industry(baseAttributes), requirements(baseAttributes)]')
             .then(foundClass => {
                 if (!foundClass) throw new NotFoundError()
                 return foundClass
@@ -113,9 +113,11 @@ mobileClassService.updateClassById = async (classId, classDTO, requirements, use
 
         await ClassRequirement.query().where('eclasseclassid', classId).delete();
 
+        console.log(user);
         await cls.$relatedQuery('requirements', trx)
             .insertToTable(classRequirements, user.sub);
 
+        console.log(user);
         return cls.$query(trx).updateByUserId(classDTO, user.sub).returning('*')
         .withGraphFetched('[company(baseAttributes), industry(baseAttributes), requirements(baseAttributes)]');
 
