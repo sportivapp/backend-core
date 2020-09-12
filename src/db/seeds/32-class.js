@@ -13,7 +13,7 @@ exports.seed = (knex, Promise) => knex('eclass').del()
                     eclasspicname: "Steven",
                     eclasspicmobilenumber: "08123123123",
                     eindustryeindustryid: 1,
-                    ecompanyecompanyid: 4,
+                    ecompanyecompanyid: 6,
                     efileefileid: 1,
                     eclasscreatetime: Date.now(),
                     eclasscreateby: 0
@@ -29,7 +29,7 @@ exports.seed = (knex, Promise) => knex('eclass').del()
                     eclasspicname: "Steven",
                     eclasspicmobilenumber: "08123123123",
                     eindustryeindustryid: 1,
-                    ecompanyecompanyid: 4,
+                    ecompanyecompanyid: 6,
                     efileefileid: 1,
                     eclasscreatetime: Date.now(),
                     eclasscreateby: 0

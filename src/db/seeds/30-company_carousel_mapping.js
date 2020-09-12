@@ -3,20 +3,20 @@ exports.seed = (knex, Promise) => knex('ecompanycarouselmapping').del()
   knex('ecompanycarouselmapping').insert(
     [
         {
-            ecompanyecompanyid: 1,
+            ecompanyecompanyid: 6,
             efileefileid: 2,
             ecompanycarouselmappingcreatetime: Date.now(),
-            ecompanycarouselmappingcreateby: 1,
+            ecompanycarouselmappingcreateby: 0,
             ecompanycarouselmappingchangetime: Date.now(),
-            ecompanycarouselmappingchangeby: 1
+            ecompanycarouselmappingchangeby: 0
         },
         {
-          ecompanyecompanyid: 1,
+          ecompanyecompanyid: 6,
           efileefileid: 3,
           ecompanycarouselmappingcreatetime: Date.now(),
-          ecompanycarouselmappingcreateby: 1,
+          ecompanycarouselmappingcreateby: 0,
           ecompanycarouselmappingchangetime: Date.now(),
-          ecompanycarouselmappingchangeby: 1
+          ecompanycarouselmappingchangeby: 0
         },
     ]
   ));
