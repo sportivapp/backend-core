@@ -205,5 +205,54 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
+        //26
+        {
+          efilename: '001-Bambang Nurdiansyah SE.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/001-Bambang Nurdiansyah SE.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '002-Mundari Karya.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/002-Mundari Karya.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '003-Djadjang Nurdjaman.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/003-Djadjang Nurdjaman.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '004-ZUCHLI IMRAN PUTRA SH MH.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/004-ZUCHLI IMRAN PUTRA SH MH.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '005-Yulio Mariem Putra, M. PD.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/005-Yulio Mariem Putra, M. PD.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '006-Yeyen Tumena.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/006-Yeyen Tumena.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
       ]
 ));
