@@ -207,8 +207,8 @@ exports.seed = (knex, Promise) => knex('efile').del()
         },
         //26
         {
-          efilename: '001-Bambang Nurdiansyah SE.jpeg',
-          efilepath: process.env.TEMP_DIRECTORY + '/001-Bambang Nurdiansyah SE.jpeg',
+          efilename: '001-Rachmad Darmawan.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/001-Rachmad Darmawan.jpeg',
           efiletype: 'image/jpg',
           efilesize: 1,
           efilecreateby: 0,
@@ -249,6 +249,14 @@ exports.seed = (knex, Promise) => knex('efile').del()
         {
           efilename: '006-Yeyen Tumena.jpeg',
           efilepath: process.env.TEMP_DIRECTORY + '/006-Yeyen Tumena.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '007-Bambang Nurdiansyah SE.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/007-Bambang Nurdiansyah SE.jpeg',
           efiletype: 'image/jpg',
           efilesize: 1,
           efilecreateby: 0,

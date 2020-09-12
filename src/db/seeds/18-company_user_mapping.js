@@ -67,6 +67,43 @@ exports.seed = (knex, Promise) => knex('ecompanyusermapping').del()
                     eusereuserid: 7,
                     ecompanyusermappingcreateby: 0,
                     ecompanyusermappingpermission: 10
+                },
+                // APSSI
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 8,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 10
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 9,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 10
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 10,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 10
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 11,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 10
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 12,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 10
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 13,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 10
                 }
             ]
       ));

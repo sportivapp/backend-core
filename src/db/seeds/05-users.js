@@ -66,5 +66,84 @@ exports.seed = (knex, Promise) => knex('euser').del()
           eusergender: 'male',
           euserdob: 660960000
         },
+        // 8
+        {
+          eusernik: '',
+          eusername: 'Mundari Karya',
+          euseremail: 'mkarya1957@gmail.com',
+          euserpassword: '$2y$10$kWHosh2Tz6wlMPUwIwmhnuDQtoiTxanLCCVuEa1viHMQBGwpmXkGO',
+          eusermobilenumber: '0817154672',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efilefileid: 27
+          // euserdob: 
+        },
+        {
+          eusernik: '',
+          eusername: 'Djadjang Nurdjaman',
+          euseremail: 'djadjangnurdjaman@yahoo.com',
+          euserpassword: '$2y$10$5n/CG49Y8pK70caGGfkkqOjU40z/wUYrp321M7ZoB7AV40HA9f6wW',
+          eusermobilenumber: '081220204935',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efilefileid: 28
+          // euserdob: 
+        },
+        {
+          eusernik: '',
+          eusername: 'ZUCHLI IMRAN PUTRA SH MH',
+          euseremail: 'zip.lawyer@yahoo.com',
+          euserpassword: '$2y$10$FDqh4XvpQ4YyQCSIov9nf.p3EW71XJ5fW9S5jxuYXx64hGxx1/LgC',
+          eusermobilenumber: '081212013700',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efilefileid: 29
+          // euserdob: 
+        },
+        {
+          eusernik: '',
+          eusername: 'Yulio Mariem Putra, M. PD',
+          euseremail: 'mariemputrayulio@gmail.com',
+          euserpassword: '$2y$10$PbonGY56opUWhfNYQFEGdeo3O9tRv1mLFMODKDZkKpPwItIAyYMGy',
+          eusermobilenumber: '081288517658',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efilefileid: 30
+          // euserdob: 
+        },
+        {
+          eusernik: '',
+          eusername: 'Yeyen Tumena',
+          euseremail: 'tumena.yeyen@yahoo.com',
+          euserpassword: '$2y$10$mFX3i4fqSa1KOiBwFywya.vt1zO1icoiWXNJ6vwKde1Pff3l6J3uW',
+          eusermobilenumber: '08111014406',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efilefileid: 31
+          // euserdob: 
+        },
+        {
+          eusernik: '',
+          eusername: 'Bambang Nurdiansyah SE',
+          euseremail: 'benbs_coach17@yahoo.com',
+          euserpassword: '$2y$10$V4ndZYhVysNEA1tSO6yaKu0eOjzW67SuH38lIGpinS7O5se.hpt5e',
+          eusermobilenumber: '081911143330',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efilefileid: 32
+          // euserdob: 
+        },
       ]
     ));
