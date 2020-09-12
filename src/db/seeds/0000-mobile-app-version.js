@@ -3,9 +3,16 @@ exports.seed = (knex, Promise) => knex('emobileappversion').del()
     knex('emobileappversion').insert(
       [
         {
-          emobileappversion: '1.0',
+          emobileappversion: '1.0.0',
           emobileappversionchangetime: 1599842675,
-          emobileappversionstatus: 'MAJOR'
+          emobileappversionstatus: 'MAJOR',
+          emobileappversionforceupdate: false,
+        },
+        {
+          emobileappversion: '1.1.0',
+          emobileappversionchangetime: 1599920340,
+          emobileappversionstatus: 'MINOR',
+          emobileappversionforceupdate: false,
         }
       ]
 ));
