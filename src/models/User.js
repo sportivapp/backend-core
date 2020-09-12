@@ -103,30 +103,6 @@ class User extends Model {
           to: 'efile.efileid'
         }
       },
-      approvalUser1: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: User,
-        join: {
-          from: 'euser.euserapprovaluserid1',
-          to: 'euser.euserid'
-        }
-      },
-      approvalUser2: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: User,
-        join: {
-          from: 'euser.euserapprovaluserid2',
-          to: 'euser.euserid'
-        }
-      },
-      approvalUser3: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: User,
-        join: {
-          from: 'euser.euserapprovaluserid3',
-          to: 'euser.euserid'
-        }
-      },
       projects: {
         relation: Model.HasManyRelation,
         modelClass: Project,
