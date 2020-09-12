@@ -145,5 +145,18 @@ exports.seed = (knex, Promise) => knex('euser').del()
           efilefileid: 32
           // euserdob: 
         },
+        {
+          eusernik: '',
+          eusername: 'Weshley Hutagalung',
+          euseremail: 'weshbola@gmail.com',
+          euserpassword: '$2y$10$9/HGR8K9tN9ISYs1D2BskeCZDwucBGcxVf0TuCncvTbe.Wj6G4kqe',
+          eusermobilenumber: '0811880895',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efilefileid: 33
+          // euserdob: 
+        },
       ]
     ));

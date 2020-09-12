@@ -262,5 +262,13 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
+        {
+          efilename: '008-Weshley Hutagalung.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/008-Weshley Hutagalung.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
       ]
 ));
