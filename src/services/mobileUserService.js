@@ -168,8 +168,6 @@ UserService.updateUserCoachData = async (userCoachDTO, user, industryIds) => {
 
     if (userFromDB.euseriscoach)
         return
-    
-    userCoachDTO.euserdob = new Date(userCoachDTO.euserdob).getTime();
 
     const coachIndustryMappings = industryIds.map(industryId => ({
         eindustryeindustryid: industryId,
