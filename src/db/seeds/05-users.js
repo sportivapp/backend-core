@@ -132,6 +132,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
           efileefileid: 31
           // euserdob: 
         },
+        // 13
         {
           eusernik: '',
           eusername: 'Bambang Nurdiansyah SE',
@@ -156,6 +157,32 @@ exports.seed = (knex, Promise) => knex('euser').del()
           ecountryecountryid: 1,
           eusergender: 'male',
           efileefileid: 33
+          // euserdob: 
+        },
+        {
+          eusernik: '',
+          eusername: 'Heru Pujihartono',
+          euseremail: 'herus7black@gmail.com',
+          euserpassword: '$2y$10$fBbpC9spxCcRs1ESbnNqN./Raa3/Zw0g86GRijFpP7.ijo7xwHp3a',
+          eusermobilenumber: '0812188705570',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efileefileid: 34
+          // euserdob: 
+        },
+        {
+          eusernik: '',
+          eusername: 'Miftahudin, SH',
+          euseremail: 'miftah.pm99@gmail.com',
+          euserpassword: '$2y$10$92OOThh87XvujKE5.aHrm.ekZMqLu/f.nc6quTyCag.nmVF4Q40fi',
+          eusermobilenumber: '081399195599',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          // efileefileid: 
           // euserdob: 
         },
       ]

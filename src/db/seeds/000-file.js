@@ -174,7 +174,7 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilecreatetime: Date.now()
         },
         {
-          efilename: '28-ucapanselamat1.MP4',
+          efilename: '28-ucapanselamat2.MP4',
           efilepath: process.env.TEMP_DIRECTORY + '/28-ucapanselamat1.MP4',
           efiletype: 'video/mp4',
           efilesize: 1,
@@ -182,7 +182,7 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilecreatetime: Date.now()
         },
         {
-          efilename: '29-ucapanselamat1.MP4',
+          efilename: '29-ucapanselamat3.MP4',
           efilepath: process.env.TEMP_DIRECTORY + '/29-ucapanselamat1.MP4',
           efiletype: 'video/mp4',
           efilesize: 1,
@@ -190,7 +190,7 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilecreatetime: Date.now()
         },
         {
-          efilename: '30-ucapanselamat1.MP4',
+          efilename: '30-ucapanselamat4.MP4',
           efilepath: process.env.TEMP_DIRECTORY + '/30-ucapanselamat1.MP4',
           efiletype: 'video/mp4',
           efilesize: 1,
@@ -198,7 +198,7 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilecreatetime: Date.now()
         },
         {
-          efilename: '31-ucapanselamat1.MP4',
+          efilename: '31-ucapanselamat5.MP4',
           efilepath: process.env.TEMP_DIRECTORY + '/31-ucapanselamat1.MP4',
           efiletype: 'video/mp4',
           efilesize: 1,
@@ -207,13 +207,14 @@ exports.seed = (knex, Promise) => knex('efile').del()
         },
         //26
         {
-          efilename: '001-Rachmad Darmawan.jpeg',
-          efilepath: process.env.TEMP_DIRECTORY + '/001-Rachmad Darmawan.jpeg',
+          efilename: '001-Rahmad Darmawan.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/001-Rahmad Darmawan.jpeg',
           efiletype: 'image/jpg',
           efilesize: 1,
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
+        //27
         {
           efilename: '002-Mundari Karya.jpeg',
           efilepath: process.env.TEMP_DIRECTORY + '/002-Mundari Karya.jpeg',
@@ -222,6 +223,7 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
+        //28
         {
           efilename: '003-Djadjang Nurdjaman.jpeg',
           efilepath: process.env.TEMP_DIRECTORY + '/003-Djadjang Nurdjaman.jpeg',
@@ -230,6 +232,7 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
+        //29
         {
           efilename: '004-ZUCHLI IMRAN PUTRA SH MH.jpeg',
           efilepath: process.env.TEMP_DIRECTORY + '/004-ZUCHLI IMRAN PUTRA SH MH.jpeg',
@@ -238,6 +241,7 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
+        //30
         {
           efilename: '005-Yulio Mariem Putra, M. PD.jpeg',
           efilepath: process.env.TEMP_DIRECTORY + '/005-Yulio Mariem Putra, M. PD.jpeg',
@@ -246,6 +250,7 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
+        //31
         {
           efilename: '006-Yeyen Tumena.jpeg',
           efilepath: process.env.TEMP_DIRECTORY + '/006-Yeyen Tumena.jpeg',
@@ -254,6 +259,7 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
+        //32
         {
           efilename: '007-Bambang Nurdiansyah SE.jpeg',
           efilepath: process.env.TEMP_DIRECTORY + '/007-Bambang Nurdiansyah SE.jpeg',
@@ -262,9 +268,19 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
+        //33
         {
           efilename: '008-Weshley Hutagalung.jpeg',
           efilepath: process.env.TEMP_DIRECTORY + '/008-Weshley Hutagalung.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        //34
+        {
+          efilename: '009-Heru Pujihartono.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/009-Heru Pujihartono.jpeg',
           efiletype: 'image/jpg',
           efilesize: 1,
           efilecreateby: 0,
