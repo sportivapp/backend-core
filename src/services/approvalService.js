@@ -12,10 +12,10 @@ approvalService.createApproval = async (approvalDTO, userIds, isMultiApproval, u
 
     if (!isUserIdValid) return
 
-    await transaction(Approval, ApprovalUser, async (Approval, trx) => {
+    return Approval.transaction(async trx => {
 
 
-        const createdApproval = await Approval.query()
+        const createdApproval = await Approval.query(trx)
             .insertToTable({ ...approvalDTO, eapprovaltype: isMultiApproval ? 'MULTI' : 'SINGLE' }, user.sub)
 
         return addUsersFromApproval(trx, createdApproval.eapprovalid, userIds, user)
@@ -60,7 +60,7 @@ approvalService.updateApproval = async (approvalDTO, userIds, user) => {
 
     if(actualUserIds.length !== userIds.length) return
 
-    await transaction(Approval, async (_, trx) => {
+    return Approval.transaction(async trx => {
 
         const updateApproval = approval.$query(trx)
             .updateByUserId({ eapprovaltype: approvalDTO.isMultiple ? 'MULTI': 'SINGLE' }, user.sub)
