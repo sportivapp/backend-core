@@ -235,7 +235,7 @@ class User extends Model {
     return {
       ...this.baseModifiers(),
       baseAttributes(builder) {
-        builder.select('euserid', 'eusername', 'euseremail', 'eusernik', 'eusermobilenumber', 'euseridentitynumber', 'euserdob', 'eusergender')
+        builder.select('euserid', 'eusername', 'euseremail', 'eusernik', 'eusermobilenumber', 'euseridentitynumber', 'euserdob', 'eusergender', 'efileefileid')
       }
     }
   }
