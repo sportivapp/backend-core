@@ -486,6 +486,15 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilesize: 1,
           efilecreateby: 0,
           efilecreatetime: Date.now()
+        },
+        //60
+        {
+          efilename: '010-Heru Pujihartono.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/010-Heru Pujihartono.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
         }
       ]
 ));
