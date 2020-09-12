@@ -78,7 +78,7 @@ UsersService.createUser = async (userDTO, permission, user) => {
 
     const trimmedName = userDTO.eusername.replace(/\s+/g, '')
 
-    userDTO.euserpassword = await bcrypt.hash('qplay'.concat(trimmedName.toLowerCase()));
+    userDTO.euserpassword = await bcrypt.hash('sportiv'.concat(trimmedName.toLowerCase()));
 
     const company = await Company.query().findById(user.companyId)
 
