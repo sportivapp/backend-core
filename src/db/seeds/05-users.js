@@ -77,7 +77,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
           euseraddress: '',
           ecountryecountryid: 1,
           eusergender: 'male',
-          efilefileid: 27
+          efileefileid: 27
           // euserdob: 
         },
         {
@@ -90,7 +90,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
           euseraddress: '',
           ecountryecountryid: 1,
           eusergender: 'male',
-          efilefileid: 28
+          efileefileid: 28
           // euserdob: 
         },
         {
@@ -103,7 +103,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
           euseraddress: '',
           ecountryecountryid: 1,
           eusergender: 'male',
-          efilefileid: 29
+          efileefileid: 29
           // euserdob: 
         },
         {
@@ -116,7 +116,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
           euseraddress: '',
           ecountryecountryid: 1,
           eusergender: 'male',
-          efilefileid: 30
+          efileefileid: 30
           // euserdob: 
         },
         {
@@ -129,7 +129,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
           euseraddress: '',
           ecountryecountryid: 1,
           eusergender: 'male',
-          efilefileid: 31
+          efileefileid: 31
           // euserdob: 
         },
         {
@@ -142,7 +142,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
           euseraddress: '',
           ecountryecountryid: 1,
           eusergender: 'male',
-          efilefileid: 32
+          efileefileid: 32
           // euserdob: 
         },
         {
@@ -155,7 +155,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
           euseraddress: '',
           ecountryecountryid: 1,
           eusergender: 'male',
-          efilefileid: 33
+          efileefileid: 33
           // euserdob: 
         },
       ]
