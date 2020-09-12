@@ -13,6 +13,12 @@ exports.seed = (knex, Promise) => knex('eaddress').del()
           eaddresspostalcode: 13300,
           ecountryecountryid: 1,
           estateestateid: 1
+        },
+        {
+          eaddressstreet: 'Jalan',
+          eaddresspostalcode: 15000,
+          ecountryecountryid: 1,
+          estateestateid: 12
         }
       ]
 ));
