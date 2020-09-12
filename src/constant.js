@@ -127,7 +127,9 @@ module.exports = {
         classUser: {
             registration: '/user-class/registration',
             list: '/user-class',
-            id: '/user-class/:classUserId'
+            id: '/user-class/:classUserId',
+            history: '/user-class-history',
+            historyId: '/user-class-history/:classUserId'
         },
         permit: {
             list: '/permit',

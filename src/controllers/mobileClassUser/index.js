@@ -53,4 +53,28 @@ mobileClassUserController.getMyClasses = async (req, res, next) => {
     }
 }
 
+mobileClassUserController.getHistoryClasses = async (req, res, next) => {
+
+    const { page = '0', size = '10', companyId } = req.query
+
+    try {
+        const pageObj = await mobileClassUserService.getHistoryClasses(companyId, parseInt(page), parseInt(size), req.user)
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+    } catch (e) {
+        next(e)
+    }
+}
+
+mobileClassUserController.getHistoryClassById = async (req, res, next) => {
+
+    const { classUserId } = req.params
+
+    try {
+        const pageObj = await mobileClassUserService.getHistoryClassById(classUserId, req.user)
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+    } catch (e) {
+        next(e)
+    }
+}
+
 module.exports = mobileClassUserController
