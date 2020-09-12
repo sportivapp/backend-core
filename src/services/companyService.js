@@ -68,6 +68,8 @@ CompanyService.getUsersByCompanyId = async(companyId, page, size) => {
     return Company.relatedQuery('users')
         .withGraphFetched('file')
         .for(companyId)
+        .withGraphJoined('grades')
+        .where('grades.ecompanyecompanyid', companyId)
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
@@ -76,7 +78,7 @@ CompanyService.getAllCompanyByUserId = async(userId) => {
 
     return User.relatedQuery('companies')
         .for(userId)
-        .modify({ecompanyusermappingdeletestatus: false})
+        .modify({ ecompanyusermappingdeletestatus: false })
         .where('ecompanyparentid', null)
         .orderBy('ecompanyusermappingcreatetime', 'ASC')
         .withGraphFetched('[branches(baseAttributes), sisters(baseAttributes), logo(baseAttributes)]');

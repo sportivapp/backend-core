@@ -5,7 +5,7 @@ const CompanyUserMapping = require('../models/CompanyUserMapping')
 const ClassTypeEnum = require('../models/enum/ClassTypeEnum')
 const ClassUserStatusEnum = require('../models/enum/ClassUserStatusEnum')
 const ServiceHelper = require('../helper/ServiceHelper')
-const { UnsupportedOperationError } = require('../models/errors')
+const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
 const mobileClassUserService = {}
 
@@ -106,6 +106,7 @@ mobileClassUserService.getMyClasses = async (companyId, page, size, user) => {
         .joinRelated('class(baseAttributes).[company(baseAttributes), industry(baseAttributes)]')
         .where('eclassusermapping.eusereuserid', user.sub)
         .andWhereNot('eclassusermappingstatus', ClassUserStatusEnum.CANCELED)
+        .andWhereNot('eclassusermappingstatus', ClassUserStatusEnum.REJECTED)
 
     if (companyId && companyId !== '')
 
@@ -119,6 +120,61 @@ mobileClassUserService.getMyClasses = async (companyId, page, size, user) => {
         return query
             .page(page, size)
             .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+}
+
+mobileClassUserService.getHistoryClasses = async (companyId, page, size, user) => {
+
+    const query = ClassUserMapping.query()
+        .select('class.*')
+        .select('eclassusermapping.eclassusermappingid', 'eclassusermapping.eclassusermappingstatus')
+        .select('class:company.ecompanyid', 'class:company.ecompanyname')
+        .select('class:industry.eindustryid', 'class:industry.eindustryname')
+        .joinRelated('class(baseAttributes).[company(baseAttributes), industry(baseAttributes)]')
+        .where('eclassusermapping.eusereuserid', user.sub)
+        .andWhere('eclassusermappingstatus', ClassUserStatusEnum.REJECTED)
+
+    if (companyId && companyId !== '')
+
+        return query
+            .andWhere('class.ecompanyecompanyid', companyId)
+            .page(page, size)
+            .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+
+    else
+
+        return query
+            .page(page, size)
+            .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+}
+
+mobileClassUserService.getHistoryClassById = async (classUserId, user) => {
+
+    const classUser = await ClassUserMapping.query()
+        .select('eclassusermappingid', 'eclassusermappingstatus')
+        .select('class.*')
+        .select('class:company.ecompanyid','class:company.ecompanyname')
+        .select('class:industry.eindustryid', 'class:industry.eindustryname')
+        .joinRelated('class(baseAttributes).[company(baseAttributes), industry(baseAttributes)]')
+        .where('eclassusermappingid', classUserId)
+        .orderBy('eclassusermappingcreatetime', 'DESC')
+        .first()
+
+    if (!classUser) throw new NotFoundError()
+
+    const requirements = await ClassRequirement.query()
+        .where('eclasseclassid', classUser.eclassid)
+
+    const mapping = await CompanyUserMapping.query()
+        .where('ecompanyecompanyid', classUser.ecompanyid)
+        .where('eusereuserid', user.sub)
+        .first()
+
+    return {
+        ...classUser,
+        isRegistered: true,
+        isInCompany: !!mapping,
+        requirements
+    }
 }
 
 module.exports = mobileClassUserService
