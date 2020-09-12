@@ -285,12 +285,7 @@ UserService.changeIndustryByUserId = async (user, type, industryIds) => {
 
 }
 
-UserService.getListPendingInviteByUserId = async (page, size, userId) => {
-
-    if(isNaN(page) || isNaN(size)) {
-        page = 0
-        size = 10
-    }
+UserService.getListPendingByUserId = async (page, size, userId, type) => {
 
     const userFromDB = User.query()
         .select()
@@ -300,9 +295,12 @@ UserService.getListPendingInviteByUserId = async (page, size, userId) => {
     if(!userFromDB)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
 
+    if( type !== CompanyLogTypeEnum.INVITE && type !== CompanyLogTypeEnum.APPLY)
+        throw new NotFoundError()
+
     return CompanyLog.query()
     .where('eusereuserid', userId)
-    .where('ecompanylogtype', CompanyLogTypeEnum.INVITE)
+    .where('ecompanylogtype', type)
     .andWhere('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
     .orderBy('ecompanylogcreatetime', 'DESC')
     .page(page, size)

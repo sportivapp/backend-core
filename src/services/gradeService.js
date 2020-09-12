@@ -157,11 +157,9 @@ gradeService.getUsersByPositionId = async (page, size, positionId) => {
 
     if (!grade) return ServiceHelper.toEmptyPage(page, size)
 
-    const userPage = await UserPositionMapping.relatedQuery('users')
-        .for(UserPositionMapping.query()
-            .where('egradeegradeid', positionId)
-            .where('euserpositionmappingdeletestatus', false)
-        )
+    const userPage = await Grade.relatedQuery('users')
+        .for(positionId)
+        .modify('baseAttributes')
         .page(page, size)
 
     return ServiceHelper.toPageObj(page, size, userPage)

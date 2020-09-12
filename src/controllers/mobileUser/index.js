@@ -219,13 +219,13 @@ controller.changeIndustryByUserId = async (req, res, next) => {
 
 }
 
-controller.getListPendingInviteByUserId = async (req, res, next) => {
+controller.getListPendingByUserId = async (req, res, next) => {
 
-    const {page, size} = req.query
+    const {page = '0', size = '10', type = 'INVITE'} = req.query
 
     try {
 
-        const pageObj = await mobileUserService.getListPendingInviteByUserId(parseInt(page), parseInt(size),req.user.sub);
+        const pageObj = await mobileUserService.getListPendingByUserId(parseInt(page), parseInt(size), req.user.sub, type.toUpperCase());
 
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
 
