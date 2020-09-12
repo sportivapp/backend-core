@@ -110,8 +110,9 @@ UserService.getOtherUserById = async (userId, type) => {
         relatedIndustry = 'userIndustries'
 
     return User.query()
+    .findById(userId)
+    .modify('baseAttributes')
     .withGraphFetched("[" + relatedIndustry + ", companies, teams, experiences, licenses]")
-    .where('euserid', userId)
     .first();
 
 }
