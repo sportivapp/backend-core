@@ -106,7 +106,6 @@ mobileClassUserService.getMyClasses = async (companyId, page, size, user) => {
         .joinRelated('class(baseAttributes).[company(baseAttributes), industry(baseAttributes)]')
         .where('eclassusermapping.eusereuserid', user.sub)
         .andWhereNot('eclassusermappingstatus', ClassUserStatusEnum.CANCELED)
-        .andWhereNot('eclassusermappingstatus', ClassUserStatusEnum.REJECTED)
 
     if (companyId && companyId !== '')
 
