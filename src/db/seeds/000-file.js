@@ -156,5 +156,54 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
+        // 20
+        {
+          efilename: '26-ucapanselamatketumpssi.MP4',
+          efilepath: process.env.TEMP_DIRECTORY + '/26-ucapanselamatketumpssi.MP4',
+          efiletype: 'video/mp4',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '27-ucapanselamat1.MP4',
+          efilepath: process.env.TEMP_DIRECTORY + '/27-ucapanselamat1.MP4',
+          efiletype: 'video/mp4',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '28-ucapanselamat1.MP4',
+          efilepath: process.env.TEMP_DIRECTORY + '/28-ucapanselamat1.MP4',
+          efiletype: 'video/mp4',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '29-ucapanselamat1.MP4',
+          efilepath: process.env.TEMP_DIRECTORY + '/29-ucapanselamat1.MP4',
+          efiletype: 'video/mp4',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '30-ucapanselamat1.MP4',
+          efilepath: process.env.TEMP_DIRECTORY + '/30-ucapanselamat1.MP4',
+          efiletype: 'video/mp4',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '31-ucapanselamat1.MP4',
+          efilepath: process.env.TEMP_DIRECTORY + '/31-ucapanselamat1.MP4',
+          efiletype: 'video/mp4',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
       ]
 ));
