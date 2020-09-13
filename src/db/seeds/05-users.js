@@ -227,5 +227,18 @@ exports.seed = (knex, Promise) => knex('euser').del()
           efileefileid: 63
           // euserdob: 
         },
+        {
+          eusernik: '',
+          eusername: 'Ali Reza',
+          euseremail: 'alireza1406@gmail.com',
+          euserpassword: '$2y$10$HeIwj6IlWmrPrhvU/Un7S.YEylg23dCqOh.v5cv2FtN2n/4o79hKy',
+          eusermobilenumber: '082112112711 ',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efileefileid: 64
+          // euserdob: 
+        },
       ]
     ));

@@ -519,6 +519,14 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilesize: 1,
           efilecreateby: 0,
           efilecreatetime: Date.now()
+        },
+        {
+          efilename: '014-Ali Reza.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/014-Ali Reza.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
         }
       ]
 ));

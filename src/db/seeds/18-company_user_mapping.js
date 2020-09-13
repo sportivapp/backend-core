@@ -93,6 +93,7 @@ exports.seed = (knex, Promise) => knex('ecompanyusermapping').del()
                     ecompanyusermappingcreateby: 0,
                     ecompanyusermappingpermission: 1
                 },
+                // Yeyen tumena
                 {
                     ecompanyecompanyid: 6,
                     eusereuserid: 12,
@@ -105,6 +106,7 @@ exports.seed = (knex, Promise) => knex('ecompanyusermapping').del()
                     ecompanyusermappingcreateby: 0,
                     ecompanyusermappingpermission: 1
                 },
+                // Weshley
                 {
                     ecompanyecompanyid: 6,
                     eusereuserid: 14,
@@ -140,6 +142,13 @@ exports.seed = (knex, Promise) => knex('ecompanyusermapping').del()
                     eusereuserid: 19,
                     ecompanyusermappingcreateby: 0,
                     ecompanyusermappingpermission: 1
+                },
+                // Ali reza
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 20,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 10
                 }
             ]
       ));
