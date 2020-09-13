@@ -178,7 +178,8 @@ UsersService.getUserCurrentCompany = async ( user ) => {
 UsersService.updateUserById = async (userId, userDTO, user) => {
 
     if (user.permission != 9 && user.permission != 10) {
-        if (userId != user.sub) return
+        // if (userId != user.sub) 
+            return
     }
 
     // const userMapping = await CompanyUserMapping.query()
