@@ -2,9 +2,7 @@ const News = require('../models/News')
 const Company = require('../models/Company')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
-const UnsupportedOperationErrorEnum = {
-    NEWS_NOT_EXIST: 'NEWS_NOT_EXIST',
-}
+const UnsupportedOperationErrorEnum = {}
 
 const mobileNewsService = {}
 
@@ -16,7 +14,7 @@ mobileNewsService.getNewsDetail = async (newsId) => {
     .first()
 
     if(!newsFromDB)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NEWS_NOT_EXIST)
+        throw new NotFoundError
 
     return newsFromDB
 }
