@@ -214,5 +214,18 @@ exports.seed = (knex, Promise) => knex('euser').del()
           efileefileid: 62
           // euserdob: 
         },
+        {
+          eusernik: '',
+          eusername: 'Galih Purnanda Sakti',
+          euseremail: 'zizusakti@gmail.com',
+          euserpassword: '$2y$10$HowRbCQqTS/DLXE/eFKphOme3aJg22Da1vcGzEmw4srWU/fHqY9iu',
+          eusermobilenumber: '081806418027',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efileefileid: 63
+          // euserdob: 
+        },
       ]
     ));

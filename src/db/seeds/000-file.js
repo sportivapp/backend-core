@@ -511,6 +511,14 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilesize: 1,
           efilecreateby: 0,
           efilecreatetime: Date.now()
+        },
+        {
+          efilename: '013-Galih Purnanda Sakti.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/013-Galih Purnanda Sakti.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
         }
       ]
 ));
