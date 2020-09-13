@@ -65,11 +65,12 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
 
 CompanyService.getUsersByCompanyId = async(companyId, page, size) => {
 
-    return Company.relatedQuery('users')
+    return User.query()
         .withGraphFetched('file')
-        .for(companyId)
+        .joinRelated('companies')
         .withGraphJoined('grades')
         .where('grades.ecompanyecompanyid', companyId)
+        .orWhere('companies.ecompanyid', companyId)
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
