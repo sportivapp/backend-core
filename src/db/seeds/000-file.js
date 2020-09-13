@@ -489,8 +489,24 @@ exports.seed = (knex, Promise) => knex('efile').del()
         },
         //60
         {
-          efilename: '010-Heru Pujihartono.jpeg',
-          efilepath: process.env.TEMP_DIRECTORY + '/010-Heru Pujihartono.jpeg',
+          efilename: '010-Emral Abus.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/010-Emral Abus.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '011-Miftahudin, SH.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/011-Miftahudin, SH.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '012-Syafrianto Rusli.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/012-Syafrianto Rusli.jpeg',
           efiletype: 'image/jpg',
           efilesize: 1,
           efilecreateby: 0,

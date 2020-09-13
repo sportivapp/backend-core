@@ -119,6 +119,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
           efileefileid: 30
           // euserdob: 
         },
+        // 12
         {
           eusernik: '',
           eusername: 'Yeyen Tumena',
@@ -146,6 +147,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
           efileefileid: 32
           // euserdob: 
         },
+        // 14
         {
           eusernik: '',
           eusername: 'Weshley Hutagalung',
@@ -195,7 +197,21 @@ exports.seed = (knex, Promise) => knex('euser').del()
           euseraddress: '',
           ecountryecountryid: 1,
           eusergender: 'male',
-          // efileefileid: 
+          efileefileid: 61
+          // euserdob: 
+        },
+        // 18
+        {
+          eusernik: '',
+          eusername: 'Syafrianto Rusli',
+          euseremail: 'yanto.rusli61@gmail.com',
+          euserpassword: '$2y$10$/jj/EKBB6FbNAJ1yhCiOb.cVJRm9yb0DE69E0lLgq56hMMWjycgl.',
+          eusermobilenumber: '08126626344',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efileefileid: 62
           // euserdob: 
         },
       ]

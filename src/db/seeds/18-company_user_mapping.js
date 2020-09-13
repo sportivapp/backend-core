@@ -73,25 +73,25 @@ exports.seed = (knex, Promise) => knex('ecompanyusermapping').del()
                     ecompanyecompanyid: 6,
                     eusereuserid: 8,
                     ecompanyusermappingcreateby: 0,
-                    ecompanyusermappingpermission: 10
+                    ecompanyusermappingpermission: 1
                 },
                 {
                     ecompanyecompanyid: 6,
                     eusereuserid: 9,
                     ecompanyusermappingcreateby: 0,
-                    ecompanyusermappingpermission: 10
+                    ecompanyusermappingpermission: 1
                 },
                 {
                     ecompanyecompanyid: 6,
                     eusereuserid: 10,
                     ecompanyusermappingcreateby: 0,
-                    ecompanyusermappingpermission: 10
+                    ecompanyusermappingpermission: 1
                 },
                 {
                     ecompanyecompanyid: 6,
                     eusereuserid: 11,
                     ecompanyusermappingcreateby: 0,
-                    ecompanyusermappingpermission: 10
+                    ecompanyusermappingpermission: 1
                 },
                 {
                     ecompanyecompanyid: 6,
@@ -103,7 +103,7 @@ exports.seed = (knex, Promise) => knex('ecompanyusermapping').del()
                     ecompanyecompanyid: 6,
                     eusereuserid: 13,
                     ecompanyusermappingcreateby: 0,
-                    ecompanyusermappingpermission: 10
+                    ecompanyusermappingpermission: 1
                 },
                 {
                     ecompanyecompanyid: 6,
@@ -115,19 +115,25 @@ exports.seed = (knex, Promise) => knex('ecompanyusermapping').del()
                     ecompanyecompanyid: 6,
                     eusereuserid: 15,
                     ecompanyusermappingcreateby: 0,
-                    ecompanyusermappingpermission: 10
+                    ecompanyusermappingpermission: 1
                 },
                 {
                     ecompanyecompanyid: 6,
                     eusereuserid: 16,
                     ecompanyusermappingcreateby: 0,
-                    ecompanyusermappingpermission: 10
+                    ecompanyusermappingpermission: 1
                 },
                 {
                     ecompanyecompanyid: 6,
-                    eusereuserid: 16,
+                    eusereuserid: 17,
                     ecompanyusermappingcreateby: 0,
-                    ecompanyusermappingpermission: 10
+                    ecompanyusermappingpermission: 1
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 18,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
                 }
             ]
       ));
