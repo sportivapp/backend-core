@@ -5,12 +5,11 @@ const controller = {}
 
 controller.getNewsDetail = async (req, res, next) => {
 
-    const { companyId } = req.body
     const { newsId } = req.params
 
     try {
 
-        const result = await mobileNewsService.getNewsDetail(companyId, newsId)
+        const result = await mobileNewsService.getNewsDetail(newsId)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
         
     } catch (e) {
