@@ -155,10 +155,16 @@ UserService.updateUser = async (userDTO, industryIds, user) => {
 
     if (!userFromDB)
         return
-    
-    await User.transaction(async trx => {
-        await updateUserAndIndustries(userFromDB, userDTO, industryIds, user, trx);
-    })
+
+    // Update user only
+    if (industryIds.length === 0) {
+        await userFromDB.$query().updateByUserId(userDTO, user.sub);
+    } else {
+        // Update user and industry
+        await User.transaction(async trx => {
+            await updateUserAndIndustries(userFromDB, userDTO, industryIds, user, trx);
+        })
+    }
 
     return 1;
 
