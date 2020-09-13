@@ -14,7 +14,7 @@ mobileNewsService.getNewsDetail = async (newsId) => {
     .first()
 
     if(!newsFromDB)
-        throw new NotFoundError
+        throw new NotFoundError()
 
     return newsFromDB
 }
