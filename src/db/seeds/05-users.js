@@ -232,12 +232,25 @@ exports.seed = (knex, Promise) => knex('euser').del()
           eusername: 'Ali Reza',
           euseremail: 'alireza1406@gmail.com',
           euserpassword: '$2y$10$HeIwj6IlWmrPrhvU/Un7S.YEylg23dCqOh.v5cv2FtN2n/4o79hKy',
-          eusermobilenumber: '082112112711 ',
+          eusermobilenumber: '082112112711',
           euseridentitynumber: '',
           euseraddress: '',
           ecountryecountryid: 1,
           eusergender: 'male',
           efileefileid: 64
+          // euserdob: 
+        },
+        {
+          eusernik: '',
+          eusername: 'Fabriant Immanuel Leleng',
+          euseremail: 'rianleleng@gmail.com',
+          euserpassword: '$2y$10$8tljmHpdzPYn9y3hkAUUkeP0zNNLmVT6WN3Z2EOdpAw2REY4Kq5N6',
+          eusermobilenumber: '0818668060',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efileefileid: 65
           // euserdob: 
         },
       ]
