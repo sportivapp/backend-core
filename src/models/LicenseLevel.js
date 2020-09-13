@@ -1,3 +1,4 @@
+const Industry = require('./Industry');
 const Model = require('./Model');
 
 class LicenseLevel extends Model {
@@ -23,6 +24,10 @@ class LicenseLevel extends Model {
     return {
       baseAttributes(builder) {
         builder.select('elicenselevelid', 'elicenselevelname')
+      },
+      baseAttributesWithIndustry(builder) {
+        builder.select('elicenselevelid', 'elicenselevelname')
+        .withGraphFetched('industry(baseAttributes)')
       }
     }
   }
@@ -30,7 +35,14 @@ class LicenseLevel extends Model {
   static get relationMappings() {
 
     return {
-      
+      industry: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Industry,
+        join: {
+          from: 'elicenselevel.eindustryeindustryid',
+          to: 'eindustry.eindustryid'
+        }
+      }
     }
   }
 
