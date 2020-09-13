@@ -22,8 +22,17 @@ class Team extends Model {
         };
     }
 
+    static get modifiers() {
+        return {
+          baseAttributes(builder) {
+            builder.select('eteamid', 'eteamname').withGraphFetched('teamPicture(baseAttributes)')
+          }
+        }
+      }
+
     static get relationMappings() {
 
+        const File = require('./File')
         const User = require('./User')
 
         return {
@@ -65,6 +74,14 @@ class Team extends Model {
                         to: 'eteamindustrymapping.eindustryeindustryid'
                     },
                     to: 'eindustry.eindustryid'
+                }
+            },
+            teamPicture: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: File,
+                join: {
+                    from: 'eteam.efileefileid',
+                    to: 'efile.efileid'
                 }
             }
         }

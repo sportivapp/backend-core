@@ -24,13 +24,23 @@ class Experience extends Model {
     }
   }
 
+  static get modifiers() {
+    return {
+      baseAttributes(builder) {
+        builder.select('eexperienceid', 'eexperiencename', 'eexperiencestartdate', 'eexperienceenddate', 'eexperiencelocation',
+        'eexperienceposition', 'eexperiencedescription')
+        .withGraphFetched('industry(baseAttributes)')
+      }
+    }
+  }
+
   static get relationMappings() {
 
     const Industry = require('./Industry')
     const File = require('./File')
 
     return {
-      industries: {
+      industry: {
         relation: Model.BelongsToOneRelation,
         modelClass: Industry,
         join: {

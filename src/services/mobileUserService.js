@@ -112,8 +112,12 @@ UserService.getOtherUserById = async (userId, type) => {
     return User.query()
     .findById(userId)
     .modify('baseAttributes')
-    .withGraphFetched("[" + relatedIndustry + ", companies, teams, experiences, licenses]")
-    .first();
+    .withGraphFetched(relatedIndustry)
+    .withGraphFetched('companies(baseAttributes)')
+    .withGraphFetched('teams(baseAttributes)')
+    .withGraphFetched('experiences(baseAttributes)')
+    .withGraphFetched('licenses(baseAttributes)')
+    // .withGraphFetched("[" + relatedIndustry + ", companies(baseAttributes), teams(baseAttributes), experiences.industry, licenses.industry]")
 
 }
 
