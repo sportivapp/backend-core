@@ -144,6 +144,9 @@ module.exports = {
         },
         app: {
             version: '/app/version'
+        },
+        news: {
+            id: '/news/:newsId'
         }
     }
 }
