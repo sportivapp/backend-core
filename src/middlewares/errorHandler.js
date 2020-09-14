@@ -3,8 +3,7 @@ const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const slackLoggingService = require('../helper/slackLoggingService');
 
 module.exports = async (error, req, res, next) => {
-    const slackUrl = 'https://hooks.slack.com/services/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'
-    slackLoggingService.sendSlackMessage(slackUrl, slackLoggingService.setLogMessage(error))
+    slackLoggingService.sendSlackMessage(slackLoggingService.setLogMessage(error))
         .then(ignored => processError(error, res));
 }
 

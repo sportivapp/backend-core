@@ -9,6 +9,7 @@ require('dotenv').config();
 const readXlsxFile = require("read-excel-file/node");
 const emailService = require('../helper/emailService');
 const ServiceHelper = require('../helper/ServiceHelper')
+const firebaseService = require('../helper/firebaseService')
 
 const UsersService = {};
 
@@ -287,7 +288,8 @@ UsersService.login = async (loginDTO) => {
         if (!result || !result.ecompanyecompanyid) return
 
         token = await generateJWTToken(user, result.ecompanyecompanyid, result.ecompanyusermappingpermission);
-
+        await firebaseService.pushNotification(user.euserid, 'Login Successful',
+            `Login Successful for email ${user.euseremail}`)
     }
 
     return token;
