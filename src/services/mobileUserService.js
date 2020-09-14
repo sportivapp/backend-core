@@ -47,7 +47,7 @@ UserService.login = async (loginDTO) => {
 
     const success = await bcrypt.compare(loginDTO.euserpassword, user.euserpassword);
 
-    if (!success) throw new UnsupportedOperationError('SERVER_ERROR')
+    if (!success) throw new NotFoundError()
 
     return await generateJWTToken(user);
 
