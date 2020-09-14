@@ -20,7 +20,7 @@ const smtpConfig = {
         pass: process.env.MAIL_SMTPPASSWORD
     },
     tls: {
-        maxVersion: 'TLSv1.3',
+        maxVersion: 'TLSv1.2',
         minVersion: 'TLSv1.2'
     }
 }
