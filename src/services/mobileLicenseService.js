@@ -23,7 +23,7 @@ LicenseService.getLicense = async (licenseId) => {
     if(!license)
         throw new NotFoundError()
 
-    return license(query)
+    return license
 }
 
 LicenseService.getLicenses = async (user) => {
