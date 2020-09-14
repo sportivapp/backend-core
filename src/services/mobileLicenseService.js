@@ -32,8 +32,6 @@ LicenseService.createLicense = async (licenseDTO, user) => {
     if (!file)
         return
 
-    licenseDTO.elicensegraduationdate = new Date(licenseDTO.elicensegraduationdate).getTime();
-
     const license = await License.query().insertToTable(licenseDTO, user.sub);
 
     return license;
@@ -60,7 +58,6 @@ LicenseService.updateLicense = async (licenseDTO, licenseId, user) => {
     if (!license)
         return
 
-    licenseDTO.elicensegraduationdate = new Date(licenseDTO.elicensegraduationdate).getTime();
     return license.$query().updateByUserId(licenseDTO, user.sub).returning('*');
 
 }

@@ -489,8 +489,65 @@ exports.seed = (knex, Promise) => knex('efile').del()
         },
         //60
         {
-          efilename: '010-Heru Pujihartono.jpeg',
-          efilepath: process.env.TEMP_DIRECTORY + '/010-Heru Pujihartono.jpeg',
+          efilename: '010-Emral Abus.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/010-Emral Abus.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '011-Miftahudin, SH.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/011-Miftahudin, SH.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '012-Syafrianto Rusli.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/012-Syafrianto Rusli.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '013-Galih Purnanda Sakti.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/013-Galih Purnanda Sakti.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '014-Ali Reza.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/014-Ali Reza.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '015-Fabriant Immanuel Leleng.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/015-Fabriant Immanuel Leleng.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        // 66
+        {
+          efilename: '016-Fakhri Husaini.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/016-Fakhri Husaini.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '017-Dino Sutan Karajaan.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/017-Dino Sutan Karajaan.jpeg',
           efiletype: 'image/jpg',
           efilesize: 1,
           efilecreateby: 0,

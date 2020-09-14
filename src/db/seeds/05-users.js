@@ -119,6 +119,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
           efileefileid: 30
           // euserdob: 
         },
+        // 12
         {
           eusernik: '',
           eusername: 'Yeyen Tumena',
@@ -146,6 +147,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
           efileefileid: 32
           // euserdob: 
         },
+        // 14
         {
           eusernik: '',
           eusername: 'Weshley Hutagalung',
@@ -176,7 +178,7 @@ exports.seed = (knex, Promise) => knex('euser').del()
           eusernik: '',
           eusername: 'Emral Abus',
           euseremail: 'emral_abus@yahoo.co.id',
-          euserpassword: '$2y$10$fBbpC9spxCcRs1ESbnNqN./Raa3/Zw0g86GRijFpP7.ijo7xwHp3a',
+          euserpassword: '$2y$10$/MmJQHszqqtqyLU9iWEaX.RuRc5j3PZzrfjXchP15PtMGmZZGvg6q',
           eusermobilenumber: '081319768005',
           euseridentitynumber: '',
           euseraddress: '',
@@ -195,7 +197,87 @@ exports.seed = (knex, Promise) => knex('euser').del()
           euseraddress: '',
           ecountryecountryid: 1,
           eusergender: 'male',
-          // efileefileid: 
+          efileefileid: 61
+          // euserdob: 
+        },
+        // 18
+        {
+          eusernik: '',
+          eusername: 'Syafrianto Rusli',
+          euseremail: 'yanto.rusli61@gmail.com',
+          euserpassword: '$2y$10$/jj/EKBB6FbNAJ1yhCiOb.cVJRm9yb0DE69E0lLgq56hMMWjycgl.',
+          eusermobilenumber: '08126626344',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efileefileid: 62
+          // euserdob: 
+        },
+        {
+          eusernik: '',
+          eusername: 'Galih Purnanda Sakti',
+          euseremail: 'zizusakti@gmail.com',
+          euserpassword: '$2y$10$HowRbCQqTS/DLXE/eFKphOme3aJg22Da1vcGzEmw4srWU/fHqY9iu',
+          eusermobilenumber: '081806418027',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efileefileid: 63
+          // euserdob: 
+        },
+        {
+          eusernik: '',
+          eusername: 'Ali Reza',
+          euseremail: 'alireza1406@gmail.com',
+          euserpassword: '$2y$10$HeIwj6IlWmrPrhvU/Un7S.YEylg23dCqOh.v5cv2FtN2n/4o79hKy',
+          eusermobilenumber: '082112112711',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efileefileid: 64
+          // euserdob: 
+        },
+        {
+          eusernik: '',
+          eusername: 'Fabriant Immanuel Leleng',
+          euseremail: 'rianleleng@gmail.com',
+          euserpassword: '$2y$10$8tljmHpdzPYn9y3hkAUUkeP0zNNLmVT6WN3Z2EOdpAw2REY4Kq5N6',
+          eusermobilenumber: '0818668060',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efileefileid: 65
+          // euserdob: 
+        },
+        // 22
+        {
+          eusernik: '',
+          eusername: 'Fakhri Husaini',
+          euseremail: 'coachfakhri.fh@gmail.com',
+          euserpassword: '$2y$10$rSQY4/R.4qjuL8H/V746F.TZz5ogNZvhUKyGOWcHPPvjt3KujqJKC',
+          eusermobilenumber: '08125335434',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efileefileid: 66
+          // euserdob: 
+        },
+        {
+          eusernik: '',
+          eusername: 'Dino Sutan Karajaan',
+          euseremail: 'dinosutan17@gmail.com',
+          euserpassword: '$2y$10$cQol5jj4vFEkhimzld3uJ.J8SAMPGUBqcNrnn./qCp4vMcMNbkT4C',
+          eusermobilenumber: '081310828017',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efileefileid: 67
           // euserdob: 
         },
       ]

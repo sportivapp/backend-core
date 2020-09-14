@@ -103,7 +103,7 @@ userController.updateUserById = async (req, res, next) => {
         gender,
         hobby,
         address,
-        permission,
+        // permission,
         identityNumber,
         fileId
     } = req.body
@@ -122,7 +122,8 @@ userController.updateUserById = async (req, res, next) => {
             efileefileid: fileId
         }
 
-        const data = await userService.updateUserById(userId, userDTO, permission, user)
+        // const data = await userService.updateUserById(userId, userDTO, permission, user)
+        const data = await userService.updateUserById(userId, userDTO, user)
         if (!data) return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
 

@@ -5,6 +5,7 @@ const   express     = require('express'),
         https       = require('https'),
         path        = require('path')
 
+require('dotenv').config();
 const app = express();
 const routes = require('./routes/v1');
 const slackLoggingService = require('./helper/slackLoggingService');
@@ -26,7 +27,7 @@ app.use((_, res, next) => {
 app.use(express.json({limit: '1000mb'}));
 app.use(express.urlencoded({limit: '1000mb', extended: true }));
 app.use(morgan('dev'));
-app.use(express.static(path.resolve(__dirname + '/../temp')));
+app.use(express.static(process.env.TEMP_DIRECTORY));
 
 app.use(routes)
 
@@ -58,7 +59,6 @@ app.use((_, __, next) => {
 
 app.use(errorHandler)
 
-require('dotenv').config();
 const httpPORT = process.env.PORT || 5100;
 const httpServer = app.listen(httpPORT, function() {
     console.log(`HTTP Server started on port ${httpPORT}`);
