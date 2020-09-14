@@ -280,5 +280,18 @@ exports.seed = (knex, Promise) => knex('euser').del()
           efileefileid: 67
           // euserdob: 
         },
+        {
+          eusernik: '',
+          eusername: 'Surya Binanga',
+          euseremail: 'suryasimorangkir@gmail.com',
+          euserpassword: '$2y$10$SIxoOulWGIp/ffpHQZuwjuUdSENG7lFzuXMVwckedV2zUaoxVDS/a',
+          eusermobilenumber: '081381567393',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efileefileid: 68
+          // euserdob: 
+        },
       ]
     ));
