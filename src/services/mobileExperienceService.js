@@ -132,7 +132,7 @@ experienceService.deleteExperience = async (experienceId, loggedInUser) => {
     .where('eexperienceid', experienceId)
     .where('eusereuserid', loggedInUser.sub)
     .then(rowsAffected => {
-        if(rowsAffected !== 1)
+        if(!rowsAffected)
             throw new NotFoundError()
     })
 
