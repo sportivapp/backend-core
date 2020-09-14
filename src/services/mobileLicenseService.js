@@ -20,6 +20,7 @@ LicenseService.getLicense = async (licenseId) => {
     .then(result => {
         if(!result)
             throw new NotFoundError()
+        return result
     })
     
 }
