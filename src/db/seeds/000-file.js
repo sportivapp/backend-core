@@ -552,6 +552,14 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilesize: 1,
           efilecreateby: 0,
           efilecreatetime: Date.now()
+        },
+        {
+          efilename: '018-Surya Binanga.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/018-Surya Binanga.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
         }
       ]
 ));
