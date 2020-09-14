@@ -83,7 +83,7 @@ companyService.getVirtualMemberCard = async (companyId, user) => {
         .first();
 
     if (!userInCompany)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
+        throw new NotFoundError()
 
     const virtualMemberCard = await Company.query()
         .select('ecompany.efileefileid', 'ecompanyname', 'eusername', 'egradename')
