@@ -155,6 +155,18 @@ exports.seed = (knex, Promise) => knex('ecompanyusermapping').del()
                     eusereuserid: 21,
                     ecompanyusermappingcreateby: 0,
                     ecompanyusermappingpermission: 1
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 22,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 23,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
                 }
             ]
       ));

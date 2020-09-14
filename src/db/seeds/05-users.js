@@ -253,5 +253,32 @@ exports.seed = (knex, Promise) => knex('euser').del()
           efileefileid: 65
           // euserdob: 
         },
+        // 22
+        {
+          eusernik: '',
+          eusername: 'Fakhri Husaini',
+          euseremail: 'coachfakhri.fh@gmail.com',
+          euserpassword: '$2y$10$rSQY4/R.4qjuL8H/V746F.TZz5ogNZvhUKyGOWcHPPvjt3KujqJKC',
+          eusermobilenumber: '08125335434',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efileefileid: 66
+          // euserdob: 
+        },
+        {
+          eusernik: '',
+          eusername: 'Dino Sutan Karajaan',
+          euseremail: 'dinosutan17@gmail.com',
+          euserpassword: '$2y$10$cQol5jj4vFEkhimzld3uJ.J8SAMPGUBqcNrnn./qCp4vMcMNbkT4C',
+          eusermobilenumber: '081310828017',
+          euseridentitynumber: '',
+          euseraddress: '',
+          ecountryecountryid: 1,
+          eusergender: 'male',
+          efileefileid: 67
+          // euserdob: 
+        },
       ]
     ));

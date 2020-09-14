@@ -535,6 +535,23 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilesize: 1,
           efilecreateby: 0,
           efilecreatetime: Date.now()
+        },
+        // 66
+        {
+          efilename: '016-Fakhri Husaini.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/016-Fakhri Husaini.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '017-Dino Sutan Karajaan.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/017-Dino Sutan Karajaan.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
         }
       ]
 ));
