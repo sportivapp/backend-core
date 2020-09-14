@@ -19,7 +19,7 @@ class Experience extends Model {
         eexperiencestartdate: { type: 'integer'},
         eexperiencelocation: { type: 'string', minLength: 1, maxLength: 65 },
         eexperienceposition: { type: 'string', minLength: 1, maxLength: 65 },
-        eexperiencedescription: { type: 'string', minLength: 1, maxLength: 1025 },
+        eexperiencedescription: { type: 'string', maxLength: 1025 },
       }
     }
   }
