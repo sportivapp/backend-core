@@ -53,88 +53,88 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilecreatetime: Date.now()
         },
         {
-          efilename: '00004-heading dan shooting 1.mp4',
-          efilepath: process.env.TEMP_DIRECTORY + '/00004-heading dan shooting 1.mp4',
+          efilename: '00004-defend a.mp4',
+          efilepath: process.env.TEMP_DIRECTORY + '/00004-defend a.mp4',
           efiletype: 'video/mp4',
           efilesize: 1,
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
         {
-          efilename: '00005-heading dan shooting 2.mp4',
-          efilepath: process.env.TEMP_DIRECTORY + '/00005-heading dan shooting 2.mp4',
+          efilename: '00005-defend b.mp4',
+          efilepath: process.env.TEMP_DIRECTORY + '/00005-defend b.mp4',
           efiletype: 'video/mp4',
           efilesize: 1,
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
         {
-          efilename: '00006-passing dan control A.mp4',
-          efilepath: process.env.TEMP_DIRECTORY + '/00006-passing dan control A.mp4',
+          efilename: '00006-dribbling and running with the ball 1.mp4',
+          efilepath: process.env.TEMP_DIRECTORY + '/00006-dribbling and running with the ball 1.mp4',
           efiletype: 'video/mp4',
           efilesize: 1,
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
         {
-          efilename: '00007-passing dan control B.mp4',
-          efilepath: process.env.TEMP_DIRECTORY + '/00007-passing dan control B.mp4',
+          efilename: '00007-dribbling and running with the ball 2.mp4',
+          efilepath: process.env.TEMP_DIRECTORY + '/00007-dribbling and running with the ball 2.mp4',
           efiletype: 'video/mp4',
           efilesize: 1,
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
         {
-          efilename: '00008-shielding and turning B.mp4',
-          efilepath: process.env.TEMP_DIRECTORY + '/00008-shielding and turning B.mp4',
+          efilename: '00008-heading dan shooting 1.mp4',
+          efilepath: process.env.TEMP_DIRECTORY + '/00008-heading dan shooting 1.mp4',
           efiletype: 'video/mp4',
           efilesize: 1,
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
         {
-          efilename: '00009-shielding and turning.mp4',
-          efilepath: process.env.TEMP_DIRECTORY + '/00009-shielding and turning.mp4',
+          efilename: '00009-heading dan shooting 2.mp4',
+          efilepath: process.env.TEMP_DIRECTORY + '/00009-heading dan shooting 2.mp4',
           efiletype: 'video/mp4',
           efilesize: 1,
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
         {
-          efilename: '00010-small side games.mp4',
-          efilepath: process.env.TEMP_DIRECTORY + '/00010-small side games.mp4',
+          efilename: '00010-passing dan control A.mp4',
+          efilepath: process.env.TEMP_DIRECTORY + '/00010-passing dan control A.mp4',
           efiletype: 'video/mp4',
           efilesize: 1,
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
         {
-          efilename: '00011-defend a.mp4',
-          efilepath: process.env.TEMP_DIRECTORY + '/00011-defend a.mp4',
+          efilename: '00011-passing dan control B.mp4',
+          efilepath: process.env.TEMP_DIRECTORY + '/00011-passing dan control B.mp4',
           efiletype: 'video/mp4',
           efilesize: 1,
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
         {
-          efilename: '00012-defend b.mp4',
-          efilepath: process.env.TEMP_DIRECTORY + '/00012-defend b.mp4',
+          efilename: '00012-shielding and turning.mp4',
+          efilepath: process.env.TEMP_DIRECTORY + '/00012-shielding and turning.mp4',
           efiletype: 'video/mp4',
           efilesize: 1,
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
         {
-          efilename: '00013-dribbling and running with the ball 1.mp4',
-          efilepath: process.env.TEMP_DIRECTORY + '/00013-dribbling and running with the ball 1.mp4',
+          efilename: '00013-shielding and turning B.mp4',
+          efilepath: process.env.TEMP_DIRECTORY + '/00013-shielding and turning B.mp4',
           efiletype: 'video/mp4',
           efilesize: 1,
           efilecreateby: 0,
           efilecreatetime: Date.now()
         },
         {
-          efilename: '00014-dribbling and running with the ball 2.mp4',
-          efilepath: process.env.TEMP_DIRECTORY + '/00014-dribbling and running with the ball 2.mp4',
+          efilename: '00014-small side games.mp4',
+          efilepath: process.env.TEMP_DIRECTORY + '/00014-small side games.mp4',
           efiletype: 'video/mp4',
           efilesize: 1,
           efilecreateby: 0,
