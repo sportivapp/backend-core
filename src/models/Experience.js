@@ -1,4 +1,5 @@
 const Model = require('./Model');
+const { ManyToManyRelation } = require('./Model');
 
 class Experience extends Model {
   static get tableName() {
@@ -23,17 +24,40 @@ class Experience extends Model {
     }
   }
 
+  static get modifiers() {
+    return {
+      baseAttributes(builder) {
+        builder.select('eexperienceid', 'eexperiencename', 'eexperiencestartdate', 'eexperienceenddate', 'eexperiencelocation',
+        'eexperienceposition', 'eexperiencedescription')
+        .withGraphFetched('industry(baseAttributes)')
+      }
+    }
+  }
+
   static get relationMappings() {
 
     const Industry = require('./Industry')
+    const File = require('./File')
 
     return {
-      industries: {
+      industry: {
         relation: Model.BelongsToOneRelation,
         modelClass: Industry,
         join: {
           from: 'eexperience.eindustryeindustryid',
           to: 'eindustry.eindustryid'
+        }
+      },
+      files: {
+        relation: ManyToManyRelation,
+        modelClass: File,
+        join: {
+          from: 'eexperience.eexperienceid',
+          through: {
+            from: 'efileexperiencemapping.eexperienceeexperienceid',
+            to: 'efileexperiencemapping.efileefileid'
+          },
+          to: 'efile.efileid'
         }
       }
     }

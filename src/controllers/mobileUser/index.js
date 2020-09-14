@@ -49,12 +49,14 @@ controller.createUser = async (req, res, next) => {
 
 }
 
-controller.getUserById = async (req, res, next) => {
+controller.getOtherUserById = async (req, res, next) => {
 
     const { userId } = req.body;
+    const { type } = req.query;
 
     try {
-        const result = await mobileUserService.getUserById(userId);
+        
+        const result = await mobileUserService.getOtherUserById(userId, type.toUpperCase());
 
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404));
@@ -190,5 +192,48 @@ controller.changePassword = async (req, res, next) => {
     }
 
 }
+
+controller.getIndustryByUserId = async (req, res, next) => {
+
+    const { type } = req.query
+
+    try {
+        const result = await mobileUserService.getIndustryByUserId(req.user, type.toUpperCase())
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+    } catch (e) {
+        next(e)
+    }
+
+}
+
+controller.changeIndustryByUserId = async (req, res, next) => {
+
+    const { type } = req.query
+
+    try {
+        const result = await mobileUserService.changeIndustryByUserId(req.user, type.toUpperCase(), req.body.industryIds)
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+    } catch (e) {
+        next(e)
+    }
+
+}
+
+controller.getListPendingByUserId = async (req, res, next) => {
+
+    const {page = '0', size = '10', type = 'INVITE'} = req.query
+
+    try {
+
+        const pageObj = await mobileUserService.getListPendingByUserId(parseInt(page), parseInt(size), req.user.sub, type.toUpperCase());
+
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 
 module.exports = controller;

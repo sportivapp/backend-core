@@ -1,11 +1,10 @@
 const Permit = require('../models/Permit')
 const User = require('../models/User')
 const ServiceHelper = require('../helper/ServiceHelper')
-const Roster = require('../models/Roster')
-const RosterUserMapping = require('../models/RosterUserMapping')
 const PermitApprovalMapping = require('../models/PermitApprovalMapping')
+const PermitStatusEnum = require('../models/enum/PermitStatusEnum')
+const approvalService = require('./approvalService')
 const Grades = require('../models/Grades')
-const UserPositionMapping = require('../models/UserPositionMapping')
 
 const permitService = {}
 
@@ -22,7 +21,7 @@ permitService.getPermitList = async (page, size, user) => {
 permitService.getSubordinatePermitList = async (page, size, user) => {
 
     const mappingSubQuery = PermitApprovalMapping.query().where('eusereuserid', user.sub)
-        .where('epermitapprovalmappingstatus', 1)
+        .where('epermitapprovalmappingstatus', PermitStatusEnum.PENDING)
 
     const permitApprovalPage = await PermitApprovalMapping.relatedQuery('permits')
         .for(mappingSubQuery)
@@ -31,7 +30,7 @@ permitService.getSubordinatePermitList = async (page, size, user) => {
     return ServiceHelper.toPageObj(page, size, permitApprovalPage)
 }
 
-permitService.getPermitById = async (permitId, user) => {
+permitService.getPermitById = async (permitId) => {
 
     const permit = await Permit.query()
         .findById(permitId)
@@ -40,38 +39,7 @@ permitService.getPermitById = async (permitId, user) => {
         .first()
 
     if (!permit || !permit.user) return
-    else if (permit.user.euserpermission === user.permission && permit.user.euserid !== user.sub) return
     else return permit
-}
-
-async function getRosterSupervisorIdQuery(rosterId) {
-    return Roster.relatedQuery('supervisor')
-        .for(rosterId)
-        .first()
-        .then(user => {
-            if (!user)
-                return
-            return user.euserid
-        })
-}
-
-async function getProjectManagerIdQuery(rosterId) {
-    return await Roster.relatedQuery('project')
-        .for(rosterId)
-        .modify('notDeleted')
-        .first()
-        .withGraphFetched('manager(notDeleted)')
-        .then(project => {
-            if (!project || !project.manager) return
-            return project.manager.euserid
-        });
-}
-
-function toPermitApprovalMappingList(supervisorIds, permitId) {
-    return supervisorIds.map(supervisorId => ({
-        eusereuserid: supervisorId,
-        epermitepermitid: permitId
-    }))
 }
 
 permitService.requestApproval = async (permitId, user) => {
@@ -79,67 +47,74 @@ permitService.requestApproval = async (permitId, user) => {
     const permit = await Permit.query()
         .findById(permitId)
         .modify('notDeleted')
-        .withGraphFetched('user(notDeleted)')
+        .withGraphFetched('user(baseAttributes).departments.parent')
         .first()
 
-    const updatePermit = Permit.query()
+    if (!permit || !permit.user) return
+
+    if (permit.epermitstatus !== PermitStatusEnum.CREATED) return
+
+    const permitUser = permit.user
+
+    const departments = permitUser.departments.filter(department => department.ecompanyecompanyid === user.companyId)
+
+    let valueAndTypeList = []
+
+    valueAndTypeList.push({type: 'USER', value: permitUser.euserid})
+
+    if (departments > 0) {
+        let isSubDepartment = false
+        const departmentIds = departments.map(department => {
+            if (department.parent) isSubDepartment = true
+            return department.edepartmentid
+        })
+        valueAndTypeList.push({type: 'DEPARTMENT LIST', value: departmentIds})
+        if (isSubDepartment) {
+            const parentDepartmentIds = permitUser.departments.map(department => {
+                if (department.parent) return parent.edepartmentid
+            })
+            valueAndTypeList.push({type: 'DEPARTMENT LIST', value: parentDepartmentIds})
+        }
+    }
+
+    valueAndTypeList.push({type: 'COMPANY', value: user.companyId})
+
+    const approvals = await approvalService.searchApprovals(valueAndTypeList, 0)
+
+    let insertPermitApprovalMappings
+
+    if (approvals.length <= 0) {
+
+        const userIds = await Grades.query()
+            .where('ecompanyecompanyid', companyId)
+            .orderBy('egradecreatetime', 'ASC')
+            .withGraphFetched('users')
+            .first()
+            .then(grade => grade.users)
+            .then(users => users.map(user => user.euserid))
+
+        insertPermitApprovalMappings = (trx) => PermitApprovalMapping.query(trx)
+            .insertToTable(toPermitApprovalMappingListFromUserList(userIds, permitId), user.sub)
+
+    } else {
+
+        insertPermitApprovalMappings = (trx) => PermitApprovalMapping.query(trx)
+            .insertToTable(toPermitApprovalMappingList(approvals, permitId), user.sub)
+    }
+
+    const updatePermit = (trx) => Permit.query(trx)
         .findById(permitId)
-        .updateByUserId({epermitstatus: 1}, user.sub)
+        .updateByUserId({epermitstatus: PermitStatusEnum.PENDING}, user.sub)
         .returning('*')
 
-    if (!permit || !permit.user) return
-    else if (permit.user.euserid != user.sub) return
-
-    // let supervisorId
-    //
-    // const rosterId = await RosterUserMapping.query()
-    //     .where('eusereuserid', user.sub)
-    //     .first()
-    //     .then(mapping => mapping.erostererosterid)
-    //
-    // if (rosterId) {
-    //     supervisorId = await getRosterSupervisorIdQuery(rosterId)
-    // }
-    //
-    // if (!supervisorId && rosterId) {
-    //     supervisorId = await getProjectManagerIdQuery(rosterId)
-    // }
-    //
-    // //if user is in a project
-    // if (supervisorId) {
-    //
-    //     const addApprovalPermitMapping = PermitApprovalMapping.query()
-    //         .insertToTable({eusereuserid: supervisorId, epermitepermitid: permitId}, user.sub)
-    //
-    //     return Promise.all([addApprovalPermitMapping, updatePermit])
-    //         .then(resultArr => resultArr[1])
-    //
-    // } else {
-
-    const approvalUserIds = await User.query().findById(permit.user.euserid)
-        .withGraphFetched('[approvalUser1, approvalUser2, approvalUser3]')
-        .then(foundUser => {
-            let userIds = []
-            if (foundUser.approvalUser1) userIds.push(foundUser.approvalUser1.euserid)
-            if (foundUser.approvalUser2) userIds.push(foundUser.approvalUser2.euserid)
-            if (foundUser.approvalUser3) userIds.push(foundUser.approvalUser3.euserid)
-            return userIds
-        })
-
-    if (approvalUserIds.length === 0) return
-
-    const insertPermitApprovalMapping = PermitApprovalMapping.query()
-        .insertToTable(toPermitApprovalMappingList(approvalUserIds, permitId), user.sub)
-
-    return Promise.all([insertPermitApprovalMapping, updatePermit])
-        .then(resultArr => resultArr[resultArr.length - 1])
-
-    // }
+    return Permit.transaction(async trx => {
+        return Promise.all([insertPermitApprovalMappings(trx), updatePermit(trx)])
+            .then(resultArr => resultArr[resultArr.length - 1])
+    })
 }
 
 permitService.createPermit = async (permitDTO, user) => {
 
-    permitDTO.epermitstatus = 0
     permitDTO.eusereuserid = user.sub
 
     const foundUser = await User.query()
@@ -155,61 +130,79 @@ permitService.createPermit = async (permitDTO, user) => {
 
 permitService.updatePermitStatusById = async (permitId, status, user) => {
 
+    if (PermitStatusEnum.APPROVED !== status && PermitStatusEnum.REJECTED !== status) return
+
     let permit = await permitService.getPermitById(permitId, user)
 
     if (!permit) return
 
-    const approval = await PermitApprovalMapping.query()
+    const permitApproval = await PermitApprovalMapping.query()
         .where('epermitepermitid', permitId)
         .where('eusereuserid', user.sub)
+        .withGraphFetched('approval')
         .first()
 
-    if (!approval) return
+    if (!permitApproval) return
 
     else {
 
-        await PermitApprovalMapping.query()
-            .where('epermitepermitid', permitId)
-            .where('eusereuserid', user.sub)
-            .updateByUserId({epermitapprovalmappingstatus: status}, user.sub)
+        return Permit.transaction(async trx => {
 
-        if (permit.user.eusermultiapproval) {
+            await permitApproval.$query(trx)
+                .updateByUserId({epermitapprovalmappingstatus: status}, user.sub)
 
-            const permitStatusChangedMappings = await PermitApprovalMapping.query()
-                .where('epermitepermitid', permitId)
-                .whereNot({ epermitapprovalmappingstatus: 1 })
+            if (permitApproval.approval && permitApproval.approval.eapprovaltype === 'MULTI') {
 
-            const approvedList = permitStatusChangedMappings
-                .map(mapping => mapping.epermitapprovalmappingstatus)
-                .filter(status => status === 2)
+                const permitStatusChangedMappings = await PermitApprovalMapping.query()
+                    .where('epermitepermitid', permitId)
 
-            let realStatus
+                const approvedList = permitStatusChangedMappings
+                    .map(mapping => mapping.epermitapprovalmappingstatus)
+                    .filter(status => status === PermitStatusEnum.APPROVED)
 
-            if (approvedList.length === permitStatusChangedMappings.length) realStatus = 2
-            else if (approvedList.length === 0) realStatus = 3
+                const isPendingPermitExist = permitStatusChangedMappings
+                    .map(mapping => mapping.epermitapprovalmappingstatus)
+                    .filter(status => status === PermitStatusEnum.PENDING)
+                    .length > 0
 
-            return Permit.query()
-                .findById(permitId)
-                .updateByUserId({epermitstatus: realStatus}, user.sub)
-                .returning('*')
+                const updatePermit = (status) => Permit.query(trx)
+                    .findById(permitId)
+                    .updateByUserId({epermitstatus: status}, user.sub)
+                    .returning('*')
 
-        } else {
+                if (approvedList.length === permitStatusChangedMappings.length) {
+                    return updatePermit(PermitStatusEnum.APPROVED)
+                } else if (!isPendingPermitExist) {
+                    return updatePermit(PermitStatusEnum.REJECTED)
+                } else return permit
 
-            const selectApprovedPermitMapping = await PermitApprovalMapping.query()
-                .where('epermitepermitid', permitId)
-                .where('epermitapprovalmappingstatus', 2)
-                .first()
+            } else {
 
-            let realStatus
+                await permitApproval.$query(trx)
+                    .updateByUserId({epermitapprovalmappingstatus: status}, user.sub)
 
-            if (selectApprovedPermitMapping) realStatus = 2
-            else realStatus = 3
+                const permitMappings = await PermitApprovalMapping.query()
+                    .where('epermitepermitid', permitId)
 
-            return Permit.query()
-                .findById(permitId)
-                .updateByUserId({epermitstatus: realStatus}, user.sub)
-                .returning('*')
-        }
+                const isApprovedExist = permitMappings
+                    .filter(mapping => mapping.epermitapprovalmappingstatus === PermitStatusEnum.APPROVED)
+                    .length > 0
+
+                const isRejectExist = permitMappings
+                    .filter(mapping => mapping.epermitapprovalmappingstatus === PermitStatusEnum.REJECTED)
+                    .length > 0
+
+                const updatePermit = (status) => Permit.query(trx)
+                    .findById(permitId)
+                    .updateByUserId({epermitstatus: status}, user.sub)
+                    .returning('*')
+
+                if (isApprovedExist) return updatePermit(PermitStatusEnum.APPROVED)
+                else if (isRejectExist) return updatePermit(PermitStatusEnum.REJECTED)
+                else return permit
+            }
+
+        })
     }
 }
 
@@ -237,17 +230,38 @@ permitService.deletePermitById = async (permitId, user) => {
     if (!permit)
         return true
 
-    if (permit.epermitstatus > 1)
+    if (permit.epermitstatus === PermitStatusEnum.APPROVED || permit.epermitstatus === PermitStatusEnum.REJECTED)
         return false
 
-    if (permit.user.euserid != user.sub && permit.user.euserpermission <= user.permission)
+    if (permit.user.euserid !== user.sub)
         return false
 
-    return Permit.query()
-        .findById(permitId)
-        .deleteByUserId(user.sub)
+    return permit.$query()
+        .delete()
         .then(rowsAffected => rowsAffected === 1)
 
+}
+
+function toPermitApprovalMappingListFromUserList(userIds, permitId) {
+    return userIds.map(userId => ({
+        eusereuserid: userId,
+        epermitepermitid: permitId
+    }))
+}
+
+function toPermitApprovalMappingList(approvalList, permitId) {
+    let permitApprovalMappings = []
+    approvalList.forEach(approval => {
+        approval.approvalUsers.forEach(approvalUser => {
+            const permitApproval = {
+                eapprovaleapprovalid: approval.eapprovalid,
+                eusereuserid: approvalUser.eusereuserid,
+                epermitepermitid: permitId
+            }
+            permitApprovalMappings.push(permitApproval)
+        })
+    })
+    return permitApprovalMappings
 }
 
 module.exports = permitService

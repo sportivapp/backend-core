@@ -1,5 +1,9 @@
 const Model = require('./Model');
 const Team = require('./Team');
+const Industry = require('./Industry');
+const License = require('./License');
+const Experience = require('./Experience');
+
 
 class User extends Model {
   static get tableName() {
@@ -33,7 +37,10 @@ class User extends Model {
     const File = require('./File')
     const Project =require('./Project')
     const Announcement = require('./Announcement');
+    const Department = require('./Department')
     const UserIndustryMapping = require('./UserIndustryMapping')
+    const Class = require('./Class')
+    const ClassUserMapping = require('./ClassUserMapping')
 
     return {
       permits: {
@@ -68,6 +75,18 @@ class User extends Model {
           to: 'egrade.egradeid'
         }
       },
+      departments: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Department,
+        join: {
+          from: 'euser.euserid',
+          through: {
+            from: 'euserpositionmapping.eusereuserid',
+            to: 'euserpositionmapping.edepartmentedepartmentid'
+          },
+          to: 'edepartment.edepartmentid'
+        }
+      },
       country: {
         relation: Model.BelongsToOneRelation,
         modelClass: Country,
@@ -82,30 +101,6 @@ class User extends Model {
         join: {
           from: 'euser.efileefileid',
           to: 'efile.efileid'
-        }
-      },
-      approvalUser1: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: User,
-        join: {
-          from: 'euser.euserapprovaluserid1',
-          to: 'euser.euserid'
-        }
-      },
-      approvalUser2: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: User,
-        join: {
-          from: 'euser.euserapprovaluserid2',
-          to: 'euser.euserid'
-        }
-      },
-      approvalUser3: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: User,
-        join: {
-          from: 'euser.euserapprovaluserid3',
-          to: 'euser.euserid'
         }
       },
       projects: {
@@ -171,7 +166,68 @@ class User extends Model {
           from: 'euser.euserid',
           to: 'euserindustrymapping.eusereuserid'
         }
+      },
+      userIndustries: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Industry,
+        join: {
+          from: 'euser.euserid',
+          through: {
+            from: 'euserindustrymapping.eusereuserid',
+            to: 'euserindustrymapping.eindustryeindustryid'
+          },
+          to: 'eindustry.eindustryid'
+        }
+      },
+      coachIndustriesMapping: {
+        relation: Model.HasManyRelation,
+        modelClass: UserIndustryMapping,
+        join: {
+          from: 'euser.euserid',
+          to: 'ecoachindustrymapping.eusereuserid'
+        }
+      },
+      coachIndustries: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Industry,
+        join: {
+          from: 'euser.euserid',
+          through: {
+            from: 'ecoachindustrymapping.eusereuserid',
+            to: 'ecoachindustrymapping.eindustryeindustryid'
+          },
+          to: 'eindustry.eindustryid'
+        }
+      },
+      licenses: {
+        relation: Model.HasManyRelation,
+        modelClass: License,
+        join: {
+          from: 'euser.euserid',
+          to: 'elicense.elicensecreateby'
+        }
+      },
+      experiences: {
+        relation: Model.HasManyRelation,
+        modelClass: Experience,
+        join: {
+          from: 'euser.euserid',
+          to: 'eexperience.eusereuserid'
+        }
+      },
+      classes: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Class,
+        join: { 
+          from : 'euser.euserid',
+          through: {
+            from: 'eclassusermapping.eusereuserid',
+            to: 'eclassusermapping.eclasseclassid'
+          },
+          to: 'eclass.eclassid'
+        }
       }
+
     }
   }
 
@@ -179,7 +235,7 @@ class User extends Model {
     return {
       ...this.baseModifiers(),
       baseAttributes(builder) {
-        builder.select('euserid', 'eusername', 'euseremail', 'eusernik', 'eusermobilenumber')
+        builder.select('euserid', 'eusername', 'euseremail', 'eusernik', 'eusermobilenumber', 'euseridentitynumber', 'euserdob', 'eusergender', 'efileefileid')
       }
     }
   }

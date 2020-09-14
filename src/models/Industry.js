@@ -39,8 +39,8 @@ class Industry extends Model {
 
         return {
             // ...this.baseModifiers(),
-            selectName(builder) {
-                builder.select('eindustryname')
+            baseAttributes(builder) {
+                builder.select('eindustryid', 'eindustryname')
             }
         }
 

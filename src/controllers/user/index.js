@@ -44,9 +44,9 @@ userController.createUser = async (req, res, next) => {
         gender,
         hobby,
         address,
-        isMultiApproval,
         permission,
-        identityNumber
+        identityNumber,
+        fileId
     } = req.body
 
     try {
@@ -54,17 +54,19 @@ userController.createUser = async (req, res, next) => {
         const userDTO = {
             eusernik: userNik,
             eusername: username,
-            euseremail: userEmail,
+            euseremail: userEmail.toLowerCase(),
             eusermobilenumber: userMobileNumber,
-            eusermultiapproval: isMultiApproval,
             eusergender: gender,
             euserhobby: hobby,
             euseridentitynumber: identityNumber,
-            euseraddress: address
+            euseraddress: address,
+            efileefileid: fileId === 0 ? null : fileId
         }
 
         const data = await userService.createUser(userDTO, permission, user)
 
+        if (!data)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
 
     } catch (e) {
@@ -101,9 +103,9 @@ userController.updateUserById = async (req, res, next) => {
         gender,
         hobby,
         address,
-        isMultiApproval,
-        permission,
-        identityNumber
+        // permission,
+        identityNumber,
+        fileId
     } = req.body
     const { userId } = req.params
 
@@ -113,14 +115,15 @@ userController.updateUserById = async (req, res, next) => {
             eusernik: userNik,
             eusername: username,
             eusermobilenumber: userMobileNumber,
-            eusermultiapproval: isMultiApproval,
             eusergender: gender,
             euserhobby: hobby,
             euseridentitynumber: identityNumber,
-            euseraddress: address
+            euseraddress: address,
+            efileefileid: fileId
         }
 
-        const data = await userService.updateUserById(userId, userDTO, permission, user)
+        // const data = await userService.updateUserById(userId, userDTO, permission, user)
+        const data = await userService.updateUserById(userId, userDTO, user)
         if (!data) return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
 

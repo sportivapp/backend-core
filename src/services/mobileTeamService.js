@@ -10,7 +10,7 @@ const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const UnsupportedOperationErrorEnum = {
     NOT_ADMIN: 'NOT_ADMIN',
     USER_NOT_IN_TEAM: 'USER_NOT_IN_TEAM',
-    UPDATE_FAILED: 'UPDATE_FAILED',
+    TEAM_NOT_FOUND: 'TEAM_NOT_FOUND',
     USER_APPLIED: 'USER_APPLIED',
     USER_IN_TEAM: 'USER_IN_TEAM',
     USER_NOT_INVITED: 'USER_NOT_INVITED',
@@ -48,6 +48,8 @@ teamService.isAdmin = async (teamId, userId) => {
     .andWhere('eteamusermappingposition', TeamUserMappingPositionEnum.ADMIN)
     .first()
     .then(user => {
+        if(user === undefined)
+            return false
         return user.eteamusermappingposition === TeamUserMappingPositionEnum.ADMIN
     });
 }
@@ -148,10 +150,12 @@ teamService.updateTeam = async (teamDTO, user, teamId, industryIds) => {
     if (!isAdmin)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
-    const newTeam = await Team.query().updateByUserId(teamDTO, user.sub);
+    const team = await Team.query().where('eteamid', teamDTO.eteamid);
 
-    if (!newTeam)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.UPDATE_FAILED)
+    if (!team)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TEAM_NOT_FOUND)
+
+    await team.$query().updateByUserId(teamDTO, user.sub);
 
     // remove all industry mapping from the team
     await TeamIndustryMapping.query().where('eteameteamid', teamId).delete();
@@ -200,8 +204,7 @@ teamService.processIntoTeam = async (teamId, user, userId) => {
 
     const teamLogPromise = teamService.updateTeamLog(teamId, user, userId, TeamLogStatusEnum.ACCEPTED);
 
-    return Promise.all([teamUserMappingPromise, teamLogPromise])
-    .then();
+    return Promise.all([teamUserMappingPromise, teamLogPromise]);
 
 }
 

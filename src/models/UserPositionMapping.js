@@ -23,16 +23,25 @@ class UserPositionMapping extends Model {
     static get relationMappings() {
 
         const User = require('./User')
+        const Grades = require('./Grades')
 
         return {
-            users: {
+            user: {
                 relation: Model.BelongsToOneRelation,
                 modelClass: User,
                 join: {
                     from: 'euserpositionmapping.eusereuserid',
                     to: 'euser.euserid'
                 }
-            }
+            },
+            grade: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Grades,
+                join: {
+                    from: 'euserpositionmapping.egradeegradeid',
+                    to: 'egrade.egradeid'
+                }
+            },
         }
     }
 }
