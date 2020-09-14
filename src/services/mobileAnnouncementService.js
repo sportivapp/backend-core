@@ -1,11 +1,7 @@
 const Announcement = require('../models/Announcement');
 
 const announcementService = {}
-const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
-
-const UnsupportedAnnouncementErrorEnum = {
-    ANNOUNCEMENT_NOT_EXIST: 'ANNOUNCEMENT_NOT_EXIST',
-}
+const { NotFoundError } = require('../models/errors')
 
 announcementService.getAnnouncements = async (user) => {
 
