@@ -1,6 +1,11 @@
 const Announcement = require('../models/Announcement');
 
 const announcementService = {}
+const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
+
+const UnsupportedAnnouncementErrorEnum = {
+    ANNOUNCEMENT_NOT_EXIST: 'ANNOUNCEMENT_NOT_EXIST',
+}
 
 announcementService.getAnnouncements = async (user) => {
 
@@ -10,7 +15,7 @@ announcementService.getAnnouncements = async (user) => {
     .where('users.euserid', user.sub);
 
     if (announcements.length === 0)
-        return [];
+        throw new UnsupportedOperationError(UnsupportedAnnouncementErrorEnum.ANNOUNCEMENT_NOT_EXIST)
 
     const returnedAnnouncements = announcements.map(announcement => {
         return {
@@ -39,6 +44,11 @@ announcementService.getAnnouncement = async (announcementId, user) => {
     if (announcement.eusername === null) {
         announcement.eusername = 'SYSTEM';
     }
+    
+    if(!announcement) {
+        throw new UnsupportedOperationError(UnsupportedAnnouncementErrorEnum.ANNOUNCEMENT_NOT_EXIST)
+    }
+
 
     return announcement
 
