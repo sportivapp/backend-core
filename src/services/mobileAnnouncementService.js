@@ -15,7 +15,7 @@ announcementService.getAnnouncements = async (user) => {
     .where('users.euserid', user.sub);
 
     if (announcements.length === 0)
-        throw new UnsupportedOperationError(UnsupportedAnnouncementErrorEnum.ANNOUNCEMENT_NOT_EXIST)
+        return [];
 
     const returnedAnnouncements = announcements.map(announcement => {
         return {
@@ -46,7 +46,7 @@ announcementService.getAnnouncement = async (announcementId, user) => {
     }
     
     if(!announcement) {
-        throw new UnsupportedOperationError(UnsupportedAnnouncementErrorEnum.ANNOUNCEMENT_NOT_EXIST)
+        throw new NotFoundError()
     }
 
 

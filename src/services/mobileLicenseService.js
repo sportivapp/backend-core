@@ -1,6 +1,7 @@
 const License = require('../models/License');
 const fileService = require('./fileService');
-const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
+const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
+const { query } = require('../models/License');
 
 const LicenseService = {};
 
@@ -20,19 +21,18 @@ LicenseService.getLicense = async (licenseId) => {
     .first();
 
     if(!license)
-    throw new UnsupportedOperationError(UnsupportedLicenseErrorEnum.LICENSE_NOT_FOUND)
+        throw new NotFoundError()
 
+    return license(query)
 }
 
 LicenseService.getLicenses = async (user) => {
 
-    const license = await License.query()
+    return License.query()
     .select('elicenseid', 'elicenseacademicname', 'elicensegraduationdate', 'elicenselevel', 'eindustryname')
     .joinRelated('industry')
     .where('elicensecreateby', user.sub);
 
-    if(!license)
-    throw new UnsupportedOperationError(UnsupportedLicenseErrorEnum.LICENSE_NOT_FOUND)
 }
 
 LicenseService.createLicense = async (licenseDTO, user) => {
@@ -41,7 +41,7 @@ LicenseService.createLicense = async (licenseDTO, user) => {
 
     // License must have a file attached
     if (!file)
-    throw new UnsupportedOperationError(UnsupportedLicenseErrorEnum.FILE_LICENSE_NOT_EXIST)
+        throw new UnsupportedOperationError(UnsupportedLicenseErrorEnum.FILE_LICENSE_NOT_EXIST)
 
     const license = await License.query().insertToTable(licenseDTO, user.sub);
 
@@ -61,14 +61,14 @@ LicenseService.updateLicense = async (licenseDTO, licenseId, user) => {
 
     // License must have a file attached
     if (!file)
-    throw new UnsupportedOperationError(UnsupportedLicenseErrorEnum.FILE_LICENSE_NOT_EXIST)
+         throw new UnsupportedOperationError(UnsupportedLicenseErrorEnum.FILE_LICENSE_NOT_EXIST)
 
 
     const licenses = await LicenseService.getLicensesByIdsAndCreateBy([licenseId], user.sub);
     const license = licenses[0];
 
     if (!license)
-    throw new UnsupportedOperationError(UnsupportedLicenseErrorEnum.LICENSE_NOT_FOUND)
+        throw new UnsupportedOperationError(UnsupportedLicenseErrorEnum.LICENSE_NOT_FOUND)
 
     return license.$query().updateByUserId(licenseDTO, user.sub).returning('*');
 
@@ -79,7 +79,7 @@ LicenseService.deleteLicenses = async (licenseIds, user) => {
     const licenses = await LicenseService.getLicensesByIdsAndCreateBy(licenseIds, user.sub);
 
     if (licenses.length === 0 || licenses.length !== licenseIds.length)
-    throw new UnsupportedOperationError(UnsupportedLicenseErrorEnum.LICENSE_NOT_FOUND)
+        throw new UnsupportedOperationError(UnsupportedLicenseErrorEnum.LICENSE_NOT_FOUND)
 
     return License.query().whereIn('elicenseid', licenseIds).del()
     .then(rowsAffected => rowsAffected === licenseIds.length);
