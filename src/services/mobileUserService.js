@@ -187,7 +187,7 @@ UserService.updateUser = async (userDTO, industryIds, user) => {
 
 UserService.updateUserCoachData = async (userCoachDTO, user, industryIds) => {
 
-    await UserService.getUserById(user.sub);
+    const userFromDB = await UserService.getUserById(user.sub);
 
     if (userFromDB.euseriscoach)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.ALREADY_REGISTERED_AS_COACH) 
