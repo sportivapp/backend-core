@@ -104,7 +104,7 @@ UserService.getUserById = async (userId) => {
     .first();
 
     if (!user)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
+        throw new NotFoundError()
 
     return user;
     
@@ -129,7 +129,7 @@ UserService.getOtherUserById = async (userId, type) => {
     .withGraphFetched('licenses(baseAttributes)')
     .then(user => {
         if(user === undefined)
-            throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
+            throw new NotFoundError()
         return user
     })
     // .withGraphFetched("[" + relatedIndustry + ", companies(baseAttributes), teams(baseAttributes), experiences.industry, licenses.industry]")
