@@ -24,6 +24,14 @@ const UnsupportedOperationErrorEnum = {
     INDUSTRY_IS_EMPTY: 'INDUSTRY_IS_EMPTY',
 }
 
+const ErrorUserEnum = {
+    EMAIL_NOT_FOUND :'EMAIL_NOT_FOUND',
+    EMAIL_INVALID : 'EMAIL_INVALID',
+    USER_ALREADY_EXIST : 'USER_ALREADY_EXIST',
+    OTP_NOT_FOUND : 'OTP_NOT_FOUND',
+    OTP_CODE_NOT_MATCH : 'OTP_CODE_NOT_MATCH'
+}
+
 async function generateJWTToken(user) {
 
     const config = {
@@ -43,7 +51,7 @@ UserService.login = async (loginDTO) => {
 
     const user = await User.query().where('euseremail', loginDTO.euseremail).first();
 
-    if (!user) throw new NotFoundError()
+    if (!user) throw new UnsupportedOperationError(ErrorUserEnum.EMAIL_NOT_FOUND)
 
     const success = await bcrypt.compare(loginDTO.euserpassword, user.euserpassword);
 
@@ -58,20 +66,20 @@ UserService.createUser = async (userDTO, otpCode) => {
     const isEmail = emailService.validateEmail(userDTO.euseremail);
 
     if (!isEmail)
-        return 'invalid email'
+        throw new UnsupportedOperationError(ErrorUserEnum.EMAIL_INVALID)
 
     const user = await User.query().where('euseremail', userDTO.euseremail).first();
 
     if (user)
-        return 'user exist'
+        throw new UnsupportedOperationError(ErrorUserEnum.USER_ALREADY_EXIST)
 
     const otp = await Otp.query().where('euseremail', userDTO.euseremail).first();
 
     if (!otp)
-        return 'no otp found'
+        throw new UnsupportedOperationError(ErrorUserEnum.OTP_NOT_FOUND)
 
     if (otp.eotpcode !== otpCode)
-        return 'otp code not match'
+        throw new UnsupportedOperationError(ErrorUserEnum.OTP_CODE_NOT_MATCH)
 
     // confirm OTP
     await otp.$query().updateByUserId({ eotpconfirmed: true }, 0);
@@ -154,9 +162,15 @@ UserService.updateUser = async (userDTO, industryIds, user) => {
     if (!userFromDB)
         return
     
-    await User.transaction(async trx => {
-        await updateUserAndIndustries(userFromDB, userDTO, industryIds, user, trx);
-    })
+    // Update user only
+    if (industryIds.length === 0) {
+        await userFromDB.$query().updateByUserId(userDTO, user.sub);
+    } else {
+        // Update user and industry
+        await User.transaction(async trx => {
+            await updateUserAndIndustries(userFromDB, userDTO, industryIds, user, trx);
+        })
+    }
 
     return 1;
 

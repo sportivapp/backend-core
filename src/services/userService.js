@@ -174,39 +174,41 @@ UsersService.getUserCurrentCompany = async ( user ) => {
 
 }
 
-UsersService.updateUserById = async (userId, userDTO, permission, user) => {
+// UsersService.updateUserById = async (userId, userDTO, permission, user) => {
+UsersService.updateUserById = async (userId, userDTO, user) => {
 
     if (user.permission != 9 && user.permission != 10) {
-        if (userId != user.sub) return
+        // if (userId != user.sub) 
+            return
     }
 
-    const userMapping = await CompanyUserMapping.query()
-        .where('ecompanyecompanyid', user.companyId)
-        .where('eusereuserid', userId)
-        .first()
+    // const userMapping = await CompanyUserMapping.query()
+    //     .where('ecompanyecompanyid', user.companyId)
+    //     .where('eusereuserid', userId)
+    //     .first()
 
     const updateUserQuery = User.query().findById(userId)
         .updateByUserId(userDTO, user.sub)
         .returning('*')
 
-    let realPermission
+    // let realPermission
 
-    if (!permission) realPermission = 1
-    else realPermission = permission
+    // if (!permission) realPermission = 1
+    // else realPermission = permission
 
-    let additionalQuery
+    // let additionalQuery
 
-    if (userMapping.ecompanyusermappingpermission != realPermission) {
-        additionalQuery = CompanyUserMapping.query()
-            .where('ecompanyecompanyid', user.companyId)
-            .where('eusereuserid', userId)
-            .updateByUserId({ ecompanyusermappingpermission: realPermission }, user.sub)
-    }
+    // if (userMapping.ecompanyusermappingpermission != realPermission) {
+    //     additionalQuery = CompanyUserMapping.query()
+    //         .where('ecompanyecompanyid', user.companyId)
+    //         .where('eusereuserid', userId)
+    //         .updateByUserId({ ecompanyusermappingpermission: realPermission }, user.sub)
+    // }
 
-    if (additionalQuery)
-        return Promise.all([additionalQuery, updateUserQuery])
-            .then(resultArr => resultArr[1])
-    else
+    // if (additionalQuery)
+    //     return Promise.all([additionalQuery, updateUserQuery])
+    //         .then(resultArr => resultArr[1])
+    // else
         return updateUserQuery
 }
 
