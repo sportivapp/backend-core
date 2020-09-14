@@ -43,13 +43,11 @@ UserService.login = async (loginDTO) => {
 
     const user = await User.query().where('euseremail', loginDTO.euseremail).first();
 
-    if (!user)
-        return
+    if (!user) throw new NotFoundError()
 
     const success = await bcrypt.compare(loginDTO.euserpassword, user.euserpassword);
 
-    if (!success)
-        return
+    if (!success) throw new UnsupportedOperationError('SERVER_ERROR')
 
     return await generateJWTToken(user);
 
