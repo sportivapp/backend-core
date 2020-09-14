@@ -44,9 +44,6 @@ controller.getVirtualMemberCard = async (req, res, next) => {
     try {
 
         const result = await companyService.getVirtualMemberCard(parseInt(companyId), req.user);
-
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404));
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
