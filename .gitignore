@@ -1,10 +1,4 @@
 node_modules
-<<<<<<< HEAD
-env
-knexfile.js
-temp
-=======
 temp
 knexfile.js
 .env
->>>>>>> 9418ef0fe77cb3c5be4a5d3b1211d0e3d237898a
