@@ -1,6 +1,7 @@
 const Announcement = require('../models/Announcement');
 
 const announcementService = {}
+const { NotFoundError } = require('../models/errors')
 
 announcementService.getAnnouncements = async (user) => {
 
@@ -39,6 +40,11 @@ announcementService.getAnnouncement = async (announcementId, user) => {
     if (announcement.eusername === null) {
         announcement.eusername = 'SYSTEM';
     }
+    
+    if(!announcement) {
+        throw new NotFoundError()
+    }
+
 
     return announcement
 

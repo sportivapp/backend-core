@@ -560,6 +560,22 @@ exports.seed = (knex, Promise) => knex('efile').del()
           efilesize: 1,
           efilecreateby: 0,
           efilecreatetime: Date.now()
+        },
+        {
+          efilename: '019-Barry Timothy.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/019-Barry Timothy.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
+        },
+        {
+          efilename: '020-Agus Sungeng Riyanto S.pd.jpeg',
+          efilepath: process.env.TEMP_DIRECTORY + '/020-Agus Sungeng Riyanto S.pd.jpeg',
+          efiletype: 'image/jpg',
+          efilesize: 1,
+          efilecreateby: 0,
+          efilecreatetime: Date.now()
         }
       ]
 ));

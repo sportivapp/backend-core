@@ -137,11 +137,12 @@ exports.seed = (knex, Promise) => knex('ecompanyusermapping').del()
                     ecompanyusermappingcreateby: 0,
                     ecompanyusermappingpermission: 1
                 },
+                // Galih
                 {
                     ecompanyecompanyid: 6,
                     eusereuserid: 19,
                     ecompanyusermappingcreateby: 0,
-                    ecompanyusermappingpermission: 1
+                    ecompanyusermappingpermission: 10
                 },
                 // Ali reza
                 {
@@ -171,6 +172,18 @@ exports.seed = (knex, Promise) => knex('ecompanyusermapping').del()
                 {
                     ecompanyecompanyid: 6,
                     eusereuserid: 24,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 25,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 26,
                     ecompanyusermappingcreateby: 0,
                     ecompanyusermappingpermission: 1
                 }

@@ -52,7 +52,6 @@ experienceService.getExperienceList = async (page = 0, size = 10, loggedInUser, 
     .where(raw('lower("eexperiencename")'), 'like', `%${newKeyword}%`)
     .page(page, size)
 
-
     return ServiceHelper.toPageObj(page, size, pageObj)
 }
 
@@ -64,6 +63,11 @@ experienceService.getExperienceById = async (experienceId) => {
     .leftJoinRelated('[industry, files]')
     .where('eexperienceid', experienceId)
     .first()
+    .then(experience => {
+        if(experience === undefined)
+            throw new NotFoundError()
+        return experience
+    })
 
 }
 

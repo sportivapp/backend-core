@@ -1,18 +1,27 @@
 const License = require('../models/License');
 const fileService = require('./fileService');
+const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
+const { query } = require('../models/License');
 
 const LicenseService = {};
+
+const UnsupportedLicenseErrorEnum = {
+    FILE_LICENSE_NOT_EXIST : 'FILE_LICENSE_NOT_EXIST',
+}
 
 LicenseService.getLicense = async (licenseId) => {
 
     return License.query()
+    .findById(licenseId)
     .select('elicenseid', 'elicenseacademicname', 'efileid', 'efilename', 'elicensegraduationdate', 'eindustryname', 'elicenselevel', 
     'elicenseadditionalinformation')
     .leftJoinRelated('industry')
     .joinRelated('file')
-    .where('elicenseid', licenseId)
-    .first();
-
+    .then(result => {
+        if(!result)
+            throw new NotFoundError()
+    })
+    
 }
 
 LicenseService.getLicenses = async (user) => {
@@ -30,7 +39,7 @@ LicenseService.createLicense = async (licenseDTO, user) => {
 
     // License must have a file attached
     if (!file)
-        return
+        throw new UnsupportedOperationError(UnsupportedLicenseErrorEnum.FILE_LICENSE_NOT_EXIST)
 
     const license = await License.query().insertToTable(licenseDTO, user.sub);
 
@@ -50,13 +59,14 @@ LicenseService.updateLicense = async (licenseDTO, licenseId, user) => {
 
     // License must have a file attached
     if (!file)
-        return
+         throw new UnsupportedOperationError(UnsupportedLicenseErrorEnum.FILE_LICENSE_NOT_EXIST)
+
 
     const licenses = await LicenseService.getLicensesByIdsAndCreateBy([licenseId], user.sub);
     const license = licenses[0];
 
     if (!license)
-        return
+        throw new NotFoundError()
 
     return license.$query().updateByUserId(licenseDTO, user.sub).returning('*');
 
@@ -67,7 +77,7 @@ LicenseService.deleteLicenses = async (licenseIds, user) => {
     const licenses = await LicenseService.getLicensesByIdsAndCreateBy(licenseIds, user.sub);
 
     if (licenses.length === 0 || licenses.length !== licenseIds.length)
-        return
+        throw new NotFoundError()
 
     return License.query().whereIn('elicenseid', licenseIds).del()
     .then(rowsAffected => rowsAffected === licenseIds.length);
