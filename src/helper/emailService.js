@@ -68,7 +68,7 @@ exports.sendForgotPasswordLink = async ( userId, email ) => {
     const info = await transporter.sendMail({
         from: process.env.MAIL_SMTPNAME, // sender address
         to: email, // list of receivers
-        subject: 'Forgot Password Code - Nawakara', // Subject line
+        subject: 'Forgot Password Code - Sportiv', // Subject line
         text: 'Berikut adalah password baru kamu: ' + newPassword, // plain text body
         // html: html
     });
