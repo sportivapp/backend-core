@@ -5,7 +5,7 @@ const controller = {};
 
 controller.getTheoryList = async (req, res, next) => {
 
-    const { keyword = '', companyId = null, page = '0', size = '10' } = req.query
+    const { keyword = '', companyId = null, page = '0', size = '100' } = req.query
     
     try {
 
