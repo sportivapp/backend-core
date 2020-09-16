@@ -57,7 +57,8 @@ exports.seed = (knex, Promise) => knex('ecompany').del()
               ecompanycreateby: 0,
               ecompanycreatetime: Date.now(),
               eindustryeindustryid: 1,
-              ecompanyphonenumber: "021-000000"
+              ecompanyphonenumber: "021-000000",
+              efileefileid: 2
             }
       ]
     ));
