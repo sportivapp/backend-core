@@ -2,6 +2,14 @@ const Otp = require('../models/Otp');
 const User = require('../models/User');
 const otpCodeGenerator = require('../helper/otpCodeGenerator');
 const emailService = require('../helper/emailService');
+const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
+
+const ErrorEnum = {
+    EMAIL_INVALID: 'EMAIL_INVALID',
+    EMAIL_EXISTED: 'EMAIL_EXISTED',
+    OTP_PENDING: 'OTP_PENDING',
+    OTP_CONFIRMED: 'OTP_CONFIRMED'
+}
 
 const OtpService = {};
 
@@ -10,7 +18,7 @@ OtpService.createOtp = async (email) => {
     const isEmail = await emailService.validateEmail(email);
     
     if (!isEmail)
-        return 'invalid email'
+        throw new UnsupportedOperationError(ErrorEnum.EMAIL_INVALID);
 
     const otp = Otp.query().where('euseremail', email).first();
     const user = User.query().where('euseremail', email).first();
@@ -19,7 +27,7 @@ OtpService.createOtp = async (email) => {
 
     // If email exist in user
     if (promised[1])
-        return 'email used'
+        throw new UnsupportedOperationError(ErrorEnum.EMAIL_EXISTED);
 
     let returnedOtp = {}
     const otpCode = otpCodeGenerator.create4DigitsOTP();
@@ -29,11 +37,11 @@ OtpService.createOtp = async (email) => {
 
         // If less than one minute passed
         if ((Date.now() - promised[0].eotpchangetime) < 60000)
-            return 'you need to wait'
+            throw new UnsupportedOperationError(ErrorEnum.OTP_PENDING);
 
         // If already confirmed
         if (promised[0].otpcodeconfirmed)
-            return 'otp already confirmed'
+            throw new UnsupportedOperationError(ErrorEnum.OTP_CONFIRMED);
 
         // resend Otp
         returnedOtp = await promised[0].$query().updateByUserId({ eotpcode: otpCode }, 0).returning('*');
@@ -49,7 +57,7 @@ OtpService.createOtp = async (email) => {
 
     }
 
-    await emailService.sendEmailOTP(email, otpCode);
+    emailService.sendEmailOTP(email, otpCode);
 
     return 1;
 
