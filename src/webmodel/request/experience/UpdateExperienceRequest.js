@@ -6,7 +6,7 @@ const schema = Joi.object({
     endDate: Joi.number().positive().allow(0),
     location: Joi.string().max(65),
     position: Joi.string().max(65),
-    description: Joi.string().max(1025),
+    description: Joi.string().max(1025).allow('', null),
     industryId: Joi.number().positive().required()
 })
 
