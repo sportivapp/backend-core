@@ -5,7 +5,7 @@ exports.seed = (knex, Promise) => knex('enotificationbody').del()
                 {
                     enotificationbodyentityid: 1,
                     enotificationbodyentitytype: 'COMPANY',
-                    enotificationbodyaction: 'INVITE',
+                    enotificationbodyaction: 'COMPANY_INVITE',
                     enotificationbodytitle: 'Company Invitation',
                     enotificationbodymessage: 'You have been invited to this Company!',
                     enotificationbodysenderid: 4,
@@ -17,7 +17,7 @@ exports.seed = (knex, Promise) => knex('enotificationbody').del()
                 {
                     enotificationbodyentityid: 2,
                     enotificationbodyentitytype: 'COMPANY',
-                    enotificationbodyaction: 'INVITE',
+                    enotificationbodyaction: 'COMPANY_INVITE',
                     enotificationbodytitle: 'Company Invitation',
                     enotificationbodymessage: 'You have been invited to this Company!',
                     enotificationbodysenderid: 5,
@@ -29,7 +29,7 @@ exports.seed = (knex, Promise) => knex('enotificationbody').del()
                 {
                     enotificationbodyentityid: 3,
                     enotificationbodyentitytype: 'COMPANY',
-                    enotificationbodyaction: 'INVITE',
+                    enotificationbodyaction: 'COMPANY_INVITE',
                     enotificationbodytitle: 'Company Invitation',
                     enotificationbodymessage: 'You have been invited to this Company!',
                     enotificationbodysenderid: 3,
@@ -41,7 +41,7 @@ exports.seed = (knex, Promise) => knex('enotificationbody').del()
                 {
                     enotificationbodyentityid: 4,
                     enotificationbodyentitytype: 'COMPANY',
-                    enotificationbodyaction: 'INVITE',
+                    enotificationbodyaction: 'COMPANY_INVITE',
                     enotificationbodytitle: 'Company Invitation',
                     enotificationbodymessage: 'You have been invited to this Company!',
                     enotificationbodysenderid: 4,
