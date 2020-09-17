@@ -1,15 +1,17 @@
 const NotificationEnum = {
     company: {
         type: 'COMPANY',
-        action: {
+        actions: {
 
         }
     },
     class: {
         type: 'CLASS',
-        action: {
-            
+        actions: {
+
         }
 
     }
 }
+
+module.exports = NotificationEnum
