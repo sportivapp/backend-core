@@ -147,6 +147,11 @@ module.exports = {
         },
         news: {
             id: '/news/:newsId'
+        },
+        notification: {
+            list: '/notification',
+            body: '/notification-body',
+            id: '/notification/:notificationId'
         }
     }
 }
