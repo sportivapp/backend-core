@@ -73,5 +73,5 @@ httpsServer.listen(httpsPORT, function() {
 
 module.exports = {
     httpServer: httpServer,
-    // httpsServer: httpsServer
+    httpsServer: httpsServer
 }
