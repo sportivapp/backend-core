@@ -12,25 +12,11 @@ const UnsupportedLicenseErrorEnum = {
 LicenseService.getLicense = async (licenseId) => {
 
     return License.query()
-<<<<<<< HEAD
         .findById(licenseId)
         .modify('baseAttributes')
         .withGraphFetched('file(baseAttributes)')
         .withGraphFetched('licenseLevel(baseAttributesWithIndustry)')
 
-=======
-    .findById(licenseId)
-    .select('elicenseid', 'elicenseacademicname', 'efileid', 'efilename', 'elicensegraduationdate', 'eindustryname', 'elicenselevel', 
-    'elicenseadditionalinformation')
-    .leftJoinRelated('industry')
-    .joinRelated('file')
-    .then(result => {
-        if(!result)
-            throw new NotFoundError()
-        return result
-    })
-    
->>>>>>> 80bbbb127ce9254ee02cf0ca78ad1b2132415cda
 }
 
 LicenseService.getLicenses = async (user) => {
