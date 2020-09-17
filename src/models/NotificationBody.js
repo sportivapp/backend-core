@@ -18,6 +18,22 @@ class NotificationBody extends Model {
         };
     }
 
+    static get relationMappings() {
+
+        const Notification = require('./Notification');
+
+        return {
+            notifications: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Notification,
+                join: {
+                    from: 'enotificationbody.enotificationbodyid',
+                    to: 'enotification.enotificationbodyenotificationbodyid'
+                }
+            }
+        }
+    }
+
 }
 
 module.exports = NotificationBody;
