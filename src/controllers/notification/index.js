@@ -19,29 +19,11 @@ controller.getAllNotification = async (req, res, next) => {
 
 }
 
-controller.getAllNotificationBody = async (req, res, next) => {
-
-    const {page = '0', size = '100', type = 'ALL' } = req.query
+controller.deleteNotificationBody = async (req, res, next) => {
     
     try {
 
-        const pageObj = await notificationService.getAllNotificationBody(parseInt(page), parseInt(size), req.user, type.toUpperCase());
-
-        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
-
-    } catch(e) {
-        next(e);
-    }
-
-}
-
-controller.deleteNotification = async (req, res, next) => {
-
-    const { notificationId } = req.params
-    
-    try {
-
-        const result = await notificationService.deleteNotification(notificationId, req.user);
+        const result = await notificationService.deleteNotificationBody();
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
