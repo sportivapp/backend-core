@@ -2,11 +2,11 @@ const Otp = require('../models/Otp');
 const User = require('../models/User');
 const otpCodeGenerator = require('../helper/otpCodeGenerator');
 const emailService = require('../helper/emailService');
-const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
+const { UnsupportedOperationError } = require('../models/errors')
 
 const ErrorEnum = {
     EMAIL_INVALID: 'EMAIL_INVALID',
-    EMAIL_EXISTED: 'EMAIL_EXISTED',
+    EMAIL_USED: 'EMAIL_USED',
     OTP_PENDING: 'OTP_PENDING',
     OTP_CONFIRMED: 'OTP_CONFIRMED'
 }
