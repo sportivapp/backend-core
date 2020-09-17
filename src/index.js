@@ -33,25 +33,25 @@ app.use((_, __, next) => {
     next(err);
 });
 
-app.use((error, req, res, next) => {
-    // errorMsg = error;
-    console.log(error)
-    const status = error.status || 500;
-    res.status(status).send({
-        error: {
-            status: status,
-            message: error.message || 'Internal Server Error',
-        },
-    });
+// app.use((error, req, res, next) => {
+//     // errorMsg = error;
+//     console.log(error)
+//     const status = error.status || 500;
+//     res.status(status).send({
+//         error: {
+//             status: status,
+//             message: error.message || 'Internal Server Error',
+//         },
+//     });
 
-    errorMsg = {
-        status: status,
-        message: error.message || 'Internal Server Error',
-        errStack: error.stack
-    }
+//     errorMsg = {
+//         status: status,
+//         message: error.message || 'Internal Server Error',
+//         errStack: error.stack
+//     }
 
-    slackLoggingService.sendSlackMessage(webHookURL, slackLoggingService.setLogMessage(errorMsg));
-});
+//     slackLoggingService.sendSlackMessage(webHookURL, slackLoggingService.setLogMessage(errorMsg));
+// });
 
 app.use(errorHandler)
 
