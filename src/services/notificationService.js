@@ -23,55 +23,21 @@ notificationService.getAllNotification = async (page, size, user) => {
     const userInDB = await notificationService.checkUserInDB(user.sub)
 
     if(!userInDB)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
+        return ServiceHelper.toEmptyPage(page, size)
 
-    return Notification.query()
-    .select()
-    .where('eusereuserid', user.sub)
+    return Notification.relatedQuery('notificationBody')
+    .for(Notification.query().where('eusereuserid', user.sub))
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
 }
 
-notificationService.getAllNotificationBody = async (page, size, user, type) => {
-
-    const userInDB = await notificationService.checkUserInDB(user.sub)
-
-    if(!userInDB)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
-
-    if(type !== 'COMPANY' && type !== 'CLASS' && type !== 'ALL')
-        throw new NotFoundError()
-
-    if(type === 'ALL')
-        return NotificationBody.query()
-        .joinRelated('notifications')
-        .where('eusereuserid', user.sub)
-        .page(page, size)
-        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+notificationService.deleteNotificationBody = async () => {
 
     return NotificationBody.query()
-    .joinRelated('notifications')
-    .where('eusereuserid', user.sub)
-    .andWhere('enotificationbodyentitytype', type)
-    .page(page, size)
-    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
-
-}
-
-notificationService.deleteNotification = async (notificationId, user) => {
-
-    const userInDB = await notificationService.checkUserInDB(user.sub)
-
-    if(!userInDB)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
-
-    return Notification.query()
     .delete()
-    .where('eusereuserid', user.sub)
-    .andWhere('enotificationid', notificationId)
-    .first()
-    .then(rowsAffected => rowsAffected === 1)
+    .where('enotificationbodycreatetime', '<', Date.now() - 2678400) // where notification already more than 30 days old
+    .then(rowsAffected => rowsAffected > 0)
 
 }
 
