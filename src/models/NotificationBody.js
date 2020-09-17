@@ -24,7 +24,7 @@ class NotificationBody extends Model {
 
         return {
             notifications: {
-                relation: Model.BelongsToOneRelation,
+                relation: Model.HasManyRelation,
                 modelClass: Notification,
                 join: {
                     from: 'enotificationbody.enotificationbodyid',
