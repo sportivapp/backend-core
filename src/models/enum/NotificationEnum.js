@@ -16,7 +16,7 @@ const NotificationEnum = {
         type: 'USER',
         actions: {
             join: {
-                title: 'User Applied',
+                title: 'User Apply',
                 code: 'USER_APPLY',
                 message: 'New user has applied to Organization!'
             },
