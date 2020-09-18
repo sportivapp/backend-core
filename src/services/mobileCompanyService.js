@@ -42,6 +42,9 @@ companyService.getHighestPosition = async (companyId) => {
     .select()
     .where('ecompanyecompanyid', companyId)
     .whereIn('eusereuserid', userIds)
+    .then(users => {
+        return users.map(user => user.eusereuserid)
+    })
 
 }
 
