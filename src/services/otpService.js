@@ -37,7 +37,7 @@ OtpService.createOtp = async (email) => {
 
         // If less than one minute passed
         const oneMinute = 60 * 1000;
-        if (promised[0].eotpchangetime < (Date.now() - oneMinute))
+        if ((Date.now() - promised[0].eotpchangetime) < oneMinute)
             throw new UnsupportedOperationError(ErrorEnum.OTP_PENDING);
 
         // If already confirmed

@@ -8,7 +8,8 @@ const cryptojs = require('crypto-js');
 const ErrorEnum = {
     EMAIL_INVALID: 'EMAIL_INVALID',
     TOKEN_INVALID: 'TOKEN_INVALID',
-    TOKEN_EXPIRED: 'TOKEN_EXPIRED'
+    TOKEN_EXPIRED: 'TOKEN_EXPIRED',
+    FORGET_PENDING: 'FORGET_PENDING'
 }
 
 const ForgetService = {};
@@ -28,9 +29,9 @@ ForgetService.sendForgetEmail = async (email) => {
     const forget = await Forget.query().where('euseremail', email).first();
 
     // If less than one minute passed
-    const oneMinute = 60 * 1000;
-    if (forget.eforgetchangetime < (Date.now() - oneMinute))
-        throw new UnsupportedOperationError(ErrorEnum.OTP_PENDING);
+    const oneMinute = 60 * 1000;    
+    if ((Date.now() - forget.eforgetchangetime) < oneMinute)
+        throw new UnsupportedOperationError(ErrorEnum.FORGET_PENDING);
     
     // Generate random token
     const token = [...Array(22)].map(i=>(~~(Math.random()*36)).toString(36)).join('');
