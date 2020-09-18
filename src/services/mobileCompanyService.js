@@ -7,13 +7,18 @@ const User = require('../models/User')
 const RosterUserMapping = require('../models/RosterUserMapping')
 const ShiftRosterUserMapping = require('../models/ShiftRosterUserMapping')
 const Team = require('../models/Team')
+const Grade = require('../models/Grades')
+const UserPositionMapping = require('../models/UserPositionMapping')
+const NotificationEnum = require('../models/enum/NotificationEnum')
 const CompanyLogTypeEnum = require('../models/enum/CompanyLogTypeEnum')
 const CompanyLogStatusEnum = require('../models/enum/CompanyLogStatusEnum')
 const { raw } = require('objection');
 const ServiceHelper = require('../helper/ServiceHelper')
+const notificationService = require('./notificationService')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
 const UnsupportedOperationErrorEnum = {
+    USER_APPLIED: 'USER_APPLIED',
     USER_IN_COMPANY: 'USER_IN_COMPANY',
     USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY',
     USER_NOT_EXIST: 'USER_NOT_EXIST',
@@ -24,6 +29,24 @@ const UnsupportedOperationErrorEnum = {
 }
 
 const companyService = {}
+
+companyService.getHighestPosition = async (companyId) => {
+
+    const users = await Grade.relatedQuery('users')
+    .for(Grade.query().where('ecompanyecompanyid', companyId).andWhere('egradesuperiorid', null))
+    .distinct('euserid')
+
+    let userIds = users.map(user => user.euserid)
+ 
+    return CompanyUserMapping.query()
+    .select()
+    .where('ecompanyecompanyid', companyId)
+    .whereIn('eusereuserid', userIds)
+    .then(users => {
+        return users.map(user => user.eusereuserid)
+    })
+
+}
 
 companyService.getCompany = async (companyId, user) => {
 
@@ -128,7 +151,7 @@ companyService.createCompanyLog = async (companyId, user, userId, type) => {
         ecompanyecompanyid: companyId,
         eusereuserid: userId,
         ecompanylogtype: type
-    }, user.sub);
+    }, user.sub)
 
 }
 
@@ -159,6 +182,9 @@ companyService.processIntoCompany = async (companyId, user, userId) => {
 
 companyService.joinCompany = async (companyId, user) => {
 
+    // get company(organization) highest user position (admin)
+    const getHighestPosition = await companyService.getHighestPosition(companyId)
+
     // If user already in company
     const userInCompany = await companyService.checkUserInCompany(companyId, user.sub);
 
@@ -169,8 +195,27 @@ companyService.joinCompany = async (companyId, user) => {
     const pendingInviteApply = await companyService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.INVITE, CompanyLogTypeEnum.APPLY]);
 
     // If there is no pending invite / apply, create apply log
-    if (!pendingInviteApply)
-        return companyService.createCompanyLog(companyId, user, user.sub, CompanyLogTypeEnum.APPLY);
+    if (!pendingInviteApply) {
+        // after create the company log, create notification for admin
+        return companyService.createCompanyLog(companyId, user, user.sub, CompanyLogTypeEnum.APPLY)
+        .then(companyLog => {
+
+            const notificationObj = {
+                enotificationbodyentityid: user.sub,
+                enotificationbodyentitytype: NotificationEnum.user.type,
+                enotificationbodyaction: NotificationEnum.user.actions.join.code,
+                enotificationbodytitle: NotificationEnum.user.actions.join.title,
+                enotificationbodymessage: NotificationEnum.user.actions.join.message
+            }
+
+            notificationService.saveNotification(
+                notificationObj,
+                user,
+                getHighestPosition
+            )
+            return companyLog
+        })
+    }
 
     // If apply pending exist, return
     if (pendingInviteApply.ecompanylogtype === CompanyLogTypeEnum.APPLY && pendingInviteApply.ecompanylogstatus === CompanyLogStatusEnum.PENDING)
@@ -178,7 +223,24 @@ companyService.joinCompany = async (companyId, user) => {
 
     // If invited, then auto join
     if (pendingInviteApply.ecompanylogtype === CompanyLogTypeEnum.INVITE && pendingInviteApply.ecompanylogstatus === CompanyLogStatusEnum.PENDING)
-        return companyService.processIntoCompany(companyId, user, user.sub);
+        return companyService.processIntoCompany(companyId, user, user.sub)
+        .then(processedUser => {
+
+            const notificationObj = {
+                enotificationbodyentityid: user.sub,
+                enotificationbodyentitytype: NotificationEnum.user.type,
+                enotificationbodyaction: NotificationEnum.user.actions.accepted.code,
+                enotificationbodytitle: NotificationEnum.user.actions.accepted.title,
+                enotificationbodymessage: NotificationEnum.user.actions.accepted.message
+            }
+
+            notificationService.saveNotification(
+                notificationObj,
+                user,
+                getHighestPosition
+            )
+            return processedUser
+        })
 
 }
 
@@ -234,7 +296,25 @@ companyService.exitCompany = async (companyId, user) => {
     if (!userInCompany)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
 
-    const removeUser = await companyService.removeUserFromCompany(userInCompany, user.sub, companyId);
+    const getHighestPosition = await companyService.getHighestPosition(companyId)
+
+    const removeUser = await companyService.removeUserFromCompany(userInCompany, user.sub, companyId)
+    .then(ignore => {
+
+        const notificationObj = {
+            enotificationbodyentityid: user.sub,
+            enotificationbodyentitytype: NotificationEnum.user.type,
+            enotificationbodyaction: NotificationEnum.user.actions.exit.code,
+            enotificationbodytitle: NotificationEnum.user.actions.exit.title,
+            enotificationbodymessage: NotificationEnum.user.actions.exit.message
+        }
+
+        notificationService.saveNotification(
+            notificationObj,
+            user,
+            getHighestPosition
+        )
+    })
 
     // delete approval user mapping
     const removeApprovalUser =  Approval.relatedQuery('approvalUsers')
@@ -299,6 +379,8 @@ companyService.processInvitation = async (companyId, user, status) => {
     if (status !== CompanyLogStatusEnum.ACCEPTED && status !== CompanyLogStatusEnum.REJECTED)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.STATUS_UNACCEPTED)
 
+    const getHighestPosition = await companyService.getHighestPosition(companyId)
+
     const pendingInvite = await companyService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.INVITE]);
 
     if (!pendingInvite)
@@ -306,9 +388,43 @@ companyService.processInvitation = async (companyId, user, status) => {
 
     if (status === CompanyLogStatusEnum.REJECTED)
         return companyService.updateCompanyLog(companyId, user, user.sub, CompanyLogStatusEnum.REJECTED)
+        .then(companyLog => {
+            
+            const notificationObj = {
+                enotificationbodyentityid: user.sub,
+                enotificationbodyentitytype: NotificationEnum.user.type,
+                enotificationbodyaction: NotificationEnum.user.actions.rejected.code,
+                enotificationbodytitle: NotificationEnum.user.actions.rejected.title,
+                enotificationbodymessage: NotificationEnum.user.actions.rejected.message
+            }
+
+            notificationService.saveNotification(
+                notificationObj,
+                user,
+                getHighestPosition
+            )
+            return companyLog
+        })
 
     if (status === CompanyLogStatusEnum.ACCEPTED)
-        return companyService.processIntoCompany(companyId, user, user.sub);
+        return companyService.processIntoCompany(companyId, user, user.sub)
+        .then(processedUser => {
+
+            const notificationObj = {
+                enotificationbodyentityid: user.sub,
+                enotificationbodyentitytype: NotificationEnum.user.type,
+                enotificationbodyaction: NotificationEnum.user.actions.accepted.code,
+                enotificationbodytitle: NotificationEnum.user.actions.accepted.title,
+                enotificationbodymessage: NotificationEnum.user.actions.accepted.message
+            }
+
+            notificationService.saveNotification(
+                notificationObj,
+                user,
+                getHighestPosition
+            )
+            return processedUser
+        })
 
 }
 
