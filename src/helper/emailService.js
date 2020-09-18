@@ -43,7 +43,7 @@ exports.sendEmailOTP = async (email, otpCode) => {
     const info = await transporter.sendMail({
         from: process.env.MAIL_SMTPNAME, // sender address
         to: email, // list of receivers
-        subject: "OTP Code - Sportiv", // Subject line
+        subject: "Kode OTP - Sportiv", // Subject line
         text: "", // plain text body
         html: html
     });
@@ -55,6 +55,26 @@ exports.sendEmailOTP = async (email, otpCode) => {
         console.log("Email sent!");
     });
 
+}
+
+exports.sendForgetEmail = async (email, link) => {
+
+    const info = await transporter.sendMail({
+        from: process.env.MAIL_SMTPNAME, // sender address
+        to: email, // list of receivers
+        subject: 'Tautan Lupa Kata Sandi - Sportiv', // Subject line
+        text: 'Tautan untuk mengganti kata sandi: ' + link, // plain text body
+        // html: html
+    });
+
+    transporter.sendMail(info, (err, data) => {
+        if (err) {
+            console.log(err);
+        }
+        console.log("Email sent!");
+    });
+
+    return true;
 }
 
 exports.sendForgotPasswordLink = async ( userId, email ) => {
