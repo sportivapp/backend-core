@@ -90,7 +90,7 @@ ForgetService.checkForgetLink = async (token, email) => {
 
 ForgetService.setPassword = async (token, email, newPassword) => {
 
-    await ForgetService.checkLinkValidity(token, email);
+    await ForgetService.checkForgetLink(token, email);
     
     const user = await User.query().where('euseremail', email).first();
 
