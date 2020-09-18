@@ -75,7 +75,7 @@ ForgetService.checkForgetLink = async (token, email) => {
         throw new UnsupportedOperationError(ErrorEnum.TOKEN_INVALID);
 
     const thirtyMinute = 30 * 60 * 1000;
-    if (splittedToken[0] < thirtyMinute)
+    if (splittedToken[0] < (Date.now() - thirtyMinute))
         throw new UnsupportedOperationError(ErrorEnum.TOKEN_EXPIRED);
 
     if (splittedToken[1] !== token)
