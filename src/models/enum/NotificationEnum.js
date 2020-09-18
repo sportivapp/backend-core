@@ -26,8 +26,8 @@ const NotificationEnum = {
                 message: 'a user leave from your Organization!'
             },
             accepted: {
-                title: 'User Accept',
-                code: 'USER_ACCEPT',
+                title: 'User Join',
+                code: 'USER_JOIN',
                 message: 'New User has join your Organization!'
             },
             rejected: {
