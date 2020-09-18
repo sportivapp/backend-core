@@ -92,7 +92,7 @@ ForgetService.setPassword = async (token, email, newPassword) => {
     const user = await User.query().where('euseremail', email).first();
 
     const encryptedPassword = await bcrypt.hash(newPassword);
-    user.$query().updateByUserId({ euserpassword: encryptedPassword }, user.sub);
+    await user.$query().updateByUserId({ euserpassword: encryptedPassword }, user.sub);
 
     return Forget.query()
     .where('euseremail', email)
