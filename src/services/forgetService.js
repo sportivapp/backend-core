@@ -4,6 +4,7 @@ const emailService = require('../helper/emailService');
 const { UnsupportedOperationError } = require('../models/errors')
 require('dotenv').config();
 const cryptojs = require('crypto-js');
+const bcrypt = require('../helper/bcrypt');
 
 const ErrorEnum = {
     EMAIL_INVALID: 'EMAIL_INVALID',
