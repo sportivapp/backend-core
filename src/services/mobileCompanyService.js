@@ -7,8 +7,6 @@ const User = require('../models/User')
 const RosterUserMapping = require('../models/RosterUserMapping')
 const ShiftRosterUserMapping = require('../models/ShiftRosterUserMapping')
 const Team = require('../models/Team')
-const NotificationBody = require('../models/NotificationBody')
-const Notification = require('../models/Notification')
 const Grade = require('../models/Grades')
 const UserPositionMapping = require('../models/UserPositionMapping')
 const NotificationEnum = require('../models/enum/NotificationEnum')
@@ -16,6 +14,7 @@ const CompanyLogTypeEnum = require('../models/enum/CompanyLogTypeEnum')
 const CompanyLogStatusEnum = require('../models/enum/CompanyLogStatusEnum')
 const { raw } = require('objection');
 const ServiceHelper = require('../helper/ServiceHelper')
+const notificationService = require('./notificationService')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
 const UnsupportedOperationErrorEnum = {
@@ -35,11 +34,9 @@ companyService.getHighestPosition = async (companyId) => {
 
     const users = await Grade.relatedQuery('users')
     .for(Grade.query().where('ecompanyecompanyid', companyId).andWhere('egradesuperiorid', null))
-    .distinct('eusereuserid')
+    .distinct('euserid')
 
-    let userIds = []
-
-    users.map(userId => userIds.push(userId.eusereuserid))
+    let userIds = users.map(user => user.euserid)
  
     return CompanyUserMapping.query()
     .select()
@@ -199,12 +196,17 @@ companyService.joinCompany = async (companyId, user) => {
         // after create the company log, create notification for admin
         return companyService.createCompanyLog(companyId, user, user.sub, CompanyLogTypeEnum.APPLY)
         .then(companyLog => {
-            companyService.saveNotification(
-                user.sub,
-                NotificationEnum.user.type, 
-                NotificationEnum.user.actions.join.code, 
-                NotificationEnum.user.actions.join.title, 
-                NotificationEnum.user.actions.join.message, 
+
+            const notificationObj = {
+                enotificationbodyentityid: user.sub,
+                enotificationbodyentitytype: NotificationEnum.user.type,
+                enotificationbodyaction: NotificationEnum.user.actions.join.code,
+                enotificationbodytitle: NotificationEnum.user.actions.join.title,
+                enotificationbodymessage: NotificationEnum.user.actions.join.message
+            }
+
+            notificationService.saveNotification(
+                notificationObj,
                 user,
                 getHighestPosition
             )
@@ -220,12 +222,17 @@ companyService.joinCompany = async (companyId, user) => {
     if (pendingInviteApply.ecompanylogtype === CompanyLogTypeEnum.INVITE && pendingInviteApply.ecompanylogstatus === CompanyLogStatusEnum.PENDING)
         return companyService.processIntoCompany(companyId, user, user.sub)
         .then(processedUser => {
-            companyService.saveNotification(
-                user.sub,
-                NotificationEnum.user.type, 
-                NotificationEnum.user.actions.accepted.code, 
-                NotificationEnum.user.actions.accepted.title, 
-                NotificationEnum.user.actions.accepted.message, 
+
+            const notificationObj = {
+                enotificationbodyentityid: user.sub,
+                enotificationbodyentitytype: NotificationEnum.user.type,
+                enotificationbodyaction: NotificationEnum.user.actions.accepted.code,
+                enotificationbodytitle: NotificationEnum.user.actions.accepted.title,
+                enotificationbodymessage: NotificationEnum.user.actions.accepted.message
+            }
+
+            notificationService.saveNotification(
+                notificationObj,
                 user,
                 getHighestPosition
             )
@@ -290,12 +297,17 @@ companyService.exitCompany = async (companyId, user) => {
 
     const removeUser = await companyService.removeUserFromCompany(userInCompany, user.sub, companyId)
     .then(ignore => {
-        companyService.saveNotification(
-            user.sub,
-            NotificationEnum.user.type, 
-            NotificationEnum.user.actions.exit.code, 
-            NotificationEnum.user.actions.exit.title, 
-            NotificationEnum.user.actions.exit.message, 
+
+        const notificationObj = {
+            enotificationbodyentityid: user.sub,
+            enotificationbodyentitytype: NotificationEnum.user.type,
+            enotificationbodyaction: NotificationEnum.user.actions.exit.code,
+            enotificationbodytitle: NotificationEnum.user.actions.exit.title,
+            enotificationbodymessage: NotificationEnum.user.actions.exit.message
+        }
+
+        notificationService.saveNotification(
+            notificationObj,
             user,
             getHighestPosition
         )
@@ -374,12 +386,17 @@ companyService.processInvitation = async (companyId, user, status) => {
     if (status === CompanyLogStatusEnum.REJECTED)
         return companyService.updateCompanyLog(companyId, user, user.sub, CompanyLogStatusEnum.REJECTED)
         .then(companyLog => {
-            companyService.saveNotification(
-                user.sub,
-                NotificationEnum.user.type, 
-                NotificationEnum.user.actions.rejected.code, 
-                NotificationEnum.user.actions.rejected.title, 
-                NotificationEnum.user.actions.rejected.message, 
+            
+            const notificationObj = {
+                enotificationbodyentityid: user.sub,
+                enotificationbodyentitytype: NotificationEnum.user.type,
+                enotificationbodyaction: NotificationEnum.user.actions.rejected.code,
+                enotificationbodytitle: NotificationEnum.user.actions.rejected.title,
+                enotificationbodymessage: NotificationEnum.user.actions.rejected.message
+            }
+
+            notificationService.saveNotification(
+                notificationObj,
                 user,
                 getHighestPosition
             )
@@ -389,43 +406,22 @@ companyService.processInvitation = async (companyId, user, status) => {
     if (status === CompanyLogStatusEnum.ACCEPTED)
         return companyService.processIntoCompany(companyId, user, user.sub)
         .then(processedUser => {
-            companyService.saveNotification(
-                user.sub,
-                NotificationEnum.user.type, 
-                NotificationEnum.user.actions.accepted.code, 
-                NotificationEnum.user.actions.accepted.title, 
-                NotificationEnum.user.actions.accepted.message, 
+
+            const notificationObj = {
+                enotificationbodyentityid: user.sub,
+                enotificationbodyentitytype: NotificationEnum.user.type,
+                enotificationbodyaction: NotificationEnum.user.actions.accepted.code,
+                enotificationbodytitle: NotificationEnum.user.actions.accepted.title,
+                enotificationbodymessage: NotificationEnum.user.actions.accepted.message
+            }
+
+            notificationService.saveNotification(
+                notificationObj,
                 user,
                 getHighestPosition
             )
             return processedUser
         })
-
-}
-
-companyService.saveNotification = async (entityid, type, action, title, message, loggedInUser, targetUserIds) => {
-
-    const notificationBodyDTO = {
-        enotificationbodyentityid: entityid,
-        enotificationbodyentitytype: type,
-        enotificationbodyaction: action,
-        enotificationbodytitle: title,
-        enotificationbodymessage: message,
-        enotificationbodysenderid: loggedInUser.sub
-    }
-    
-    return NotificationBody.query()
-    .insertToTable(notificationBodyDTO, loggedInUser.sub)
-    .then(notificationBody => {
-
-        const notificationDTO = targetUserIds.map(targetUserId => ({
-            eusereuserid: targetUserId.eusereuserid,
-            enotificationbodyenotificationbodyid: notificationBody.enotificationbodyid
-        }))
-
-        return Notification.query()
-        .insertToTable(notificationDTO, loggedInUser.sub)
-    })
 
 }
 
