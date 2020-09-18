@@ -46,6 +46,8 @@ ForgetService.sendForgetEmail = async (email) => {
 
     emailService.sendForgetEmail(email, link);
 
+    return true;
+
 }
 
 ForgetService.checkForgetLink = async (token, email) => {
