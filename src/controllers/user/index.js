@@ -181,7 +181,7 @@ userController.getAllUserByCompanyId = async (req, res, next) => {
         if(!pageObj)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
 
-        return res.status(200).json(ResponseHelper.toBaseResponse(pageObj.data, pageObj.paging))
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
  
     } catch(e) {
         next(e);
