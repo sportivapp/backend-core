@@ -34,7 +34,7 @@ ForgetService.sendForgetEmail = async (email) => {
     const link = 'https://org.sportiv.app/changePassword/' + token + '/' + email;
     
     if (forget) {
-        await forget.$query.updateByUserId({
+        await forget.$query().updateByUserId({
             eforgetvalue: encryptedValue
         }, 0)
     } else {
