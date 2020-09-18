@@ -56,7 +56,6 @@ ForgetService.checkForgetLink = async (token, email) => {
 
     if (!forget)
         throw new UnsupportedOperationError(ErrorEnum.TOKEN_INVALID);
-    console.log(forget);
 
     let tokenValue;
 
@@ -67,9 +66,7 @@ ForgetService.checkForgetLink = async (token, email) => {
         throw new UnsupportedOperationError(ErrorEnum.TOKEN_INVALID);
     }
     
-    console.log(tokenValue);
     const splittedToken = tokenValue.split(':');
-    console.log(splittedToken);
 
     if (splittedToken.length !== 2)
         throw new UnsupportedOperationError(ErrorEnum.TOKEN_INVALID);
@@ -93,6 +90,12 @@ ForgetService.setPassword = async (token, email, newPassword) => {
 
     const encryptedPassword = await bcrypt.hash(newPassword);
     user.$query().updateByUserId({ euserpassword: encryptedPassword }, user.sub);
+
+    return Forget.query()
+    .where('euseremail', email)
+    .where('eforgotvalue', token)
+    .delete()
+    .then(rowsAffected => rowsAffected === 1);
 
 }
 
