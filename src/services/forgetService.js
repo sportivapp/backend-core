@@ -39,7 +39,7 @@ ForgetService.sendForgetEmail = async (email) => {
         })
     } else {
         await Forget.query().insertToTable({
-            eforgetemail: email,
+            euseremail: email,
             eforgetvalue: encryptedValue
         }, 0);
     }    
