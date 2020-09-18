@@ -57,7 +57,7 @@ notificationService.saveNotification = async (notificationObj, loggedInUser, tar
     .then(notificationBody => {
 
         const notificationDTO = targetUserIds.map(targetUserId => ({
-            eusereuserid: targetUserId.eusereuserid,
+            eusereuserid: targetUserId,
             enotificationbodyenotificationbodyid: notificationBody.enotificationbodyid
         }))
 
