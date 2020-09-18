@@ -29,7 +29,7 @@ ForgetService.sendForgetEmail = async (email) => {
 
     // If less than one minute passed
     const oneMinute = 60 * 1000;
-    if (forget[0].eforgotchangetime < (Date.now() - oneMinute))
+    if (forget[0].eforgetchangetime < (Date.now() - oneMinute))
         throw new UnsupportedOperationError(ErrorEnum.OTP_PENDING);
     
     // Generate random token
