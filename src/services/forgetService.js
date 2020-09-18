@@ -26,6 +26,11 @@ ForgetService.sendForgetEmail = async (email) => {
         return
 
     const forget = await Forget.query().where('euseremail', email).first();
+
+    // If less than one minute passed
+    const oneMinute = 60 * 1000;
+    if (forget[0].eotpchangetime < (Date.now() - oneMinute))
+        throw new UnsupportedOperationError(ErrorEnum.OTP_PENDING);
     
     // Generate random token
     const token = [...Array(22)].map(i=>(~~(Math.random()*36)).toString(36)).join('');
@@ -77,8 +82,6 @@ ForgetService.checkForgetLink = async (token, email) => {
 
     if (splittedToken[1] !== token)
         throw new UnsupportedOperationError(ErrorEnum.TOKEN_INVALID);
-    
-    return true;
 
 }
 
