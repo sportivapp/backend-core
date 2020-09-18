@@ -86,14 +86,13 @@ ForgetService.setPassword = async (token, email, newPassword) => {
 
     await ForgetService.checkLinkValidity(token, email);
     
-    const user = await User.query().where('euseremail', email);
+    const user = await User.query().where('euseremail', email).first();
 
     const encryptedPassword = await bcrypt.hash(newPassword);
     user.$query().updateByUserId({ euserpassword: encryptedPassword }, user.sub);
 
     return Forget.query()
     .where('euseremail', email)
-    .where('eforgotvalue', token)
     .delete()
     .then(rowsAffected => rowsAffected === 1);
 
