@@ -7,9 +7,8 @@ const cryptojs = require('crypto-js');
 
 const ErrorEnum = {
     EMAIL_INVALID: 'EMAIL_INVALID',
-    EMAIL_USED: 'EMAIL_USED',
-    TOKEN_PENDING: 'TOKEN_PENDING',
-    TOKEN_CONFIRMED: 'TOKEN_CONFIRMED'
+    TOKEN_INVALID: 'TOKEN_INVALID',
+    TOKEN_EXPIRED: 'TOKEN_EXPIRED'
 }
 
 const ForgetService = {};
@@ -45,11 +44,11 @@ ForgetService.sendForgetEmail = async (email) => {
         }, 0);
     }    
 
-    emailService.sendForgetEmail(link);
+    emailService.sendForgetEmail(email, link);
 
 }
 
-ForgetService.checkLinkValidity = async (token, email) => {
+ForgetService.checkForgetLink = async (token, email) => {
 
     const forget = await Forget.query().where('euseremail', email).first();
 
@@ -78,6 +77,17 @@ ForgetService.checkLinkValidity = async (token, email) => {
         throw new UnsupportedOperationError(ErrorEnum.TOKEN_INVALID);
     
     return true;
+
+}
+
+ForgetService.setPassword = async (token, email, newPassword) => {
+
+    await ForgetService.checkLinkValidity(token, email);
+    
+    const user = await User.query().where('euseremail', email);
+
+    const encryptedPassword = await bcrypt.hash(newPassword);
+    user.$query().updateByUserId({ euserpassword: encryptedPassword }, user.sub);
 
 }
 

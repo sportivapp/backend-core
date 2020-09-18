@@ -43,7 +43,7 @@ exports.sendEmailOTP = async (email, otpCode) => {
     const info = await transporter.sendMail({
         from: process.env.MAIL_SMTPNAME, // sender address
         to: email, // list of receivers
-        subject: "OTP Code - Sportiv", // Subject line
+        subject: "Kode OTP - Sportiv", // Subject line
         text: "", // plain text body
         html: html
     });
@@ -57,19 +57,13 @@ exports.sendEmailOTP = async (email, otpCode) => {
 
 }
 
-exports.sendForgotPasswordLink = async ( userId, email ) => {
-    const newPassword = await shortid.generate();
-    const encryptedPassword = await bcrypt.hash(newPassword);
-
-    await User.query().patchAndFetchById(userId, { euserpassword: encryptedPassword });
-
-    // const html = 'Forgot password link';
+exports.sendForgotPasswordLink = async (email, link) => {
 
     const info = await transporter.sendMail({
         from: process.env.MAIL_SMTPNAME, // sender address
         to: email, // list of receivers
-        subject: 'Forgot Password Code - Sportiv', // Subject line
-        text: 'Berikut adalah password baru kamu: ' + newPassword, // plain text body
+        subject: 'Tautan Lupa Kata Sandi - Sportiv', // Subject line
+        text: 'Tautan untuk mengganti kata sandi: ' + link, // plain text body
         // html: html
     });
 

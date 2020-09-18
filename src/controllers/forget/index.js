@@ -17,4 +17,37 @@ controller.sendForgetEmail = async (req, res, next) => {
 
 }
 
+controller.checkForgetLink = async (req, res, next) => {
+
+    const { token, email } = req.params;
+
+    try {
+
+        const result = await forgetService.checkForgetLink(token, email);
+
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+    
+}
+
+controller.setPassword = async (req, res, next) => {
+
+    const { token, email } = req.params;
+    const { password } = req.body;
+
+    try {
+
+        const result = await forgetService.checkForgetLink(token, email, password);
+
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+    
+}
+
 module.exports = controller;
