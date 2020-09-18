@@ -27,6 +27,7 @@ const teamRoutes = require('./team');
 const fileRoutes = require('./file');
 const companyLogRoutes = require('./companyLog');
 const theoryRoutes = require('./theory');
+const notificationRoutes = require('./notification');
 
 router.use('/api/v1', [
     userRoutes,
@@ -53,7 +54,8 @@ router.use('/api/v1', [
     teamRoutes,
     fileRoutes,
     companyLogRoutes,
-    theoryRoutes
+    theoryRoutes,
+    notificationRoutes
 ]);
 
 const mobileUserRoutes = require('./mobileUser');
