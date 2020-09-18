@@ -98,7 +98,8 @@ ForgetService.setPassword = async (token, email, newPassword) => {
     const encryptedPassword = await bcrypt.hash(newPassword);
     await user.$query().updateByUserId({ euserpassword: encryptedPassword }, user.sub);
 
-    return forget.$query()
+    return Forget.query()
+    .where('euseremail', email)
     .delete()
     .then(rowsAffected => rowsAffected === 1);
 
