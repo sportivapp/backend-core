@@ -40,7 +40,7 @@ controller.setPassword = async (req, res, next) => {
 
     try {
 
-        const result = await forgetService.checkForgetLink(token, email, password);
+        const result = await forgetService.setPassword(token, email, password);
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 

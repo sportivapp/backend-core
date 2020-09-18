@@ -84,15 +84,13 @@ ForgetService.checkForgetLink = async (token, email) => {
     if (splittedToken[1] !== token)
         throw new UnsupportedOperationError(ErrorEnum.TOKEN_INVALID);
 
-    return forget;
+    return true;
 
 }
 
 ForgetService.setPassword = async (token, email, newPassword) => {
 
-    console.log('a')
-    const forget = await ForgetService.checkLinkValidity(token, email);
-    console.log('b')
+    await ForgetService.checkLinkValidity(token, email);
     
     const user = await User.query().where('euseremail', email).first();
 
