@@ -89,7 +89,9 @@ ForgetService.checkForgetLink = async (token, email) => {
 
 ForgetService.setPassword = async (token, email, newPassword) => {
 
+    console.log('a')
     const forget = await ForgetService.checkLinkValidity(token, email);
+    console.log('b')
     
     const user = await User.query().where('euseremail', email).first();
 
