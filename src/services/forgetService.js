@@ -30,7 +30,7 @@ ForgetService.sendForgetEmail = async (email) => {
     // Generate random token
     const token = [...Array(22)].map(i=>(~~(Math.random()*36)).toString(36)).join('');
     const tokenValue = Date.now() + ':' + token;
-    const encryptedValue = cryptojs.AES.encrypt(tokenValue, process.env.FORGET_SECRET).toString();
+    const encryptedValue = cryptojs.AES.encrypt(tokenValue, email + process.env.FORGET_SECRET).toString();
     const link = 'https://org.sportiv.app/changePassword/' + token + '/' + email;
     
     if (forget) {
@@ -61,7 +61,7 @@ ForgetService.checkForgetLink = async (token, email) => {
     let tokenValue;
 
     try {
-        const bytes = cryptojs.AES.decrypt(forget.eforgetvalue, process.env.FORGET_SECRET);
+        const bytes = cryptojs.AES.decrypt(forget.eforgetvalue, email + process.env.FORGET_SECRET);
         tokenValue = bytes.toString(cryptojs.enc.Utf8);
     } catch(e) {
         throw new UnsupportedOperationError(ErrorEnum.TOKEN_INVALID);
@@ -78,7 +78,7 @@ ForgetService.checkForgetLink = async (token, email) => {
     if (splittedToken[0] < thirtyMinute)
         throw new UnsupportedOperationError(ErrorEnum.TOKEN_EXPIRED);
 
-    if (splittedToken[1] === token)
+    if (splittedToken[1] !== token)
         throw new UnsupportedOperationError(ErrorEnum.TOKEN_INVALID);
     
     return true;
