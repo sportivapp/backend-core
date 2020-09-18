@@ -36,13 +36,13 @@ ForgetService.sendForgetEmail = async (email) => {
     if (forget) {
         await forget.$query.updateByUserId({
             eforgetvalue: encryptedValue
-        })
+        }, 0)
     } else {
         await Forget.query().insertToTable({
             euseremail: email,
             eforgetvalue: encryptedValue
         }, 0);
-    }    
+    }
 
     emailService.sendForgetEmail(email, link);
 
