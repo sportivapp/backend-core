@@ -38,14 +38,5 @@ exports.seed = (knex, Promise) => knex('enotification').del()
                     enotificationchangeby: 4,
                     enotificationchangetime: 1583193600
                 },
-                {
-                    eusereuserid: 1,
-                    enotificationbodyenotificationbodyid: 5,
-                    enotificationisread: false,
-                    enotificationcreateby: 5,
-                    enotificationcreatetime: Date.now(),
-                    enotificationchangeby: 5,
-                    enotificationchangetime: Date.now()
-                },
             ]
         ));

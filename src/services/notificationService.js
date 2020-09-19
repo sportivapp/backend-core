@@ -3,7 +3,6 @@ const NotificationBody = require('../models/NotificationBody')
 const User = require('../models/User')
 const ServiceHelper = require('../helper/ServiceHelper');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
-const NotificationEnum = require('../models/enum/NotificationEnum')
 
 const UnsupportedOperationErrorEnum = {
     USER_NOT_EXIST: 'USER_NOT_EXIST'

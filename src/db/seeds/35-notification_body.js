@@ -49,20 +49,7 @@ exports.seed = (knex, Promise) => knex('enotificationbody').del()
                     enotificationbodycreatetime: 1583193600,
                     enotificationbodychangeby: 4,
                     enotificationbodychangetime: 1583193600
-                },
-                {
-                    enotificationbodyentityid: 5,
-                    enotificationbodyentitytype: 'CLASS',
-                    enotificationbodyaction: 'CLASS_REGISTER',
-                    enotificationbodytitle: 'Class Registration',
-                    enotificationbodymessage: 'You have been registered to this Class!',
-                    enotificationbodysenderid: 5,
-                    enotificationbodycreateby: 5,
-                    enotificationbodycreatetime: Date.now(),
-                    enotificationbodychangeby: 5,
-                    enotificationbodychangetime: Date.now()
-                }
-                
+                },       
                 
             ]
         ));
