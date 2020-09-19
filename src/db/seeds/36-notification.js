@@ -37,6 +37,6 @@ exports.seed = (knex, Promise) => knex('enotification').del()
                     enotificationcreatetime: 1583193600,
                     enotificationchangeby: 4,
                     enotificationchangetime: 1583193600
-                },
+                }
             ]
         ));
