@@ -24,9 +24,9 @@ controller.getLicenses = async (req, res, next) => {
     const { page = '0', size = '10', keyword = '' } = req.query;
 
     try {
-        const result = await licenseService.getLicenses(req.user, parseInt(page), parseInt(size), keyword);
+        const pageObj = await licenseService.getLicenses(req.user, parseInt(page), parseInt(size), keyword);
 
-        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
     } catch(e) {
         next(e);
     }
