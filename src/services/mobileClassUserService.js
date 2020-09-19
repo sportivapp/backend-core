@@ -6,6 +6,8 @@ const ClassTypeEnum = require('../models/enum/ClassTypeEnum')
 const ClassUserStatusEnum = require('../models/enum/ClassUserStatusEnum')
 const ServiceHelper = require('../helper/ServiceHelper')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
+const NotificationEnum = require('../models/enum/NotificationEnum')
+const notificationService = require('./notificationService')
 
 const mobileClassUserService = {}
 
@@ -17,7 +19,19 @@ const ErrorEnum = {
 
 }
 
+mobileClassUserService.getTargetUserId = async (classId) => {
+
+    if(classId) {
+    const users = await ClassUserMapping.query().select('eusereuserid');
+    userIds = users.map(user => user.eusereuserid);
+    }
+
+    return userIds
+}
+
 mobileClassUserService.registerByClassId = async (classId, user) => {
+
+    const getTargetUserId = await mobileClassUserService.getTargetUserId(classId)
 
     if (!classId) throw new UnsupportedOperationError(ErrorEnum.CLASS_ID_REQUIRED)
 
@@ -41,7 +55,9 @@ mobileClassUserService.registerByClassId = async (classId, user) => {
         .andWhereNot('eclassusermappingstatus', ClassUserStatusEnum.CANCELED)
         .orderBy('eclassusermappingcreatetime', 'DESC')
         .first()
-    
+
+
+
     if (!classUserMapping)
 
         return ClassUserMapping.query()
@@ -49,12 +65,30 @@ mobileClassUserService.registerByClassId = async (classId, user) => {
                 eclasseclassid: classId,
                 eusereuserid: user.sub
             }, user.sub)
-            .then(mapping => mobileClassService.getClassById(mapping.eclasseclassid, user))
+            .then(mapping => mobileClassService.getClassById(mapping.eclasseclassid, user)
+            .then(classLog => {
+                const notificationObj = {
+                    enotificationbodyentityid: user.sub,
+                    enotificationbodyentitytype: NotificationEnum.class.type,
+                    enotificationbodyaction: NotificationEnum.class.actions.register.code,
+                    enotificationbodytitle: NotificationEnum.class.actions.register.title,
+                    enotificationbodymessage: NotificationEnum.class.actions.register.message
+                }
+
+                notificationService.saveNotification(
+                    notificationObj,
+                    user,
+                    getTargetUserId
+                )
+                return classLog
+            }))
 
     else return mobileClassService.getClassById(classUserMapping.eclasseclassid, user)
 }
 
 mobileClassUserService.cancelRegistrationByClassUserId = async (classUserId, user) => {
+
+    const getTargetUserId = await mobileClassUserService.getTargetUserId(classId)
 
     const classUser = await ClassUserMapping.query().findById(classUserId)
 
@@ -63,6 +97,22 @@ mobileClassUserService.cancelRegistrationByClassUserId = async (classUserId, use
     return classUser.$query()
         .updateByUserId({ eclassusermappingstatus: ClassUserStatusEnum.CANCELED }, user.sub)
         .then(rowsAffected => rowsAffected === 1)
+        .then(classLog => { 
+            const notificationObj = {
+            enotificationbodyentityid: user.sub,
+            enotificationbodyentitytype: NotificationEnum.class.type,
+            enotificationbodyaction: NotificationEnum.class.actions.canceled.code,
+            enotificationbodytitle: NotificationEnum.class.actions.canceled.title,
+            enotificationbodymessage: NotificationEnum.class.actions.canceled.message
+        }
+
+        notificationService.saveNotification(
+            notificationObj,
+            user,
+            getTargetUserId
+        )
+        return classLog
+    })
 }
 
 mobileClassUserService.processRegistration = async (classUserId, status, user) => {
