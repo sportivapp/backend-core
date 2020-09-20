@@ -11,22 +11,22 @@ const NotificationEnum = {
             register: {
                 title: 'Register Class',
                 code: 'REGISTER_CLASS',
-                message: 'You have been Enrolled for this class'
+                message: 'A User has registered to a Class!'
             },
             approved: {
                 title: 'Approved Class',
                 code: 'APPROVED_CLASS',
-                message: 'Class you registered has been Approved'
+                message: 'Your class registration has been approved!'
             },
             rejected: {
                 title: 'Rejected Class',
                 code: 'REJECTED_CLASS',
-                message:'Class your registered has been rejected'
+                message:'Your class registration has been rejected!'
             },
             canceled: {
                 title: 'Canceled Class',
                 code: 'CANCELED_CLASS',
-                message:'Class your registered has been canceled'
+                message:'A user canceled registration to a class!'
             }
         }
     },

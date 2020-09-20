@@ -8,6 +8,8 @@ const ServiceHelper = require('../helper/ServiceHelper')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const NotificationEnum = require('../models/enum/NotificationEnum')
 const notificationService = require('./notificationService')
+const Grade = require('../models/Grades')
+
 
 const mobileClassUserService = {}
 
@@ -19,23 +21,77 @@ const ErrorEnum = {
 
 }
 
-mobileClassUserService.getTargetUserId = async (classId) => {
+mobileClassUserService.getHighestPosition = async (classId) => {
 
-    if(classId) {
-    const users = await ClassUserMapping.query().select('eusereuserid');
-    userIds = users.map(user => user.eusereuserid);
-    }
+    const foundCompany = await Class.query()
+    .select('ecompanyecompanyid')
+    .findById(classId)
+    .where('eclassid',classId)
 
-    return userIds
+    if(!foundCompany) throw new NotFoundError()
+
+    // const getClass = await Class.query().findById(classId)
+
+    // if(!getClass)
+    //     return false
+
+    // const getCompany = await Class.relatedQuery('company')
+    //     .for(getClass.ecompanyecompa
+    //         \
+    //         nyid)
+
+    // const getCompanies = getCompany.map(getCompany => getCompany.ecompanyecompanyid)
+
+    
+
+    const users = await Grade.relatedQuery('users')
+    .for(Grade.query()
+    .where('ecompanyecompanyid',foundCompany.ecompanyecompanyid).andWhere('egradesuperiorid', null))
+    .distinct('euserid')
+
+    let userIds = users.map(user => user.euserid)
+
+    
+
+    const companyUserMapping  = await CompanyUserMapping.query()
+    .select()
+    .where('ecompanyecompanyid', foundCompany.ecompanyecompanyid)
+    .whereIn('eusereuserid', userIds)
+    .then(users => {
+            console.log(userIds)
+            if(users.length === 0)
+                throw new NotFoundError()
+            return
+                
+
+
+
+
+            
+    // return ClassUserMapping.query()
+    // .where('eclasseclassid',classId)
+    // .where('eusereuserid',userIds)
+    // .then(users => {
+    //     if(!users)
+    //         throw new NotFoundError()
+    //     return console.log(users)
+
+
+        // return users.map(user => user.eusereuserid)
+        
+    })
+
+
 }
 
 mobileClassUserService.registerByClassId = async (classId, user) => {
 
-    const getTargetUserId = await mobileClassUserService.getTargetUserId(classId)
+    const getHighestPosition = await mobileClassUserService.getHighestPosition(classId)
 
     if (!classId) throw new UnsupportedOperationError(ErrorEnum.CLASS_ID_REQUIRED)
 
     const foundClass = await Class.query().findById(classId)
+
     if (!foundClass) throw new UnsupportedOperationError(ErrorEnum.CLASS_NOT_FOUND)
 
     if (foundClass.eclasstype === ClassTypeEnum.PRIVATE) {
@@ -68,7 +124,7 @@ mobileClassUserService.registerByClassId = async (classId, user) => {
             .then(mapping => mobileClassService.getClassById(mapping.eclasseclassid, user)
             .then(classLog => {
                 const notificationObj = {
-                    enotificationbodyentityid: user.sub,
+                    enotificationbodyentityid: classId,
                     enotificationbodyentitytype: NotificationEnum.class.type,
                     enotificationbodyaction: NotificationEnum.class.actions.register.code,
                     enotificationbodytitle: NotificationEnum.class.actions.register.title,
@@ -78,7 +134,7 @@ mobileClassUserService.registerByClassId = async (classId, user) => {
                 notificationService.saveNotification(
                     notificationObj,
                     user,
-                    getTargetUserId
+                    getHighestPosition
                 )
                 return classLog
             }))
@@ -88,7 +144,7 @@ mobileClassUserService.registerByClassId = async (classId, user) => {
 
 mobileClassUserService.cancelRegistrationByClassUserId = async (classUserId, user) => {
 
-    const getTargetUserId = await mobileClassUserService.getTargetUserId(classId)
+    // const getTargetUserId = await mobileClassUserService.getTargetUserId(classId)
 
     const classUser = await ClassUserMapping.query().findById(classUserId)
 
@@ -99,7 +155,7 @@ mobileClassUserService.cancelRegistrationByClassUserId = async (classUserId, use
         .then(rowsAffected => rowsAffected === 1)
         .then(classLog => { 
             const notificationObj = {
-            enotificationbodyentityid: user.sub,
+            enotificationbodyentityid: classId,
             enotificationbodyentitytype: NotificationEnum.class.type,
             enotificationbodyaction: NotificationEnum.class.actions.canceled.code,
             enotificationbodytitle: NotificationEnum.class.actions.canceled.title,
