@@ -78,6 +78,8 @@ mobileClassUserService.registerByClassId = async (classId, user) => {
             }, user.sub)
             .then(mapping => mobileClassService.getClassById(mapping.eclasseclassid, user)
             .then(classLog => {
+
+            if(getHighestPosition.length > 0) {
                 const notificationObj = {
                     enotificationbodyentityid: classId,
                     enotificationbodyentitytype: NotificationEnum.class.type,
@@ -91,6 +93,7 @@ mobileClassUserService.registerByClassId = async (classId, user) => {
                     user,
                     getHighestPosition
                 )
+            }
                 return classLog
             }))
 
@@ -109,6 +112,8 @@ mobileClassUserService.cancelRegistrationByClassUserId = async (classUserId, use
         .updateByUserId({ eclassusermappingstatus: ClassUserStatusEnum.CANCELED }, user.sub)
         .then(rowsAffected => rowsAffected === 1)
         .then(classLog => { 
+
+        if(getHighestPosition.length > 0) {
             const notificationObj = {
             enotificationbodyentityid: classId,
             enotificationbodyentitytype: NotificationEnum.class.type,
@@ -122,6 +127,7 @@ mobileClassUserService.cancelRegistrationByClassUserId = async (classUserId, use
             user,
             getHighestPosition
         )
+    }
         return classLog
     })
 }
