@@ -36,15 +36,9 @@ companyService.getHighestPosition = async (companyId) => {
     .for(Grade.query().where('ecompanyecompanyid', companyId).andWhere('egradesuperiorid', null))
     .distinct('euserid')
 
-    let userIds = users.map(user => user.euserid)
- 
-    return CompanyUserMapping.query()
-    .select()
-    .where('ecompanyecompanyid', companyId)
-    .whereIn('eusereuserid', userIds)
-    .then(users => {
-        return users.map(user => user.eusereuserid)
-    })
+    if(users.length <= 0)
+        throw new NotFoundError()
+    return users.map(user => user.euserid)
 
 }
 
