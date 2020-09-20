@@ -11,7 +11,7 @@ const NotificationEnum = {
             register: {
                 title: 'Register Class',
                 code: 'REGISTER_CLASS',
-                message: 'A User has registered to a Class!'
+                message: 'A User has registration to a Class!'
             },
             approved: {
                 title: 'Approved Class',
