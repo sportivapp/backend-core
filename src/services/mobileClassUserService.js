@@ -28,59 +28,14 @@ mobileClassUserService.getHighestPosition = async (classId) => {
     .findById(classId)
     .where('eclassid',classId)
 
-    if(!foundCompany) throw new NotFoundError()
-
-    // const getClass = await Class.query().findById(classId)
-
-    // if(!getClass)
-    //     return false
-
-    // const getCompany = await Class.relatedQuery('company')
-    //     .for(getClass.ecompanyecompa
-    //         \
-    //         nyid)
-
-    // const getCompanies = getCompany.map(getCompany => getCompany.ecompanyecompanyid)
-
-    
+    if(!foundCompany) throw new NotFoundError()    
 
     const users = await Grade.relatedQuery('users')
     .for(Grade.query()
     .where('ecompanyecompanyid',foundCompany.ecompanyecompanyid).andWhere('egradesuperiorid', null))
     .distinct('euserid')
 
-    let userIds = users.map(user => user.euserid)
-
-    
-
-    const companyUserMapping  = await CompanyUserMapping.query()
-    .select()
-    .where('ecompanyecompanyid', foundCompany.ecompanyecompanyid)
-    .whereIn('eusereuserid', userIds)
-    .then(users => {
-            console.log(userIds)
-            if(users.length === 0)
-                throw new NotFoundError()
-            return
-                
-
-
-
-
-            
-    // return ClassUserMapping.query()
-    // .where('eclasseclassid',classId)
-    // .where('eusereuserid',userIds)
-    // .then(users => {
-    //     if(!users)
-    //         throw new NotFoundError()
-    //     return console.log(users)
-
-
-        // return users.map(user => user.eusereuserid)
-        
-    })
-
+    return users.map(user => user.euserid)
 
 }
 
@@ -144,7 +99,7 @@ mobileClassUserService.registerByClassId = async (classId, user) => {
 
 mobileClassUserService.cancelRegistrationByClassUserId = async (classUserId, user) => {
 
-    // const getTargetUserId = await mobileClassUserService.getTargetUserId(classId)
+    const getHighestPosition = await mobileClassUserService.getHighestPosition(classId)
 
     const classUser = await ClassUserMapping.query().findById(classUserId)
 
@@ -165,7 +120,7 @@ mobileClassUserService.cancelRegistrationByClassUserId = async (classUserId, use
         notificationService.saveNotification(
             notificationObj,
             user,
-            getTargetUserId
+            getHighestPosition
         )
         return classLog
     })
