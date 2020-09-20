@@ -36,15 +36,7 @@ companyService.getHighestPosition = async (companyId) => {
     .for(Grade.query().where('ecompanyecompanyid', companyId).andWhere('egradesuperiorid', null))
     .distinct('euserid')
 
-    let userIds = users.map(user => user.euserid)
- 
-    return CompanyUserMapping.query()
-    .select()
-    .where('ecompanyecompanyid', companyId)
-    .whereIn('eusereuserid', userIds)
-    .then(users => {
-        return users.map(user => user.eusereuserid)
-    })
+    return users.map(user => user.euserid)
 
 }
 
@@ -200,19 +192,21 @@ companyService.joinCompany = async (companyId, user) => {
         return companyService.createCompanyLog(companyId, user, user.sub, CompanyLogTypeEnum.APPLY)
         .then(companyLog => {
 
-            const notificationObj = {
-                enotificationbodyentityid: user.sub,
-                enotificationbodyentitytype: NotificationEnum.user.type,
-                enotificationbodyaction: NotificationEnum.user.actions.join.code,
-                enotificationbodytitle: NotificationEnum.user.actions.join.title,
-                enotificationbodymessage: NotificationEnum.user.actions.join.message
+            if(getHighestPosition.length > 0 ) {
+                const notificationObj = {
+                    enotificationbodyentityid: user.sub,
+                    enotificationbodyentitytype: NotificationEnum.user.type,
+                    enotificationbodyaction: NotificationEnum.user.actions.join.code,
+                    enotificationbodytitle: NotificationEnum.user.actions.join.title,
+                    enotificationbodymessage: NotificationEnum.user.actions.join.message
+                }
+    
+                notificationService.saveNotification(
+                    notificationObj,
+                    user,
+                    getHighestPosition
+                )
             }
-
-            notificationService.saveNotification(
-                notificationObj,
-                user,
-                getHighestPosition
-            )
             return companyLog
         })
     }
@@ -226,19 +220,21 @@ companyService.joinCompany = async (companyId, user) => {
         return companyService.processIntoCompany(companyId, user, user.sub)
         .then(processedUser => {
 
-            const notificationObj = {
-                enotificationbodyentityid: user.sub,
-                enotificationbodyentitytype: NotificationEnum.user.type,
-                enotificationbodyaction: NotificationEnum.user.actions.accepted.code,
-                enotificationbodytitle: NotificationEnum.user.actions.accepted.title,
-                enotificationbodymessage: NotificationEnum.user.actions.accepted.message
+            if(getHighestPosition.length > 0) {
+                const notificationObj = {
+                    enotificationbodyentityid: user.sub,
+                    enotificationbodyentitytype: NotificationEnum.user.type,
+                    enotificationbodyaction: NotificationEnum.user.actions.accepted.code,
+                    enotificationbodytitle: NotificationEnum.user.actions.accepted.title,
+                    enotificationbodymessage: NotificationEnum.user.actions.accepted.message
+                }
+    
+                notificationService.saveNotification(
+                    notificationObj,
+                    user,
+                    getHighestPosition
+                )
             }
-
-            notificationService.saveNotification(
-                notificationObj,
-                user,
-                getHighestPosition
-            )
             return processedUser
         })
 
@@ -301,19 +297,21 @@ companyService.exitCompany = async (companyId, user) => {
     const removeUser = await companyService.removeUserFromCompany(userInCompany, user.sub, companyId)
     .then(ignore => {
 
-        const notificationObj = {
-            enotificationbodyentityid: user.sub,
-            enotificationbodyentitytype: NotificationEnum.user.type,
-            enotificationbodyaction: NotificationEnum.user.actions.exit.code,
-            enotificationbodytitle: NotificationEnum.user.actions.exit.title,
-            enotificationbodymessage: NotificationEnum.user.actions.exit.message
-        }
-
-        notificationService.saveNotification(
-            notificationObj,
-            user,
-            getHighestPosition
-        )
+        if(getHighestPosition.length > 0 ) {
+            const notificationObj = {
+                enotificationbodyentityid: user.sub,
+                enotificationbodyentitytype: NotificationEnum.user.type,
+                enotificationbodyaction: NotificationEnum.user.actions.exit.code,
+                enotificationbodytitle: NotificationEnum.user.actions.exit.title,
+                enotificationbodymessage: NotificationEnum.user.actions.exit.message
+            }
+    
+            notificationService.saveNotification(
+                notificationObj,
+                user,
+                getHighestPosition
+            )
+        } 
     })
 
     // delete approval user mapping
@@ -390,19 +388,21 @@ companyService.processInvitation = async (companyId, user, status) => {
         return companyService.updateCompanyLog(companyId, user, user.sub, CompanyLogStatusEnum.REJECTED)
         .then(companyLog => {
             
-            const notificationObj = {
-                enotificationbodyentityid: user.sub,
-                enotificationbodyentitytype: NotificationEnum.user.type,
-                enotificationbodyaction: NotificationEnum.user.actions.rejected.code,
-                enotificationbodytitle: NotificationEnum.user.actions.rejected.title,
-                enotificationbodymessage: NotificationEnum.user.actions.rejected.message
+            if(getHighestPosition.length > 0 ) {
+                const notificationObj = {
+                    enotificationbodyentityid: user.sub,
+                    enotificationbodyentitytype: NotificationEnum.user.type,
+                    enotificationbodyaction: NotificationEnum.user.actions.rejected.code,
+                    enotificationbodytitle: NotificationEnum.user.actions.rejected.title,
+                    enotificationbodymessage: NotificationEnum.user.actions.rejected.message
+                }
+    
+                notificationService.saveNotification(
+                    notificationObj,
+                    user,
+                    getHighestPosition
+                )
             }
-
-            notificationService.saveNotification(
-                notificationObj,
-                user,
-                getHighestPosition
-            )
             return companyLog
         })
 
@@ -410,19 +410,22 @@ companyService.processInvitation = async (companyId, user, status) => {
         return companyService.processIntoCompany(companyId, user, user.sub)
         .then(processedUser => {
 
-            const notificationObj = {
-                enotificationbodyentityid: user.sub,
-                enotificationbodyentitytype: NotificationEnum.user.type,
-                enotificationbodyaction: NotificationEnum.user.actions.accepted.code,
-                enotificationbodytitle: NotificationEnum.user.actions.accepted.title,
-                enotificationbodymessage: NotificationEnum.user.actions.accepted.message
+            if(getHighestPosition.length > 0 ) {
+                const notificationObj = {
+                    enotificationbodyentityid: user.sub,
+                    enotificationbodyentitytype: NotificationEnum.user.type,
+                    enotificationbodyaction: NotificationEnum.user.actions.accepted.code,
+                    enotificationbodytitle: NotificationEnum.user.actions.accepted.title,
+                    enotificationbodymessage: NotificationEnum.user.actions.accepted.message
+                }
+    
+                notificationService.saveNotification(
+                    notificationObj,
+                    user,
+                    getHighestPosition
+                )
             }
 
-            notificationService.saveNotification(
-                notificationObj,
-                user,
-                getHighestPosition
-            )
             return processedUser
         })
 

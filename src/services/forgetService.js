@@ -29,10 +29,12 @@ ForgetService.sendForgetEmail = async (email) => {
 
     const forget = await Forget.query().where('euseremail', email).first();
 
-    // If less than one minute passed
-    const oneMinute = 60 * 1000;    
-    if ((Date.now() - forget.eforgetchangetime) < oneMinute)
-        throw new UnsupportedOperationError(ErrorEnum.FORGET_PENDING);
+    if (forget) {
+        // If less than one minute passed
+        const oneMinute = 60 * 1000;    
+        if ((Date.now() - forget.eforgetchangetime) < oneMinute)
+            throw new UnsupportedOperationError(ErrorEnum.FORGET_PENDING);
+    }
     
     // Generate random token
     const token = [...Array(22)].map(i=>(~~(Math.random()*36)).toString(36)).join('');
