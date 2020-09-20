@@ -26,7 +26,6 @@ mobileClassUserService.getHighestPosition = async (classId) => {
     const foundCompany = await Class.query()
     .select('ecompanyecompanyid')
     .findById(classId)
-    .where('eclassid',classId)
 
     if(!foundCompany) throw new NotFoundError()    
 
