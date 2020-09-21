@@ -39,7 +39,7 @@ controller.getCompanies = async (req, res, next) => {
 
 controller.getUsersByCompanyId = async (req, res, next) => {
 
-    const { page, size, keyword = '' } = req.query
+    const { page = '0', size = '10', keyword = '' } = req.query
     
     const { companyId } = req.params
 
