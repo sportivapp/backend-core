@@ -23,6 +23,7 @@ module.exports = {
             removeCoach: '/user/coach-remove',
             industry: '/user/industry',
             pending: '/user-pending-log',
+            profile: '/user-profile'
         },
         profile: {
             changeCompany: '/change-company',

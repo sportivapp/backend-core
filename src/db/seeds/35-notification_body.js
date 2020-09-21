@@ -49,6 +49,6 @@ exports.seed = (knex, Promise) => knex('enotificationbody').del()
                     enotificationbodycreatetime: 1583193600,
                     enotificationbodychangeby: 4,
                     enotificationbodychangetime: 1583193600
-                }
+                }          
             ]
         ));

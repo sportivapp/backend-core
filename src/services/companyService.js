@@ -68,10 +68,12 @@ CompanyService.getUsersByCompanyId = async(companyId, page, size, keyword) => {
     return User.query()
         .withGraphFetched('file')
         .joinRelated('companies')
-        .withGraphJoined('grades')
-        .where('grades.ecompanyecompanyid', companyId)
-        .orWhere('companies.ecompanyid', companyId)
-        .where(raw('lower("eusername")'), 'like', `%${keyword.toLowerCase()}%`)
+        .withGraphFetched('grades')
+        .modifyGraph('grades', builder => {
+            builder.where('ecompanyecompanyid', companyId)
+        })
+        .where('companies.ecompanyid', companyId)
+        .andWhere(raw('lower("eusername")'), 'like', `%${keyword}%`)
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
