@@ -122,6 +122,29 @@ UsersService.getUserById = async ( userId, user ) => {
 
 }
 
+UsersService.getOtherUserById = async (userId, type) => {
+
+    if (type !== 'USER' && type !== 'COACH')
+        return
+
+    let relatedIndustry = 'coachIndustries'
+    if (type === 'USER')
+        relatedIndustry = 'userIndustries'
+
+    return User.query()
+    .findById(userId)
+    .modify('baseAttributes')
+    .withGraphFetched(relatedIndustry)
+    .withGraphFetched('experiences(baseAttributes)')
+    .withGraphFetched('licenses(baseAttributes)')
+    .then(user => {
+        if(user === undefined)
+            throw new NotFoundError()
+        return user
+    })
+
+}
+
 UsersService.getProfile = async ( user ) => {
 
     return User.query()
