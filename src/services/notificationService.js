@@ -41,4 +41,31 @@ notificationService.deleteNotificationBody = async () => {
 
 }
 
+notificationService.saveNotification = async (notificationObj, loggedInUser, targetUserIds) => {
+
+    const notificationBodyDTO = {
+        enotificationbodyentityid: notificationObj.enotificationbodyentityid,
+        enotificationbodyentitytype: notificationObj.enotificationbodyentitytype,
+        enotificationbodyaction: notificationObj.enotificationbodyaction,
+        enotificationbodytitle: notificationObj.enotificationbodytitle,
+        enotificationbodymessage: notificationObj.enotificationbodymessage,
+        enotificationbodysenderid: loggedInUser.sub
+    }
+    
+    return NotificationBody.query()
+    .insertToTable(notificationBodyDTO, loggedInUser.sub)
+    .then(notificationBody => {
+
+        const notificationDTO = targetUserIds.map(targetUserId => ({
+            eusereuserid: targetUserId,
+            enotificationbodyenotificationbodyid: notificationBody.enotificationbodyid
+        }))
+
+        return Notification.query()
+        .insertToTable(notificationDTO, loggedInUser.sub)
+    })
+
+}
+
+
 module.exports = notificationService;
