@@ -8,9 +8,27 @@ const NotificationEnum = {
     class: {
         type: 'CLASS',
         actions: {
-
+            register: {
+                title: 'Register Class',
+                code: 'REGISTER_CLASS',
+                message: 'A User has registered to a Class!'
+            },
+            approved: {
+                title: 'Approved Class',
+                code: 'APPROVED_CLASS',
+                message: 'Your class registration has been approved!'
+            },
+            rejected: {
+                title: 'Rejected Class',
+                code: 'REJECTED_CLASS',
+                message:'Your class registration has been rejected!'
+            },
+            canceled: {
+                title: 'Canceled Class',
+                code: 'CANCELED_CLASS',
+                message:'A user canceled its registration to a class!'
+            }
         }
-
     },
     user: {
         type: 'USER',
