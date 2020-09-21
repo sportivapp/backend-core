@@ -89,6 +89,18 @@ companyService.getCompanies = async (page, size, keyword) => {
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
 
+companyService.getUsersByCompanyId = async(companyId, page, size) => {
+
+    return User.query()
+        .withGraphFetched('file')
+        .joinRelated('companies')
+        .withGraphJoined('grades')
+        .where('grades.ecompanyecompanyid', companyId)
+        .orWhere('companies.ecompanyid', companyId)
+        .page(page, size)
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+}
+
 companyService.getVirtualMemberCard = async (companyId, user) => {
 
     const userInCompany = await Company.query()
