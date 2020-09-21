@@ -37,6 +37,20 @@ controller.getCompanies = async (req, res, next) => {
 
 }
 
+controller.getUsersByCompanyId = async (req, res, next) => {
+
+    const { page, size } = req.query
+
+    const { companyId } = req.params
+
+    try {
+        const pageObj = await companyService.getUsersByCompanyId(companyId, parseInt(page), parseInt(size))
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+    } catch (e) {
+        next(e)
+    }
+}
+
 controller.getVirtualMemberCard = async (req, res, next) => {
 
     const { companyId } = req.params;
