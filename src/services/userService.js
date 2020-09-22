@@ -324,11 +324,12 @@ UsersService.login = async (loginDTO) => {
 
 }
 
-UsersService.changeUserPassword = async ( user , newPassword) => {
+UsersService.changeUserPassword = async ( user , oldPassword, newPassword) => {
 
     const userFromDB = await User.query().findById(user.sub);
 
-    const samePassword = await bcrypt.compare(newPassword, userFromDB.euserpassword);
+    const samePassword = await bcrypt.compare(oldPassword, userFromDB.euserpassword);
+    
     if (samePassword)
         throw new Error(UnsupportedOperationError(ErrorEnum.PASSWORD_INVALID))
 
