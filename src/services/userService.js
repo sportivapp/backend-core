@@ -14,7 +14,7 @@ const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const UsersService = {};
 
 const ErrorEnum = {
-    PASSWORD_INVALID = 'PASSWORD_INVALID',
+    PASSWORD_INVALID: 'PASSWORD_INVALID',
 }
 
 UsersService.registerEmployees = async (user, path) => {
