@@ -330,7 +330,7 @@ UsersService.changeUserPassword = async ( user , oldPassword, newPassword) => {
 
     const samePassword = await bcrypt.compare(oldPassword, userFromDB.euserpassword);
     
-    if (samePassword)
+    if (!samePassword)
         throw new Error(UnsupportedOperationError(ErrorEnum.PASSWORD_INVALID))
 
     const encryptedPassword = await bcrypt.hash(newPassword);
