@@ -151,6 +151,9 @@ module.exports = {
         },
         notification: {
             list: '/notification'
+        },
+        license: {
+            id : '/license/:licenseId'
         }
     }
 }
