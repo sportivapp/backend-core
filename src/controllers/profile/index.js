@@ -6,7 +6,7 @@ const profileController = {}
 profileController.changeUserPassword = async (req, res, next) => {
 
     const user = req.user;
-    const { newPassword } = req.body;
+    const { oldPassword, newPassword } = req.body;
 
     try {
 
