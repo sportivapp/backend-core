@@ -3,14 +3,11 @@ const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
 const LicenseService = {}
 
-LicenseService.getLicense = async (licenseId) => {
+LicenseService.getLicenseById = async (licenseId) => {
 
     return License.query()
     .findById(licenseId)
-    .select('elicenseid', 'elicenseacademicname', 'efileid', 'efilename', 'elicensegraduationdate', 'eindustryname', 'elicenselevel', 
-    'elicenseadditionalinformation')
-    .leftJoinRelated('industry')
-    .joinRelated('file')
+    .modify('baseAttributes')
     .then(result => {
         if(!result)
             throw new NotFoundError()
