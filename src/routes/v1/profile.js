@@ -6,7 +6,7 @@ const { routes } = require('../../constant')
 
 router.post(routes.profile.changeCompany, auth.authenticateToken, profileController.changeUserCompany);
 router.get(routes.profile.currentCompany, auth.authenticateToken, profileController.getUserCurrentCompany);
-router.put(routes.profile.changePassword, auth.authenticateToken, profileController.changePassword);
+router.put(routes.profile.changePassword, auth.authenticateToken, profileController.changeUserCompany);
 router.put(routes.profile.profile, auth.authenticateToken, profileController.updateProfile)
 router.get(routes.profile.profile, auth.authenticateToken, profileController.getProfile)
 

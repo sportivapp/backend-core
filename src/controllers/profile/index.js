@@ -3,7 +3,7 @@ const ResponseHelper = require('../../helper/ResponseHelper')
 
 const profileController = {}
 
-profileController.changePassword = async (req, res, next) => {
+profileController.changeUserPassword = async (req, res, next) => {
 
     const user = req.user;
     const { newPassword } = req.body;
