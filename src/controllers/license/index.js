@@ -3,13 +3,13 @@ const ResponseHelper = require('../../helper/ResponseHelper');
 
 const controller = {};
 
-controller.getLicense = async (req, res, next) => {
+controller.getLicenseById = async (req, res, next) => {
 
     const { licenseId } = req.params;
 
     try {
 
-        const result = await licenseService.getLicense(parseInt(licenseId));
+        const result = await licenseService.getLicenseById(parseInt(licenseId));
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
