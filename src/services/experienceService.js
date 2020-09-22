@@ -6,13 +6,12 @@ const experienceService = {}
 experienceService.getExperienceById = async (experienceId) => {
 
     return Experience.query()
-    .select('eexperienceid','eexperiencename', 'eexperiencestartdate', 'eexperienceenddate', 'eexperiencelocation', 
-    'eexperienceposition', 'eexperiencedescription', 'eindustryname', 'efileid', 'efilename')
-    .leftJoinRelated('[industry, files]')
-    .where('eexperienceid', experienceId)
-    .first()
+    .findById(experienceId)
+    .modify('baseAttributes')
+    .leftJoinRelated('files')
+    .select('efileid', 'efilename')
     .then(experience => {
-        if(experience === undefined)
+        if(!experience)
             throw new NotFoundError()
         return experience
     })
