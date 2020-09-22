@@ -10,7 +10,7 @@ profileController.changeUserPassword = async (req, res, next) => {
 
     try {
 
-        const result = await userService.changeUserPassword(user, newPassword);
+        const result = await userService.changeUserPassword(user, oldPassword, newPassword);
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
