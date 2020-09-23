@@ -3,7 +3,6 @@ const CompanyUserMapping = require('../models/CompanyUserMapping')
 const Company = require('../models/Company')
 const CompanySequence = require('../models/CompanySequence')
 const Grade = require('../models/Grades');
-const UserPositionMapping = require('../models/UserPositionMapping');
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -13,10 +12,6 @@ const ServiceHelper = require('../helper/ServiceHelper')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
 
 const UsersService = {};
-
-const ErrorEnum = {
-    PASSWORD_INVALID: 'PASSWORD_INVALID',
-}
 
 UsersService.registerEmployees = async (user, path) => {
 
@@ -208,7 +203,6 @@ UsersService.login = async (loginDTO) => {
         if (!result || !result.ecompanyecompanyid) return
 
         token = await UsersService.generateJWTToken(user, result.ecompanyecompanyid, functions);
-        token = await generateJWTToken(user, result.ecompanyecompanyid, result.ecompanyusermappingpermission);
 
     }
 
@@ -255,23 +249,6 @@ UsersService.sendForgotPasswordLink = async ( email ) => {
     }
 
     return true;
-}
-
-UsersService.addApprovalUsers = async (userId, approverUserIds, user) => {
-    const users = await User.query()
-        .whereIn('euserid', approverUserIds)
-
-    if (users.length !== approvalUserIds.length) return
-
-    const patchDTO = {}
-    approverUserIds.forEach((value, index) => {
-        patchDTO['euserapprovaluserid'.concat(index)] = value
-    })
-
-    return User.query()
-        .findById(userId)
-        .updateByUserId(patchDTO, user.sub)
-        .returning('*')
 }
 
 module.exports = UsersService;

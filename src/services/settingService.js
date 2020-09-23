@@ -25,11 +25,16 @@ SettingService.getModulesByUserId = async ( userId ) => {
 
 SettingService.getModulesByGradeIds = async (gradeIds) => {
 
-    const functionIds = SettingService.getAllFunctionByGradeIds(gradeIds)
+    const functionObj = await SettingService.getAllFunctionByGradeIds(gradeIds);
 
-    return Function.relatedQuery('module')
-        .distinct()
-        .for(Function.query().whereIn('efunctionid', functionIds))
+    const moduleIds = []
+
+    for (let key in functionObj) {
+        moduleIds.push(key)
+    }
+
+    return Module.query()
+        .whereIn('emoduleid', moduleIds)
 }
 
 SettingService.getModuleById = async (companyId, moduleId) => {

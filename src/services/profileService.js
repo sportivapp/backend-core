@@ -2,9 +2,15 @@ const userService = require('./userService')
 const companyService = require('./companyService')
 const settingService = require('./settingService')
 const gradeService = require('./gradeService')
+const bcrypt = require('../helper/bcrypt')
 const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
 
 const profileService = {}
+
+const ErrorEnum = {
+    PASSWORD_INVALID: 'PASSWORD_INVALID',
+    USER_NOT_FOUND: 'USER_NOT_FOUND'
+}
 
 profileService.updateProfile = async (userDTO, user) => {
 
@@ -44,23 +50,47 @@ profileService.changeUserCompany = async (companyId, user) => {
 
 profileService.getFunctions = async (user) => {
 
-    const gradeIds = gradeService.getAllGradesByUserIdAndCompanyId(user.companyId, user.sub)
+    const gradeIds = await gradeService.getAllGradesByUserIdAndCompanyId(user.companyId, user.sub)
         .then(grades => grades.map(grade => grade.egradeid))
 
     return settingService.getAllFunctionByGradeIds(gradeIds)
 
 }
 
-profileService.changeUserPassword = async (user , newPassword) => {
+profileService.getFunctionsByModuleId = async (moduleId, user) => {
+
+    const gradeIds = await gradeService.getAllGradesByUserIdAndCompanyId(user.companyId, user.sub)
+        .then(grades => grades.map(grade => grade.egradeid))
+
+    return settingService.getAllFunctionByGradeIds(gradeIds)
+        .then(groupedFunctions => groupedFunctions[moduleId])
+        .then(functions => {
+            if (!functions) return []
+            return functions
+        })
+
+}
+
+profileService.changeUserPassword = async (user, oldPassword, newPassword) => {
+
+    const userFromDB = await userService.getUserById(user.sub, user);
+
+    if (!userFromDB) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_FOUND)
+
+    const samePassword = await bcrypt.compare(oldPassword, userFromDB.euserpassword);
+
+    if (!samePassword)
+        throw new UnsupportedOperationError(ErrorEnum.PASSWORD_INVALID);
 
     const encryptedPassword = await bcrypt.hash(newPassword);
 
-    return userService.updateUserById(user.sub, { euserpassword: encryptedPassword }, user.sub)
+    return userService.updateUserById(user.sub, { euserpassword: encryptedPassword }, user);
+
 }
 
 profileService.getModules = async (user) => {
 
-    const gradeIds = gradeService.getAllGradesByUserIdAndCompanyId(user.companyId, user.sub)
+    const gradeIds = await gradeService.getAllGradesByUserIdAndCompanyId(user.companyId, user.sub)
         .then(grades => grades.map(grade => grade.egradeid))
 
     return settingService.getModulesByGradeIds(gradeIds)

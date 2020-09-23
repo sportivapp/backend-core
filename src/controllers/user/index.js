@@ -4,25 +4,6 @@ const templatePath = require('../../../templates/index');
 
 const userController = {}
 
-userController.changePassword = async (req, res, next) => {
-
-    const user = req.user;
-    const { newPassword } = req.body;
-
-    try {
-
-        const result = await userService.changeUserPassword(user, newPassword);
-
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
-        return res.status(200).json(ResponseHelper.toBaseResponse(result))
-
-        
-    } catch (e) {
-        next(e);
-    }
-}
-
 userController.registerEmployees = async (req, res, next) => {
 
     if (req.user.functions.indexOf('C5') === -1)
@@ -263,23 +244,6 @@ userController.importTemplate = async (req, res, next) => {
         next(e);
     }
 
-}
-
-userController.addApprovalUsers = async (req, res, next) => {
-
-    if (req.user.functions.indexOf('C6') === -1)
-        return res.status(403).json(ResponseHelper.toErrorResponse(403))
-
-    try {
-        const {userId, approvalUserIds} = req.body
-
-        const result = userService.addApprovalUsers(userId, approvalUserIds, req.user)
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
-        return res.status(200).json(ResponseHelper.toBaseResponse(result))
-    } catch (e) {
-        next(e)
-    }
 }
 
 module.exports = userController

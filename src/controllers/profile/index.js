@@ -10,12 +10,8 @@ profileController.changeUserPassword = async (req, res, next) => {
 
     try {
 
-        const result = await userService.changeUserPassword(user, oldPassword, newPassword);
-
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
+        const result = await profileService.changeUserPassword(user, oldPassword, newPassword);
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
-
 
     } catch (e) {
         next(e);
@@ -101,17 +97,19 @@ profileController.updateProfile = async (req, res, next) => {
 profileController.getModules = async (req, res, next) => {
 
     try {
-        const modules = profileService.getModules(req.user);
+        const modules = await profileService.getModules(req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(modules))
     } catch (e) {
         next(e)
     }
 }
 
-profileController.getFunctions = async (req, res, next) => {
+profileController.getFunctionsByModuleId = async (req, res, next) => {
+
+    const { moduleId } = req.params
 
     try {
-        const modules = profileService.getFunctions(req.user);
+        const modules = await profileService.getFunctionsByModuleId(moduleId, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(modules))
     } catch (e) {
         next(e)
