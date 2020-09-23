@@ -110,34 +110,12 @@ userController.getUserById = async (req, res, next) => {
 
 }
 
-userController.getUserCurrentCompany = async (req, res, next) => {
-
-    const user = req.user;
-
-    if (req.user.functions.indexOf('R1') === -1)
-        return res.status(403).json(ResponseHelper.toErrorResponse(403))
-
-    try {
-
-        const result = await userService.getUserCurrentCompany(user);
-
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
-        return res.status(200).json(ResponseHelper.toBaseResponse(
-            result))
-
-    } catch (e) {
-        next(e);
-    }
-}
-
 userController.getOtherUserById = async (req, res, next) => {
 
     const { userId } = req.body;
     const { type } = req.query;
 
-    //TODO check module 1
-    if (req.user.functions.indexOf('R1') === -1)
+    if (req.user.functions.indexOf('R5') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
