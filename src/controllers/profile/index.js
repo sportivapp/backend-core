@@ -1,4 +1,4 @@
-const userService = require('../../services/userService')
+const profileService = require('../../services/profileService')
 const ResponseHelper = require('../../helper/ResponseHelper')
 
 const profileController = {}
@@ -10,10 +10,7 @@ profileController.changePassword = async (req, res, next) => {
 
     try {
 
-        const result = await userService.changeUserPassword(user, newPassword);
-
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
+        const result = await profileService.changeUserPassword(user, newPassword);
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
 
@@ -28,10 +25,7 @@ profileController.getUserCurrentCompany = async (req, res, next) => {
 
     try {
 
-        const result = await userService.getUserCurrentCompany(user);
-
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        const result = await profileService.getUserCurrentCompany(user);
         return res.status(200).json(ResponseHelper.toBaseResponse(
             result))
 
@@ -47,9 +41,7 @@ profileController.changeUserCompany = async (req, res, next) => {
 
     try {
 
-        const result = await userService.changeUserCompany(companyId, user)
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        const result = await profileService.changeUserCompany(companyId, user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch (e) {
@@ -63,7 +55,7 @@ profileController.getProfile = async (req, res, next) => {
 
     try {
 
-        const result = await userService.getProfile(user);
+        const result = await profileService.getProfile(user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch (e) {
@@ -95,9 +87,29 @@ profileController.updateProfile = async (req, res, next) => {
             euseraddress: address
         }
 
-        const data = await userService.updateProfile(userDTO, user)
+        const data = await profileService.updateProfile(userDTO, user)
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
 
+    } catch (e) {
+        next(e)
+    }
+}
+
+profileController.getModules = async (req, res, next) => {
+
+    try {
+        const modules = profileService.getModules(req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(modules))
+    } catch (e) {
+        next(e)
+    }
+}
+
+profileController.getFunctions = async (req, res, next) => {
+
+    try {
+        const modules = profileService.getFunctions(req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(modules))
     } catch (e) {
         next(e)
     }

@@ -357,7 +357,7 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
 
 }
 
-CompanyService.getCompanyById = async (companyId) => {
+CompanyService.getCompleteCompanyById = async (companyId) => {
 
     const company = await Company.query().findById(companyId)
         .withGraphFetched('[industry(baseAttributes), ' +
@@ -477,6 +477,19 @@ CompanyService.deleteCompany = async (companyId) => {
     return Promise.all([deleteUserMapping, deleteModuleMapping, deleteCompany])
         .then(resultArr => resultArr[2])
         .then(rowsAffected => rowsAffected === 1)
+}
+
+CompanyService.getCompanyById = async (companyId) => {
+    return Company.query()
+        .findById(companyId)
+}
+
+CompanyService.isUserExistInCompany = async (companyId, userId) => {
+    return CompanyUserMapping.query()
+        .where('ecompanyecompanyid', companyId)
+        .where('eusereuserid', userId)
+        .first()
+        .then(data => !!data)
 }
 
 module.exports = CompanyService;

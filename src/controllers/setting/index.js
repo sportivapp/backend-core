@@ -31,7 +31,7 @@ Controller.updateModulesNameByCompanyId = async (req, res, next) => {
 
     try {
 
-        const result = await SettingService.updateModulesByCompanyId(companyId, moduleDTO, req.user);
+        const result = await SettingService.updateModuleByCompanyId(companyId, moduleDTO, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch(e) {

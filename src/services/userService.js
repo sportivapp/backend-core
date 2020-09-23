@@ -115,13 +115,6 @@ UsersService.getUserById = async ( userId, user ) => {
 
 }
 
-UsersService.getProfile = async ( user ) => {
-
-    return User.query()
-        .findById(user.sub);
-
-}
-
 UsersService.getOtherUserById = async (userId, type) => {
 
     if (type !== 'USER' && type !== 'COACH')
@@ -145,58 +138,6 @@ UsersService.getOtherUserById = async (userId, type) => {
 
 }
 
-UsersService.getProfile = async ( user ) => {
-
-    return User.query()
-        .findById(user.sub);
-
-}
-
-UsersService.getUserCurrentCompany = async ( user ) => {
-
-    const companyData = await Company.query()
-        .select()
-        .where('ecompanyid', user.companyId)
-        .withGraphFetched('[older]')
-        .first()
-
-    let result
-
-    if( companyData.older === null || companyData.older === undefined){
-        result = {
-            companyId: companyData.ecompanyid,
-            companyName: companyData.ecompanyname,
-            parent: null
-        }
-    } else if( companyData.older.older === null  || companyData.older.older === undefined) {
-        result = {
-            companyId: companyData.ecompanyid,
-            companyName: companyData.ecompanyname,
-            parent: {
-                companyId: companyData.older.ecompanyid,
-                companyName: companyData.older.ecompanyname,
-                parent: null
-            }
-        }
-    } else if( companyData.older.older !== null || companyData.older.older !== undefined) {
-        result = {
-            companyId: companyData.ecompanyid,
-            companyName: companyData.ecompanyname,
-            parent: {
-                companyId: companyData.older.ecompanyid,
-                companyName: companyData.older.ecompanyname,
-                parent: {
-                    companyId: companyData.older.older.ecompanyid,
-                    companyName: companyData.older.older.ecompanyname
-                }
-            }
-        }
-    }
-
-    return result
-
-}
-
 UsersService.updateUserById = async (userId, userDTO, user) => {
 
     return User.query().findById(userId)
@@ -204,14 +145,7 @@ UsersService.updateUserById = async (userId, userDTO, user) => {
         .returning('*')
 }
 
-UsersService.updateProfile = async (userDTO, user) => {
-
-    return User.query().findById(user.sub)
-        .updateByUserId(userDTO, user.sub)
-        .returning('*')
-}
-
-async function generateJWTToken(user, companyId, functions) {
+UsersService.generateJWTToken = async (user, companyId, functions) => {
 
     const config = {
         sub: user.euserid,
@@ -268,46 +202,12 @@ UsersService.login = async (loginDTO) => {
 
         if (!result || !result.ecompanyecompanyid) return
 
-        token = await generateJWTToken(user, result.ecompanyecompanyid, functions);
+        token = await UsersService.generateJWTToken(user, result.ecompanyecompanyid, functions);
 
     }
 
     return token;
 
-}
-
-UsersService.changeUserPassword = async ( user , newPassword) => {
-
-    const encryptedPassword = await bcrypt.hash(newPassword);
-
-    return User.query().findById(user.sub).updateByUserId({ euserpassword: encryptedPassword }, user.sub);
-}
-
-UsersService.changeUserCompany = async (companyId, user) => {
-
-    const loggedInUser = await User.query().select().where('euseremail', user.email).first();
-
-    const userCompany = await CompanyUserMapping.query().select()
-    .where('ecompanyecompanyid', companyId)
-    .where('eusereuserid', user.sub)
-    .first()
-
-    const result = await User.query()
-        .joinRelated('companies')
-        .withGraphFetched('grades.functions')
-        .where('ecompanyecompanyid', companyId)
-        .first();
-
-    let functions = result.grades[0].functions.map(func => func.efunctioncode)
-
-    result.grades.forEach(grade => {
-        if (grade.functions.length > functions.length) functions = grade.functions.map(func => func.efunctioncode)
-    })
-
-    if(!userCompany)
-        return
-
-    return generateJWTToken(loggedInUser, companyId, functions);
 }
 
 UsersService.deleteUserById = async ( userId, loggedInUser ) => {
@@ -350,13 +250,6 @@ UsersService.addApprovalUsers = async (userId, approverUserIds, user) => {
     return User.query()
         .findById(userId)
         .updateByUserId(patchDTO, user.sub)
-        .returning('*')
-}
-
-UsersService.updateProfile = async (userDTO, user) => {
-
-    return User.query().findById(user.sub)
-        .updateByUserId(userDTO, user.sub)
         .returning('*')
 }
 

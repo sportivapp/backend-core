@@ -128,7 +128,7 @@ companyController.getCompanyById = async (req, res, next) => {
     const { companyId } = req.params
 
     try {
-        const result = await companyService.getCompanyById(companyId)
+        const result = await companyService.getCompleteCompanyById(companyId)
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))

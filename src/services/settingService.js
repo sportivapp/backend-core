@@ -23,6 +23,15 @@ SettingService.getModulesByUserId = async ( userId ) => {
 
 }
 
+SettingService.getModulesByGradeIds = async (gradeIds) => {
+
+    const functionIds = SettingService.getAllFunctionByGradeIds(gradeIds)
+
+    return Function.relatedQuery('module')
+        .distinct()
+        .for(Function.query().whereIn('efunctionid', functionIds))
+}
+
 SettingService.getModuleById = async (companyId, moduleId) => {
 
     const module = await CompanyModuleMapping.query()
@@ -54,6 +63,46 @@ SettingService.getAllFunctionByGradeId = async (gradeId) => {
     .joinRelated('functions')
     .select('efunctionefunctioncode')
     .where('egradeegradeid', gradeId);
+
+    // create object with (key, value) = (functioncode, true)
+    let gradeFunctionCodes = {};
+    for (let i=0; i<myGradeFunctions.length; i++) {
+        gradeFunctionCodes[myGradeFunctions[i].efunctionefunctioncode] = true;
+    }
+
+    let groupedFunction = {};
+    for (let i=0; i<allFunctions.length; i++) {
+        let moduleId = allFunctions[i].efunctioncode.substring(1);
+
+        if (typeof groupedFunction[moduleId] === 'undefined') {
+            groupedFunction[moduleId] = [];
+        }
+
+        let status = false;
+        if (gradeFunctionCodes.hasOwnProperty(allFunctions[i].efunctioncode)) {
+            status = true;
+        }
+
+        groupedFunction[moduleId].push({
+            code: allFunctions[i].efunctioncode,
+            name: allFunctions[i].efunctionname,
+            status: status
+        });
+    }
+
+    return groupedFunction;
+
+}
+
+SettingService.getAllFunctionByGradeIds = async (gradeIds) => {
+
+    const allFunctions = await Function.query();
+
+    // get all functions assigned to this grade
+    const myGradeFunctions = await Grade.query()
+        .joinRelated('functions')
+        .distinct('efunctionefunctioncode')
+        .whereIn('egradeegradeid', gradeIds);
 
     // create object with (key, value) = (functioncode, true)
     let gradeFunctionCodes = {};
