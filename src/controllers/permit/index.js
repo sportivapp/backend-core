@@ -12,7 +12,7 @@ controller.createPermit = async (req, res, next) => {
     if (user.functions.indexOf('C6') === -1) return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const permitDTO = {
-        eusereuserid: permitRequest.userId,
+        eusereuserid: req.user.sub,
         epermitdescription: permitRequest.description,
         epermitstartdate: permitRequest.startDate,
         epermitenddate: permitRequest.endDate,
@@ -32,7 +32,7 @@ controller.createPermit = async (req, res, next) => {
 
 controller.getPermitList = async (req, res, next) => {
 
-    const {page, size} = req.query
+    const { page, size } = req.query
 
     const user = req.user
 
@@ -41,6 +41,38 @@ controller.getPermitList = async (req, res, next) => {
     try {
         const pageObj = await permitService.getPermitList(parseInt(page), parseInt(size), user)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+    }catch (e) {
+        next(e)
+    }
+}
+
+controller.requestApproval = async (req, res, next) => {
+
+    const { permitId } = req.params
+
+    const user = req.user
+
+    try {
+        const result = await permitService.requestApproval(parseInt(permitId), user)
+        if (!result)
+            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+    } catch (e) {
+        next(e)
+    }
+}
+
+controller.getSubordinatePermitList = async (req, res, next) => {
+
+    const { page, size } = req.query
+
+    const user = req.user
+
+    if (user.functions.indexOf('R6') === -1) return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
+    try {
+        const pageObj = await permitService.getSubordinatePermitList(parseInt(page), parseInt(size), user)
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
     } catch (e) {
         next(e)
     }
@@ -48,14 +80,12 @@ controller.getPermitList = async (req, res, next) => {
 
 controller.getPermitById = async (req, res, next) => {
 
-    const {permitId} = req.params
+    const { permitId } = req.params
 
-    const user = req.user
-
-    if (user.functions.indexOf('R6') === -1) return res.status(403).json(ResponseHelper.toErrorResponse(403))
+    if (req.user.functions.indexOf('R6') === -1) return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
-        const result = await permitService.getPermitById(permitId)
+        const result =  await permitService.getPermitById(permitId)
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
@@ -66,7 +96,7 @@ controller.getPermitById = async (req, res, next) => {
 
 controller.updatePermitById = async (req, res, next) => {
 
-    const {permitId} = req.params
+    const { permitId } = req.params
 
     const permitRequest = req.body
 
@@ -88,7 +118,7 @@ controller.updatePermitById = async (req, res, next) => {
 
 controller.updatePermitStatusById = async (req, res, next) => {
 
-    const {permitId, status} = req.body
+    const { permitId, status } = req.body
 
     const user = req.user
 
@@ -104,7 +134,7 @@ controller.updatePermitStatusById = async (req, res, next) => {
 
 controller.deletePermitById = async (req, res, next) => {
 
-    const {permitId} = req.params
+    const { permitId } = req.params
 
     const user = req.user
 
@@ -112,41 +142,7 @@ controller.deletePermitById = async (req, res, next) => {
 
     try {
         const result = await permitService.deletePermitById(permitId, user)
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
-    } catch (e) {
-        next(e)
-    }
-}
-
-controller.requestApproval = async (req, res, next) => {
-
-    const {permitId} = req.params
-
-    const user = req.user
-
-    try {
-        const result = await permitService.requestApproval(parseInt(permitId), user)
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
-        return res.status(200).json(ResponseHelper.toBaseResponse(result))
-    } catch (e) {
-        next(e)
-    }
-}
-
-controller.getSubordinatePermitList = async (req, res, next) => {
-
-    const {page, size} = req.query
-
-    const user = req.user
-
-    if (user.functions.indexOf('R6') === -1) return res.status(403).json(ResponseHelper.toErrorResponse(403))
-
-    try {
-        const pageObj = await permitService.getSubordinatePermitList(parseInt(page), parseInt(size), user)
-        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
     } catch (e) {
         next(e)
     }

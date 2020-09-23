@@ -70,9 +70,14 @@ UsersService.registerEmployees = async (user, path) => {
 
 UsersService.createUser = async (userDTO, user) => {
 
+    const getUserByEmail = await User.query().where('euseremail', userDTO.euseremail).first();
+
+    if (getUserByEmail)
+        return
+
     const trimmedName = userDTO.eusername.replace(/\s+/g, '')
 
-    userDTO.euserpassword = await bcrypt.hash('qplay'.concat(trimmedName.toLowerCase()));
+    userDTO.euserpassword = await bcrypt.hash('sportiv'.concat(trimmedName.toLowerCase()));
 
     const company = await Company.query().findById(user.companyId)
 
@@ -95,6 +100,7 @@ UsersService.createUser = async (userDTO, user) => {
 UsersService.getUserById = async ( userId, user ) => {
 
     const result = await User.query()
+        .withGraphFetched('file')
         .findById(userId)
 
     if (!result) return
@@ -106,6 +112,36 @@ UsersService.getUserById = async ( userId, user ) => {
     if (!mapping) return
 
     return result;
+
+}
+
+UsersService.getProfile = async ( user ) => {
+
+    return User.query()
+        .findById(user.sub);
+
+}
+
+UsersService.getOtherUserById = async (userId, type) => {
+
+    if (type !== 'USER' && type !== 'COACH')
+        return
+
+    let relatedIndustry = 'coachIndustries'
+    if (type === 'USER')
+        relatedIndustry = 'userIndustries'
+
+    return User.query()
+    .findById(userId)
+    .modify('baseAttributes')
+    .withGraphFetched(relatedIndustry)
+    .withGraphFetched('experiences(baseAttributes)')
+    .withGraphFetched('licenses(baseAttributes)')
+    .then(user => {
+        if(user === undefined)
+            throw new NotFoundError()
+        return user
+    })
 
 }
 
@@ -314,6 +350,13 @@ UsersService.addApprovalUsers = async (userId, approverUserIds, user) => {
     return User.query()
         .findById(userId)
         .updateByUserId(patchDTO, user.sub)
+        .returning('*')
+}
+
+UsersService.updateProfile = async (userDTO, user) => {
+
+    return User.query().findById(user.sub)
+        .updateByUserId(userDTO, user.sub)
         .returning('*')
 }
 

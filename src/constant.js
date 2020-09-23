@@ -5,7 +5,10 @@ module.exports = {
             list: '/company',
             register: '/company-register',
             id: '/company/:companyId',
-            users: '/company/:companyId/users'
+            users: '/company/:companyId/users',
+            exit: '/company-exit',
+            cancelJoin: '/company-cancel-join/:companyId',
+            processInvitation: '/company-process-invitation'
         },
         user: {
             login: '/user-login',
@@ -16,11 +19,16 @@ module.exports = {
             import: '/user-import-template',
             id: '/user/:userId',
             approval: '/user/approval',
+            coach: '/user/coach',
+            removeCoach: '/user/coach-remove',
+            industry: '/user/industry',
+            pending: '/user-pending-log',
+            profile: '/user-profile'
         },
         profile: {
-            company: '/profile/company',
-            currentCompany: '/user/current-company',
-            changePassword: '/profile/change-password',
+            changeCompany: '/change-company',
+            currentCompany: '/current-company',
+            changePassword: '/change-password',
             profile: '/profile'
         },
         grade: {
@@ -94,6 +102,55 @@ module.exports = {
         },
         country: {
             list: '/country'
+        },
+        experience: {
+            list: '/experience',
+            id: '/experience/:experienceId'
+        },
+        team: {
+            list: '/team',
+            id: '/team/:teamId',
+            member: '/team-member',
+            kick: '/team-kick',
+            invite: '/team-invite',
+            processInvitation: '/team-process-invitation',
+            processRequest: '/team-process-request',
+            join: '/team-join',
+            position: '/team-member-position',
+            cancelInvitation: '/team-cancel-invite',
+            cancelRequest: '/team-cancel-request',
+            exit: '/team-exit',
+        },
+        class: {
+            list: '/class',
+            id: '/class/:classId'
+        },
+        classUser: {
+            registration: '/user-class/registration',
+            list: '/user-class',
+            id: '/user-class/:classUserId',
+            history: '/user-class-history',
+            historyId: '/user-class-history/:classUserId'
+        },
+        permit: {
+            list: '/permit',
+            id: '/permit/:permitId',
+            action: '/permit/action',
+            request: '/permit/:permitId/request',
+            subordinate: '/permit/subordinate'
+        },
+        companyLog: {
+            list: '/company/:companyId/log',
+            id: '/company/:companyId/log/:companyLogId'
+        },
+        app: {
+            version: '/app/version'
+        },
+        news: {
+            id: '/news/:newsId'
+        },
+        notification: {
+            list: '/notification'
         }
     }
 }

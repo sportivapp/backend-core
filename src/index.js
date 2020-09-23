@@ -2,14 +2,13 @@ const   express     = require('express'),
         cors        = require('cors'),
         morgan      = require('morgan'),
         fs          = require('fs'),
-        https       = require('https')
+        https       = require('https'),
+        path        = require('path')
 
+require('dotenv').config();
 const app = express();
 const routes = require('./routes/v1');
-const slackLoggingService = require('./helper/slackLoggingService');
-
-const webHookURL = 'https://hooks.slack.com/services/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';
-let errorMsg = {};
+const errorHandler = require('./middlewares/errorHandler');
 
 app.use(cors());
 app.use((_, res, next) => {
@@ -24,53 +23,55 @@ app.use((_, res, next) => {
 app.use(express.json({limit: '1000mb'}));
 app.use(express.urlencoded({limit: '1000mb', extended: true }));
 app.use(morgan('dev'));
+app.use(express.static(process.env.TEMP_DIRECTORY));
 
 app.use(routes)
 
 app.use((_, __, next) => {
-    const err = new Error('Not Found');
+    const err = new Error('Path Not Found');
     err.status = 404;
     next(err);
 });
 
-app.use((error, req, res, next) => {
-    // errorMsg = error;
-    console.log(error)
-    const status = error.status || 500;
-    res.status(status).send({
-        error: {
-            status: status,
-            message: error.message || 'Internal Server Error',
-        },
-    });
-    
-    errorMsg = {
-        status: status,
-        message: error.message || 'Internal Server Error',
-        errStack: error.stack
-    }
+// app.use((error, req, res, next) => {
+//     // errorMsg = error;
+//     console.log(error)
+//     const status = error.status || 500;
+//     res.status(status).send({
+//         error: {
+//             status: status,
+//             message: error.message || 'Internal Server Error',
+//         },
+//     });
+//
+//     errorMsg = {
+//         status: status,
+//         message: error.message || 'Internal Server Error',
+//         errStack: error.stack
+//     }
+//
+//     slackLoggingService.sendSlackMessage(webHookURL, slackLoggingService.setLogMessage(errorMsg));
+// });
 
-    slackLoggingService.sendSlackMessage(webHookURL, slackLoggingService.setLogMessage(errorMsg));
-});
+app.use(errorHandler)
 
-require('dotenv').config();
 const httpPORT = process.env.PORT || 5100;
 const httpServer = app.listen(httpPORT, function() {
     console.log(`HTTP Server started on port ${httpPORT}`);
 })
 
-// // configuration for https
-// const options = {
-//     key: fs.readFileSync('../../../etc/ssl/private/quickplay.key', 'utf8'),
-//     cert: fs.readFileSync('../../../etc/ssl/certs/quickplay.crt', 'utf8')
-// };
-// const httpsServer = https.createServer(options, app);
-// const httpsPORT = process.env.HTTPS_PORT || 5101;
-// httpsServer.listen(httpsPORT, function() {
-//     console.log(`HTTPS Server started on port ${httpsPORT}.`);
-// });
+// configuration for https
+ const options = {
+    key: fs.readFileSync('../../../etc/ssl/private/quickplay.key', 'utf8'),
+    cert: fs.readFileSync('../../../etc/ssl/certs/quickplay.crt', 'utf8')
+};
+const httpsServer = https.createServer(options, app);
+const httpsPORT = process.env.HTTPS_PORT || 5101;
+httpsServer.listen(httpsPORT, function() {
+    console.log(`HTTPS Server started on port ${httpsPORT}.`);
+});
 
 module.exports = {
     httpServer: httpServer,
-    // httpsServer: httpsServer
+    httpsServer: httpsServer
 }

@@ -23,6 +23,16 @@ class License extends Model {
     };
   }
 
+  static get modifiers() {
+    return {
+      baseAttributes(builder) {
+        builder.select('elicenseid', 'elicenseacademicname', 'elicensegraduationdate', 'elicenselevel', 'elicenseadditionalinformation')
+        .withGraphFetched('industry(baseAttributes)')
+        .withGraphFetched('file(baseAttributes)')
+      }
+    }
+  }
+
   static get relationMappings() {
 
     const File = require('./File');

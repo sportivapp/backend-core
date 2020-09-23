@@ -45,6 +45,12 @@ exports.seed = (knex, Promise) => knex('ecompanyusermapping').del()
                     ecompanyusermappingpermission: 10
                 },
                 {
+                    ecompanyecompanyid: 2,
+                    eusereuserid: 1,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 10
+                },
+                {
                     ecompanyecompanyid: 3,
                     eusereuserid: 1,
                     ecompanyusermappingcreateby: 0,
@@ -61,6 +67,125 @@ exports.seed = (knex, Promise) => knex('ecompanyusermapping').del()
                     eusereuserid: 7,
                     ecompanyusermappingcreateby: 0,
                     ecompanyusermappingpermission: 10
+                },
+                // APSSI
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 8,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 9,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 10,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 11,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
+                },
+                // Yeyen tumena
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 12,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 10
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 13,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
+                },
+                // Weshley
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 14,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 10
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 15,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 16,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 17,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 18,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
+                },
+                // Galih
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 19,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 10
+                },
+                // Ali reza
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 20,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 10
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 21,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 22,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 23,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 24,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 25,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
+                },
+                {
+                    ecompanyecompanyid: 6,
+                    eusereuserid: 26,
+                    ecompanyusermappingcreateby: 0,
+                    ecompanyusermappingpermission: 1
                 }
             ]
       ));

@@ -59,7 +59,8 @@ userController.createUser = async (req, res, next) => {
         gender,
         hobby,
         address,
-        identityNumber
+        identityNumber,
+        fileId
     } = req.body
 
     try {
@@ -67,16 +68,19 @@ userController.createUser = async (req, res, next) => {
         const userDTO = {
             eusernik: userNik,
             eusername: username,
-            euseremail: userEmail,
+            euseremail: userEmail.toLowerCase(),
             eusermobilenumber: userMobileNumber,
             eusergender: gender,
             euserhobby: hobby,
             euseridentitynumber: identityNumber,
-            euseraddress: address
+            euseraddress: address,
+            efileefileid: fileId === 0 ? null : fileId
         }
 
         const data = await userService.createUser(userDTO, user)
 
+        if (!data)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400));
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
 
     } catch (e) {
@@ -127,6 +131,26 @@ userController.getUserCurrentCompany = async (req, res, next) => {
     }
 }
 
+userController.getOtherUserById = async (req, res, next) => {
+
+    const { userId } = req.body;
+    const { type } = req.query;
+
+    //TODO check module 1
+    if (req.user.functions.indexOf('R1') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
+    try {
+
+        const result = await userService.getOtherUserById(userId, type.toUpperCase());
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 userController.updateUserById = async (req, res, next) => {
 
     const user = req.user
@@ -137,7 +161,8 @@ userController.updateUserById = async (req, res, next) => {
         gender,
         hobby,
         address,
-        identityNumber
+        identityNumber,
+        fileId
     } = req.body
     const { userId } = req.params
 
@@ -153,29 +178,13 @@ userController.updateUserById = async (req, res, next) => {
             eusergender: gender,
             euserhobby: hobby,
             euseridentitynumber: identityNumber,
-            euseraddress: address
+            euseraddress: address,
+            efileefileid: fileId
         }
 
         const data = await userService.updateUserById(userId, userDTO, user)
         if (!data) return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
-
-    } catch (e) {
-        next(e)
-    }
-}
-
-userController.changeUserCompany = async (req, res, next) => {
-
-    const user = req.user
-    const { companyId } = req.body
-
-    try {
-
-        const result = await userService.changeUserCompany(companyId, user)
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
-        return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch (e) {
         next(e)
@@ -193,6 +202,9 @@ userController.deleteUserById = async (req, res, next) => {
     try {
 
         const result = await userService.deleteUserById(userId, user);
+
+        if (result === undefined)
+            return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch (e) {
@@ -231,7 +243,7 @@ userController.getAllUserByCompanyId = async (req, res, next) => {
         if(!pageObj)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
 
-        return res.status(200).json(ResponseHelper.toBaseResponse(pageObj.data, pageObj.paging))
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
  
     } catch(e) {
         next(e);

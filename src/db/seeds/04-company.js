@@ -49,6 +49,15 @@ exports.seed = (knex, Promise) => knex('ecompany').del()
               ecompanycreatetime: Date.now(),
               eindustryeindustryid: 1,
               ecompanyphonenumber: "021-505050"
+            },
+            {
+              ecompanyname: 'Asosiasi Pelatih Sepakbola Seluruh Indonesia',
+              ecompanyemailaddress: 'apssi@apssi.com',
+              eaddresseaddressid: 3,
+              ecompanycreateby: 0,
+              ecompanycreatetime: Date.now(),
+              eindustryeindustryid: 1,
+              ecompanyphonenumber: "021-000000"
             }
       ]
     ));

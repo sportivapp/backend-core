@@ -5,7 +5,7 @@ const companyController = {}
 
 companyController.registerCompany = async (req, res, next) => {
 
-    const { nik, name, password, mobileNumber, companyName, companyEmail, street, postalCode, countryId, stateId } = req.body;
+    const { nik, name, password, mobileNumber, companyName, companyEmail, street, postalCode, industryId, countryId, stateId } = req.body;
 
     try {
 
@@ -19,7 +19,8 @@ companyController.registerCompany = async (req, res, next) => {
         const companyDTO = {
             ecompanyname: companyName,
             ecompanyemailaddress: companyEmail,
-            ecompanyphonenumber: mobileNumber
+            ecompanyphonenumber: mobileNumber,
+            eindustryeindustryid: industryId
         }
         const addressDTO = {
             eaddressstreet: street,
@@ -57,7 +58,8 @@ companyController.createCompany = async (req, res, next) => {
             countryId,
             stateId,
             isAutoNik,
-            companyNik
+            companyNik,
+            fileId
         } = req.body;
 
         const companyDTO = {
@@ -68,7 +70,8 @@ companyController.createCompany = async (req, res, next) => {
             eindustryeindustryid: industryId,
             ecompanyphonenumber: companyPhoneNumber,
             ecompanyautonik: isAutoNik,
-            ecompanynik: companyNik
+            ecompanynik: companyNik,
+            efileefileid: fileId
         }
 
         const addressDTO = {

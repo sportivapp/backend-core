@@ -1,78 +1,100 @@
 const Announcement = require('../models/Announcement');
 const AnnouncementUserMapping = require('../models/AnnouncementUserMapping');
-const AnnouncementDelete = require('../models/AnnouncementDelete');
 const ServiceHelper = require('../helper/ServiceHelper')
 
 const AnnouncementService = {};
 
-AnnouncementService.getAllAnnouncement = async (page, size, user) => {
-    const announcementPage = await Announcement.query().select().where('eannouncementdeletestatus', false).page( page, size);
+AnnouncementService.getAllAnnouncement = async (page, size, type = 'IN', user) => {
 
-    if (announcementPage && user.permission !== 1) return
+    if (type === 'IN')
 
-    return ServiceHelper.toPageObj(page, size, announcementPage);
+        return AnnouncementUserMapping.relatedQuery('announcement')
+            .for(AnnouncementUserMapping.query().where('eusereuserid', user.sub))
+            .withGraphFetched('users(baseAttributes)')
+            .page(page, size)
+            .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj));
+
+    else
+
+        return Announcement.query()
+            .where('eannouncementcreateby', user.sub)
+            .withGraphFetched('users(baseAttributes)')
+            .page(page, size)
+            .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj));
 }
 
 AnnouncementService.getAnnouncementById = async (announcementId, user) => {
-    const announcement = await Announcement.query().select().where('eannouncementid', announcementId).first();
 
-    if (announcement && user.permission !== 1) return
+    const announcement = await Announcement.query()
+        .where('eannouncementid', announcementId)
+        .andWhere('eannouncementcreateby', user.sub)
+        .withGraphFetched('users(baseAttributes)')
+        .first()
 
-    return announcement;
+    if (!announcement)
+
+        return AnnouncementUserMapping.relatedQuery('announcement')
+            .for(AnnouncementUserMapping.query()
+                .where('eannouncementeannouncementid', announcementId)
+                .andWhere('eusereuserid', user.sub)
+                .first())
+            .withGraphFetched('users(baseAttributes)')
+
+    return announcement
 }
 
-AnnouncementService.addUser = async (announcementId, userIds) => {
+AnnouncementService.addUser = async (announcementId, userIds, loggedInUser) => {
 
     const users = userIds.map(user => ({
         eannouncementeannouncementid: announcementId, 
         eusereuserid: user
     }));
 
-    const insertedUser = await AnnouncementUserMapping.query().insert(users)
-
-    return insertedUser;
+    return AnnouncementUserMapping.query().insertToTable(users, loggedInUser.sub);
 }
 
 AnnouncementService.createAnnouncement = async ( announcementDTO, userIds, user ) => {
-    if (user.permission === 1) return
 
-    const announcement = await Announcement.query().insert(announcementDTO);
+    const announcement = await Announcement.query().insertToTable(announcementDTO, user.sub)
 
-    await AnnouncementService.addUser(announcement.eannouncementid, userIds);
+    await AnnouncementService.addUser(announcement.eannouncementid, userIds, user);
 
     return announcement;
 }
 
 
 AnnouncementService.updateAnnouncement = async (announcementId, announcementDTO, userIds, user) => {
-    
-    if (user.permission === 1) return
+
+    const announcement = await Announcement.query()
+        .where('eannouncementid', announcementId)
+        .andWhere('eannouncementcreateby', user.sub)
+        .first()
+
+    if (!announcement) return
 
     // remove user that has the announcement
     await AnnouncementUserMapping.query().delete().where('eannouncementeannouncementid', announcementId);
 
-    const result = await Announcement.query()
+    const result = announcement.$query()
         .updateByUserId(announcementDTO, user.sub)
-        .where('eannouncementid', announcementId)
         .returning('*');
 
     // Insert user that get the announcement
-    await AnnouncementService.addUser(parseInt(announcementId, 10) , userIds);
+    await AnnouncementService.addUser(parseInt(announcementId, 10) , userIds, user);
 
     return result;
 }
 
-//soft delete ( not actually deleted )
 AnnouncementService.deleteAnnouncement = async (announcementId, user) => {
 
-    if (user.permission === 1) return
-
-    const result = await AnnouncementDelete.query()
-        .deleteByUserId(user.sub)
+    const announcement = await Announcement.query()
         .where('eannouncementid', announcementId)
-        .returning('*');
+        .andWhere('eannouncementcreateby', user.sub)
+        .first()
 
-    return result;
+    if (!announcement) return false
+
+    return announcement.$query().delete().then(rowsAffected => rowsAffected === 1);
 }
 
 module.exports = AnnouncementService;

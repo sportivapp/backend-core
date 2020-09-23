@@ -3,7 +3,7 @@ const Location = require('../models/Location');
 const User = require('../models/User')
 const Device = require('../models/Device')
 const ServiceHelper = require('../helper/ServiceHelper')
-const FileService = require('./mobileFileService')
+const FileService = require('./fileService')
 const ShiftRosterUserMapping = require('../models/ShiftRosterUserMapping')
 
 const AbsenService = {};

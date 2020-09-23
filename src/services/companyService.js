@@ -12,8 +12,9 @@ const Module = require('../models/Module')
 const CompanySequence = require('../models/CompanySequence')
 const { raw } = require('objection')
 const ServiceHelper = require('../helper/ServiceHelper')
-const fileService = require('./mobileFileService');
 const settingService = require('./settingService')
+const fileService = require('./fileService');
+const { UnsupportedOperationError } = require('../models/errors')
 
 const CompanyService = {};
 
@@ -26,7 +27,9 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
 
     companyDTO.eaddresseaddressid = address.eaddressid;
     companyDTO.ecompanycreateby = 0;
-    const company = await Company.query().insertToTable(companyDTO, user.euserid);
+    const company = await Company.query()
+        .insertToTable(companyDTO, user.euserid)
+        .withGraphFetched('logo(baseAttributes)');
 
     if (companyDTO.ecompanyautonik) {
         if (!companyDTO.ecompanynik) return
@@ -81,22 +84,24 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
 
 CompanyService.getUsersByCompanyId = async(companyId, page, size) => {
 
-    return Company.relatedQuery('users')
-        .for(companyId)
+    return User.query()
+        .withGraphFetched('file')
+        .joinRelated('companies')
+        .withGraphJoined('grades')
+        .where('grades.ecompanyecompanyid', companyId)
+        .orWhere('companies.ecompanyid', companyId)
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
 
 CompanyService.getAllCompanyByUserId = async(userId) => {
 
-    const result = await User.relatedQuery('companies')
-    .for(userId)
-    .modify({ ecompanyusermappingdeletestatus: false })
-    .where('ecompanyparentid', null)
-    .orderBy('ecompanyusermappingcreatetime', 'ASC')
-    .withGraphFetched('[branches, sisters]')
-
-    return result
+    return User.relatedQuery('companies')
+        .for(userId)
+        .modify({ ecompanyusermappingdeletestatus: false })
+        .where('ecompanyparentid', null)
+        .orderBy('ecompanyusermappingcreatetime', 'ASC')
+        .withGraphFetched('[branches(baseAttributes), sisters(baseAttributes), logo(baseAttributes)]');
 
 }
 
@@ -194,8 +199,9 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
     else if (companyDTO.ecompanyparentid) {
         const parent = await Company.query().findById(companyDTO.ecompanyparentid).withGraphFetched('parent')
         if (!parent) return
-        if (companyIds.indexOf(parent.ecompanyid) === -1 && !parent.parent) return
-        else if (companyIds.indexOf(parent.parent.ecompanyid) === -1) return
+        else if (companyIds.indexOf(parent.ecompanyid) === -1) {
+            if (parent.parent && companyIds.indexOf(parent.parent.ecompanyid) === -1) return
+        }
     }
 
     if (companyDTO.eindustryeindustryid) {
@@ -204,11 +210,18 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
     }
 
     companyDTO.eaddresseaddressid = address.eaddressid;
-    const company = await Company.query().insertToTable(companyDTO, user.sub);
+    const company = await Company.query()
+        .insertToTable(companyDTO, user.sub)
+        .withGraphFetched('logo(baseAttributes)');
 
     if (companyDTO.ecompanyautonik) {
         if (!companyDTO.ecompanynik) return
         await CompanySequence.createSequence(company.ecompanyid)
+    }
+
+    if (companyDTO.efileefileid) {
+        const logo = await fileService.getFileById(companyDTO.efileefileid)
+        if (!logo) throw new UnsupportedOperationError('FILE_NOT_FOUND')
     }
 
     const id = ( isNaN(userId) ) ? parseInt(user.sub) : userId
@@ -258,7 +271,6 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
             departments: 1,
             childrenCount: 0
         }))
-
 }
 
 CompanyService.getCompanyList = async (page, size, type, keyword, companyId, user) => {
@@ -291,7 +303,10 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
             query = query
             .where('ecompanyparentid', companyId)
             .whereNull('ecompanyolderid')
-            .withGraphFetched('[branches, industry, address.[state, country]]')
+            .withGraphFetched('[branches(baseAttributes), ' +
+                'industry(baseAttributes), ' +
+                'address.[state, country], ' +
+                'logo(baseAttributes)]')
 
         }
 
@@ -300,7 +315,11 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
             query = query
                 .where('ecompanyolderid', companyId)
                 .whereNull('ecompanyparentid')
-                .withGraphFetched('[branches, sisters.industry, industry, address.[state, country]]')
+                .withGraphFetched('[branches(baseAttributes), ' +
+                    'sisters(baseAttributes).industry(baseAttributes), ' +
+                    'industry(baseAttributes), ' +
+                    'address.[state, country],' +
+                    'logo(baseAttributes)]')
         }
 
     } else {
@@ -312,7 +331,10 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
             .whereNull('ecompanyparentid')
             .whereNull('ecompanyolderid')
             .whereIn('ecompanyid', companyIds)
-            .withGraphFetched('[branches, sisters.industry, industry, address.[state, country]]')
+            .withGraphFetched('[branches(baseAttributes), ' +
+                'sisters(baseAttributes).industry(baseAttributes), ' +
+                'industry(baseAttributes), address.[state, country],' +
+                'logo(baseAttributes)]')
             .orderBy('ecompanyusermappingcreatetime', 'ASC')
     }
 
@@ -338,7 +360,9 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
 CompanyService.getCompanyById = async (companyId) => {
 
     const company = await Company.query().findById(companyId)
-        .withGraphFetched('[industry,address.[country,state]]')
+        .withGraphFetched('[industry(baseAttributes), ' +
+        'address.[country,state], ' +
+        'logo(baseAttributes)]')
 
     const headUser = Grades.query().where('ecompanyecompanyid', companyId)
         .orderBy('egradecreatetime', 'ASC')
@@ -361,7 +385,7 @@ CompanyService.getCompanyById = async (companyId) => {
 
 CompanyService.editCompany = async (companyId, supervisorId, companyDTO, addressDTO, user) => {
 
-    // if fileid is not given on update, delete the file
+    // efileefileid null if undefined or 0 was sent
     if (companyDTO.efileefileid === undefined || companyDTO.efileefileid === 0) {
         companyDTO.efileefileid = null;
     }
@@ -423,24 +447,7 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, address
     const departmentCount = Company.relatedQuery('departments').for(companyId).count()
     const branchCount = Company.relatedQuery('branches').for(companyId).count()
     const getCompanyQuery = Company.query().findById(companyId)
-        .withGraphFetched('[industry,address]')
-
-    // User didnt give a file and file existed (delete file)
-    if (company.efileefileid && companyDTO.efileefileid === null) {
-        await fileService.deleteFileById(company.efileefileid);
-    }
-    // User give a file
-    else if (companyDTO.efileefileid) {
-        
-        // File does not exist / not uploaded yet
-        const file = await fileService.getFileById(companyDTO.efileefileid);
-
-        if (!file)
-            return
-
-        const newPathDir = '/company/' + company.ecompanyid;
-        await fileService.moveFile(file, newPathDir);
-    }
+        .withGraphFetched('[industry(baseAttributes), address.[country, state], logo(baseAttributes)]')
 
     return Promise.all([getCompanyQuery, employeeCount, departmentCount, branchCount])
         .then(resultArr => ({
