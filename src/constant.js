@@ -23,6 +23,7 @@ module.exports = {
             removeCoach: '/user/coach-remove',
             industry: '/user/industry',
             pending: '/user-pending-log',
+            profile: '/user-profile'
         },
         profile: {
             changeCompany: '/change-company',
@@ -94,7 +95,8 @@ module.exports = {
             id: '/shift/:shiftId/pattern/:patternId'
         },
         industry: {
-            list: '/industry'
+            list: '/industry',
+            licenseLevel: '/industry-license-level'
         },
         state: {
             list: '/state'
@@ -150,6 +152,9 @@ module.exports = {
         },
         notification: {
             list: '/notification'
+        },
+        file: {
+            download: '/file-download/:fileId'
         }
     }
 }

@@ -9,8 +9,13 @@ require('dotenv').config();
 const readXlsxFile = require("read-excel-file/node");
 const emailService = require('../helper/emailService');
 const ServiceHelper = require('../helper/ServiceHelper')
+const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
 
 const UsersService = {};
+
+const ErrorEnum = {
+    PASSWORD_INVALID: 'PASSWORD_INVALID',
+}
 
 UsersService.registerEmployees = async (user, path) => {
 
@@ -119,6 +124,29 @@ UsersService.getUserById = async ( userId, user ) => {
     if (!mapping) return
 
     return result;
+
+}
+
+UsersService.getOtherUserById = async (userId, type) => {
+
+    if (type !== 'USER' && type !== 'COACH')
+        return
+
+    let relatedIndustry = 'coachIndustries'
+    if (type === 'USER')
+        relatedIndustry = 'userIndustries'
+
+    return User.query()
+    .findById(userId)
+    .modify('baseAttributes')
+    .withGraphFetched(relatedIndustry)
+    .withGraphFetched('experiences(baseAttributes)')
+    .withGraphFetched('licenses(baseAttributes)')
+    .then(user => {
+        if(user === undefined)
+            throw new NotFoundError()
+        return user
+    })
 
 }
 
@@ -296,11 +324,19 @@ UsersService.login = async (loginDTO) => {
 
 }
 
-UsersService.changeUserPassword = async ( user , newPassword) => {
+UsersService.changeUserPassword = async ( user , oldPassword, newPassword) => {
+
+    const userFromDB = await User.query().findById(user.sub);
+
+    const samePassword = await bcrypt.compare(oldPassword, userFromDB.euserpassword);
+    
+    if (!samePassword)
+        throw new UnsupportedOperationError(ErrorEnum.PASSWORD_INVALID);
 
     const encryptedPassword = await bcrypt.hash(newPassword);
 
-    return User.query().findById(user.sub).updateByUserId({ euserpassword: encryptedPassword }, user.sub);
+    return userFromDB.$query().updateByUserId({ euserpassword: encryptedPassword }, user.sub);
+
 }
 
 UsersService.changeUserCompany = async (companyId, user) => {

@@ -43,13 +43,13 @@ app.use((_, __, next) => {
 //             message: error.message || 'Internal Server Error',
 //         },
 //     });
-//
+
 //     errorMsg = {
 //         status: status,
 //         message: error.message || 'Internal Server Error',
 //         errStack: error.stack
 //     }
-//
+
 //     slackLoggingService.sendSlackMessage(webHookURL, slackLoggingService.setLogMessage(errorMsg));
 // });
 
