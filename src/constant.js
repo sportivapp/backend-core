@@ -152,6 +152,9 @@ module.exports = {
         },
         notification: {
             list: '/notification'
+        },
+        file: {
+            download: '/file-download/:fileId'
         }
     }
 }
