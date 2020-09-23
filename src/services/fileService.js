@@ -80,7 +80,7 @@ FileService.deleteFileById = async (fileId) => {
     
 }
 
-FileService.downloadFile = async (res, fileId) => {
+FileService.downloadFile = async (fileId) => {
 
     return File
     .query()
