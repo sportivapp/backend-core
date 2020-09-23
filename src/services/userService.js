@@ -10,8 +10,13 @@ require('dotenv').config();
 const readXlsxFile = require("read-excel-file/node");
 const emailService = require('../helper/emailService');
 const ServiceHelper = require('../helper/ServiceHelper')
+const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
 
 const UsersService = {};
+
+const ErrorEnum = {
+    PASSWORD_INVALID: 'PASSWORD_INVALID',
+}
 
 UsersService.registerEmployees = async (user, path) => {
 
@@ -203,10 +208,26 @@ UsersService.login = async (loginDTO) => {
         if (!result || !result.ecompanyecompanyid) return
 
         token = await UsersService.generateJWTToken(user, result.ecompanyecompanyid, functions);
+        token = await generateJWTToken(user, result.ecompanyecompanyid, result.ecompanyusermappingpermission);
 
     }
 
     return token;
+
+}
+
+UsersService.changeUserPassword = async ( user , oldPassword, newPassword) => {
+
+    const userFromDB = await User.query().findById(user.sub);
+
+    const samePassword = await bcrypt.compare(oldPassword, userFromDB.euserpassword);
+
+    if (!samePassword)
+        throw new UnsupportedOperationError(ErrorEnum.PASSWORD_INVALID);
+
+    const encryptedPassword = await bcrypt.hash(newPassword);
+
+    return userFromDB.$query().updateByUserId({ euserpassword: encryptedPassword }, user.sub);
 
 }
 
