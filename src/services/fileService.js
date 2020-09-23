@@ -3,6 +3,7 @@ const fs = require('fs');
 const util = require('util');
 const unlink = util.promisify(fs.unlink);
 const File = require('../models/File');
+const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
 const FileService = {};
 
@@ -77,6 +78,18 @@ FileService.deleteFileById = async (fileId) => {
 
     return;
     
+}
+
+FileService.downloadFile = async (res, fileId) => {
+
+    return File
+    .query()
+    .where('efileid', fileId)
+    .first()
+    .then(file => {
+        if(!file) throw new NotFoundError()
+        return file
+    })
 }
 
 module.exports = FileService;
