@@ -84,8 +84,7 @@ FileService.downloadFile = async (fileId) => {
 
     return File
     .query()
-    .where('efileid', fileId)
-    .first()
+    .findById(fileId)
     .then(file => {
         if(!file) throw new NotFoundError()
         return file
