@@ -8,7 +8,6 @@ const fileService = require('./fileService');
 const Otp = require('../models/Otp');
 const emailService = require('../helper/emailService');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
-const CompanyLog = require('../models/CompanyLog')
 const CompanyUserMapping = require('../models/CompanyUserMapping');
 const TeamUserMapping = require('../models/TeamUserMapping');
 const License = require('../models/License');
