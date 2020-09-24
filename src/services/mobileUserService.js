@@ -15,6 +15,7 @@ const License = require('../models/License');
 const ServiceHelper = require('../helper/ServiceHelper')
 const CompanyLogTypeEnum = require('../models/enum/CompanyLogTypeEnum')
 const CompanyLogStatusEnum = require('../models/enum/CompanyLogStatusEnum')
+const companyLogService = require('../services/companyLogService')
 
 const UserService = {};
 
@@ -313,13 +314,7 @@ UserService.getListPendingByUserId = async (page, size, userId, type) => {
     if( type !== CompanyLogTypeEnum.INVITE && type !== CompanyLogTypeEnum.APPLY)
         throw new NotFoundError()
 
-    return CompanyLog.query()
-    .where('eusereuserid', userId)
-    .where('ecompanylogtype', type)
-    .andWhere('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
-    .orderBy('ecompanylogcreatetime', 'DESC')
-    .page(page, size)
-    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+    return companyLogService.getListPendingByUserId(userId, type, 'DESC', page, size)
 
 }
 
