@@ -3,14 +3,14 @@ const ResponseHelper = require('../../helper/ResponseHelper')
 
 const profileController = {}
 
-profileController.changePassword = async (req, res, next) => {
+profileController.changeUserPassword = async (req, res, next) => {
 
     const user = req.user;
-    const { newPassword } = req.body;
+    const { oldPassword, newPassword } = req.body;
 
     try {
 
-        const result = await userService.changeUserPassword(user, newPassword);
+        const result = await userService.changeUserPassword(user, oldPassword, newPassword);
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))

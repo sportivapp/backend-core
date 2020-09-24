@@ -79,4 +79,19 @@ controller.getFile = async (req, res, next) => {
 
 }
 
+controller.downloadFile = async (req, res, next) => {
+    
+    const { fileId } = req.params
+
+    try {
+
+        const result = await fileService.downloadFile(fileId)
+        return res.download(result.efilepath)
+        
+    } catch (e) {
+        next(e)
+    }
+
+}
+
 module.exports = controller;

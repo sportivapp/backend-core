@@ -154,6 +154,9 @@ module.exports = {
         },
         license: {
             id : '/license/:licenseId'
+        },
+        file: {
+            download: '/file-download/:fileId'
         }
     }
 }
