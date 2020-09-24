@@ -95,12 +95,12 @@ userController.getUserById = async (req, res, next) => {
 
 userController.getOtherUserById = async (req, res, next) => {
 
-    const { userId } = req.body;
+    const { userId, companyId } = req.body;
     const { type } = req.query;
 
     try {
         
-        const result = await userService.getOtherUserById(userId, type.toUpperCase());
+        const result = await userService.getOtherUserById(userId, type.toUpperCase(), companyId);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
