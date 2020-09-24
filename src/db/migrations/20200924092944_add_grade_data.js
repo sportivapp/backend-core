@@ -2,6 +2,7 @@ exports.up = (knex) =>
     knex.transaction(trx => {
         knex('ecompany')
             .select('ecompanyid')
+            .whereNull('ecompanyparentid')
             .then(companies => createAdmins(companies,knex, trx))
             .then(grades => {
                 return knex('efunction')

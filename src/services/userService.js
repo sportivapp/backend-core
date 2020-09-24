@@ -145,7 +145,7 @@ UsersService.updateUserById = async (userId, userDTO, user) => {
         .returning('*')
 }
 
-UsersService.generateJWTToken = async (user, companyId, functions) => {
+UsersService.generateJWTToken = async (user, companyId) => {
 
     const config = {
         sub: user.euserid,
@@ -153,7 +153,6 @@ UsersService.generateJWTToken = async (user, companyId, functions) => {
         email: user.euseremail,
         name: user.eusername,
         mobileNumber: user.eusermobilenumber,
-        functions: functions,
         companyId: companyId
     }
     const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' });
@@ -190,19 +189,10 @@ UsersService.login = async (loginDTO) => {
         const result = await User.query()
         .select('ecompanyecompanyid')
         .joinRelated('companies')
-        .withGraphFetched('grades.functions')
+        .where('eusereuserid', user.euserid)
         .orderBy('ecompanyusermappingcreatetime', 'ASC')
         .first();
-
-        let functions = result.grades[0].functions.map(func => func.efunctioncode)
-
-        result.grades.forEach(grade => {
-            if (grade.functions.length > functions.length) functions = grade.functions.map(func => func.efunctioncode)
-        })
-
-        if (!result || !result.ecompanyecompanyid) return
-
-        token = await UsersService.generateJWTToken(user, result.ecompanyecompanyid, functions);
+        token = await UsersService.generateJWTToken(user, result.ecompanyecompanyid);
 
     }
 

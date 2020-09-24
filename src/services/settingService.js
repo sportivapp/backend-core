@@ -13,6 +13,11 @@ SettingService.getModulesByCompanyId = async ( companyId ) => {
 
 }
 
+SettingService.getModulesByName = async (name) => {
+    return Module.query()
+        .where('emodulename', name)
+}
+
 SettingService.getModulesByUserId = async ( userId ) => {
 
     const moduleIds = await Grade.relatedQuery('functions')
@@ -71,12 +76,12 @@ SettingService.getAllFunctionByGradeId = async (gradeId) => {
 
     // create object with (key, value) = (functioncode, true)
     let gradeFunctionCodes = {};
-    for (let i=0; i<myGradeFunctions.length; i++) {
+    for (let i = 0; i < myGradeFunctions.length; i++) {
         gradeFunctionCodes[myGradeFunctions[i].efunctionefunctioncode] = true;
     }
 
     let groupedFunction = {};
-    for (let i=0; i<allFunctions.length; i++) {
+    for (let i = 0; i < allFunctions.length; i++) {
         let moduleId = allFunctions[i].efunctioncode.substring(1);
 
         if (typeof groupedFunction[moduleId] === 'undefined') {
@@ -111,12 +116,12 @@ SettingService.getAllFunctionByGradeIds = async (gradeIds) => {
 
     // create object with (key, value) = (functioncode, true)
     let gradeFunctionCodes = {};
-    for (let i=0; i<myGradeFunctions.length; i++) {
+    for (let i = 0; i < myGradeFunctions.length; i++) {
         gradeFunctionCodes[myGradeFunctions[i].efunctionefunctioncode] = true;
     }
 
     let groupedFunction = {};
-    for (let i=0; i<allFunctions.length; i++) {
+    for (let i = 0; i < allFunctions.length; i++) {
         let moduleId = allFunctions[i].efunctioncode.substring(1);
 
         if (typeof groupedFunction[moduleId] === 'undefined') {

@@ -93,7 +93,13 @@ profileService.getModules = async (user) => {
     const gradeIds = await gradeService.getAllGradesByUserIdAndCompanyId(user.companyId, user.sub)
         .then(grades => grades.map(grade => grade.egradeid))
 
-    return settingService.getModulesByGradeIds(gradeIds)
+    const modules = await settingService.getModulesByGradeIds(gradeIds)
+
+    if (modules.length === 0) {
+        return settingService.getModuleById(user.companyId, 1)
+    }
+
+    return modules
 
 }
 
