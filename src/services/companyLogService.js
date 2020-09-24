@@ -108,4 +108,15 @@ companyLogService.cancelInvite = async (companyLogId) => {
         .then(rowsAffected => rowsAffected === 1)
 }
 
+companyLogService.getListPendingByUserId = async (userId, type, logOrderBy, page, size) => {
+
+    return CompanyLog.query()
+    .where('eusereuserid', userId)
+    .where('ecompanylogtype', type)
+    .andWhere('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
+    .orderBy('ecompanylogcreatetime', logOrderBy)
+    .page(page, size)
+    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+}
+
 module.exports = companyLogService
