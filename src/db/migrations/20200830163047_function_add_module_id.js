@@ -3,6 +3,5 @@ exports.up = (knex, Promise) => knex.schema.alterTable('efunction', t => {
 });
 
 exports.down = (knex, Promise) => knex.schema.alterTable('efunction', t => {
-    t.dropForeign('emoduleemoduleid', 'efunction_emoduleemoduleid_foreign')
-        .then(ignored => t.dropColumn('emoduleemoduleid'))
+    t.dropColumn('emoduleemoduleid')
 });
