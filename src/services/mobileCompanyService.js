@@ -2,7 +2,6 @@ const Company = require('../models/Company')
 const CompanyUserMapping = require('../models/CompanyUserMapping')
 const CompanyFileMapping = require('../models/CompanyFileMapping')
 const Approval = require('../models/Approval')
-const CompanyLog = require('../models/CompanyLog')
 const User = require('../models/User')
 const RosterUserMapping = require('../models/RosterUserMapping')
 const ShiftRosterUserMapping = require('../models/ShiftRosterUserMapping')
@@ -290,7 +289,7 @@ companyService.exitCompany = async (companyId, user) => {
                 getHighestPosition
             )
         }
-        
+
         return removedUser
     })
 
