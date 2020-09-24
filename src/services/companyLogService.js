@@ -9,6 +9,60 @@ const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
 const companyLogService = {}
 
+companyLogService.createCompanyLog = async (companyId, user, userId, type) => {
+
+    return CompanyLog.query().insertToTable({
+        ecompanyecompanyid: companyId,
+        eusereuserid: userId,
+        ecompanylogtype: type
+    }, user.sub)
+
+}
+
+companyLogService.getPendingLog = async (companyId, userId, types) => {
+
+    return CompanyLog.query()
+    .where('eusereuserid', userId)
+    .andWhere('ecompanyecompanyid', companyId)
+    .whereIn('ecompanylogtype', types)
+    .andWhere('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
+    .orderBy('ecompanylogcreatetime', 'DESC')
+    .first();
+
+}
+
+
+companyLogService.updateCompanyLog = async (companyId, user, userId, status) => {
+
+    const log = await companyLogService.getPendingLog(companyId, userId, [CompanyLogTypeEnum.INVITE, CompanyLogTypeEnum.APPLY]);
+
+    return log.$query().updateByUserId({
+        ecompanylogstatus: status
+    }, user.sub)
+    .returning('*');
+
+}
+
+companyLogService.removeCompanyLog = async (userId, companyId, removeType ) => {
+
+    if( removeType === 'USER_CANCEL_JOIN' )
+        return CompanyLog.query()
+        .delete()
+        .where('eusereuserid', userId)
+        .where('ecompanyecompanyid', companyId)
+        .where('ecompanylogtype', CompanyLogTypeEnum.APPLY)
+        .where('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
+        .first()
+        .then(rowsAffected => rowsAffected === 1)
+
+    if( removeType === 'EXIT_COMPANY')
+        return CompanyLog.query()
+        .where('eusereuserid', userId)
+        .where('ecompanyecompanyid', companyId)
+        .delete()
+
+}
+
 companyLogService.processRequest = async (companyLogId, status, user) => {
 
     if (status !== CompanyLogStatusEnum.ACCEPTED && status !== CompanyLogStatusEnum.REJECTED)
