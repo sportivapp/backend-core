@@ -25,7 +25,7 @@ class Company extends Model {
         builder.select('ecompanyid', 'ecompanyname').withGraphFetched('logo(baseAttributes)')
       },
       idAndName(builder) {
-        builder.select('ecompanyid', 'ecompanyname')
+        builder.select('ecompanyid as companyId', 'ecompanyname as companyName')
       }
     }
   }
