@@ -14,9 +14,11 @@ exports.authenticateToken = async (req, res, next) => {
             return res.status(401).json("You need to log in first.");
         }
         req.user = user;
-        req.user.functions = await profileService.getFunctionCodes(user)
-        if (req.user.functions.length === 0) {
-            req.user.functions = ['R1']
+        if (!req.originalUrl.includes('/mobile')) {
+            req.user.functions = await profileService.getFunctionCodes(user)
+            if (req.user.functions.length === 0) {
+                req.user.functions = ['R1']
+            }
         }
         next();
     });
