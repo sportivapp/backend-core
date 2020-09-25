@@ -4,10 +4,10 @@ const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
 const LicenseService = {}
 
-LicenseService.getLicenseById = async (licenseId, userId, companyId) => {
+LicenseService.getLicenseById = async (licenseId, userId, user) => {
 
     const userInCompany = CompanyUserMapping.query()
-    .where('ecompanyecompanyid', companyId)
+    .where('ecompanyecompanyid', user.companyId)
     .where('eusereuserid', userId)
     .first()
 
@@ -16,8 +16,8 @@ LicenseService.getLicenseById = async (licenseId, userId, companyId) => {
 
     return License.query()
     .findById(licenseId)
-    .where('elicensecreateby', userId)
     .modify('baseAttributes')
+    .where('elicensecreateby', userId)
     .then(result => {
         if(!result)
             throw new NotFoundError()

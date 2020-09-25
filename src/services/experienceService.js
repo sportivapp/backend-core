@@ -4,10 +4,10 @@ const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
 const experienceService = {}
 
-experienceService.getExperienceById = async (experienceId, userId, companyId) => {
+experienceService.getExperienceById = async (experienceId, userId, user) => {
 
     const userInCompany = CompanyUserMapping.query()
-    .where('ecompanyecompanyid', companyId)
+    .where('ecompanyecompanyid', user.companyId)
     .where('eusereuserid', userId)
     .first()
 
