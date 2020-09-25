@@ -21,15 +21,10 @@ exports.up = (knex) =>
             .catch(trx.rollback)
     })
 
-exports.down = (knex) => {
-  knex('egrade').where('egradename', 'Admin')
-      .del()
-};
-
 function createAdmins(companies, knex, trx) {
     let admins = companies.map(company => ({
-        egradename: 'Admin',
-        egradedescription: 'Admin of Company',
+        egradename: 'Administrator',
+        egradedescription: 'Administrator of Company',
         egradecreateby: 0,
         egradecreatetime: Date.now(),
         ecompanyecompanyid: company.ecompanyid
@@ -73,3 +68,8 @@ function mapUserAndGrades(grades, knex, trx) {
 
     return Promise.all(promises)
 }
+
+exports.down = (knex) => {
+    knex('egrade').where('egradename', 'Administrator')
+        .del()
+};

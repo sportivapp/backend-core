@@ -96,7 +96,9 @@ profileService.getModules = async (user) => {
     const modules = await settingService.getModulesByGradeIds(gradeIds)
 
     if (modules.length === 0) {
-        return settingService.getModuleById(user.companyId, 1)
+        const module = await settingService.getDefaultModuleByCompanyId(user.companyId)
+        console.log(module)
+        return [module]
     }
 
     return modules

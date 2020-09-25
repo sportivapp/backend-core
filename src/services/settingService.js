@@ -34,8 +34,14 @@ SettingService.getModulesByGradeIds = async (gradeIds) => {
 
     const moduleIds = []
 
+    let isModuleValid
+
     for (let key in functionObj) {
-        moduleIds.push(key)
+        isModuleValid = true
+        for (let func in functionObj[key]) {
+            if (!func.status) isModuleValid = false
+        }
+        if (isModuleValid) moduleIds.push(key)
     }
 
     return Module.query()
@@ -44,13 +50,23 @@ SettingService.getModulesByGradeIds = async (gradeIds) => {
 
 SettingService.getModuleById = async (companyId, moduleId) => {
 
-    const module = await CompanyModuleMapping.query()
-        .where('ecompanyecompanyid', companyId)
-        .andWhere('emoduleemoduleid', moduleId)
+    const module = await CompanyModuleMapping.relatedQuery('module')
+        .for(CompanyModuleMapping.query()
+            .where('ecompanyecompanyid', companyId)
+            .andWhere('emoduleemoduleid', moduleId))
         .first();
 
     return module;
 
+}
+
+SettingService.getDefaultModuleByCompanyId = async (companyId) => {
+    return CompanyModuleMapping.query()
+        .where('ecompanyecompanyid', companyId)
+        .orderBy('emoduleemoduleid', 'ASC')
+        .first()
+        .withGraphFetched('module')
+        .then(mapping => mapping.module)
 }
 
 SettingService.updateModuleByCompanyId = async ( companyId, moduleDTO, user ) => {

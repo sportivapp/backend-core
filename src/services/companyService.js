@@ -244,8 +244,8 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
     const insertCompanyUserMappingQuery = CompanyUserMapping.query().insertToTable(companyUserMappingDTO, user.sub)
 
     const gradeDTO = {
-        egradename: 'Super Admin',
-        egradedescription: 'Administrator',
+        egradename: 'Administrator',
+        egradedescription: 'Administrator of Company',
         ecompanyecompanyid: company.ecompanyid
     }
 
