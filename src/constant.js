@@ -97,7 +97,8 @@ module.exports = {
             id: '/shift/:shiftId/pattern/:patternId'
         },
         industry: {
-            list: '/industry'
+            list: '/industry',
+            licenseLevel: '/industry-license-level'
         },
         state: {
             list: '/state'

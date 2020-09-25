@@ -12,11 +12,11 @@ class License extends Model {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['elicenseacademicname', 'elicensegraduationdate', 'eindustryeindustryid', 'elicenselevel', 'efileefileid'],
+      required: ['elicenseacademicname', 'elicensegraduationdate', 'eindustryeindustryid', 'elicenselevelelicenselevelid', 'efileefileid'],
       properties: {
         elicenseacademicname: { type: 'string', minLength: 1, maxLength: 256 },
         eindustryeindustryid: { type: 'integer' },
-        elicenselevel: { type: 'string', minLength: 1, maxLength: 256 },
+        elicenselevelelicenselevelid: { type: 'integer' },
         efileefileid: { type: 'integer' },
         elicenseadditionalinformation: { type: 'string', minLength: 0, maxLength: 256 }
       }
@@ -26,7 +26,8 @@ class License extends Model {
   static get modifiers() {
     return {
       baseAttributes(builder) {
-        builder.select('elicenseid', 'elicenseacademicname', 'elicensegraduationdate', 'elicenselevel', 'elicenseadditionalinformation')
+        builder.select('elicenseid', 'elicenseacademicname', 'elicensegraduationdate', 'elicenseadditionalinformation')
+        .withGraphFetched('licenseLevel(baseAttributes)')
         .withGraphFetched('industry(baseAttributes)')
         .withGraphFetched('file(baseAttributes)')
       }
@@ -37,6 +38,7 @@ class License extends Model {
 
     const File = require('./File');
     const Industry = require('./Industry');
+    const LicenseLevel = require('./LicenseLevel');
 
     return {
       industry: {
@@ -53,6 +55,14 @@ class License extends Model {
         join: {
           from: 'elicense.efileefileid',
           to: 'efile.efileid'
+        }
+      },
+      licenseLevel: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: LicenseLevel,
+        join: {
+          from: 'elicense.elicenselevelelicenselevelid',
+          to: 'elicenselevel.elicenselevelid'
         }
       }
     }
