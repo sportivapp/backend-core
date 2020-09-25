@@ -18,6 +18,7 @@ exports.authenticateToken = async (req, res, next) => {
         if (req.user.functions.length === 0) {
             req.user.functions = ['R1']
         }
+        console.log(req.user)
         next();
     });
 
