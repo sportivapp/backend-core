@@ -300,7 +300,7 @@ UserService.changeIndustryByUserId = async (user, type, industryIds) => {
 
 }
 
-UserService.getListPendingByUserId = async (page, size, userId, type) => {
+UserService.getListPendingByUserId = async (page, size, userId, type, sortType) => {
 
     const userFromDB = User.query()
         .select()
@@ -313,7 +313,7 @@ UserService.getListPendingByUserId = async (page, size, userId, type) => {
     if( type !== CompanyLogTypeEnum.INVITE && type !== CompanyLogTypeEnum.APPLY)
         throw new NotFoundError()
 
-    return companyLogService.getListPendingByUserId(userId, type, 'DESC', page, size)
+    return companyLogService.getListPendingByUserId(userId, type, sortType, page, size)
 
 }
 
