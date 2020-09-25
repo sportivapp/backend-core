@@ -25,9 +25,11 @@ profileService.getProfile = async (user) => {
 
 profileService.getUserCurrentCompany = async (user) => {
 
-    return companyService.getCompanyById(user.companyId)
+    const company = await companyService.getCompanyById(user.companyId)
+    return company
+        .$query()
         .modify('idAndName')
-        .withGraphFetched('older(idAndName).older(idAndName)')
+        .withGraphFetched('older(idAndName) as parent .older(idAndName) as parent')
         .then(company => {
             if (!company) throw new NotFoundError()
             return company
