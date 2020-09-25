@@ -160,6 +160,18 @@ SettingService.getAllFunctionByGradeIds = async (gradeIds) => {
 
 }
 
+
+
+SettingService.getAllFunctionCodesByGradeIds = async (gradeIds) => {
+
+    return Grade.query()
+        .joinRelated('functions')
+        .distinct('efunctionefunctioncode')
+        .whereIn('egradeegradeid', gradeIds)
+        .then(funcList => funcList.map(func => func.efunctionefunctioncode));
+
+}
+
 SettingService.deleteFuncionsByGradeId = async (gradeId) => {
 
     return GradeFunctionMapping.query().where('egradeegradeid', gradeId).del();

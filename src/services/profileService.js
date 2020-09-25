@@ -59,6 +59,15 @@ profileService.getFunctions = async (user) => {
 
 }
 
+profileService.getFunctionCodes = async (user) => {
+
+    const gradeIds = await gradeService.getAllGradesByUserIdAndCompanyId(user.companyId, user.sub)
+        .then(grades => grades.map(grade => grade.egradeid))
+
+    return settingService.getAllFunctionCodesByGradeIds(gradeIds)
+
+}
+
 profileService.getFunctionsByModuleId = async (moduleId, user) => {
 
     const gradeIds = await gradeService.getAllGradesByUserIdAndCompanyId(user.companyId, user.sub)
