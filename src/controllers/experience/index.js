@@ -6,11 +6,11 @@ const controller = {}
 controller.getExperienceById = async (req, res, next) => {
 
     const { experienceId } = req.params
-    const { userId, companyId } = req.body
+    const { userId } = req.body
     
     try {
 
-        const result = await experienceService.getExperienceById(parseInt(experienceId), userId, companyId)
+        const result = await experienceService.getExperienceById(parseInt(experienceId), userId, req.user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch(e) {
