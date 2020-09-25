@@ -1,12 +1,22 @@
 const Experience = require('../models/Experience')
+const CompanyUserMapping = require('../models/CompanyUserMapping')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
 const experienceService = {}
 
-experienceService.getExperienceById = async (experienceId) => {
+experienceService.getExperienceById = async (experienceId, userId, companyId) => {
+
+    const userInCompany = CompanyUserMapping.query()
+    .where('ecompanyecompanyid', companyId)
+    .where('eusereuserid', userId)
+    .first()
+
+    if(!userInCompany)
+        throw new NotFoundError()
 
     return Experience.query()
     .findById(experienceId)
+    .where('eexperiencecreateby', userId)
     .modify('baseAttributes')
     .leftJoinRelated('files')
     .select('efileid', 'efilename')
