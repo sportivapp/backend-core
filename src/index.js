@@ -43,13 +43,13 @@ app.use((_, __, next) => {
 //             message: error.message || 'Internal Server Error',
 //         },
 //     });
-//
+
 //     errorMsg = {
 //         status: status,
 //         message: error.message || 'Internal Server Error',
 //         errStack: error.stack
 //     }
-//
+
 //     slackLoggingService.sendSlackMessage(webHookURL, slackLoggingService.setLogMessage(errorMsg));
 // });
 
@@ -61,7 +61,7 @@ const httpServer = app.listen(httpPORT, function() {
 })
 
 // configuration for https
- const options = {
+const options = {
     key: fs.readFileSync('../../../etc/ssl/private/quickplay.key', 'utf8'),
     cert: fs.readFileSync('../../../etc/ssl/certs/quickplay.crt', 'utf8')
 };

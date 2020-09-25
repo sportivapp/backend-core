@@ -19,9 +19,25 @@ class Industry extends Model {
         };
     }
 
+    static get modifiers() {
+
+        return {
+            // ...this.baseModifiers(),
+            baseAttributes(builder) {
+                builder.select('eindustryid', 'eindustryname')
+            },
+            baseAttributesWithLicenseLevels(builder) {
+                builder.select('eindustryid', 'eindustryname')
+                .withGraphFetched('licenseLevels(baseAttributes)')
+            }
+        }
+
+    }
+
     static get relationMappings() {
 
         const Company = require('./Company')
+        const LicenseLevel = require('./LicenseLevel')
 
         return {
             companies: {
@@ -31,19 +47,16 @@ class Industry extends Model {
                     from: 'eindustry.eindustryid',
                     to: 'ecompany.eindustryeindustryid'
                 }
+            },
+            licenseLevels: {
+                relation: Model.HasManyRelation,
+                modelClass: LicenseLevel,
+                join: {
+                    from: 'eindustry.eindustryid',
+                    to: 'elicenselevel.eindustryeindustryid'
+                }
             }
         }
-    }
-
-    static get modifiers() {
-
-        return {
-            // ...this.baseModifiers(),
-            baseAttributes(builder) {
-                builder.select('eindustryid', 'eindustryname')
-            }
-        }
-
     }
 
 }

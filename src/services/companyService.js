@@ -63,14 +63,17 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
         }))
 }
 
-CompanyService.getUsersByCompanyId = async(companyId, page, size) => {
+CompanyService.getUsersByCompanyId = async(companyId, page, size, keyword) => {
 
     return User.query()
         .withGraphFetched('file')
         .joinRelated('companies')
-        .withGraphJoined('grades')
-        .where('grades.ecompanyecompanyid', companyId)
-        .orWhere('companies.ecompanyid', companyId)
+        .withGraphFetched('grades')
+        .modifyGraph('grades', builder => {
+            builder.where('ecompanyecompanyid', companyId)
+        })
+        .where('companies.ecompanyid', companyId)
+        .andWhere(raw('lower("eusername")'), 'like', `%${keyword}%`)
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
