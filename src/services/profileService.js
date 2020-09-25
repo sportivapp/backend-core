@@ -97,7 +97,6 @@ profileService.getModules = async (user) => {
 
     if (modules.length === 0) {
         const module = await settingService.getDefaultModuleByCompanyId(user.companyId)
-        console.log(module)
         return [module]
     }
 

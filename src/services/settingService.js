@@ -38,9 +38,9 @@ SettingService.getModulesByGradeIds = async (gradeIds) => {
 
     for (let key in functionObj) {
         isModuleValid = true
-        for (let func in functionObj[key]) {
+        functionObj[key].forEach(func => {
             if (!func.status) isModuleValid = false
-        }
+        })
         if (isModuleValid) moduleIds.push(key)
     }
 
