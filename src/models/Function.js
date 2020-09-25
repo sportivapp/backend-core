@@ -22,6 +22,7 @@ class Function extends Model {
   static get relationMappings() {
 
     const GradeFunctionMapping = require('./GradeFunctionMapping');
+    const Module = require('./Module')
 
     return {
       grade: {
@@ -30,6 +31,14 @@ class Function extends Model {
         join: {
           from: 'efunction.efunctioncode',
           to: 'egradefunctionmapping.efunctionefunctioncode'
+        }
+      },
+      module: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Module,
+        join: {
+          from: 'efunction.emoduleemoduleid',
+          to: 'emodule.emoduleemoduleid'
         }
       }
     }

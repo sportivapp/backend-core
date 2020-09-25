@@ -24,6 +24,5 @@ router.get( routes.user.id , auth.authenticateToken, userController.getUserById)
 router.post( routes.user.profile, auth.authenticateToken, userController.getOtherUserById);
 router.put( routes.user.id , auth.authenticateToken, userController.updateUserById);
 router.delete( routes.user.id , auth.authenticateToken, userController.deleteUserById);
-router.delete( routes.user.approval , auth.authenticateToken, userController.addApprovalUsers);
 
 module.exports = router.expressRouter;

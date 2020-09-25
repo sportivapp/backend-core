@@ -42,8 +42,6 @@ function addUsersToMappingByDepartment(roster, userIds, user) {
 
 RosterService.createRoster = async (rosterDTO, user) => {
 
-    if (user.permission !== 8 && user.permission !== 10) return
-
     return Roster.query().insertToTable(rosterDTO, user.sub)
         .then(roster => RosterService.addMember(roster, user));
 }
@@ -80,9 +78,7 @@ RosterService.addMember = async (roster, user) => {
         .then(result => ({ ...roster, mappings: result }))
 }
 
-RosterService.getAllRosters = async (timesheetId, user) => {
-
-    if (user.permission !== 8 && user.permission !== 10) return
+RosterService.getAllRosters = async (timesheetId) => {
 
     return Roster.query()
         .modify('baseAttributes')
@@ -97,18 +93,17 @@ RosterService.getAllRosters = async (timesheetId, user) => {
             '.parent(baseAttributes)]]')
 }
 
-RosterService.getAllMemberById = async (page, size, rosterId, user) => {
+RosterService.getAllMemberById = async (page, size, rosterId) => {
 
-    if (user.permission !== 7 && user.permission !== 8 && user.permission !== 10) return
-
-    const membersPage = await RosterUserMapping.query().select().where('erostererosterid', rosterId).page(page, size);
+    const membersPage = await RosterUserMapping.query()
+        .where('erostererosterid', rosterId)
+        .modify('baseAttributes')
+        .page(page, size);
 
     return ServiceHelper.toPageObj(page, size, membersPage);
 }
 
-RosterService.viewRosterById = async (rosterId, user) => {
-
-    if (user.permission !== 8 && user.permission !== 10) return
+RosterService.viewRosterById = async (rosterId) => {
 
     return Roster.query().select()
         .modify('baseAttributes')
@@ -125,8 +120,6 @@ RosterService.viewRosterById = async (rosterId, user) => {
 }
 
 RosterService.updateRosterById = async (rosterId, rosterDTO, user) => {
-
-    if (user.permission !== 8 && user.permission !== 10) return
 
     const roster = await Roster.query().findById(rosterId)
 
@@ -168,13 +161,12 @@ RosterService.updateRosterById = async (rosterId, rosterDTO, user) => {
     }
 }
 
-RosterService.deleteRosterById = async (rosterId, user) => {
+RosterService.deleteRosterById = async (rosterId) => {
 
-    if (user.permission !== 8 && user.permission !== 10) return
-
-    const result = await Roster.query().delete().where('erosterid', rosterId);
-
-    return result;
+    const roster = await Roster.query().findById(rosterId)
+    if (!roster) return false
+    return roster.$query()
+        .del().then(rowsAffected => rowsAffected === 1);
 }
 
 RosterService.updateUsersOfRosters = async (projectId, rosterDTOs, loggedInUser) => {

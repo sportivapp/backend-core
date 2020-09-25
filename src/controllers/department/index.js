@@ -3,15 +3,11 @@ const ResponseHelper = require('../../helper/ResponseHelper')
 
 const controller = {}
 
-function isUserNotValid( user ) {
-    return user.permission !== 10
-}
-
 controller.getAllDepartmentbyCompanyId = async (req, res, next) => {
     
     const user = req.user
 
-    if (isUserNotValid(user)) 
+    if (user.functions.indexOf('R3') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { page, size, companyId, type, superiorId } = req.query
@@ -31,7 +27,7 @@ controller.getDepartmentByDepartmentId = async (req, res, next) => {
     
     const user = req.user
 
-    if (isUserNotValid(user)) 
+    if (user.functions.indexOf('R3') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { departmentId } = req.params
@@ -51,7 +47,7 @@ controller.createDepartment = async (req, res, next) => {
     
     const user = req.user
 
-    if (isUserNotValid(user)) 
+    if (user.functions.indexOf('C3') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { departmentName, departmentDescription, departmentSuperiorId, companyId } = req.body
@@ -81,7 +77,7 @@ controller.updateDepartment = async (req, res, next) => {
     
     const user = req.user
 
-    if (isUserNotValid(user)) 
+    if (user.functions.indexOf('U3') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { departmentId } = req.params
@@ -109,7 +105,7 @@ controller.deleteDepartment = async (req, res, next) => {
     
     const user = req.user
 
-    if (isUserNotValid(user)) 
+    if (user.functions.indexOf('D3') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { departmentId } = req.params
@@ -131,7 +127,7 @@ controller.getAllUsersByDepartmentId = async (req, res, next) => {
 
     const user = req.user
 
-    if (isUserNotValid(user))
+    if (user.functions.indexOf('R3') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { page, size } = req.query

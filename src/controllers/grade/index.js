@@ -5,6 +5,9 @@ const controller = {}
 
 controller.getGrades = async (req, res, next) => {
 
+    if (req.user.functions.indexOf('R4') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     const { page, size, companyId, departmentId } = req.query
 
     try {
@@ -19,6 +22,9 @@ controller.getGrades = async (req, res, next) => {
 controller.getGradeById = async (req, res, next) => {
 
     const { gradeId } = req.params
+
+    if (req.user.functions.indexOf('R4') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
         const grade = await gradeService.getGradeById(gradeId)
@@ -36,7 +42,7 @@ controller.createGrade = async (req, res, next) => {
 
     const user = req.user
 
-    if (!isUserAdmin(user))
+    if (user.functions.indexOf('C4') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     let gradeDTO = {
@@ -69,7 +75,7 @@ controller.updateGradeById = async (req, res, next) => {
 
     const user = req.user
 
-    if (!isUserAdmin(user))
+    if (user.functions.indexOf('U4') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const gradeDTO = {
@@ -96,7 +102,7 @@ controller.deleteGradeById = async (req, res, next) => {
     const { gradeId } = req.params
     const user = req.user
 
-    if (!isUserAdmin(req.user))
+    if (user.functions.indexOf('D4') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
@@ -109,15 +115,14 @@ controller.deleteGradeById = async (req, res, next) => {
     }
 }
 
-function isUserAdmin(user) {
-    return user.permission === 10
-}
-
 controller.saveUserPositions = async (req, res, next) => {
 
     const user = req.user
 
     const { positionId, userIds } = req.body
+
+    if (user.functions.indexOf('C4') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     if ( isNaN(positionId) ) return res.status(400).json(ResponseHelper.toErrorResponse(400))
 
@@ -134,6 +139,9 @@ controller.getUsersByPositionId = async (req, res, next) => {
     const { page, size } = req.query
 
     const { gradeId } = req.params
+
+    if (req.user.functions.indexOf('R4') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
         const pageObj = await gradeService.getUsersByPositionId(parseInt(page), parseInt(size), gradeId)

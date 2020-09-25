@@ -7,6 +7,9 @@ controller.createShift = async (req, res, next) => {
 
     const { name, startDate, endDate, isGeneral } = req.body
 
+    if (req.user.functions.indexOf('C8') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     const shiftDTO = {
         eshiftname: name,
         eshiftstartdate: startDate,
@@ -25,6 +28,9 @@ controller.createShift = async (req, res, next) => {
 
 controller.getAllShift = async (req, res, next) => {
 
+    if (req.user.functions.indexOf('R8') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     try {
         const result = await shiftService.getAllShift()
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
@@ -36,6 +42,9 @@ controller.getAllShift = async (req, res, next) => {
 controller.getShiftById = async (req, res, next) => {
 
     const { shiftId } = req.params
+
+    if (req.user.functions.indexOf('R8') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
         const result = await shiftService.getShiftById(shiftId)
@@ -51,6 +60,9 @@ controller.updateShiftById = async (req, res, next) => {
     const { shiftId } = req.params
 
     const { name, startDate, endDate } = req.body
+
+    if (req.user.functions.indexOf('U8') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const shiftDTO = {
         eshiftname: name,
@@ -70,6 +82,9 @@ controller.updateShiftById = async (req, res, next) => {
 controller.deleteShiftById = async (req, res, next) => {
 
     const { shiftId } = req.params
+
+    if (req.user.functions.indexOf('D8') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
         const result = await shiftService.deleteShiftById(shiftId)

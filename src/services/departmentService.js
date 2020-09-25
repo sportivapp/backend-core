@@ -64,16 +64,15 @@ departmentService.getDepartmentByDepartmentId = async (departmentId) => {
     .where('ecompanyid', department.ecompanyecompanyid)
     .first()
 
-    const companyUser = await CompanyUserMapping.query()
-    .select('eusereuserid')
-    .where('ecompanyecompanyid', company.ecompanyid)
-    .where('ecompanyusermappingpermission', 10)
-    .first()
-
-    const user = await User.query()
-    .select('eusername','euserid')
-    .where('euserid', companyUser.eusereuserid)
-    .first()
+    const headUser = await Grade.query().where('ecompanyecompanyid', company.ecompanyid)
+        .orderBy('egradecreatetime', 'ASC')
+        .first()
+        .then(position => position
+            .$relatedQuery('users')
+            .select('eusername','euserid')
+            .orderBy('eusercreatetime', 'ASC')
+            .first()
+        )
 
     const userData = await Grade.relatedQuery('users')
         .for(Grade.query().where('edepartmentedepartmentid', departmentId))
@@ -86,7 +85,7 @@ departmentService.getDepartmentByDepartmentId = async (departmentId) => {
         ecompanyecompanyid: department.ecompanyecompanyid,
         childrenCount: parseInt(subDepartment[0].count),
         ecompanyname: company.ecompanyname,
-        eusername: user.eusername,
+        eusername: headUser.eusername,
         userCount: userData.length
     }
 
