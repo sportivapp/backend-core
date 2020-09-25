@@ -2,6 +2,7 @@ const CompanyLog = require('../models/CompanyLog')
 const Company = require('../models/Company')
 const User = require('../models/User')
 const CompanyUserMapping = require('../models/CompanyUserMapping')
+const CompanyLogRemoveEnum = require('../models/enum/companyLogRemoveEnum')
 const CompanyLogStatusEnum = require('../models/enum/CompanyLogStatusEnum')
 const CompanyLogTypeEnum = require('../models/enum/CompanyLogTypeEnum')
 const ServiceHelper = require('../helper/ServiceHelper')
@@ -45,7 +46,7 @@ companyLogService.updateCompanyLog = async (companyId, user, userId, status) => 
 
 companyLogService.removeCompanyLog = async (userId, companyId, removeType ) => {
 
-    if( removeType === 'USER_CANCEL_JOIN' )
+    if( removeType === CompanyLogRemoveEnum.USER_CANCEL_JOIN )
         return CompanyLog.query()
         .delete()
         .where('eusereuserid', userId)
@@ -55,7 +56,7 @@ companyLogService.removeCompanyLog = async (userId, companyId, removeType ) => {
         .first()
         .then(rowsAffected => rowsAffected === 1)
 
-    if( removeType === 'EXIT_COMPANY')
+    if( removeType === CompanyLogRemoveEnum.EXIT_COMPANY )
         return CompanyLog.query()
         .where('eusereuserid', userId)
         .where('ecompanyecompanyid', companyId)
@@ -162,13 +163,13 @@ companyLogService.cancelInvite = async (companyLogId) => {
         .then(rowsAffected => rowsAffected === 1)
 }
 
-companyLogService.getListPendingByUserId = async (userId, type, logOrderBy, page, size) => {
+companyLogService.getListPendingByUserId = async (userId, type, sortDirection, page, size) => {
 
     return CompanyLog.query()
     .where('eusereuserid', userId)
     .where('ecompanylogtype', type)
     .andWhere('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
-    .orderBy('ecompanylogcreatetime', logOrderBy)
+    .orderBy('ecompanylogcreatetime', sortDirection)
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
