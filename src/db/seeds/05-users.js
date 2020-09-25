@@ -137,8 +137,8 @@ exports.seed = (knex, Promise) => knex('euser').del()
         {
           eusernik: '3',
           eusername: 'Bambang Nurdiansyah SE',
-          euseremail: 'benbs_coach17@yahoo.com',
-          euserpassword: '$2y$10$V4ndZYhVysNEA1tSO6yaKu0eOjzW67SuH38lIGpinS7O5se.hpt5e',
+          euseremail: 'bengs_coach17@yahoo.com',
+          euserpassword: '$2y$10$ZntBvZecKZtHv7GigqIj0uIB4Uu5VLKP8kBOlzTcCYHU832D./7oS',
           eusermobilenumber: '081911143330',
           euseridentitynumber: '',
           euseraddress: '',

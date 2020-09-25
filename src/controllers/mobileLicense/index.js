@@ -21,10 +21,12 @@ controller.getLicense = async (req, res, next) => {
 
 controller.getLicenses = async (req, res, next) => {
 
-    try {
-        const result = await licenseService.getLicenses(req.user);
+    const { page = '0', size = '10', keyword = '' } = req.query;
 
-        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+    try {
+        const pageObj = await licenseService.getLicenses(req.user, parseInt(page), parseInt(size), keyword);
+
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
     } catch(e) {
         next(e);
     }
@@ -33,13 +35,13 @@ controller.getLicenses = async (req, res, next) => {
 
 controller.createLicense = async (req, res, next) => {
 
-    const { academicName, graduationDate, industryId, level, additionalInformation, fileId } = req.body;
+    const { academicName, graduationDate, industryId, licenseLevelId, additionalInformation, fileId } = req.body;
 
     const licenseDTO = {
         elicenseacademicname: academicName,
         elicensegraduationdate: graduationDate,
         eindustryeindustryid: industryId,
-        elicenselevel: level,
+        elicenselevelelicenselevelid: licenseLevelId,
         elicenseadditionalinformation: additionalInformation,
         efileefileid: fileId
     }
@@ -56,14 +58,14 @@ controller.createLicense = async (req, res, next) => {
 
 controller.updateLicense = async (req, res, next) => {
 
-    const { academicName, graduationDate, industryId, level, additionalInformation, fileId } = req.body;
+    const { academicName, graduationDate, industryId, licenseLevelId, additionalInformation, fileId } = req.body;
     const { licenseId } = req.params;
 
     const licenseDTO = {
         elicenseacademicname: academicName,
         elicensegraduationdate: graduationDate,
         eindustryeindustryid: industryId,
-        elicenselevel: level,
+        elicenselevelelicenselevelid: licenseLevelId,
         elicenseadditionalinformation: additionalInformation,
         efileefileid: fileId
     }

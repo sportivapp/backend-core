@@ -127,7 +127,15 @@ UsersService.getUserById = async ( userId, user ) => {
 
 }
 
-UsersService.getOtherUserById = async (userId, type) => {
+UsersService.getOtherUserById = async (userId, type, companyId) => {
+
+    const userInCompany = await CompanyUserMapping.
+    query()
+    .where('ecompanyecompanyid', companyId)
+    .where('eusereuserid', userId)
+    .first()
+
+    if(!userInCompany) throw new NotFoundError()
 
     if (type !== 'USER' && type !== 'COACH')
         return

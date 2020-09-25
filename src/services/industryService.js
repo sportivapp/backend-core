@@ -14,4 +14,12 @@ industryService.getIndustryList = async (keyword) => {
         .where(raw('lower("eindustryname")'), 'like', `%${newKeyword}%`)
 }
 
+industryService.getIndustryListWithLicenseLevel = async () => {
+
+    return Industry.query()
+        .modify('baseAttributesWithLicenseLevels')
+        .withGraphFetched('licenseLevels');
+
+}
+
 module.exports = industryService

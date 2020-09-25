@@ -1,7 +1,8 @@
 const License = require('../models/License');
 const fileService = require('./fileService');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
-const { query } = require('../models/License');
+const { raw } = require('objection')
+const ServiceHelper = require('../helper/ServiceHelper')
 
 const LicenseService = {};
 
@@ -12,25 +13,25 @@ const UnsupportedLicenseErrorEnum = {
 LicenseService.getLicense = async (licenseId) => {
 
     return License.query()
-    .findById(licenseId)
-    .select('elicenseid', 'elicenseacademicname', 'efileid', 'efilename', 'elicensegraduationdate', 'eindustryname', 'elicenselevel', 
-    'elicenseadditionalinformation')
-    .leftJoinRelated('industry')
-    .joinRelated('file')
-    .then(result => {
-        if(!result)
-            throw new NotFoundError()
-        return result
-    })
-    
+        .findById(licenseId)
+        .modify('baseAttributes')
+        .withGraphFetched('file(baseAttributes)')
+        .withGraphFetched('licenseLevel(baseAttributesWithIndustry)')
+
 }
 
-LicenseService.getLicenses = async (user) => {
+LicenseService.getLicenses = async (user, page, size, keyword) => {
 
-    return License.query()
-    .select('elicenseid', 'elicenseacademicname', 'elicensegraduationdate', 'elicenselevel', 'eindustryname')
-    .joinRelated('industry')
+    const pageQuery = License.query()
+    .modify('baseAttributes')
+    .withGraphFetched('licenseLevel(baseAttributesWithIndustry)')
     .where('elicensecreateby', user.sub);
+
+    return pageQuery
+        .where(raw('lower("elicenseacademicname")'), 'like', `%${keyword.toLowerCase()}%`)
+        .modify('baseAttributes')
+        .page(page, size)
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
 }
 
