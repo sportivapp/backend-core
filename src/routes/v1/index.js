@@ -29,6 +29,8 @@ const companyLogRoutes = require('./companyLog');
 const theoryRoutes = require('./theory');
 const notificationRoutes = require('./notification');
 const forgetRoutes = require('./forget');
+const experienceRoutes = require('./experience');
+const licenseRoutes = require('./license');
 
 router.use('/api/v1', [
     userRoutes,
@@ -57,7 +59,10 @@ router.use('/api/v1', [
     companyLogRoutes,
     theoryRoutes,
     notificationRoutes,
-    forgetRoutes
+    forgetRoutes,
+    experienceRoutes,
+    licenseRoutes
+    
 ]);
 
 const mobileUserRoutes = require('./mobileUser');

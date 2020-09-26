@@ -49,7 +49,7 @@ class Experience extends Model {
         }
       },
       files: {
-        relation: ManyToManyRelation,
+        relation: Model.ManyToManyRelation,
         modelClass: File,
         join: {
           from: 'eexperience.eexperienceid',
