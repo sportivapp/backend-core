@@ -2,33 +2,41 @@ const CompanyModuleMapping = require('../models/CompanyModuleMapping');
 const Function = require('../models/Function');
 const GradeFunctionMapping = require('../models/GradeFunctionMapping');
 const Grade = require('../models/Grades');
+const gradeService = require('./gradeService')
+const { raw } = require('objection')
 const Module = require('../models/Module')
+const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
 
 const SettingService = {};
 
-SettingService.getModulesByCompanyId = async ( companyId ) => {
+SettingService.getModulesByCompanyId = async (companyId) => {
 
-    return CompanyModuleMapping.relatedQuery('module')
-        .for(CompanyModuleMapping.query().where('ecompanyecompanyid', companyId));
+    if (!companyId) return []
 
-}
-
-SettingService.getModulesByName = async (name) => {
-    return Module.query()
-        .where('emodulename', name)
-}
-
-SettingService.getModulesByUserId = async ( userId ) => {
-
-    const moduleIds = await Grade.relatedQuery('functions')
-        .for(Grade.query().joinRelated('users').where('eusereuserid', userId))
-        .then(functions => functions.map(func => func.emoduleemoduleid))
-
-    return Module.query().whereIn('emoduleid', moduleIds);
+    return CompanyModuleMapping.query()
+        .select('module.emoduleid')
+        .select('ecompanymodulemappingname as emodulename')
+        .joinRelated('module')
+        .where('ecompanyecompanyid', companyId)
+        .orderBy('emoduleemoduleid', 'ASC')
 
 }
 
-SettingService.getModulesByGradeIds = async (gradeIds) => {
+SettingService.getModulesByIds = async (companyId, moduleIds) => {
+
+    if (!companyId) return []
+
+    return CompanyModuleMapping.query()
+        .select('module.emoduleid')
+        .select('ecompanymodulemappingname as emodulename')
+        .joinRelated('module')
+        .where('ecompanyecompanyid', companyId)
+        .whereIn('emoduleemoduleid', moduleIds)
+        .orderBy('emoduleemoduleid', 'ASC')
+
+}
+
+SettingService.getModulesByGradeIds = async (companyId, gradeIds) => {
 
     const functionObj = await SettingService.getAllFunctionByGradeIds(gradeIds);
 
@@ -44,20 +52,7 @@ SettingService.getModulesByGradeIds = async (gradeIds) => {
         if (isModuleValid) moduleIds.push(key)
     }
 
-    return Module.query()
-        .whereIn('emoduleid', moduleIds)
-}
-
-SettingService.getModuleById = async (companyId, moduleId) => {
-
-    const module = await CompanyModuleMapping.relatedQuery('module')
-        .for(CompanyModuleMapping.query()
-            .where('ecompanyecompanyid', companyId)
-            .andWhere('emoduleemoduleid', moduleId))
-        .first();
-
-    return module;
-
+    return SettingService.getModulesByIds(companyId, moduleIds)
 }
 
 SettingService.getDefaultModuleByCompanyId = async (companyId) => {
@@ -69,14 +64,20 @@ SettingService.getDefaultModuleByCompanyId = async (companyId) => {
         .then(mapping => mapping.module)
 }
 
-SettingService.updateModuleByCompanyId = async ( companyId, moduleDTO, user ) => {
+SettingService.updateModuleByCompanyId = async (companyId, moduleDTO, user) => {
 
-    const module = await SettingService.getModuleById(companyId, moduleDTO.emoduleemoduleid);
+    if (!companyId) throw new UnsupportedOperationError('USER_NOT_IN_ORGANIZATION')
+
+    const module = await CompanyModuleMapping.query()
+        .where('ecompanyecompanyid', companyId)
+        .andWhere('emoduleemoduleid', moduleDTO.id)
+        .first()
 
     if (!module)
-        return
+        throw new UnsupportedOperationError('MODULE_NOT_FOUND')
 
-    return module.$query().updateByUserId(moduleDTO, user.sub)
+    return module.$query().updateByUserId({ ecompanymodulemappingname: moduleDTO.name }, user.sub)
+        .returning('*')
 
 }
 
@@ -160,8 +161,6 @@ SettingService.getAllFunctionByGradeIds = async (gradeIds) => {
 
 }
 
-
-
 SettingService.getAllFunctionCodesByGradeIds = async (gradeIds) => {
 
     return Grade.query()
@@ -172,24 +171,30 @@ SettingService.getAllFunctionCodesByGradeIds = async (gradeIds) => {
 
 }
 
-SettingService.deleteFuncionsByGradeId = async (gradeId) => {
+SettingService.deleteFunctionsByGradeId = async (gradeId, trx) => {
 
-    return GradeFunctionMapping.query().where('egradeegradeid', gradeId).del();
+    return GradeFunctionMapping.query(trx).where('egradeegradeid', gradeId).del();
 
 }
 
-SettingService.saveFuncionsByGradeId = async (gradeId, functionDTO) => {
+SettingService.saveFunctionsByGradeId = async (gradeId, functionDTOs) => {
 
-    await SettingService.deleteFuncionsByGradeId(gradeId);
+    await gradeService.getGradeById(gradeId)
+        .then(grade => {
+            if (!grade) throw new UnsupportedOperationError('GRADE_NOT_FOUND')
+        })
 
-    const gradeFunctionDTO = functionDTO.map(funcDTO => {
-        return {
-            egradeegradeid: gradeId,
-            efunctionefunctioncode: funcDTO.code,
-        }
-    });
+    return GradeFunctionMapping.transaction(async trx => {
 
-    return GradeFunctionMapping.query().insert(gradeFunctionDTO);
+        return GradeFunctionMapping.query(trx)
+            .where('egradeegradeid', gradeId)
+            .del()
+            .then(ignored => functionDTOs.map(funcDTO => ({
+                egradeegradeid: gradeId,
+                efunctionefunctioncode: funcDTO.code,
+            })))
+            .then(gradeFunctionDTO => GradeFunctionMapping.query(trx).insert(gradeFunctionDTO));
+    })
 
 }
 

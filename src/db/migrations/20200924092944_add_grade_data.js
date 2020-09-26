@@ -1,21 +1,23 @@
 exports.up = (knex) =>
     knex.transaction(trx => {
-        knex('ecompany')
-            .select('ecompanyid')
-            .whereNull('ecompanyparentid')
+        knex('egradefunctionmapping')
+            .del()
+            .then(ignored => {
+                return knex('ecompany')
+                    .select('ecompanyid')
+                    .whereNull('ecompanyparentid')
+            })
             .then(companies => createAdmins(companies,knex, trx))
             .then(grades => {
                 return knex('efunction')
                     .select('efunctioncode')
                     .then(functions => ({ grades: grades, functions: functions }))
             })
-            .then(({ grades, functions }) => {
-                return knex('egradefunctionmapping')
-                    .orderBy('egradefunctionmappingid', 'DESC')
-                    .first()
-                    .then(mapping => ({ grades: grades, functions: functions, startId: mapping.egradefunctionmappingid }))
+            .then(obj => {
+                console.log(obj)
+                return obj
             })
-            .then(({ grades, functions, startId }) => createGradeFunctionMappings(grades, functions, startId, knex, trx))
+            .then(({ grades, functions }) => createGradeFunctionMappings(grades, functions, knex, trx))
             .then(grades => mapUserAndGrades(grades, knex, trx))
             .then(trx.commit)
             .catch(trx.rollback)
@@ -32,17 +34,15 @@ function createAdmins(companies, knex, trx) {
     return knex('egrade').insert(admins).transacting(trx).returning('*')
 }
 
-function createGradeFunctionMappings(grades, functions, startId, knex, trx) {
+function createGradeFunctionMappings(grades, functions, knex, trx) {
     let gradeFunctions = []
     grades.forEach(grade => {
         functions.forEach(func => {
             const gradeFunction = {
-                egradefunctionmappingid: startId + 1,
                 egradeegradeid: grade.egradeid,
                 efunctionefunctioncode: func.efunctioncode
             }
             gradeFunctions.push(gradeFunction)
-            startId++
         })
     })
     return knex('egradefunctionmapping').insert(gradeFunctions)
@@ -69,7 +69,4 @@ function mapUserAndGrades(grades, knex, trx) {
     return Promise.all(promises)
 }
 
-exports.down = (knex) => {
-    knex('egrade').where('egradename', 'Administrator')
-        .del()
-};
+exports.down = (knex) => knex('egrade').where('egradename', 'Administrator').del();
