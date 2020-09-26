@@ -155,6 +155,9 @@ module.exports = {
         notification: {
             list: '/notification'
         },
+        license: {
+            id : '/license/:licenseId'
+        },
         file: {
             download: '/file-download/:fileId'
         }
