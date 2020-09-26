@@ -166,4 +166,12 @@ gradeService.getUsersByPositionId = async (page, size, positionId) => {
 
 }
 
+gradeService.getAllGradesByUserIdAndCompanyId = async (companyId, userId) => {
+    return Grade.query()
+        .joinRelated('users')
+        .joinRelated('company')
+        .where('users.euserid', userId)
+        .where('company.ecompanyid', companyId)
+}
+
 module.exports = gradeService

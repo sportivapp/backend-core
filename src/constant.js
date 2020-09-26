@@ -29,7 +29,9 @@ module.exports = {
             changeCompany: '/change-company',
             currentCompany: '/current-company',
             changePassword: '/change-password',
-            profile: '/profile'
+            profile: '/profile',
+            modules: '/profile/modules',
+            functions: '/profile/modules/:moduleId/functions'
         },
         grade: {
             list: '/grades',

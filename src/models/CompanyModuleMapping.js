@@ -20,6 +20,22 @@ class CompanyModuleMapping extends Model {
             }
         };
     }
+
+    static get relationMappings() {
+
+        const Module = require('./Module')
+
+        return {
+            module: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Module,
+                join: {
+                    from: 'ecompanymodulemapping.emoduleemoduleid',
+                    to: 'emodule.emoduleid'
+                }
+            }
+        }
+    }
 }
 
 module.exports = CompanyModuleMapping
