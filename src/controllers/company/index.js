@@ -140,7 +140,7 @@ companyController.getCompanyById = async (req, res, next) => {
 
 companyController.getUsersByCompanyId = async (req, res, next) => {
 
-    if (user.functions.indexOf('R5') === -1)
+    if (req.user.functions.indexOf('R5') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { page = '0', size = '10', keyword = '' } = req.query

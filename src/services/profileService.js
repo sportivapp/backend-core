@@ -104,7 +104,7 @@ profileService.getModules = async (user) => {
     const gradeIds = await gradeService.getAllGradesByUserIdAndCompanyId(user.companyId, user.sub)
         .then(grades => grades.map(grade => grade.egradeid))
 
-    const modules = await settingService.getModulesByGradeIds(gradeIds)
+    const modules = await settingService.getModulesByGradeIds(user.companyId, gradeIds)
 
     if (modules.length === 0) {
         const module = await settingService.getDefaultModuleByCompanyId(user.companyId)
