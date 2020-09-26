@@ -13,13 +13,7 @@ const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
 const UsersService = {};
 
-const ErrorEnum = {
-    PASSWORD_INVALID: 'PASSWORD_INVALID',
-}
-
 UsersService.registerEmployees = async (user, path) => {
-
-    if (user.permission < 9) return
 
     let positions = [];
     const values = await readXlsxFile(path).then((rows) => {
@@ -74,7 +68,7 @@ UsersService.registerEmployees = async (user, path) => {
 
 }
 
-UsersService.createUser = async (userDTO, permission, user) => {
+UsersService.createUser = async (userDTO, user) => {
 
     const getUserByEmail = await User.query().where('euseremail', userDTO.euseremail).first();
 
@@ -94,16 +88,10 @@ UsersService.createUser = async (userDTO, permission, user) => {
 
     const createdUser = await User.query().insertToTable(userDTO, user.sub)
 
-    let realPermission
-
-    if (!permission) realPermission = 1
-    else realPermission = permission
-
     await CompanyUserMapping.query()
         .insertToTable({
             ecompanyecompanyid: user.companyId,
             eusereuserid: createdUser.euserid,
-            ecompanyusermappingpermission: realPermission
         }, user.sub)
 
     return createdUser
@@ -158,97 +146,14 @@ UsersService.getOtherUserById = async (userId, type, companyId) => {
 
 }
 
-UsersService.getProfile = async ( user ) => {
-
-    return User.query()
-        .findById(user.sub);
-
-}
-
-UsersService.getUserCurrentCompany = async ( user ) => {
-
-    const companyData = await Company.query()
-        .select()
-        .where('ecompanyid', user.companyId)
-        .withGraphFetched('[older]')
-        .first()
-
-    let result
-
-    if( companyData.older === null || companyData.older === undefined){
-        result = {
-            companyId: companyData.ecompanyid,
-            companyName: companyData.ecompanyname,
-            parent: null
-        }
-    } else if( companyData.older.older === null  || companyData.older.older === undefined) {
-        result = {
-            companyId: companyData.ecompanyid,
-            companyName: companyData.ecompanyname,
-            parent: {
-                companyId: companyData.older.ecompanyid,
-                companyName: companyData.older.ecompanyname,
-                parent: null
-            }
-        }
-    } else if( companyData.older.older !== null || companyData.older.older !== undefined) {
-        result = {
-            companyId: companyData.ecompanyid,
-            companyName: companyData.ecompanyname,
-            parent: {
-                companyId: companyData.older.ecompanyid,
-                companyName: companyData.older.ecompanyname,
-                parent: {
-                    companyId: companyData.older.older.ecompanyid,
-                    companyName: companyData.older.older.ecompanyname
-                }
-            }
-        }
-    }
-
-    return result
-
-}
-
-// UsersService.updateUserById = async (userId, userDTO, permission, user) => {
 UsersService.updateUserById = async (userId, userDTO, user) => {
 
-    if (user.permission != 9 && user.permission != 10) {
-        // if (userId != user.sub) 
-            return
-    }
-
-    // const userMapping = await CompanyUserMapping.query()
-    //     .where('ecompanyecompanyid', user.companyId)
-    //     .where('eusereuserid', userId)
-    //     .first()
-
-    const updateUserQuery = User.query().findById(userId)
+    return User.query().findById(userId)
         .updateByUserId(userDTO, user.sub)
         .returning('*')
-
-    // let realPermission
-
-    // if (!permission) realPermission = 1
-    // else realPermission = permission
-
-    // let additionalQuery
-
-    // if (userMapping.ecompanyusermappingpermission != realPermission) {
-    //     additionalQuery = CompanyUserMapping.query()
-    //         .where('ecompanyecompanyid', user.companyId)
-    //         .where('eusereuserid', userId)
-    //         .updateByUserId({ ecompanyusermappingpermission: realPermission }, user.sub)
-    // }
-
-    // if (additionalQuery)
-    //     return Promise.all([additionalQuery, updateUserQuery])
-    //         .then(resultArr => resultArr[1])
-    // else
-        return updateUserQuery
 }
 
-async function generateJWTToken(user, companyId, permission) {
+UsersService.generateJWTToken = async (user, companyId) => {
 
     const config = {
         sub: user.euserid,
@@ -256,7 +161,6 @@ async function generateJWTToken(user, companyId, permission) {
         email: user.euseremail,
         name: user.eusername,
         mobileNumber: user.eusermobilenumber,
-        permission: permission,
         companyId: companyId
     }
     const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' });
@@ -267,36 +171,11 @@ async function generateJWTToken(user, companyId, permission) {
 
 UsersService.getAllUserByCompanyId = async ( page, size, companyId ) => {
 
-    // const userPage = await CompanyUserMapping.relatedQuery('users')
-    // .for(CompanyUserMapping.query().where('ecompanyecompanyid', companyId))
-    // .select('euserid', 'eusername', 'euseremail', 'eusernik', 'eusermobilenumber')
-    // .page(page, size);
-
     const userPage = Company.relatedQuery('users')
         .for(companyId)
         .modify('baseAttributes')
         .withGraphFetched('grades(baseAttributes).department(baseAttributes)')
         .page(page, size)
-
-    // const userIds = userPage.results.map(user => user.euserid);
-    //
-    // const grades = await Grade.query()
-    // .select('eusereuserid', 'egradename')
-    // .joinRelated('users')
-    // .whereIn('eusereuserid', userIds)
-    //
-    // userPage.results.map((user) => {
-    //
-    //     const userGrades = grades.filter((grade) => {
-    //         return user.euserid === grade.eusereuserid
-    //     })
-    //     .map((grade) => {
-    //         return grade.egradename;
-    //     });
-    //
-    //     user.grades = userGrades;
-    //
-    // })
  
     return ServiceHelper.toPageObj(page, size, userPage)
 
@@ -316,15 +195,12 @@ UsersService.login = async (loginDTO) => {
     if (success === true) {
 
         const result = await User.query()
-        .select('ecompanyecompanyid', 'ecompanyusermappingpermission')
+        .select('ecompanyecompanyid')
         .joinRelated('companies')
         .where('eusereuserid', user.euserid)
         .orderBy('ecompanyusermappingcreatetime', 'ASC')
         .first();
-
-        if (!result || !result.ecompanyecompanyid) return
-
-        token = await generateJWTToken(user, result.ecompanyecompanyid, result.ecompanyusermappingpermission);
+        token = await UsersService.generateJWTToken(user, result.ecompanyecompanyid);
 
     }
 
@@ -337,7 +213,7 @@ UsersService.changeUserPassword = async ( user , oldPassword, newPassword) => {
     const userFromDB = await User.query().findById(user.sub);
 
     const samePassword = await bcrypt.compare(oldPassword, userFromDB.euserpassword);
-    
+
     if (!samePassword)
         throw new UnsupportedOperationError(ErrorEnum.PASSWORD_INVALID);
 
@@ -347,35 +223,16 @@ UsersService.changeUserPassword = async ( user , oldPassword, newPassword) => {
 
 }
 
-UsersService.changeUserCompany = async (companyId, user) => {
+UsersService.deleteUserById = async ( userId, loggedInUser ) => {
 
-    const loggedInUser = await User.query().select().where('euseremail', user.email).first();
-
-    const userCompany = await CompanyUserMapping.query().select()
-    .where('ecompanyecompanyid', companyId)
-    .where('eusereuserid', user.sub)
-    .first()
-
-    if(!userCompany)
-        return
-
-    let token = null;
-    token = await generateJWTToken(loggedInUser, companyId, userCompany.ecompanyusermappingpermission);
-
-    return token;
-}
-
-UsersService.deleteUserById = async ( userId, user ) => {
-    
-    if (user.permission < 9) return
+    const user = await UsersService.getUserById(userId, loggedInUser)
 
     const projects = await User.relatedQuery('projects')
-        .for(userId)
+        .for(user.euserid)
 
     if (projects.length > 0) return false
 
-    return User.query()
-        .where('euserid', userId)
+    return user.$query()
         .delete()
         .then(rowsAffected => rowsAffected === 1)
 
@@ -390,30 +247,6 @@ UsersService.sendForgotPasswordLink = async ( email ) => {
     }
 
     return true;
-}
-
-UsersService.addApprovalUsers = async (userId, approverUserIds, user) => {
-    const users = await User.query()
-        .whereIn('euserid', approverUserIds)
-
-    if (users.length !== approvalUserIds.length) return
-
-    const patchDTO = {}
-    approverUserIds.forEach((value, index) => {
-        patchDTO['euserapprovaluserid'.concat(index)] = value
-    })
-
-    return User.query()
-        .findById(userId)
-        .updateByUserId(patchDTO, user.sub)
-        .returning('*')
-}
-
-UsersService.updateProfile = async (userDTO, user) => {
-
-    return User.query().findById(user.sub)
-        .updateByUserId(userDTO, user.sub)
-        .returning('*')
 }
 
 module.exports = UsersService;

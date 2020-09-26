@@ -9,6 +9,8 @@ controller.createPermit = async (req, res, next) => {
 
     const user = req.user
 
+    if (user.functions.indexOf('C6') === -1) return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     const permitDTO = {
         eusereuserid: req.user.sub,
         epermitdescription: permitRequest.description,
@@ -33,6 +35,8 @@ controller.getPermitList = async (req, res, next) => {
     const { page, size } = req.query
 
     const user = req.user
+
+    if (user.functions.indexOf('R6') === -1) return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
         const pageObj = await permitService.getPermitList(parseInt(page), parseInt(size), user)
@@ -64,6 +68,8 @@ controller.getSubordinatePermitList = async (req, res, next) => {
 
     const user = req.user
 
+    if (user.functions.indexOf('R6') === -1) return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     try {
         const pageObj = await permitService.getSubordinatePermitList(parseInt(page), parseInt(size), user)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
@@ -75,6 +81,8 @@ controller.getSubordinatePermitList = async (req, res, next) => {
 controller.getPermitById = async (req, res, next) => {
 
     const { permitId } = req.params
+
+    if (req.user.functions.indexOf('R6') === -1) return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
         const result =  await permitService.getPermitById(permitId)
@@ -114,6 +122,8 @@ controller.updatePermitStatusById = async (req, res, next) => {
 
     const user = req.user
 
+    if (user.functions.indexOf('U6') === -1) return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     try {
         const result = await permitService.updatePermitStatusById(permitId, status, user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
@@ -127,6 +137,8 @@ controller.deletePermitById = async (req, res, next) => {
     const { permitId } = req.params
 
     const user = req.user
+
+    if (user.functions.indexOf('D6') === -1) return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
         const result = await permitService.deletePermitById(permitId, user)

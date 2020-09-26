@@ -7,6 +7,9 @@ controller.createTimesheet = async (req, res, next) => {
 
     const { name, shiftId, rosterCount, rosters, isGeneral } = req.body
 
+    if (req.user.functions.indexOf('C9') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     const timesheetDTO = {
         etimesheetname: name,
         etimesheetrostercount: rosterCount,
@@ -32,6 +35,9 @@ controller.createTimesheet = async (req, res, next) => {
 
 controller.getTimesheets = async (req, res, next) => {
 
+    if (req.user.functions.indexOf('R9') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     try {
         const result = await timesheetService.getTimesheets()
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
@@ -43,6 +49,9 @@ controller.getTimesheets = async (req, res, next) => {
 controller.getTimesheetById = async (req, res, next) => {
 
     const { timesheetId } = req.params
+
+    if (req.user.functions.indexOf('R9') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
         const result = await timesheetService.getTimesheetById(timesheetId)
@@ -57,6 +66,9 @@ controller.updateTimesheetById = async (req, res, next) => {
 
     const { timesheetId } = req.params
     const { name, shiftId, rosterCount, rosters } = req.body
+
+    if (req.user.functions.indexOf('U9') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const timesheetDTO = {
         etimesheetname: name,
@@ -85,6 +97,9 @@ controller.updateTimesheetById = async (req, res, next) => {
 controller.deleteTimesheetById = async (req, res, next) => {
 
     const { timesheetId } = req.params
+
+    if (req.user.functions.indexOf('D9') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
         const result = await timesheetService.deleteTimesheetById(timesheetId)

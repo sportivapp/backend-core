@@ -7,6 +7,9 @@ controller.getPatternsByShiftId = async (req, res, next) => {
 
     const { shiftId } = req.params
 
+    if (req.user.functions.indexOf('R8') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     try {
         const result = await shiftPatternService.getPatternsByShiftId(shiftId)
         if (!result) return res.status(400).json(ResponseHelper.toErrorResponse(400))
@@ -19,6 +22,9 @@ controller.getPatternsByShiftId = async (req, res, next) => {
 controller.getPatternById = async (req, res, next) => {
 
     const { patternId } = req.params
+
+    if (req.user.functions.indexOf('R8') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
         const result = await shiftPatternService.getPatternById(patternId)
@@ -33,6 +39,9 @@ controller.createPattern = async (req, res, next) => {
 
     const { shiftId } = req.params
     const { startTime, endTime, times } = req.body
+
+    if (req.user.functions.indexOf('C8') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const patternDTO = {
         startTime,
@@ -54,6 +63,9 @@ controller.updatePatternById = async (req, res, next) => {
     const { shiftId, patternId } = req.params
     const { startTime, endTime, times } = req.body
 
+    if (req.user.functions.indexOf('U8') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     const patternDTO = {
         startTime,
         endTime,
@@ -72,6 +84,9 @@ controller.updatePatternById = async (req, res, next) => {
 controller.deletePatternById = async (req, res, next) => {
 
     const { patternId } = req.params
+
+    if (req.user.functions.indexOf('D8') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
         const result = await shiftPatternService.deletePatternById(patternId)

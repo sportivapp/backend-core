@@ -3,10 +3,6 @@ const ResponseHelper = require('../../helper/ResponseHelper')
 
 const companyController = {}
 
-function isUserNotValid(user) {
-    return user.permission !== 10
-}
-
 companyController.registerCompany = async (req, res, next) => {
 
     const { nik, name, password, mobileNumber, companyName, companyEmail, street, postalCode, industryId, countryId, stateId } = req.body;
@@ -45,9 +41,6 @@ companyController.registerCompany = async (req, res, next) => {
 }
 
 companyController.createCompany = async (req, res, next) => {
-
-    if (isUserNotValid(req.user))
-        return res.status(403).json(ResponseHelper.toErrorResponse(403))
     const user = req.user
 
     try {
@@ -88,6 +81,11 @@ companyController.createCompany = async (req, res, next) => {
             estateestateid: stateId
         }
 
+        if (companyOlderId || companyParentId) {
+            if (user.functions.indexOf('C1') === -1)
+                return res.status(403).json(ResponseHelper.toErrorResponse(403))
+        }
+
         const data = await companyService.createCompany(supervisorId , companyDTO, addressDTO, user);
 
         if (!data) return res.status(400).json(ResponseHelper.toErrorResponse(400))
@@ -103,7 +101,7 @@ companyController.getCompanyList = async (req, res, next) => {
 
     const user = req.user
 
-    if (isUserNotValid(user))
+    if (req.user.functions.indexOf('R1') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     // type = company or type = branch
@@ -124,13 +122,13 @@ companyController.getCompanyById = async (req, res, next) => {
 
     const user = req.user
 
-    if (isUserNotValid(user))
+    if (user.functions.indexOf('R1') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { companyId } = req.params
 
     try {
-        const result = await companyService.getCompanyById(companyId)
+        const result = await companyService.getCompleteCompanyById(companyId)
         if (!result)
             return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
@@ -141,6 +139,9 @@ companyController.getCompanyById = async (req, res, next) => {
 }
 
 companyController.getUsersByCompanyId = async (req, res, next) => {
+
+    if (user.functions.indexOf('R5') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { page = '0', size = '10', keyword = '' } = req.query
 
@@ -158,7 +159,7 @@ companyController.editCompany = async (req, res, next) => {
 
     const user = req.user
 
-    if (isUserNotValid(user))
+    if (req.user.functions.indexOf('U1') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { companyId } = req.params
@@ -210,7 +211,7 @@ companyController.deleteCompany = async (req, res, next) => {
 
     const user = req.user
 
-    if (isUserNotValid(user))
+    if (user.functions.indexOf('D1') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { companyId } = req.params
@@ -231,7 +232,7 @@ companyController.saveUsersToCompany = async (req, res, next) => {
 
     const user = req.user
 
-    if (isUserNotValid(user))
+    if (user.functions.indexOf('C1') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const users = req.body.users
