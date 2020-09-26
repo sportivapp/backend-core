@@ -38,7 +38,4 @@ function createCompanyModuleMappings(companies, modules, startId, knex, trx) {
         .then(ignored => companies)
 }
 
-exports.down = (knex) => {
-    knex('ecompanymodulemapping')
-        .del()
-};
+exports.down = (knex) => knex('ecompanymodulemapping').del()
