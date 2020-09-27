@@ -7,6 +7,14 @@ const ServiceHelper = require('../helper/ServiceHelper')
 
 const departmentService = {}
 
+
+departmentService.getDepartementId = async(departementId) => {
+
+    const result = await Department.query().findById(departementId)
+    return result
+}
+
+
 departmentService.getAllDepartmentbyCompanyId = async (page, size, type, companyId, superiorId) => {
 
     if(companyId) {
