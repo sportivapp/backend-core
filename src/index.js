@@ -62,16 +62,16 @@ const httpServer = app.listen(httpPORT, function() {
 
 // configuration for https
 const options = {
-//     key: fs.readFileSync('../../../etc/ssl/private/quickplay.key', 'utf8'),
-//     cert: fs.readFileSync('../../../etc/ssl/certs/quickplay.crt', 'utf8')
-// };
-// const httpsServer = https.createServer(options, app);
-// const httpsPORT = process.env.HTTPS_PORT || 5101;
-// httpsServer.listen(httpsPORT, function() {
-//     console.log(`HTTPS Server started on port ${httpsPORT}.`);
-// });
+    key: fs.readFileSync('../../../etc/ssl/private/quickplay.key', 'utf8'),
+    cert: fs.readFileSync('../../../etc/ssl/certs/quickplay.crt', 'utf8')
+};
+const httpsServer = https.createServer(options, app);
+const httpsPORT = process.env.HTTPS_PORT || 5101;
+httpsServer.listen(httpsPORT, function() {
+    console.log(`HTTPS Server started on port ${httpsPORT}.`);
+});
 
-// module.exports = {
-//     httpServer: httpServer,
-//     httpsServer: httpsServer
+module.exports = {
+    httpServer: httpServer,
+    httpsServer: httpsServer
 }
