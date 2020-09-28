@@ -41,6 +41,9 @@ classUserController.getUsersPendingListByClassId = async (page, size, classId, u
 
     if(!classInCompany) throw new NotFoundError()
 
+    // check if its the maker of the class, if its not then just return empty page
+    if(classInCompany.eclasscreateby !== user.sub) return ServiceHelper.toEmptyPage(page, size)
+
     return ClassUserMapping.query()
     .where('eclasseclassid', classId)
     .where('eclassusermappingstatus', ClassUserStatusEnum.PENDING)
