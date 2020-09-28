@@ -68,6 +68,27 @@ classService.createClass = async(classDTO,requirements, user) => {
 
 }
 
+classService.getAllClassByCompanyId = async (companyId, page, size, keyword) => {
+
+    if (companyId < 1) companyId = null
+
+    let pageQuery = Class.query()
+        .modify('baseAttributes')
+        .select('eclass.*')
+        .select('company.ecompanyname')
+        .select('industry.eindustryname')
+        .joinRelated('company(baseAttributes)')
+        .joinRelated('industry(baseAttributes)')
+
+    if (companyId && companyId !== '') pageQuery = pageQuery.where('ecompanyecompanyid', companyId)
+
+    return pageQuery
+        .where(raw('lower("eclassname")'), 'like', `%${keyword.toLowerCase()}%`)
+        .modify('baseAttributes')
+        .page(page, size)
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+}
+
 classService.getClassById = async (classId, user) => {
 
         const foundClass = await Class.query()
