@@ -10,4 +10,4 @@ router.put(routes.class.id, auth.authenticateToken, controller.updateClassById);
 router.delete(routes.class.id, auth.authenticateToken, controller.deleteClassById);
 router.get(routes.class.list, auth.authenticateToken, controller.getAllClassByCompanyId);
 
-module.exports = router.expressRouter
+module.exports = router.expressRouter;
