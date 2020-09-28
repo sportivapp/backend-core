@@ -10,8 +10,7 @@ const departmentService = {}
 
 departmentService.getDepartementId = async(departementId) => {
 
-    const result = await Department.query().findById(departementId)
-    return result
+    return Department.query().findById(departementId)
 }
 
 
