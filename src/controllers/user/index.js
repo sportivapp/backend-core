@@ -222,9 +222,13 @@ userController.login = async (req, res, next) => {
 
         const result = await userService.login(loginDTO);
 
-        if (!result)
-            return res.status(401).json(ResponseHelper.toErrorResponse(401))
-        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+        // if (!result)
+        //     return res.status(401).json(ResponseHelper.toErrorResponse(401))
+        // return res.status(200).json(ResponseHelper.toBaseResponse(result))
+
+        return res.cookie('tok', result, {
+            maxAge: 15 * 60 * 1000
+        }).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
         next(e);
