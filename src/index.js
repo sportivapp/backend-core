@@ -12,7 +12,7 @@ const errorHandler = require('./middlewares/errorHandler');
 
 app.use(cors());
 app.use((_, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Origin', 'https://organization.quickplay.app');
     res.header(
       'Access-Control-Allow-Headers',
       'Origin, X-Requested-With, Content-Type, Accept'  
