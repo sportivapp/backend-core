@@ -227,6 +227,8 @@ userController.login = async (req, res, next) => {
         // return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
         return res.cookie('tok', result, {
+            secure: true,
+            httpOnly: true,
             domain: 'organization.quickplay.app',
             maxAge: 15 * 60 * 1000
         }).json(ResponseHelper.toBaseResponse(result));
