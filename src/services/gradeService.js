@@ -65,7 +65,7 @@ gradeService.createGrade = async (gradeDTO, userId) => {
     if (!company) return
 
     if (gradeDTO.edepartmentedepartmentid) {
-        const department = await departmentService.getDepartementId(gradeDTO.ecompanyecompanyid)
+        const department = await departmentService.getDepartementId(gradeDTO.edepartmentedepartmentid)
         if (!department) return
     }
 
