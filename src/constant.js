@@ -131,6 +131,7 @@ module.exports = {
         classUser: {
             registration: '/user-class/registration',
             list: '/user-class',
+            pending: '/user-class-pending',
             id: '/user-class/:classUserId',
             history: '/user-class-history',
             historyId: '/user-class-history/:classUserId'
