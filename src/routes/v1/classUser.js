@@ -4,8 +4,8 @@ const controller = require('../../controllers/classUser')
 const auth = require('../../middlewares/authentication');
 const { routes } = require('../../constant')
 
-router.post(routes.classUser.list, auth.authenticateToken, controller.getRegisteredUsersByClassId)
-router.post(routes.classUser.pending, auth.authenticateToken, controller.getUsersPendingListByClassId)
-router.post(routes.classUser.registration, auth.authenticateToken, controller.processRegistration)
+router.get(routes.classUser.classUser, auth.authenticateToken, controller.getRegisteredUsersByClassId)
+router.get(routes.classUser.pendingUser, auth.authenticateToken, controller.getUsersPendingListByClassId)
+router.post(routes.classUser.processRegistration, auth.authenticateToken, controller.processRegistration)
 
 module.exports = router;
