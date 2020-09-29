@@ -7,7 +7,6 @@ const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
 const classUserController = {}
 
-
 const ErrorEnum = {
     CLASS_ID_REQUIRED: 'CLASS_ID_REQUIRED',
     CLASS_NOT_FOUND: 'CLASS_NOT_FOUND',
@@ -17,12 +16,6 @@ const ErrorEnum = {
 }
 
 classUserController.getRegisteredUsersByClassId = async (page, size, classId, user) => {
-
-    const classInCompany = await Class.query()
-    .findById(classId)
-    .where('ecompanyecompanyid', user.companyId)
-
-    if(!classInCompany) throw new NotFoundError()
 
     return ClassUserMapping.query()
     .where('eclasseclassid', classId)
@@ -39,10 +32,7 @@ classUserController.getUsersPendingListByClassId = async (page, size, classId, u
     .findById(classId)
     .where('ecompanyecompanyid', user.companyId)
 
-    if(!classInCompany) throw new NotFoundError()
-
-    // check if its the maker of the class, if its not then just return empty page
-    if(classInCompany.eclasscreateby !== user.sub) return ServiceHelper.toEmptyPage(page, size)
+    if(!classInCompany) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_ORGANIZATION)
 
     return ClassUserMapping.query()
     .where('eclasseclassid', classId)
@@ -60,7 +50,7 @@ classUserController.processRegistration = async (classId, status, userId, user) 
     .findById(classId)
     .where('ecompanyecompanyid', user.companyId)
 
-    if(!classInCompany) throw new NotFoundError()
+    if(!classInCompany) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_ORGANIZATION)
 
     if (ClassUserStatusEnum.APPROVED !== status && ClassUserStatusEnum.REJECTED !== status)
         throw new UnsupportedOperationError(ErrorEnum.STATUS_INVALID)
@@ -68,6 +58,7 @@ classUserController.processRegistration = async (classId, status, userId, user) 
     const classUser = await ClassUserMapping.query()
         .where('eclasseclassid', classId)
         .where('eusereuserid', userId)
+        .where('eclassusermappingstatus', ClassUserStatusEnum.PENDING)
         .orderBy('eclassusermappingcreatetime', 'DESC')
         .withGraphFetched('class(baseAttributes)')
         .first()
@@ -81,14 +72,10 @@ classUserController.processRegistration = async (classId, status, userId, user) 
     if (loggedInUserCompanies.indexOf(classUser.class.ecompanyecompanyid) === -1)
         throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_ORGANIZATION)
 
-    if (classUser.eclassusermappingstatus === ClassUserStatusEnum.PENDING)
-
-        return classUser.$query()
-            .updateByUserId({ eclassusermappingstatus: status }, user.sub)
-            .returning('*')
-            .withGraphFetched('class(baseAttributes)')
-
-    else return classUser
+    return classUser.$query()
+        .updateByUserId({ eclassusermappingstatus: status }, user.sub)
+        .returning('*')
+        .withGraphFetched('class(baseAttributes)')
 }
 
 
