@@ -11,6 +11,7 @@ const UserPositionMapping = require('../models/UserPositionMapping')
 const NotificationEnum = require('../models/enum/NotificationEnum')
 const CompanyLogTypeEnum = require('../models/enum/CompanyLogTypeEnum')
 const CompanyLogStatusEnum = require('../models/enum/CompanyLogStatusEnum')
+const CompanyLogRemoveEnum = require('../models/enum/CompanyLogRemoveEnum')
 const { raw } = require('objection');
 const ServiceHelper = require('../helper/ServiceHelper')
 const notificationService = require('./notificationService')
@@ -252,7 +253,7 @@ companyService.userCancelJoin = async (companyId, userId) => {
     if(!userFromDB)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
 
-    const deleteLog = await companyLogService.removeCompanyLog(userId, companyId, 'USER_CANCEL_JOIN')
+    const deleteLog = await companyLogService.removeCompanyLog(userId, companyId, CompanyLogRemoveEnum.USER_CANCEL_JOIN)
 
     if (!deleteLog)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_APPLIED)
@@ -332,7 +333,7 @@ companyService.exitCompany = async (companyId, user) => {
     .where('eusereuserid', user.sub)
     .delete()
 
-    const removeCompanyLog = companyLogService.removeCompanyLog(user.sub, companyId, 'EXIT_COMPANY')
+    const removeCompanyLog = companyLogService.removeCompanyLog(user.sub, companyId, CompanyLogRemoveEnum.EXIT_COMPANY)
 
     await Promise.all([removeApprovalUser, removeApproval, removePermits, removePositionUserMapping, removeRosterUserMapping, removeShiftRoster, removeUserFromTeam, removeCompanyLog])
     const companyMemberCount = await companyService.getCompanyMemberCount(companyId);
