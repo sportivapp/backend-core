@@ -12,10 +12,9 @@ const ErrorEnum = {
     CLASS_NOT_FOUND: 'CLASS_NOT_FOUND',
     USER_NOT_IN_ORGANIZATION: 'USER_NOT_IN_ORGANIZATION',
     STATUS_INVALID: 'STATUS_INVALID',
-
 }
 
-classUserController.getRegisteredUsersByClassId = async (page, size, classId, user) => {
+classUserController.getRegisteredUsersByClassId = async (page, size, classId) => {
 
     return ClassUserMapping.query()
     .where('eclasseclassid', classId)
