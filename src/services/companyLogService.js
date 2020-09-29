@@ -2,12 +2,67 @@ const CompanyLog = require('../models/CompanyLog')
 const Company = require('../models/Company')
 const User = require('../models/User')
 const CompanyUserMapping = require('../models/CompanyUserMapping')
+const CompanyLogRemoveEnum = require('../models/enum/CompanyLogRemoveEnum')
 const CompanyLogStatusEnum = require('../models/enum/CompanyLogStatusEnum')
 const CompanyLogTypeEnum = require('../models/enum/CompanyLogTypeEnum')
 const ServiceHelper = require('../helper/ServiceHelper')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
 const companyLogService = {}
+
+companyLogService.createCompanyLog = async (companyId, user, userId, type) => {
+
+    return CompanyLog.query().insertToTable({
+        ecompanyecompanyid: companyId,
+        eusereuserid: userId,
+        ecompanylogtype: type
+    }, user.sub)
+
+}
+
+companyLogService.getPendingLog = async (companyId, userId, types) => {
+
+    return CompanyLog.query()
+    .where('eusereuserid', userId)
+    .andWhere('ecompanyecompanyid', companyId)
+    .whereIn('ecompanylogtype', types)
+    .andWhere('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
+    .orderBy('ecompanylogcreatetime', 'DESC')
+    .first();
+
+}
+
+
+companyLogService.updateCompanyLog = async (companyId, user, userId, status) => {
+
+    const log = await companyLogService.getPendingLog(companyId, userId, [CompanyLogTypeEnum.INVITE, CompanyLogTypeEnum.APPLY]);
+
+    return log.$query().updateByUserId({
+        ecompanylogstatus: status
+    }, user.sub)
+    .returning('*');
+
+}
+
+companyLogService.removeCompanyLog = async (userId, companyId, removeType ) => {
+
+    if( removeType === CompanyLogRemoveEnum.USER_CANCEL_JOIN )
+        return CompanyLog.query()
+        .delete()
+        .where('eusereuserid', userId)
+        .where('ecompanyecompanyid', companyId)
+        .where('ecompanylogtype', CompanyLogTypeEnum.APPLY)
+        .where('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
+        .first()
+        .then(rowsAffected => rowsAffected === 1)
+
+    if( removeType === CompanyLogRemoveEnum.EXIT_COMPANY )
+        return CompanyLog.query()
+        .where('eusereuserid', userId)
+        .where('ecompanyecompanyid', companyId)
+        .delete()
+
+}
 
 companyLogService.processRequest = async (companyLogId, status, user) => {
 
@@ -106,6 +161,17 @@ companyLogService.cancelInvite = async (companyLogId) => {
         .findById(companyLogId)
         .delete()
         .then(rowsAffected => rowsAffected === 1)
+}
+
+companyLogService.getListPendingByUserId = async (userId, type, sortDirection, page, size) => {
+
+    return CompanyLog.query()
+    .where('eusereuserid', userId)
+    .where('ecompanylogtype', type)
+    .andWhere('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
+    .orderBy('ecompanylogcreatetime', sortDirection)
+    .page(page, size)
+    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
 
 module.exports = companyLogService
