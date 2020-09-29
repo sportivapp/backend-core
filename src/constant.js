@@ -126,17 +126,17 @@ module.exports = {
         },
         class: {
             list: '/class',
-            id: '/class/:classId'
+            id: '/class/:classId',
+            classUser: '/class/:classId/users',
+            pendingUser: '/class/:classId/pending-users',
+            processRegistration: '/class/process-registration'
         },
         classUser: {
             registration: '/user-class/registration',
             list: '/user-class',
             id: '/user-class/:classUserId',
             history: '/user-class-history',
-            historyId: '/user-class-history/:classUserId',
-            classUser: '/class/:classId/users',
-            pendingUser: '/class/:classId/pending-users',
-            processRegistration: '/class/process-registration'
+            historyId: '/user-class-history/:classUserId'
         },
         permit: {
             list: '/permit',
