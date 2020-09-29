@@ -136,7 +136,7 @@ module.exports = {
             historyId: '/user-class-history/:classUserId',
             classUser: '/class/:classId/users',
             pendingUser: '/class/:classId/pending-users',
-            process: '/class/process-registration'
+            processRegistration: '/class/process-registration'
         },
         permit: {
             list: '/permit',
