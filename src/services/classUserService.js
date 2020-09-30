@@ -5,7 +5,7 @@ const ClassUserStatusEnum = require('../models/enum/ClassUserStatusEnum')
 const ServiceHelper = require('../helper/ServiceHelper')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
-const classUserController = {}
+const classUserService = {}
 
 const ErrorEnum = {
     CLASS_ID_REQUIRED: 'CLASS_ID_REQUIRED',
@@ -14,7 +14,7 @@ const ErrorEnum = {
     STATUS_INVALID: 'STATUS_INVALID',
 }
 
-classUserController.getRegisteredUsersByClassId = async (page, size, classId) => {
+classUserService.getRegisteredUsersByClassId = async (page, size, classId) => {
 
     return ClassUserMapping.query()
     .where('eclasseclassid', classId)
@@ -25,7 +25,7 @@ classUserController.getRegisteredUsersByClassId = async (page, size, classId) =>
 
 }
 
-classUserController.getUsersPendingListByClassId = async (page, size, classId, user) => {
+classUserService.getUsersPendingListByClassId = async (page, size, classId, user) => {
 
     const classInCompany = await Class.query()
     .findById(classId)
@@ -43,7 +43,7 @@ classUserController.getUsersPendingListByClassId = async (page, size, classId, u
 
 }
 
-classUserController.processRegistration = async (classId, status, userId, user) => {
+classUserService.processRegistration = async (classId, status, userId, user) => {
 
     const classInCompany = await Class.query()
     .findById(classId)
@@ -78,4 +78,4 @@ classUserController.processRegistration = async (classId, status, userId, user) 
 }
 
 
-module.exports = classUserController
+module.exports = classUserService
