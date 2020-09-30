@@ -71,32 +71,25 @@ classService.createClass = async(classDTO,requirements, user) => {
 
 classService.getAllClassByCompanyId = async (companyId, page, size, keyword,user) => {
 
+    if (!companyId || companyId == '') return ServiceHelper.toEmptyPage(page,size)
+
     const isUserInOrganization = await CompanyUserMapping.query()
             .where('ecompanyecompanyid', companyId)
             .andWhere('eusereuserid', user.sub)
-        
-    if (!isUserInOrganization) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_ORGANIZATION)
+            .first()
 
-    let pageQuery = Class.query()
-        .modify('baseAttributes')
-        .select('eclass.*')
-        .select('company.ecompanyname')
-        .select('industry.eindustryname')
-        .joinRelated('company(baseAttributes)')
-        .joinRelated('industry(baseAttributes)')
+    if (!isUserInOrganization) {
+        throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_ORGANIZATION)
+    }
 
-    if (companyId && companyId !== '') pageQuery = pageQuery.where('ecompanyecompanyid', companyId)
-    
-
-    return pageQuery
+    return Class.query()
         .where(raw('lower("eclassname")'), 'like', `%${keyword.toLowerCase()}%`)
         .modify('baseAttributes')
+        .select('industry.eindustryname')
+        .joinRelated('industry(baseAttributes)')
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
-        .then(pageQuery=> {
-            if(!pageQuery) throw new NotFoundError()
-            return pageQuery
-        })
+        
 }
 
 classService.getClassById = async (classId, user) => {

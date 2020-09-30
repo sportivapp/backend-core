@@ -97,7 +97,7 @@ classController.deleteClassById = async (req, res, next) => {
 
 classController.getAllClassByCompanyId = async (req, res, next) => {
 
-    const { companyId= null, page = '0', size = '10', keyword = '' } = req.query
+    const { companyId = null, page = '0', size = '10', keyword = '' } = req.query
 
 
 
