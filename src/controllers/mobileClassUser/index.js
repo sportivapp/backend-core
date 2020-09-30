@@ -27,20 +27,6 @@ mobileClassUserController.cancelRegistrationByClassId = async (req, res, next) =
     }
 }
 
-mobileClassUserController.processRegistration = async (req, res, next) => {
-
-    const { classUserId } = req.params
-
-    const { status } = req.body
-
-    try {
-        const result = await mobileClassUserService.processRegistration(classUserId, status, req.user)
-        return res.status(200).json(ResponseHelper.toBaseResponse(result))
-    } catch (e) {
-        next(e)
-    }
-}
-
 mobileClassUserController.getMyClasses = async (req, res, next) => {
 
     const { page = '0', size = '10', companyId } = req.query
