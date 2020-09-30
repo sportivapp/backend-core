@@ -97,11 +97,13 @@ classController.deleteClassById = async (req, res, next) => {
 
 classController.getAllClassByCompanyId = async (req, res, next) => {
 
-    const { companyId = null, page = '0', size = '10', keyword = '' } = req.query
+    const { companyId= null, page = '0', size = '10', keyword = '' } = req.query
+
+
 
     try {
 
-        const pageObj = await classService.getAllClassByCompanyId(companyId, parseInt(page), parseInt(size), keyword)
+        const pageObj = await classService.getAllClassByCompanyId(companyId, parseInt(page), parseInt(size), keyword,req.user)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
     } catch(e) {
         next(e)

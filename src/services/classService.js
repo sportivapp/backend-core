@@ -19,7 +19,8 @@ const ErrorEnum = {
     INDUSTRY_NOT_FOUND: 'INDUSTRY_NOT_FOUND',
     TYPE_INVALID: 'TYPE_INVALID',
     FILE_REQUIRED: 'FILE_REQUIRED',
-    FILE_NOT_FOUND: 'FILE_NOT_FOUND'
+    FILE_NOT_FOUND: 'FILE_NOT_FOUND',
+    USER_NOT_IN_ORGANIZATION : 'USER_NOT_IN_ORGANIZATION'
 }
 
 classService.createClass = async(classDTO,requirements, user) => {
@@ -68,9 +69,13 @@ classService.createClass = async(classDTO,requirements, user) => {
 
 }
 
-classService.getAllClassByCompanyId = async (companyId, page, size, keyword) => {
+classService.getAllClassByCompanyId = async (companyId, page, size, keyword,user) => {
 
-    if (companyId < 1) companyId = null
+    const isUserInOrganization = await CompanyUserMapping.query()
+            .where('ecompanyecompanyid', companyId)
+            .andWhere('eusereuserid', user.sub)
+        
+    if (!isUserInOrganization) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_ORGANIZATION)
 
     let pageQuery = Class.query()
         .modify('baseAttributes')
@@ -81,12 +86,17 @@ classService.getAllClassByCompanyId = async (companyId, page, size, keyword) => 
         .joinRelated('industry(baseAttributes)')
 
     if (companyId && companyId !== '') pageQuery = pageQuery.where('ecompanyecompanyid', companyId)
+    
 
     return pageQuery
         .where(raw('lower("eclassname")'), 'like', `%${keyword.toLowerCase()}%`)
         .modify('baseAttributes')
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+        .then(pageQuery=> {
+            if(!pageQuery) throw new NotFoundError()
+            return pageQuery
+        })
 }
 
 classService.getClassById = async (classId, user) => {
@@ -106,18 +116,15 @@ classService.getClassById = async (classId, user) => {
         const requirements = await ClassRequirement.query()
             .where('eclasseclassid', foundClass.eclassid)
 
-        const mapping = await CompanyUserMapping.query()
-            .where('ecompanyecompanyid', foundClass.ecompanyecompanyid)
-            .where('eusereuserid', user.sub)
-            .first()
 
         return {
             ...foundClass,
-            isInCompany: !!mapping,
             requirements
         }
     
 }
+
+
 
 classService.updateClassById = async(classId, classDTO, requirements, user) => {
 
