@@ -28,8 +28,6 @@ controller.getGradeById = async (req, res, next) => {
 
     try {
         const grade = await gradeService.getGradeById(gradeId)
-        if (!grade)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(grade))
     }catch (e) {
         next(e)
@@ -59,8 +57,6 @@ controller.createGrade = async (req, res, next) => {
 
     try {
         const grade = await gradeService.createGrade(gradeDTO, user.sub)
-        if (!grade)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(grade))
     } catch (e) {
         next(e)
@@ -89,8 +85,6 @@ controller.updateGradeById = async (req, res, next) => {
 
     try {
         const grade = await gradeService.updateGradeById(gradeId, gradeDTO, req.user)
-        if (!grade)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(grade))
     } catch (e) {
         next(e)
@@ -107,8 +101,6 @@ controller.deleteGradeById = async (req, res, next) => {
 
     try {
         const result = await gradeService.deleteGradeById(gradeId, user)
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)

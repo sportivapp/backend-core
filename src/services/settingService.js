@@ -198,4 +198,14 @@ SettingService.saveFunctionsByGradeId = async (gradeId, functionDTOs) => {
 
 }
 
+SettingService.getAllModules = async () => {
+
+    return Module.query()
+}
+
+SettingService.getAllFunctions = async () => {
+
+    return Function.query()
+}
+
 module.exports = SettingService;

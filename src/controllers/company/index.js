@@ -30,9 +30,6 @@ companyController.registerCompany = async (req, res, next) => {
         }
 
         const data = await companyService.registerCompany(userDTO, companyDTO, addressDTO);
-
-        if (!data) return res.status(400).json(ResponseHelper.toErrorResponse(400))
-
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
 
     } catch(e) {
@@ -41,6 +38,7 @@ companyController.registerCompany = async (req, res, next) => {
 }
 
 companyController.createCompany = async (req, res, next) => {
+
     const user = req.user
 
     try {
@@ -87,9 +85,6 @@ companyController.createCompany = async (req, res, next) => {
         }
 
         const data = await companyService.createCompany(supervisorId , companyDTO, addressDTO, user);
-
-        if (!data) return res.status(400).json(ResponseHelper.toErrorResponse(400))
-
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
 
     } catch(e) {
@@ -105,12 +100,11 @@ companyController.getCompanyList = async (req, res, next) => {
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     // type = company or type = branch
-    const { page, size, type, keyword, companyId } = req.query
+    const { page = '0', size = '10', type, keyword = '', companyId } = req.query
 
     try {
-        const pageObj = await companyService.getCompanyList(parseInt(page), parseInt(size), type, keyword, companyId, user)
-        if (!pageObj)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        const pageObj = await companyService.getCompanyList(parseInt(page), parseInt(size), type, keyword.toLowerCase(),
+            parseInt(companyId), user)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
     } catch (e) {
         next(e)
@@ -129,8 +123,6 @@ companyController.getCompanyById = async (req, res, next) => {
 
     try {
         const result = await companyService.getCompleteCompanyById(companyId)
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)
@@ -198,8 +190,6 @@ companyController.editCompany = async (req, res, next) => {
         }
 
         const result = await companyService.editCompany(parseInt(companyId), supervisorId, companyDTO, addressDTO, user)
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch (e) {
@@ -219,8 +209,6 @@ companyController.deleteCompany = async (req, res, next) => {
     try {
 
         const result = await companyService.deleteCompany(companyId)
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch (e) {
