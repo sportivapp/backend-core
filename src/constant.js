@@ -126,7 +126,10 @@ module.exports = {
         },
         class: {
             list: '/class',
-            id: '/class/:classId'
+            id: '/class/:classId',
+            classUser: '/class/:classId/users',
+            pendingUser: '/class/:classId/pending-users',
+            processRegistration: '/class/process-registration'
         },
         classUser: {
             registration: '/user-class/registration',
