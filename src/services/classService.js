@@ -113,7 +113,6 @@ classService.getClassById = async (classId, user) => {
 
         return {
             ...foundClass,
-            isRegistered: false,
             isInCompany: !!mapping,
             requirements
         }
