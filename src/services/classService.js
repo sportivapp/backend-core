@@ -71,7 +71,7 @@ classService.createClass = async(classDTO,requirements, user) => {
 
 classService.getAllClassByCompanyId = async (companyId, page, size, keyword,user) => {
 
-    if (!companyId || companyId == '') return ServiceHelper.toEmptyPage(page,size)
+    if (companyId < 1  || companyId == '') return ServiceHelper.toEmptyPage(page,size)
 
     const isUserInOrganization = await CompanyUserMapping.query()
             .where('ecompanyecompanyid', companyId)
