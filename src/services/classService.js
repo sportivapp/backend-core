@@ -109,12 +109,10 @@ classService.getClassById = async (classId, user) => {
         const requirements = await ClassRequirement.query()
             .where('eclasseclassid', foundClass.eclassid)
 
-
         return {
             ...foundClass,
             requirements
-        }
-    
+        }    
 }
 
 

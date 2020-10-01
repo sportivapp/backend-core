@@ -99,8 +99,6 @@ classController.getAllClassByCompanyId = async (req, res, next) => {
 
     const { companyId = null, page = '0', size = '10', keyword = '' } = req.query
 
-
-
     try {
 
         const pageObj = await classService.getAllClassByCompanyId(companyId, parseInt(page), parseInt(size), keyword,req.user)
@@ -110,7 +108,4 @@ classController.getAllClassByCompanyId = async (req, res, next) => {
     }
 }
 
-
-
 module.exports = classController
-
