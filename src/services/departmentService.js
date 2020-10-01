@@ -87,19 +87,19 @@ departmentService.createDepartment = async (departmentDTO, user) => {
 
     return Department.transaction(async trx => {
 
-    const result = await Department.query(trx).insertToTable(departmentDTO, user.sub)
+        const result = await Department.query(trx).insertToTable(departmentDTO, user.sub)
 
-    const headDepartmentDTO = {
-        egradename: 'Head of '  + departmentDTO.edepartmentname,
-        egradedescription: 'The Head of ' + departmentDTO.edepartmentdescription,
-        ecompanyecompanyid: departmentDTO.ecompanyecompanyid,
-        edepartmentedepartmentid: result.edepartmentid
-    }
+        const headDepartmentDTO = {
+            egradename: 'Head of '  + departmentDTO.edepartmentname,
+            egradedescription: 'The Head of ' + departmentDTO.edepartmentdescription,
+            ecompanyecompanyid: departmentDTO.ecompanyecompanyid,
+            edepartmentedepartmentid: result.edepartmentid
+        }
 
-    return Grade.query(trx).insertToTable(headDepartmentDTO, user.sub)
-        .then(newHead => ({ result, newHead }))
+        return Grade.query(trx).insertToTable(headDepartmentDTO, user.sub)
+            .then(newHead => ({ result, newHead }))
 
-    })
+        })
 }
 
 departmentService.updateDepartment = async (departmentId, departmentDTO, user) => {

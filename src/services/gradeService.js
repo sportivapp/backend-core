@@ -18,8 +18,6 @@ gradeService.getAllGrades = async (page, size, companyId, departmentId) => {
 
     if (departmentId) {
 
-        if (!departmentId) return ServiceHelper.toEmptyPage(page, size)
-
         const gradePage = await Grade.query()
             .where('edepartmentedepartmentid', departmentId)
             .withGraphFetched('[superior,department.parent.parent,company.parent.parent]')
@@ -139,14 +137,14 @@ gradeService.deleteGradeById = async (gradeId, user) => {
 
     return Grade.transaction(async trx => {
 
-    return Grade.query(trx)
-        .whereIn('egradeid', gradeIds)
-        .updateByUserId({ egradesuperiorid: superiorId }, user.sub)
-        .then(ignored => grade.$query(trx).delete().then(rowsAffected => rowsAffected === 1))
+        return Grade.query(trx)
+            .whereIn('egradeid', gradeIds)
+            .updateByUserId({ egradesuperiorid: superiorId }, user.sub)
+            .then(ignored => grade.$query(trx).delete().then(rowsAffected => rowsAffected === 1))
 
-    }).catch(() => {
-        return false
-    })
+        }).catch(() => {
+            return false
+        })
 }
 
 gradeService.saveUserPositions = async (userIds, positionId, loggedInUser) => {
