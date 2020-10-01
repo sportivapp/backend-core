@@ -13,6 +13,7 @@ const shiftPatternSchemas = require('./shiftPattern')
 const experienceSchemas = require('./experience')
 const approvalSchemas = require('./approval')
 const permitSchemas = require('./permit')
+const classSchemas = require('./class')
 
 module.exports = {
     ...companySchemas,
@@ -29,5 +30,6 @@ module.exports = {
     ...shiftPatternSchemas,
     ...experienceSchemas,
     ...approvalSchemas,
-    ...permitSchemas
+    ...permitSchemas,
+    ...classSchemas
 }
