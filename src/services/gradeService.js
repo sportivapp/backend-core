@@ -34,15 +34,15 @@ gradeService.getAllGrades = async (page, size, companyId, departmentId) => {
             .for(companyId)
             .withGraphFetched('branches')
             .then(companies => {
+                let ids = []
                 if (companies.length > 0) {
-                    let ids = []
                     ids.push(companyId)
                     companies.forEach(company => {
                         ids.push(company.ecompanyid)
                         company.branches.forEach(branch => ids.push(branch.ecompanyid))
                     })
-                    return ids
                 }
+                return ids
             })
 
         const gradePage = await Grade.query()

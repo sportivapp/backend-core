@@ -8,7 +8,7 @@ controller.getGrades = async (req, res, next) => {
     if (req.user.functions.indexOf('R4') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
-    const { page, size, companyId, departmentId } = req.query
+    const { page = '0', size = '10', companyId, departmentId } = req.query
 
     try {
         const pageObj = await gradeService.getAllGrades(parseInt(page), parseInt(size), companyId, departmentId)
@@ -116,8 +116,6 @@ controller.saveUserPositions = async (req, res, next) => {
     if (user.functions.indexOf('C4') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
-    if ( isNaN(positionId) ) return res.status(400).json(ResponseHelper.toErrorResponse(400))
-
     try {
         const result = await gradeService.saveUserPositions(userIds, parseInt(positionId), user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
@@ -128,7 +126,7 @@ controller.saveUserPositions = async (req, res, next) => {
 
 controller.getUsersByPositionId = async (req, res, next) => {
 
-    const { page, size } = req.query
+    const { page = '0', size = '10' } = req.query
 
     const { gradeId } = req.params
 

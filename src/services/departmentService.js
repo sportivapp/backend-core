@@ -77,7 +77,7 @@ departmentService.getDepartmentByDepartmentId = async (departmentId) => {
         ecompanyecompanyid: department.ecompanyecompanyid,
         childrenCount: parseInt(subDepartment[0].count),
         ecompanyname: company.ecompanyname,
-        eusername: headUser.eusername,
+        eusername: headUser ? headUser.eusername : null,
         userCount: userData.length
     }
 
