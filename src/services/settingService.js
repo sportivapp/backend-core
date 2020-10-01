@@ -198,6 +198,22 @@ SettingService.saveFunctionsByGradeId = async (gradeId, functionDTOs) => {
 
 }
 
+SettingService.mapFunctionsToGrade = async (gradeId, codes, trx) => {
+
+    return GradeFunctionMapping.query(trx)
+        .where('egradeegradeid', gradeId)
+        .del()
+        .then(ignored => codes.map(code => ({
+            egradeegradeid: gradeId,
+            efunctionefunctioncode: code,
+        })))
+        .then(dtos => {
+            return dtos
+        })
+        .then(gradeFunctionDTOs => GradeFunctionMapping.query(trx).insert(gradeFunctionDTOs));
+
+}
+
 SettingService.getAllModules = async () => {
 
     return Module.query()

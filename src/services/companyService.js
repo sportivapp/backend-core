@@ -30,6 +30,7 @@ const ErrorEnum = {
 CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
 
     return Company.transaction(async trx => {
+
         userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
         const user = await User.query(trx).insertToTable(userDTO, 0);
 
@@ -60,7 +61,7 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
                 }, user.euserid).then(ignored => grade))
 
         const insertFunctionCodes = settingService.getAllFunctions().then(func => func.efunctioncode)
-            .then(codes => settingService.saveFunctionsByGradeId(grade.egradeid, codes))
+            .then(codes => settingService.mapFunctionsToGrade(grade.egradeid, codes, trx))
 
         // super user of the company
         const companyUserDTO = {
@@ -121,116 +122,84 @@ CompanyService.getAllCompanyByUserId = async(userId) => {
 
 CompanyService.saveUsersToCompany = async(companyId, users, loggedInUser) => {
 
-    //accepting model [{'id': 1, 'deleted': false/true}]
-
     const company = await Company.query().findById(companyId)
 
     if(!company)
         throw new UnsupportedOperationError(ErrorEnum.COMPANY_NOT_FOUND)
 
-    let deleteRelationPromises = []
+    const deletedUserIds = users.filter(user => user.deleted).map(user => user.id)
 
-    let unDeleteRelationPromises = []
+    const insertedUserIds = users.filter(user => !user.deleted).map(user => user.id)
 
-    const deletedUsers = users.filter(user => user.deleted)
+    return CompanyUserMapping.transaction(async trx => {
 
-    const insertedUsers = users.filter(user => !user.deleted)
+        await CompanyUserMapping.query(trx)
+            .where('ecompanyecompanyid', companyId)
+            .whereIn('eusereuserid', deletedUserIds)
+            .del()
 
-    const filterRelationsById = (relation, user) => {
-        return user.id === relation.eusereuserid
-    }
+        const existedUserIds = await CompanyUserMapping.query(trx)
+            .where('ecompanyecompanyid', companyId)
+            .then(list => list.map(mapping => mapping.eusereuserid))
 
-    const deleteRelation = (userId) => CompanyUserMapping.query()
-        .where('eusereuserid', userId)
-        .deleteByUserId(loggedInUser.sub)
+        const newMappingDTOs = insertedUserIds.filter(userId => !existedUserIds.find(id => id === userId))
+            .map(userId => ({ ecompanyecompanyid: companyId, eusereuserid: userId }))
 
-    const unDeleteRelation = (userId) => CompanyUserMapping.query()
-        .where('eusereuserid', userId)
-        .unDeleteByUserId(loggedInUser.sub)
+        if (newMappingDTOs.length > 0)
 
-    const selectRelationsByDeleteStatusQuery = (status) => CompanyUserMapping.query()
-        .where('ecompanyusermappingdeletestatus', status)
-        .where('ecompanyecompanyid', companyId)
-        .whereIn('eusereuserid', insertedUsers.map(user => user.id))
+            return CompanyUserMapping.query(trx).insertToTable(newMappingDTOs, loggedInUser.sub)
+                .then(mappings => mappings.map(mapping => mapping.eusereuserid))
+                .then(userIds => existedUserIds.concat(userIds))
 
-    const selectDeleteRelations = CompanyUserMapping.query()
-        .where('ecompanyecompanyid', companyId)
-        .whereIn('eusereuserid', deletedUsers.map(user => user.id))
-        .then(relations => {
-            relations
-                .filter(relation => !!deletedUsers.find(user => filterRelationsById(relation, user)))
-                .forEach(relation => deleteRelationPromises.push(deleteRelation(relation.eusereuserid)))
-            return deleteRelationPromises
-        })
+        else
 
-    const selectUnDeletedRelations = selectRelationsByDeleteStatusQuery(true)
-        .then(relations => {
-            relations
-                .filter(relation => !!insertedUsers.find(user => filterRelationsById(relation, user)))
-                .forEach(relation => unDeleteRelationPromises.push(unDeleteRelation(relation.eusereuserid)))
-            return unDeleteRelationPromises
-        })
+            return existedUserIds
 
-    const filterNewUserIds = (existedRelations) => {
-        return insertedUsers
-            .filter(user => !existedRelations.find(relation => filterRelationsById(relation, user)))
-            .map(user => ({
-                eusereuserid: user.id,
-                ecompanyecompanyid: parseInt(companyId),
-                ecompanyusermappingcreateby: loggedInUser.sub
-            }))
-    }
-
-    const getAllUsersDataByCompany = Company.relatedQuery('users')
-        .for(companyId)
-        .modify({ ecompanyusermappingdeletestatus: false })
-
-    return Promise.all([selectDeleteRelations, selectUnDeletedRelations])
-        .then(arrayOfPromises => Promise.all([...arrayOfPromises[0], ...arrayOfPromises[1]]))
-        .then(ignored => selectRelationsByDeleteStatusQuery(false))
-        .then(existedIds => filterNewUserIds(existedIds))
-        .then(freshRelations => CompanyUserMapping.query().insert(freshRelations))
-        .then(ignored => getAllUsersDataByCompany)
-
+    })
 }
 
 CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
 
+    const companyIds = await CompanyUserMapping.query()
+        .where('eusereuserid', user.sub)
+        .then(resultArr => resultArr.map(result => result.ecompanyecompanyid))
+
+    if (companyDTO.ecompanyolderid && companyDTO.ecompanyparentid) throw new UnsupportedOperationError(ErrorEnum.INVALID_TYPE)
+
+    else if (companyDTO.ecompanyolderid) {
+        const olderSister = await Company.query().findById(companyDTO.ecompanyolderid)
+        if (!olderSister) throw new UnsupportedOperationError(ErrorEnum.SISTER_NOT_FOUND)
+        if (companyIds.indexOf(companyDTO.ecompanyolderid) === -1) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_COMPANY)
+    }
+
+    else if (companyDTO.ecompanyparentid) {
+        const parent = await Company.query().findById(companyDTO.ecompanyparentid).withGraphFetched('parent')
+        if (!parent) throw new UnsupportedOperationError(ErrorEnum.PARENT_NOT_FOUND)
+        else if (companyIds.indexOf(parent.ecompanyid) === -1) {
+            if (parent.parent && companyIds.indexOf(parent.parent.ecompanyid) === -1)
+                throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_COMPANY)
+        }
+    }
+
+    if (companyDTO.eindustryeindustryid) {
+        const industry = await Industry.query().findById(companyDTO.eindustryeindustryid)
+        if (!industry) throw new UnsupportedOperationError(ErrorEnum.INDUSTRY_NOT_FOUND)
+    }
+
+    if (companyDTO.efileefileid) {
+        const logo = await fileService.getFileById(companyDTO.efileefileid)
+        if (!logo) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_FOUND)
+    }
+
+    const codes = await settingService.getAllFunctions().then(funcList => funcList.map(func => func.efunctioncode))
+
+    const modules = await settingService.getAllModules()
+
     return Company.transaction(async trx => {
 
-        const companyIds = await CompanyUserMapping.query()
-            .where('eusereuserid', user.sub)
-            .then(resultArr => resultArr.map(result => result.ecompanyecompanyid))
+        const address = await Address.query(trx).insertToTable(addressDTO, user.sub)
 
-        if (companyDTO.ecompanyolderid && companyDTO.ecompanyparentid) throw new UnsupportedOperationError(ErrorEnum.INVALID_TYPE)
-
-        else if (companyDTO.ecompanyolderid) {
-            const olderSister = await Company.query().findById(companyDTO.ecompanyolderid)
-            if (!olderSister) throw new UnsupportedOperationError(ErrorEnum.SISTER_NOT_FOUND)
-            if (companyIds.indexOf(companyDTO.ecompanyolderid) === -1) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_COMPANY)
-        }
-
-        else if (companyDTO.ecompanyparentid) {
-            const parent = await Company.query().findById(companyDTO.ecompanyparentid).withGraphFetched('parent')
-            if (!parent) throw new UnsupportedOperationError(ErrorEnum.PARENT_NOT_FOUND)
-            else if (companyIds.indexOf(parent.ecompanyid) === -1) {
-                if (parent.parent && companyIds.indexOf(parent.parent.ecompanyid) === -1)
-                    throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_COMPANY)
-            }
-        }
-
-        if (companyDTO.eindustryeindustryid) {
-            const industry = await Industry.query().findById(companyDTO.eindustryeindustryid)
-            if (!industry) throw new UnsupportedOperationError(ErrorEnum.INDUSTRY_NOT_FOUND)
-        }
-
-        if (companyDTO.efileefileid) {
-            const logo = await fileService.getFileById(companyDTO.efileefileid)
-            if (!logo) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_FOUND)
-        }
-
-        await Address.query(trx).insertToTable(addressDTO, user.sub)
-            .then(address => companyDTO.eaddresseaddressid = address.eaddressid);
+        companyDTO.eaddresseaddressid = address.eaddressid
 
         const company = await Company.query(trx)
             .insertToTable(companyDTO, user.sub)
@@ -248,15 +217,13 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
             eusereuserid: id
         }
 
-        const insertCompanyModuleMappingQuery = settingService.getAllModules()
-            .then(modules => {
-                return modules.map(module => ({
-                    ecompanymodulemappingname: module.emodulename,
-                    ecompanyecompanyid: company.ecompanyid,
-                    emoduleemoduleid: module.emoduleid
-                }))
-            })
-            .then(modules => CompanyModuleMapping.query(trx).insertToTable(modules, user.sub))
+        const companyModuleDTOs = modules.map(module => ({
+            ecompanymodulemappingname: module.emodulename,
+            ecompanyecompanyid: company.ecompanyid,
+            emoduleemoduleid: module.emoduleid
+        }))
+
+        const insertCompanyModuleMappingQuery = CompanyModuleMapping.query(trx).insertToTable(companyModuleDTOs, user.sub)
 
         const insertCompanyUserMappingQuery = CompanyUserMapping.query(trx).insertToTable(companyUserMappingDTO, user.sub)
 
@@ -267,17 +234,10 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
         }
 
         const insertGradeAndFunctions = Grades.query(trx).insertToTable(gradeDTO, user.sub)
-            .then(grade => UserPositionMapping.query(trx).insertToTable(
-                {
-                    egradeegradeid: grade.egradeid,
-                    eusereuserid: user.sub
-                }, user.sub).then(ignored => grade))
-            .then(grade => settingService.getAllFunctions().then(func => func.efunctioncode)
-                .then(codes => settingService.saveFunctionsByGradeId(grade.egradeid, codes)))
-            .catch(e => {
-                trx.rollback()
-                throw e
-            })
+            .then(grade => ({ egradeegradeid: grade.egradeid, eusereuserid: user.sub }))
+            .then(userPositionMappingDTO => UserPositionMapping.query(trx).insertToTable(userPositionMappingDTO, user.sub))
+            .then(mapping => mapping.egradeegradeid)
+            .then(gradeId => settingService.mapFunctionsToGrade(gradeId, codes, trx))
 
         // super user of the company
         const findUserQuery = User.query()
@@ -412,6 +372,10 @@ CompanyService.getCompleteCompanyById = async (companyId) => {
 
 CompanyService.editCompany = async (companyId, supervisorId, companyDTO, addressDTO, user) => {
 
+    const companyIds = await CompanyUserMapping.query()
+        .where('eusereuserid', user.sub)
+        .then(resultArr => resultArr.map(result => result.ecompanyecompanyid))
+
     // efileefileid null if undefined or 0 was sent
     if (companyDTO.efileefileid === undefined || companyDTO.efileefileid === 0) {
         companyDTO.efileefileid = null;
@@ -420,14 +384,19 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, address
     if (companyDTO.ecompanyolderid && companyDTO.ecompanyparentid)
         throw new UnsupportedOperationError(ErrorEnum.INVALID_TYPE)
 
-    if (companyDTO.ecompanyolderid) {
+    else if (companyDTO.ecompanyolderid) {
         const olderSister = await Company.query().findById(companyDTO.ecompanyolderid)
         if (!olderSister) throw new UnsupportedOperationError(ErrorEnum.SISTER_NOT_FOUND)
+        if (companyIds.indexOf(companyDTO.ecompanyolderid) === -1) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_COMPANY)
     }
 
-    if (companyDTO.ecompanyparentid) {
-        const parent = await Company.query().findById(companyDTO.ecompanyparentid)
+    else if (companyDTO.ecompanyparentid) {
+        const parent = await Company.query().findById(companyDTO.ecompanyparentid).withGraphFetched('parent')
         if (!parent) throw new UnsupportedOperationError(ErrorEnum.PARENT_NOT_FOUND)
+        else if (companyIds.indexOf(parent.ecompanyid) === -1) {
+            if (parent.parent && companyIds.indexOf(parent.parent.ecompanyid) === -1)
+                throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_COMPANY)
+        }
     }
 
     if (companyDTO.eindustryeindustryid) {
@@ -443,62 +412,71 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, address
 
     return Company.transaction(async trx => {
 
-    if (supervisorId) {
+        if (supervisorId) {
 
-        const superAdminPosition = await Grades.query().where('ecompanyecompanyid', companyId)
+            const superAdminPosition = await Grades.query().where('ecompanyecompanyid', companyId)
+                .orderBy('egradecreatetime', 'ASC')
+                .first()
+
+            headUser = await UserPositionMapping.query(trx)
+                .where('egradeegradeid', superAdminPosition.egradeid)
+                .first()
+                .updateByUserId({ eusereuserid: supervisorId }, user.sub)
+                .returning('eusereuserid')
+                .then(result => User.query().findById(result.eusereuserid))
+
+        } else {
+            headUser = await Grades.query().where('ecompanyecompanyid', companyId)
             .orderBy('egradecreatetime', 'ASC')
             .first()
+            .then(position => position
+                .$relatedQuery('users')
+                .orderBy('eusercreatetime', 'ASC')
+                .first()
+            )
+        }
 
-        headUser = await UserPositionMapping.query(trx)
-            .where('egradeegradeid', superAdminPosition.egradeid)
-            .first()
-            .updateByUserId({ eusereuserid: supervisorId }, user.sub)
-            .returning('eusereuserid')
-            .then(result => User.query().findById(result.eusereuserid))
+        const updateAdress = (addressId) => Address.query(trx)
+            .where('eaddressid', addressId)
+            .updateByUserId(addressDTO, user.sub)
 
-    } else {
-        headUser = await Grades.query().where('ecompanyecompanyid', companyId)
-        .orderBy('egradecreatetime', 'ASC')
-        .first()
-        .then(position => position
-            .$relatedQuery('users')
-            .orderBy('eusercreatetime', 'ASC')
-            .first()
-        )
-    }
+        const updateCompany = (company) => company.$query(trx).updateByUserId(companyDTO, user.sub)
 
-    const updateAdress = (addressId) => Address.query(trx)
-        .where('eaddressid', addressId)
-        .updateByUserId(addressDTO, user.sub)
+        await Promise.all([updateAdress(company.eaddresseaddressid), updateCompany(company)])
 
-    const updateCompany = (company) => company.$query(trx).updateByUserId(companyDTO, user.sub)
+        const employeeCount = CompanyUserMapping.query().where('ecompanyecompanyid', companyId).count()
+        const departmentCount = Company.relatedQuery('departments').for(companyId).count()
+        const branchCount = Company.relatedQuery('branches').for(companyId).count()
+        const getCompanyQuery = Company.query().findById(companyId)
+            .withGraphFetched('[industry(baseAttributes), address.[country, state], logo(baseAttributes)]')
 
-    await Promise.all([updateAdress(company.eaddresseaddressid), updateCompany(company)])
-
-    const employeeCount = CompanyUserMapping.query().where('ecompanyecompanyid', companyId).count()
-    const departmentCount = Company.relatedQuery('departments').for(companyId).count()
-    const branchCount = Company.relatedQuery('branches').for(companyId).count()
-    const getCompanyQuery = Company.query().findById(companyId)
-        .withGraphFetched('[industry(baseAttributes), address.[country, state], logo(baseAttributes)]')
-
-    return Promise.all([getCompanyQuery, employeeCount, departmentCount, branchCount])
-        .then(resultArr => ({
-            ...resultArr[0],
-            user: headUser,
-            employeeCount: parseInt(resultArr[1][0].count),
-            departmentCount: parseInt(resultArr[2][0].count),
-            childrenCount: parseInt(resultArr[3][0].count)
-        }))
+        return Promise.all([getCompanyQuery, employeeCount, departmentCount, branchCount])
+            .then(resultArr => ({
+                ...resultArr[0],
+                user: headUser,
+                employeeCount: parseInt(resultArr[1][0].count),
+                departmentCount: parseInt(resultArr[2][0].count),
+                childrenCount: parseInt(resultArr[3][0].count)
+            }))
 
     })
 }
 
 CompanyService.deleteCompany = async (companyId) => {
 
-    return Company.query()
-        .findById(companyId)
-        .delete()
-        .then(rowsAffected => rowsAffected === 1)
+    return Company.transaction(async trx => {
+
+        await CompanySequence.deleteSequence(companyId, trx)
+
+        await CompanyModuleMapping.query(trx)
+            .where('ecompanyecompanyid', companyId)
+            .del()
+
+        return Company.query(trx)
+            .findById(companyId)
+            .delete()
+            .then(rowsAffected => rowsAffected === 1)
+    })
 }
 
 CompanyService.getCompanyById = async (companyId) => {

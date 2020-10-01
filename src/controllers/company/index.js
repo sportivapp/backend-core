@@ -223,17 +223,12 @@ companyController.saveUsersToCompany = async (req, res, next) => {
     if (user.functions.indexOf('C1') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
-    const users = req.body.users
-
-    users.forEach(user => {
-        if (!user.id || user.deleted === undefined) return res.status(400).json(ResponseHelper.toErrorResponse(400))
-    })
+    const { users } = req.body
 
     const { companyId } = req.params
 
     try {
-        const result = await companyService.saveUsersToCompany(companyId, users, user)
-        if (!result) return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        const result = await companyService.saveUsersToCompany(parseInt(companyId), users, user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)
