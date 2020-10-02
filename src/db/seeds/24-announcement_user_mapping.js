@@ -3,12 +3,10 @@ exports.seed = (knex, Promise) => knex('eannouncementusermapping').del()
   knex('eannouncementusermapping').insert(
     [
         {
-            eannouncementusermappingid: 1,
             eannouncementeannouncementid: 1,
             eusereuserid: 1
         },
         {
-          eannouncementusermappingid: 2,
           eannouncementeannouncementid: 1,
           eusereuserid: 7
       },
