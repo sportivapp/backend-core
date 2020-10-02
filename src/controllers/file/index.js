@@ -85,7 +85,7 @@ controller.downloadFile = async (req, res, next) => {
 
     try {
 
-        const result = await fileService.downloadFile(fileId)
+        const result = await fileService.getFileById(fileId)
         return res.download(result.efilepath)
         
     } catch (e) {

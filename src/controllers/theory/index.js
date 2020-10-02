@@ -35,13 +35,13 @@ controller.getTheoryList = async (req, res, next) => {
 
 controller.previewTheory = async (req, res, next) => {
 
-    const { fileId } = req.params
+    const { theoryId } = req.params
     const { companyId } = req.body;
 
     // inser permission here?
 
     try {
-        const result = await theoryService.previewTheory(parseInt(fileId), companyId, req.user)
+        const result = await theoryService.previewTheory(parseInt(theoryId), companyId, req.user)
         return res.status(200).sendFile(result.efilepath);        
     } catch(e) {
         next(e);
@@ -51,14 +51,14 @@ controller.previewTheory = async (req, res, next) => {
 
 controller.downloadTheory = async (req, res, next) => {
 
-    const { fileId } = req.params
+    const { theoryId } = req.params
     const { companyId } = req.body
 
     // insert permission here?
 
     try {
 
-        const result = await theoryService.downloadTheory(parseInt(fileId), companyId, req.user)
+        const result = await theoryService.downloadTheory(parseInt(theoryId), companyId, req.user)
         return res.download(result.efilepath)
         
     } catch (e) {
@@ -69,14 +69,14 @@ controller.downloadTheory = async (req, res, next) => {
 
 controller.deleteTheoryByFileId = async (req, res, next) => {
 
-    const { fileId } = req.params
+    const { theoryId } = req.params
     const { companyId } = req.body
 
     // insert permission here?
     
     try {
 
-        const result = await theoryService.deleteTheoryByFileId(parseInt(fileId), companyId, req.user);
+        const result = await theoryService.deleteTheoryByFileId(parseInt(theoryId), companyId, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch(e) {
