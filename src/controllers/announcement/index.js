@@ -111,7 +111,8 @@ announcementController.updateAnnouncement = async (req, res, next) => {
 
 announcementController.createAnnouncement = async (req,res,next) => {
 
-    const { announcementTitle, announcementContent, companyId, fileId} = req.body;
+    const { announcementTitle, announcementContent, fileId} = req.body;
+    const user = req.user;
     
     try{
         
@@ -119,11 +120,11 @@ announcementController.createAnnouncement = async (req,res,next) => {
             eannouncementtitle: announcementTitle,
             eannouncementcontent: announcementContent,
             efileefileid: fileId,
-            ecompanyecompanyid: companyId
+            ecompanyecompanyid: user.companyId
 
         }
 
-        const result = await announcementService.createAnnouncement(announcementDTO,req.user)
+        const result = await announcementService.createAnnouncement(announcementDTO,user)
         return res.status(200).json(ResponseHelper.toPageResponse(result))
 
     } catch(e) {
