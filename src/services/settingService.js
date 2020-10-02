@@ -189,13 +189,43 @@ SettingService.saveFunctionsByGradeId = async (gradeId, functionDTOs) => {
         return GradeFunctionMapping.query(trx)
             .where('egradeegradeid', gradeId)
             .del()
-            .then(ignored => functionDTOs.map(funcDTO => ({
+            .then(ignored => functionDTOs.filter(funcDTO => funcDTO.status)
+                .map(funcDTO => ({
                 egradeegradeid: gradeId,
-                efunctionefunctioncode: funcDTO.code,
+                efunctionefunctioncode: funcDTO.code
             })))
             .then(gradeFunctionDTO => GradeFunctionMapping.query(trx).insert(gradeFunctionDTO));
     })
 
+}
+
+SettingService.mapFunctionsToGrade = async (gradeId, codes, trx) => {
+
+    return GradeFunctionMapping.query(trx)
+        .where('egradeegradeid', gradeId)
+        .del()
+        .then(ignored => codes.map(code => ({
+            egradeegradeid: gradeId,
+            efunctionefunctioncode: code,
+        })))
+        .then(dtos => {
+            return dtos
+        })
+        .then(gradeFunctionDTOs => GradeFunctionMapping.query(trx).insert(gradeFunctionDTOs));
+
+}
+
+SettingService.getAllModules = async () => {
+
+    return Module.query()
+}
+
+SettingService.getAllFunctions = async (codeKeyword = '') => {
+
+    console.log(codeKeyword)
+
+    return Function.query()
+        .where(raw('lower("efunctioncode")'), 'like', `%${codeKeyword}%`)
 }
 
 module.exports = SettingService;

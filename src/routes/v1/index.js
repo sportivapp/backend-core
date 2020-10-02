@@ -31,6 +31,8 @@ const notificationRoutes = require('./notification');
 const forgetRoutes = require('./forget');
 const experienceRoutes = require('./experience');
 const licenseRoutes = require('./license');
+const classRoutes = require('./class')
+const classUserRoutes = require('./classUser');
 
 router.use('/api/v1', [
     userRoutes,
@@ -61,7 +63,9 @@ router.use('/api/v1', [
     notificationRoutes,
     forgetRoutes,
     experienceRoutes,
-    licenseRoutes
+    licenseRoutes,
+    classRoutes,
+    classUserRoutes
     
 ]);
 

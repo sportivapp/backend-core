@@ -8,7 +8,7 @@ controller.getGrades = async (req, res, next) => {
     if (req.user.functions.indexOf('R4') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
-    const { page, size, companyId, departmentId } = req.query
+    const { page = '0', size = '10', companyId, departmentId } = req.query
 
     try {
         const pageObj = await gradeService.getAllGrades(parseInt(page), parseInt(size), companyId, departmentId)
@@ -28,8 +28,6 @@ controller.getGradeById = async (req, res, next) => {
 
     try {
         const grade = await gradeService.getGradeById(gradeId)
-        if (!grade)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(grade))
     }catch (e) {
         next(e)
@@ -59,8 +57,6 @@ controller.createGrade = async (req, res, next) => {
 
     try {
         const grade = await gradeService.createGrade(gradeDTO, user.sub)
-        if (!grade)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(grade))
     } catch (e) {
         next(e)
@@ -89,8 +85,6 @@ controller.updateGradeById = async (req, res, next) => {
 
     try {
         const grade = await gradeService.updateGradeById(gradeId, gradeDTO, req.user)
-        if (!grade)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(grade))
     } catch (e) {
         next(e)
@@ -107,8 +101,6 @@ controller.deleteGradeById = async (req, res, next) => {
 
     try {
         const result = await gradeService.deleteGradeById(gradeId, user)
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)
@@ -124,8 +116,6 @@ controller.saveUserPositions = async (req, res, next) => {
     if (user.functions.indexOf('C4') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
-    if ( isNaN(positionId) ) return res.status(400).json(ResponseHelper.toErrorResponse(400))
-
     try {
         const result = await gradeService.saveUserPositions(userIds, parseInt(positionId), user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
@@ -136,7 +126,7 @@ controller.saveUserPositions = async (req, res, next) => {
 
 controller.getUsersByPositionId = async (req, res, next) => {
 
-    const { page, size } = req.query
+    const { page = '0', size = '10' } = req.query
 
     const { gradeId } = req.params
 

@@ -26,6 +26,7 @@ class Grade extends Model {
     const User = require('./User')
     const Department = require('./Department')
     const Function = require('./Function');
+    const UserPositionMapping = require('./UserPositionMapping')
     const GradeFunctionMapping = require('./GradeFunctionMapping');
 
     return {
@@ -63,6 +64,14 @@ class Grade extends Model {
             to: 'euserpositionmapping.eusereuserid'
           },
           to: 'euser.euserid'
+        }
+      },
+      userMappings: {
+        relation: Model.HasManyRelation,
+        modelClass: UserPositionMapping,
+        join: {
+          from: 'egrade.egradeid',
+          to: 'euserpositionmapping.egradeegradeid'
         }
       },
       department: {
