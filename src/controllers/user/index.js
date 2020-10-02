@@ -222,7 +222,7 @@ userController.login = async (req, res, next) => {
 
         const result = await userService.login(loginDTO);
 
-        res.cookie(process.env.COOKIE_NAME, result, {
+        res.cookie('tok', result, {
             secure: true,
             httpOnly: true,
             domain: process.env.COOKIE_DOMAIN,

@@ -303,7 +303,7 @@ CompanyService.getCompanyList = async (page, size, type, keyword, companyId, use
         query = User.relatedQuery('companies')
             .for(user.sub)
             .modify({ ecompanyusermappingdeletestatus: false })
-            .where(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
+            .where(raw('lower("ecompanyname")'), 'like', `%${keyword}%`)
             .whereNull('ecompanyparentid')
             .whereNull('ecompanyolderid')
             .whereIn('ecompanyid', companyIds)
