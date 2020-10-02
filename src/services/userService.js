@@ -186,7 +186,7 @@ UsersService.login = async (loginDTO) => {
     const user = await User.query().select().where('euseremail', loginDTO.euseremail).first();
 
     if (!user)
-        return
+        throw new NotFoundError()
 
     const success = await bcrypt.compare(loginDTO.euserpassword, user.euserpassword);
 
