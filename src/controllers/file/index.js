@@ -68,11 +68,10 @@ controller.getFile = async (req, res, next) => {
     const { fileId } = req.params;
 
     try {
-        const result = await fileService.getFileById(fileId);
         
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        const result = await fileService.getFileById(fileId);
         return res.status(200).json(ResponseHelper.toBaseResponse(result)); 
+
     } catch(e) {
         next(e);
     }
