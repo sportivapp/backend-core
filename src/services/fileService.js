@@ -74,7 +74,13 @@ FileService.getFileByIdAndCreateBy = async (fileId, createBy) => {
 
 FileService.getFileById = async (fileId) => {
 
-    return File.query().where('efileid', fileId).first();
+    return File
+    .query()
+    .findById(fileId)
+    .then(file => {
+        if(!file) throw new NotFoundError()
+        return file
+    })
 
 }
 
@@ -104,17 +110,6 @@ FileService.deleteFileById = async (fileId) => {
 
     return;
     
-}
-
-FileService.downloadFile = async (fileId) => {
-
-    return File
-    .query()
-    .findById(fileId)
-    .then(file => {
-        if(!file) throw new NotFoundError()
-        return file
-    })
 }
 
 module.exports = FileService;
