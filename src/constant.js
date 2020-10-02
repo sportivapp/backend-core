@@ -166,9 +166,9 @@ module.exports = {
         },
         theory: {
             list: '/theory',
-            download: '/theory/download',
-            preview: '/theory/preview',
-            remove: '/theory/delete'
+            download: '/theory/:fileId/download',
+            preview: '/theory/:fileId/preview',
+            remove: '/theory/:fileId/delete'
         }
     }
 }
