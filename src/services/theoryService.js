@@ -38,19 +38,14 @@ theoryService.fileInCompanyExist = async (fileId, companyId) => {
 
 }
 
-theoryService.createTheory = async (companyId, file, user) => {
-
-    const isUserInCompany = await theoryService.isUserInCompany(companyId, user);
-
-    if (!isUserInCompany)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY);
+theoryService.createTheory = async ( file, user ) => {
 
     return CompanyFileMapping.transaction(async trx => {
 
         const uploadedTheory = await fileService.createFileWithTransaction(trx, file, user)
 
         const mappingDTO = {
-            ecompanyecompanyid: companyId,
+            ecompanyecompanyid: user.companyId,
             efileefileid: uploadedTheory.efileid
         }
 
