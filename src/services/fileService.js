@@ -3,9 +3,24 @@ const fs = require('fs');
 const util = require('util');
 const unlink = util.promisify(fs.unlink);
 const File = require('../models/File');
-const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
+const { raw } = require('objection');
+const { NotFoundError } = require('../models/errors')
+const ServiceHelper = require('../helper/ServiceHelper')
 
 const FileService = {};
+
+FileService.createFileWithTransaction = async (trx, file, user) => {
+
+    const fileDTO = {
+        efilename: file.filename,
+        efilepath: file.path,
+        efiletype: file.mimetype,
+        efilesize: file.size
+    }
+    
+    return File.query(trx).insertToTable(fileDTO, user.sub);
+
+}
 
 FileService.createFile = async (file, user) => {
 
@@ -37,6 +52,17 @@ FileService.createMultipleFiles = async (files, user) => {
     })
 
     return uploadFiles
+
+}
+
+FileService.getFilesByCompanyId = async (page, size, companyId, keyword) => {
+
+    return File.query()
+    .joinRelated('companyMappings')
+    .where('ecompanyecompanyid', companyId)
+    .andWhere(raw('lower("efilename")'), 'like', `%${keyword.toLowerCase()}%`)
+    .page(page, size)
+    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj));
 
 }
 
