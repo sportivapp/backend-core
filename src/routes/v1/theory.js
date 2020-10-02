@@ -17,8 +17,8 @@ const { routes } = require('../../constant')
 
 router.get( routes.theory.list, auth.authenticateToken, theoryController.getTheoryList)
 router.post( routes.theory.list, auth.authenticateToken, upload.single('file'), theoryController.createTheory)
-router.post( routes.theory.download, auth.authenticateToken, theoryController.downloadTheory);
-router.post( routes.theory.preview, auth.authenticateToken, theoryController.previewTheory);
-router.post( routes.theory.remove, auth.authenticateToken, theoryController.deleteTheoryByFileId)
+router.get( routes.theory.download, auth.authenticateToken, theoryController.downloadTheory);
+router.get( routes.theory.preview, auth.authenticateToken, theoryController.previewTheory);
+router.delete( routes.theory.remove, auth.authenticateToken, theoryController.deleteTheoryByFileId)
 
 module.exports = router.expressRouter;
