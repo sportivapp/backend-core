@@ -1,8 +1,19 @@
 const Announcement = require('../models/Announcement');
 const AnnouncementUserMapping = require('../models/AnnouncementUserMapping');
 const ServiceHelper = require('../helper/ServiceHelper')
+const fileService = require('./fileService');
+const { NotFoundError, UnsupportedOperationError } = require('../models/errors');
+const companyService = require('./companyService');
+
+
 
 const AnnouncementService = {};
+
+const ErrorEnum = {
+    COMPANY_NOT_FOUND: 'COMPANY_NOT_FOUND',
+    FILE_NOT_FOUND: 'FILE_NOT_FOUND',
+
+}
 
 AnnouncementService.getAllAnnouncement = async (page, size, type = 'IN', user) => {
 
@@ -53,13 +64,29 @@ AnnouncementService.addUser = async (announcementId, userIds, loggedInUser) => {
     return AnnouncementUserMapping.query().insertToTable(users, loggedInUser.sub);
 }
 
-AnnouncementService.createAnnouncement = async ( announcementDTO, userIds, user ) => {
+AnnouncementService.publishAnnouncement = async ( announcementDTO, userIds, user ) => {
 
     const announcement = await Announcement.query().insertToTable(announcementDTO, user.sub)
 
     await AnnouncementService.addUser(announcement.eannouncementid, userIds, user);
 
     return announcement;
+}
+
+AnnouncementService.createAnnouncement = async (announcementDTO,user) => {
+
+    const company = await companyService.getCompanyById(announcementDTO.ecompanyecompanyid)
+
+    const file = await fileService.getFileById(announcementDTO.efileefileid)
+
+    if (!company) throw new UnsupportedOperationError(ErrorEnum.COMPANY_NOT_FOUND)
+
+    if (!file) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_FOUND)
+    
+    const announcement = await Announcement.query().insertToTable(announcementDTO,user.sub)
+
+    return announcement
+    
 }
 
 

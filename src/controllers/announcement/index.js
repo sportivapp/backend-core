@@ -3,7 +3,7 @@ const announcementService = require('../../services/announcementService');
 
 announcementController = {}
 
-announcementController.createAnnouncement = async (req, res, next) => {
+announcementController.publishAnnouncement = async (req, res, next) => {
     
     const { announcementTitle, announcementContent, userIds } = req.body;
     const user = req.user;
@@ -17,7 +17,7 @@ announcementController.createAnnouncement = async (req, res, next) => {
             ecompanyecompanyid: user.companyId
         }
 
-        const result = await announcementService.createAnnouncement(announcementDTO, userIds, user);
+        const result = await announcementService.publishAnnouncement(announcementDTO,userIds,user)
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
@@ -107,6 +107,29 @@ announcementController.updateAnnouncement = async (req, res, next) => {
         next(e);
     }
 
+}
+
+announcementController.createAnnouncement = async (req,res,next) => {
+
+    const { announcementTitle, announcementContent, companyId, fileId} = req.body;
+    
+    try{
+        
+        const announcementDTO = {
+            eannouncementtitle: announcementTitle,
+            eannouncementcontent: announcementContent,
+            efileefileid: fileId,
+            ecompanyecompanyid: companyId
+
+        }
+
+        const result = await announcementService.createAnnouncement(announcementDTO,req.user)
+        return res.status(200).json(ResponseHelper.toPageResponse(result))
+
+    } catch(e) {
+        next(e)
+    }
+    
 }
 
 module.exports = announcementController;
