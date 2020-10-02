@@ -10,20 +10,6 @@ const UnsupportedOperationErrorEnum = {
     FILE_NOT_EXIST: 'FILE_NOT_EXIST'
 }
 
-theoryService.isUserInCompany = async (companyId, user) => {
-
-    return CompanyUserMapping.query()
-    .where('ecompanyecompanyid', companyId)
-    .andWhere('eusereuserid', user.sub)
-    .first()
-    .then(result => {
-        if (!result)
-            return false
-        return true
-    })
-
-}
-
 // check if the file exists in company
 theoryService.fileInCompanyExist = async (fileId, companyId) => {
 
@@ -57,9 +43,7 @@ theoryService.createTheory = async ( file, user ) => {
 
 theoryService.downloadTheory = async (fileId, companyId, user) => {
 
-    const isUserInCompany = await theoryService.isUserInCompany(companyId, user);
-
-    if (!isUserInCompany)
+    if (companyId !== user.companyId)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY);
 
     const fileInCompany = await theoryService.fileInCompanyExist(fileId, companyId)
@@ -73,9 +57,7 @@ theoryService.downloadTheory = async (fileId, companyId, user) => {
 
 theoryService.getTheoryList = async (keyword, page, size, companyId, user) => {
 
-    const isUserInCompany = await theoryService.isUserInCompany(companyId, user);
-
-    if (!isUserInCompany)
+    if (companyId !== user.companyId)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY);
 
     return fileService.getFilesByCompanyId(page, size, companyId, keyword)
@@ -84,9 +66,7 @@ theoryService.getTheoryList = async (keyword, page, size, companyId, user) => {
 
 theoryService.previewTheory = async (fileId, companyId, user) => {
 
-    const isUserInCompany = await theoryService.isUserInCompany(companyId, user);
-
-    if (!isUserInCompany)
+    if (companyId !== user.companyId)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY);
 
     const fileInCompany = await theoryService.fileInCompanyExist(fileId, companyId)
@@ -104,9 +84,7 @@ theoryService.previewTheory = async (fileId, companyId, user) => {
 
 theoryService.deleteTheoryByFileId = async (fileId, companyId, user) => {
 
-    const isUserInCompany = await theoryService.isUserInCompany(companyId, user);
-
-    if (!isUserInCompany)
+    if (companyId !== user.companyId)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY);
 
     return fileService.deleteFileById(fileId)
