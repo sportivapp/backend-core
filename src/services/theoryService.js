@@ -41,12 +41,9 @@ theoryService.createTheory = async ( file, user ) => {
 
 }
 
-theoryService.downloadTheory = async (theoryId, companyId, user) => {
+theoryService.downloadTheory = async (theoryId, user) => {
 
-    if (companyId !== user.companyId)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY);
-
-    const fileInCompany = await theoryService.fileInCompanyExist(theoryId, companyId)
+    const fileInCompany = await theoryService.fileInCompanyExist(theoryId, user.companyId)
 
     if(!fileInCompany) 
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FILE_NOT_EXIST)
@@ -55,23 +52,17 @@ theoryService.downloadTheory = async (theoryId, companyId, user) => {
 
 }
 
-theoryService.getTheoryList = async (keyword, page, size, companyId, user) => {
+theoryService.getTheoryList = async (keyword, page, size, user) => {
 
-    if (companyId !== user.companyId)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY);
-
-    return fileService.getFilesByCompanyId(page, size, companyId, keyword)
+    return fileService.getFilesByCompanyId(page, size, user.companyId, keyword)
 
 }
 
-theoryService.previewTheory = async (theoryId, companyId, user) => {
+theoryService.previewTheory = async (theoryId, user) => {
 
-    if (companyId !== user.companyId)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY);
+    const fileInCompany = await theoryService.fileInCompanyExist(theoryId, user.companyId)
 
-    const fileInCompany = await theoryService.fileInCompanyExist(theoryId, companyId)
-
-    if(!fileInCompany) 
+    if(!fileInCompany)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FILE_NOT_EXIST)
 
     return fileService.getFileById(theoryId)
@@ -82,10 +73,7 @@ theoryService.previewTheory = async (theoryId, companyId, user) => {
 
 }
 
-theoryService.deleteTheoryByFileId = async (theoryId, companyId, user) => {
-
-    if (companyId !== user.companyId)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY);
+theoryService.deleteTheoryByFileId = async (theoryId) => {
 
     return fileService.deleteFileById(theoryId)
 
