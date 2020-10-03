@@ -1,9 +1,10 @@
-const   express     = require('express'),
-        cors        = require('cors'),
-        morgan      = require('morgan'),
-        fs          = require('fs'),
-        https       = require('https'),
-        path        = require('path')
+const   express         = require('express'),
+        cors            = require('cors'),
+        morgan          = require('morgan'),
+        cookieParser    = require('cookie-parser'),
+        fs              = require('fs'),
+        https           = require('https'),
+        path            = require('path')
 
 require('dotenv').config();
 const app = express();
@@ -12,14 +13,16 @@ const errorHandler = require('./middlewares/errorHandler');
 
 app.use(cors());
 app.use((_, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Origin', process.env.ORIGIN);
     res.header(
       'Access-Control-Allow-Headers',
       'Origin, X-Requested-With, Content-Type, Accept'  
     );
+    res.header('Access-Control-Allow-Credentials', true);
     return next();
 });
 
+app.use(cookieParser());
 app.use(express.json({limit: '1000mb'}));
 app.use(express.urlencoded({limit: '1000mb', extended: true }));
 app.use(morgan('dev'));
