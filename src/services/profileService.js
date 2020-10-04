@@ -45,7 +45,7 @@ profileService.changeUserCompany = async (companyId, user) => {
 
     const loggedInUser = await userService.getUserById(user.sub, user)
 
-    const functions = await profileService.getFunctions(companyId, user)
+    const functions = await profileService.getFunctionCodes({ ...loggedInUser, companyId: companyId })
 
     return userService.generateJWTToken(loggedInUser, companyId, functions);
 }
@@ -55,7 +55,16 @@ profileService.getFunctions = async (user) => {
     const gradeIds = await gradeService.getAllGradesByUserIdAndCompanyId(user.companyId, user.sub)
         .then(grades => grades.map(grade => grade.egradeid))
 
-    return settingService.getAllFunctionByGradeIds(gradeIds)
+    const modulesWithFunctions = await settingService.getAllFunctionByGradeIds(gradeIds)
+
+    let functions = []
+
+    for (let moduleId in modulesWithFunctions) {
+        let processedFunctions = modulesWithFunctions[moduleId].map(func => ({ code: func.code, status: func.status }))
+        functions = functions.concat(processedFunctions)
+    }
+
+    return functions
 
 }
 
@@ -65,20 +74,6 @@ profileService.getFunctionCodes = async (user) => {
         .then(grades => grades.map(grade => grade.egradeid))
 
     return settingService.getAllFunctionCodesByGradeIds(gradeIds)
-
-}
-
-profileService.getFunctionsByModuleId = async (moduleId, user) => {
-
-    const gradeIds = await gradeService.getAllGradesByUserIdAndCompanyId(user.companyId, user.sub)
-        .then(grades => grades.map(grade => grade.egradeid))
-
-    return settingService.getAllFunctionByGradeIds(gradeIds)
-        .then(groupedFunctions => groupedFunctions[moduleId])
-        .then(functions => {
-            if (!functions) return []
-            return functions
-        })
 
 }
 
