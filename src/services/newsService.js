@@ -158,7 +158,7 @@ newsService.deleteNews = async (newsId, user) => {
 
     return News.transaction(trx => {
         return News.query(trx)
-        .where('enewsid', newsId)
+        .findById(newsId)
         .where('ecompanyecompanyid', user.companyId)
         .delete()
         .then(rowsAffected => rowsAffected === 1)
