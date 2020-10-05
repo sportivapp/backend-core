@@ -136,7 +136,7 @@ newsService.generateNewsLink = async (newsId, user) => {
 
     if(!newsFromDB) throw new NotFoundError() 
     
-    return {newsLink: `org.sportiv.app/news/${newsId}`}
+    return {newsLink: `https://org.sportiv.app/news/${newsId}`}
     
 }
 
