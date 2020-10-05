@@ -55,14 +55,16 @@ profileService.getFunctions = async (user) => {
     const gradeIds = await gradeService.getAllGradesByUserIdAndCompanyId(user.companyId, user.sub)
         .then(grades => grades.map(grade => grade.egradeid))
 
-    const modulesWithFunctions = await settingService.getAllFunctionByGradeIds(gradeIds)
+    const codes = await settingService.getAllFunctionCodesByGradeIds(gradeIds)
 
-    let functions = []
+    const masterCodes = await settingService.getAllFunctions()
+        .then(funcList => funcList.map(func => func.efunctioncode))
 
-    for (let moduleId in modulesWithFunctions) {
-        let processedFunctions = modulesWithFunctions[moduleId].map(func => ({ code: func.code, status: func.status }))
-        functions = functions.concat(processedFunctions)
-    }
+    let functions = {}
+
+    masterCodes.forEach(masterCode => {
+        functions[masterCode] = codes.indexOf(masterCode) !== -1
+    })
 
     return functions
 
