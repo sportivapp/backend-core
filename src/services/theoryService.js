@@ -10,6 +10,20 @@ const UnsupportedOperationErrorEnum = {
     FILE_NOT_EXIST: 'FILE_NOT_EXIST'
 }
 
+// check if user in company
+theoryService.userInCompany = async (userId, companyId) => {
+
+    return CompanyUserMapping.query()
+    .where('ecompanyecompanyid', companyId)
+    .where('eusereuserid', userId)
+    .first()
+    .then(user => {
+        if(!user) return false
+        return true
+    })
+
+}
+
 // check if the file exists in company
 theoryService.fileInCompanyExist = async (theoryId, companyId) => {
 
@@ -56,6 +70,10 @@ theoryService.downloadTheory = async (theoryId, user) => {
 
 theoryService.getTheoryList = async (keyword, page, size, user) => {
 
+    const userInCompany = await theoryService.userInCompany(user.sub, user.companyId)
+
+    if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
+
     return fileService.getFilesByCompanyId(page, size, user.companyId, keyword)
 
 }
@@ -75,7 +93,11 @@ theoryService.previewTheory = async (theoryId, user) => {
 
 }
 
-theoryService.deleteTheoryByFileId = async (theoryId) => {
+theoryService.deleteTheoryByFileId = async (theoryId, user) => {
+
+    const fileMaker = await fileService.getFileByIdAndCreateBy(theoryId, user.sub)
+
+    if(!fileMaker) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FILE_NOT_EXIST)
 
     return fileService.deleteFileById(theoryId)
 
