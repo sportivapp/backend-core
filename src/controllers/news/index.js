@@ -88,7 +88,7 @@ controller.editNews = async (req, res, next) => {
 
 controller.getNews = async (req, res, next) => {
 
-    const { page = '0', size = '10', type = 'UNPUBLISH' } = req.query
+    const { page = '0', size = '10', type = 'UNPUBLISHED' } = req.query
 
     try {
 
