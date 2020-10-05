@@ -24,7 +24,7 @@ newsService.userInCompany = async (user) => {
 
 }
 
-newsService.checkNewsByIdAndCompanyId = async (newsId, user) => {
+newsService.getNewsByIdAndCompanyId = async (newsId, user) => {
 
     return News.query()
     .findById(newsId)
@@ -32,7 +32,7 @@ newsService.checkNewsByIdAndCompanyId = async (newsId, user) => {
     .where('enewsispublished', true)
     .then(news => {
         if(!news) return false
-        return true
+        return news
     })
 
 }
@@ -61,9 +61,10 @@ newsService.publishNews = async (isPublish, newsId, user) => {
         .where('enewsid', newsId)
         .where('ecompanyecompanyid', user.companyId)
         .updateByUserId({enewsispublished: isPublish}, user.sub)
+        .first()
         .returning('*')
         .then(news => {
-            if(news.length === 0) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NEWS_NOT_EXIST)
+            if(!news) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NEWS_NOT_EXIST)
             return news
         })
     })
@@ -76,33 +77,42 @@ newsService.editNews = async (newsDTO, newsId, user) => {
 
     if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
 
-    return News.transaction(trx => {
-        return News.query(trx)
-        .where('enewsid', newsId)
-        .where('ecompanyecompanyid', user.companyId)
-        .updateByUserId(newsDTO, user.sub)
-        .returning('*')
-        .then(news => {
-            if(news.length === 0) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NEWS_NOT_EXIST)
-            return news
-        })
+    return News.query()
+    .where('enewsid', newsId)
+    .where('ecompanyecompanyid', user.companyId)
+    .updateByUserId(newsDTO, user.sub)
+    .first()
+    .returning('*')
+    .then(news => {
+        if(!news) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NEWS_NOT_EXIST)
+        return news
     })
 
 }
 
-newsService.getNews = async (page, size, user) => {
+newsService.getNews = async (page, size, user, type) => {
 
+    if(type !== 'NOTPUBLISH' && type !== 'PUBLISH')
+        throw new NotFoundError()
+
+    if(type === 'NOTPUBLISH')
+        return News.query()
+        .where('ecompanyecompanyid', user.companyId)
+        .where('enewsispublished', false)
+        .page(page, size)
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+    
     return News.query()
     .where('ecompanyecompanyid', user.companyId)
     .where('enewsispublished', true)
     .page(page, size)
-    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj)) 
 
 }
 
 newsService.getNewsDetail = async (newsId, user) => {
 
-    const newsFromDB = await newsService.checkNewsByIdAndCompanyId(newsId, user)
+    const newsFromDB = await newsService.getNewsByIdAndCompanyId(newsId, user)
 
     if(!newsFromDB) throw new NotFoundError()
 
@@ -114,16 +124,12 @@ newsService.getNewsDetail = async (newsId, user) => {
     // if user haven't viewed this news
     if(!isNewsViewed){
 
-        await NewsView.transaction(async trx => {
-
             const newsViewDTO = {
                 enewsenewsid: newsId,
                 eusereuserid: user.sub,
             }
 
-            return NewsView.query(trx).insertToTable(newsViewDTO, user.sub)
-    
-        })
+            await NewsView.query().insertToTable(newsViewDTO, user.sub)
 
     } 
 
@@ -132,11 +138,11 @@ newsService.getNewsDetail = async (newsId, user) => {
 
 newsService.generateNewsLink = async (newsId, user) => {
 
-    const newsFromDB = await newsService.checkNewsByIdAndCompanyId(newsId, user)
+    const newsFromDB = await newsService.getNewsByIdAndCompanyId(newsId, user)
 
     if(!newsFromDB) throw new NotFoundError() 
     
-    return {newsLink: `https://org.sportiv.app/news/${newsId}`}
+    return `https://org.sportiv.app/news/${newsId}`
     
 }
 
@@ -144,9 +150,9 @@ newsService.getUserViewCount = async (newsId) => {
 
     return NewsView.query()
     .where('enewsenewsid', newsId)
-    .then(userList => {
-        return userList.length
-    })
+    .count()
+    .first()
+    .then(obj => parseInt(obj.count))
 
 }
 
@@ -156,13 +162,11 @@ newsService.deleteNews = async (newsId, user) => {
 
     if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
 
-    return News.transaction(trx => {
-        return News.query(trx)
-        .findById(newsId)
-        .where('ecompanyecompanyid', user.companyId)
-        .delete()
-        .then(rowsAffected => rowsAffected === 1)
-    })
+    return News.query()
+    .findById(newsId)
+    .where('ecompanyecompanyid', user.companyId)
+    .delete()
+    .then(rowsAffected => rowsAffected === 1)
 
 }
 
