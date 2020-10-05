@@ -14,6 +14,7 @@ const experienceSchemas = require('./experience')
 const approvalSchemas = require('./approval')
 const permitSchemas = require('./permit')
 const classSchemas = require('./class')
+const newsSchemas = require('./news')
 
 module.exports = {
     ...companySchemas,
@@ -31,5 +32,6 @@ module.exports = {
     ...experienceSchemas,
     ...approvalSchemas,
     ...permitSchemas,
-    ...classSchemas
+    ...classSchemas,
+    ...newsSchemas
 }
