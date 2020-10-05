@@ -26,7 +26,7 @@ theoryService.fileInCompanyExist = async (theoryId, companyId) => {
 
 theoryService.createTheory = async ( fileId, user ) => {
 
-    const fileMaker = await fileService.checkFileMaker(fileId, user)
+    const fileMaker = await fileService.getFileByIdAndCreateBy(fileId, user.sub)
 
     if(!fileMaker) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FILE_NOT_EXIST)
 
