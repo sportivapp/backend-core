@@ -31,7 +31,7 @@ module.exports = {
             changePassword: '/change-password',
             profile: '/profile',
             modules: '/profile/modules',
-            functions: '/profile/modules/:moduleId/functions'
+            functions: '/profile/functions'
         },
         grade: {
             list: '/grades',
@@ -164,6 +164,12 @@ module.exports = {
         },
         file: {
             download: '/file-download/:fileId'
+        },
+        theory: {
+            list: '/theory',
+            download: '/theory/:theoryId/download',
+            preview: '/theory/:theoryId/preview',
+            remove: '/theory/:theoryId/delete'
         }
     }
 }
