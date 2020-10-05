@@ -153,7 +153,11 @@ module.exports = {
             version: '/app/version'
         },
         news: {
-            id: '/news/:newsId'
+            list: '/news',
+            id: '/news/:newsId',
+            publish: '/news/:newsId/publish',
+            count: '/news/:newsId/user',
+            generate: '/news/:newsId/link'
         },
         notification: {
             list: '/notification'
