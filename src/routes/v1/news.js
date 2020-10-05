@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router();
+const router = require('../router')
 const controller = require('../../controllers/news')
 const auth = require('../../middlewares/authentication');
 const { routes } = require('../../constant')
@@ -13,4 +12,4 @@ router.get( routes.news.id, auth.authenticateToken, controller.getNewsDetail);
 router.get( routes.news.count, auth.authenticateToken, controller.getUserViewCount);
 router.delete( routes.news.id, auth.authenticateToken, controller.deleteNews);
 
-module.exports = router;
+module.exports = router.expressRouter;
