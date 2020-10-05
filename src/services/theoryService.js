@@ -24,15 +24,17 @@ theoryService.fileInCompanyExist = async (theoryId, companyId) => {
 
 }
 
-theoryService.createTheory = async ( file, user ) => {
+theoryService.createTheory = async ( fileId, user ) => {
+
+    const fileMaker = await fileService.checkFileMaker(fileId, user)
+
+    if(!fileMaker) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FILE_NOT_EXIST)
 
     return CompanyFileMapping.transaction(async trx => {
 
-        const uploadedTheory = await fileService.createFileWithTransaction(trx, file, user)
-
         const mappingDTO = {
             ecompanyecompanyid: user.companyId,
-            efileefileid: uploadedTheory.efileid
+            efileefileid: fileId
         }
 
         return CompanyFileMapping.query(trx)
