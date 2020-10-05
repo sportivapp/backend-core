@@ -9,18 +9,6 @@ const ServiceHelper = require('../helper/ServiceHelper')
 
 const FileService = {};
 
-FileService.checkFileMaker = async (fileId, user) => {
-    
-    return File.query()
-    .findById(fileId)
-    .where('efilecreateby', user.sub)
-    .then(file => {
-        if(!file) return false
-        return true
-    })
-    
-}
-
 FileService.createFile = async (file, user) => {
 
     const fileDTO = {
