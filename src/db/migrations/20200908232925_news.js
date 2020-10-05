@@ -11,7 +11,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('enews', t => {
     t.integer('enewstablestatus').notNullable().defaultTo(1);
     t.integer('ecompanyecompanyid').notNullable().references('ecompany.ecompanyid').onDelete('CASCADE');
     t.integer('efileefileid').references('efile.efileid').onDelete('SET NULL');
-    t.boolean('enewsispublished').defaultTo(false);
+    t.boolean('enewsispublished').notNullable().defaultTo(false);
 
 });
 
