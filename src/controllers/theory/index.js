@@ -5,11 +5,12 @@ const controller = {};
 
 controller.createTheory = async (req, res, next) => {
 
+    const { fileId } = req.body
     // insert permission here?
     
     try {
 
-        const result = await theoryService.createTheory(req.file, req.user);
+        const result = await theoryService.createTheory(fileId, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch(e) {
