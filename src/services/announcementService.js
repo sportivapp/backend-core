@@ -1,8 +1,24 @@
 const Announcement = require('../models/Announcement');
 const AnnouncementUserMapping = require('../models/AnnouncementUserMapping');
 const ServiceHelper = require('../helper/ServiceHelper')
+const fileService = require('./fileService');
+const { NotFoundError, UnsupportedOperationError } = require('../models/errors');
+const companyService = require('./companyService');
+const NotificationEnum = require('../models/enum/NotificationEnum');
+const notificationService = require('./notificationService');
+const Grade = require('../models/Grades')
+
+
+
 
 const AnnouncementService = {};
+
+const ErrorEnum = {
+    COMPANY_NOT_FOUND: 'COMPANY_NOT_FOUND',
+    FILE_NOT_FOUND: 'FILE_NOT_FOUND',
+    ANNOUNCEMENT_NOT_FOUND : "ANNOUNCEMENT_NOT_FOUND"
+
+}
 
 AnnouncementService.getAllAnnouncement = async (page, size, type = 'IN', user) => {
 
@@ -45,44 +61,81 @@ AnnouncementService.getAnnouncementById = async (announcementId, user) => {
 
 AnnouncementService.addUser = async (announcementId, userIds, loggedInUser) => {
 
+
     const users = userIds.map(user => ({
         eannouncementeannouncementid: announcementId, 
         eusereuserid: user
     }));
 
-    return AnnouncementUserMapping.query().insertToTable(users, loggedInUser.sub);
+    return AnnouncementUserMapping.query().insertToTable(users, loggedInUser.sub)
+    .then(announcementLog => {
+
+        if(users.length > 0) {
+            const notificationObj = {
+                enotificationbodyentityid : announcementId,
+                enotificationbodyentitytype: NotificationEnum.announcement.type,
+                enotificationbodyaction: NotificationEnum.announcement.actions.publish.code,
+                enotificationbodytitle: NotificationEnum.announcement.actions.publish.title,
+                enotificationbodymessage: NotificationEnum.announcement.actions.publish.message            }
+        
+
+        notificationService.saveNotification(
+            notificationObj,
+            loggedInUser,
+            userIds
+        )
+    }
+
+        return announcementLog
+    })
 }
 
-AnnouncementService.createAnnouncement = async ( announcementDTO, userIds, user ) => {
+AnnouncementService.publishAnnouncement = async (announcementId, userIds, user ) => {
 
-    const announcement = await Announcement.query().insertToTable(announcementDTO, user.sub)
+    const announcement = await Announcement.query().findById(announcementId)
 
-    await AnnouncementService.addUser(announcement.eannouncementid, userIds, user);
+    if (!announcement) throw new UnsupportedOperationError(ErrorEnum.ANNOUNCEMENT_NOT_FOUND)
 
-    return announcement;
+    return AnnouncementService.addUser(announcement.eannouncementid, userIds, user);
+}
+
+AnnouncementService.createAnnouncement = async (announcementDTO,user) => {
+
+    const company = await companyService.getCompanyById(announcementDTO.ecompanyecompanyid)
+
+    const file = await fileService.getFileById(announcementDTO.efileefileid)
+
+    if (!company) throw new UnsupportedOperationError(ErrorEnum.COMPANY_NOT_FOUND)
+
+    if (!file) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_FOUND)
+    
+    const announcement = await Announcement.query().insertToTable(announcementDTO,user.sub)
+
+    return announcement
+    
 }
 
 
 AnnouncementService.updateAnnouncement = async (announcementId, announcementDTO, userIds, user) => {
 
     const announcement = await Announcement.query()
-        .where('eannouncementid', announcementId)
-        .andWhere('eannouncementcreateby', user.sub)
-        .first()
+         .where('eannouncementid', announcementId)
+         .andWhere('eannouncementcreateby', user.sub)
+         .first()
 
-    if (!announcement) return
+         if (!announcement) return
 
-    // remove user that has the announcement
-    await AnnouncementUserMapping.query().delete().where('eannouncementeannouncementid', announcementId);
+    return Announcement.transaction(async trx => {
+    
+        await AnnouncementUserMapping.query().delete().where('eannouncementeannouncementid', announcementId);
 
-    const result = announcement.$query()
-        .updateByUserId(announcementDTO, user.sub)
-        .returning('*');
+        await AnnouncementService.addUser(parseInt(announcementId, 10) , userIds, user)
 
-    // Insert user that get the announcement
-    await AnnouncementService.addUser(parseInt(announcementId, 10) , userIds, user);
+        return announcement.$query(trx).updateByUserId(announcementDTO, user.sub)
+        .returning('*')
+        .catch(() => new UnsupportedOperationError(ErrorEnum.ANNOUNCEMENT_NOT_FOUND))
 
-    return result;
+    })
 }
 
 AnnouncementService.deleteAnnouncement = async (announcementId, user) => {

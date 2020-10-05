@@ -46,6 +46,7 @@ module.exports = {
         },
         announcement: {
             create: '/announcement',
+            publish: '/publish-announcement/:announcementId',
             id: '/announcement/:announcementId',
             list: '/announcement-list'
         },
