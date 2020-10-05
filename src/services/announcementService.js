@@ -119,23 +119,23 @@ AnnouncementService.createAnnouncement = async (announcementDTO,user) => {
 AnnouncementService.updateAnnouncement = async (announcementId, announcementDTO, userIds, user) => {
 
     const announcement = await Announcement.query()
-        .where('eannouncementid', announcementId)
-        .andWhere('eannouncementcreateby', user.sub)
-        .first()
+         .where('eannouncementid', announcementId)
+         .andWhere('eannouncementcreateby', user.sub)
+         .first()
 
-    if (!announcement) return
+         if (!announcement) return
 
-    // remove user that has the announcement
-    await AnnouncementUserMapping.query().delete().where('eannouncementeannouncementid', announcementId);
+    return Announcement.transaction(async trx => {
+    
+        await AnnouncementUserMapping.query().delete().where('eannouncementeannouncementid', announcementId);
 
-    const result = announcement.$query()
-        .updateByUserId(announcementDTO, user.sub)
-        .returning('*');
+        await AnnouncementService.addUser(parseInt(announcementId, 10) , userIds, user)
 
-    // Insert user that get the announcement
-    await AnnouncementService.addUser(parseInt(announcementId, 10) , userIds, user);
+        return announcement.$query(trx).updateByUserId(announcementDTO, user.sub)
+        .returning('*')
+        .catch(() => new UnsupportedOperationError(ErrorEnum.ANNOUNCEMENT_NOT_FOUND))
 
-    return result;
+    })
 }
 
 AnnouncementService.deleteAnnouncement = async (announcementId, user) => {
