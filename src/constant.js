@@ -31,7 +31,7 @@ module.exports = {
             changePassword: '/change-password',
             profile: '/profile',
             modules: '/profile/modules',
-            functions: '/profile/modules/:moduleId/functions'
+            functions: '/profile/functions'
         },
         grade: {
             list: '/grades',

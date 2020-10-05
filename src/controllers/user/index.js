@@ -229,7 +229,7 @@ userController.login = async (req, res, next) => {
             maxAge: 15 * 60 * 1000
         })
 
-        return res.status(200).json(ResponseHelper.toBaseResponse(true))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch(e) {
         next(e);
