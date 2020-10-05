@@ -64,9 +64,16 @@ AnnouncementService.addUser = async (announcementId, userIds, loggedInUser) => {
     return AnnouncementUserMapping.query().insertToTable(users, loggedInUser.sub);
 }
 
-AnnouncementService.publishAnnouncement = async ( announcementDTO, userIds, user ) => {
+AnnouncementService.publishAnnouncement = async (announcementDTO,announcementId, userIds, user ) => {
 
-    const announcement = await Announcement.query().insertToTable(announcementDTO, user.sub)
+    const getAnnouncement = await Announcement.query()
+    .where('eannouncementid', announcementId)
+    .andWhere('eannouncementcreateby', user.sub)
+    .first()
+
+    if(!getAnnouncement) return
+
+    const announcement = await Announcement.query().insertToTable(announcementDTO,announcementId, user.sub)
 
     await AnnouncementService.addUser(announcement.eannouncementid, userIds, user);
 
