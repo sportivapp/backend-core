@@ -59,9 +59,9 @@ const NotificationEnum = {
         type : 'ANNOUNCEMENT',
         actions : {
             publish : {
-                title: 'Announcement Publish',
-                code: 'ANNOUNCEMENT_PUBLISH',
-                message: 'New announcement has published'
+                title: 'New Announcement',
+                code: 'NEW_ANNOUNCEMENT',
+                message: 'You got a new Announcement!'
             }
         }
     }

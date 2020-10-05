@@ -20,22 +20,6 @@ const ErrorEnum = {
 
 }
 
-AnnouncementService.getHighestPosition = async (announcementId) => {
-
-    const foundCompany = await Announcement.query()
-    .select('ecompanyecompanyid')
-    .findById(announcementId)
-
-    if(!foundCompany) throw new NotFoundError()
-
-    const users = await Grade.relatedQuery('users')
-    .for(Grade.query()
-    .where('ecompanyecompanyid',foundCompany.ecompanyecompanyid).andWhere('egradesuperiorid', null))
-    .distinct('euserid')
-
-    return users.map(user => user.euserid)
-}
-
 AnnouncementService.getAllAnnouncement = async (page, size, type = 'IN', user) => {
 
     if (type === 'IN')
@@ -77,7 +61,6 @@ AnnouncementService.getAnnouncementById = async (announcementId, user) => {
 
 AnnouncementService.addUser = async (announcementId, userIds, loggedInUser) => {
 
-    const getHighestPosition = await AnnouncementService.getHighestPosition(announcementId)
 
     const users = userIds.map(user => ({
         eannouncementeannouncementid: announcementId, 
@@ -87,8 +70,8 @@ AnnouncementService.addUser = async (announcementId, userIds, loggedInUser) => {
     return AnnouncementUserMapping.query().insertToTable(users, loggedInUser.sub)
     .then(announcementLog => {
 
-        if(getHighestPosition.length > 0) {
-            const notificiationObj = {
+        if(users.length > 0) {
+            const notificationObj = {
                 enotificationbodyentityid : announcementId,
                 enotificationbodyentitytype: NotificationEnum.announcement.type,
                 enotificationbodyaction: NotificationEnum.announcement.actions.publish.code,
@@ -97,9 +80,9 @@ AnnouncementService.addUser = async (announcementId, userIds, loggedInUser) => {
         
 
         notificationService.saveNotification(
-            notificiationObj,
+            notificationObj,
             loggedInUser,
-            getHighestPosition
+            userIds
         )
     }
 
