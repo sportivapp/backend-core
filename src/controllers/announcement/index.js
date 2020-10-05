@@ -12,13 +12,6 @@ announcementController.publishAnnouncement = async (req, res, next) => {
 
     try {
 
-        // const announcementDTO = {
-        //     eannouncementtitle: announcementTitle,
-        //     eannouncementcontent: announcementContent,
-        //     eannouncementcreateby: user.sub,
-        //     ecompanyecompanyid: user.companyId
-        // }
-
         const result = await announcementService.publishAnnouncement(announcementId,userIds,user)
 
         if (!result)
