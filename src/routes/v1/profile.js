@@ -10,6 +10,6 @@ router.put(routes.profile.changePassword, auth.authenticateToken, profileControl
 router.put(routes.profile.profile, auth.authenticateToken, profileController.updateProfile)
 router.get(routes.profile.profile, auth.authenticateToken, profileController.getProfile)
 router.get(routes.profile.modules, auth.authenticateToken, profileController.getModules)
-router.get(routes.profile.functions, auth.authenticateToken, profileController.getFunctionsByModuleId)
+router.get(routes.profile.functions, auth.authenticateToken, profileController.getAllFunctions)
 
 module.exports = router.expressRouter;

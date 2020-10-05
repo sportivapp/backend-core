@@ -104,16 +104,15 @@ profileController.getModules = async (req, res, next) => {
     }
 }
 
-profileController.getFunctionsByModuleId = async (req, res, next) => {
-
-    const { moduleId } = req.params
+profileController.getAllFunctions = async (req, res, next) => {
 
     try {
-        const modules = await profileService.getFunctionsByModuleId(moduleId, req.user);
-        return res.status(200).json(ResponseHelper.toBaseResponse(modules))
+        const functions = await profileService.getFunctions(req.user)
+        return res.status(200).json(ResponseHelper.toBaseResponse(functions))
     } catch (e) {
         next(e)
     }
+
 }
 
 module.exports = profileController
