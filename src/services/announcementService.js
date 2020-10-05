@@ -4,6 +4,10 @@ const ServiceHelper = require('../helper/ServiceHelper')
 const fileService = require('./fileService');
 const { NotFoundError, UnsupportedOperationError } = require('../models/errors');
 const companyService = require('./companyService');
+const NotificationEnum = require('../models/enum/NotificationEnum');
+const notificationService = require('./notificationService');
+const Grade = require('../models/Grades')
+
 
 
 
@@ -12,7 +16,24 @@ const AnnouncementService = {};
 const ErrorEnum = {
     COMPANY_NOT_FOUND: 'COMPANY_NOT_FOUND',
     FILE_NOT_FOUND: 'FILE_NOT_FOUND',
+    ANNOUNCEMENT_NOT_FOUND : "ANNOUNCEMENT_NOT_FOUND"
 
+}
+
+AnnouncementService.getHighestPosition = async (announcementId) => {
+
+    const foundCompany = await Announcement.query()
+    .select('ecompanyecompanyid')
+    .findById(announcementId)
+
+    if(!foundCompany) throw new NotFoundError()
+
+    const users = await Grade.relatedQuery('users')
+    .for(Grade.query()
+    .where('ecompanyecompanyid',foundCompany.ecompanyecompanyid).andWhere('egradesuperiorid', null))
+    .distinct('euserid')
+
+    return users.map(user => user.euserid)
 }
 
 AnnouncementService.getAllAnnouncement = async (page, size, type = 'IN', user) => {
@@ -56,28 +77,43 @@ AnnouncementService.getAnnouncementById = async (announcementId, user) => {
 
 AnnouncementService.addUser = async (announcementId, userIds, loggedInUser) => {
 
+    const getHighestPosition = await AnnouncementService.getHighestPosition(announcementId)
+
     const users = userIds.map(user => ({
         eannouncementeannouncementid: announcementId, 
         eusereuserid: user
     }));
 
-    return AnnouncementUserMapping.query().insertToTable(users, loggedInUser.sub);
+    return AnnouncementUserMapping.query().insertToTable(users, loggedInUser.sub)
+    .then(announcementLog => {
+
+        if(getHighestPosition.length > 0) {
+            const notificiationObj = {
+                enotificationbodyentityid : announcementId,
+                enotificationbodyentitytype: NotificationEnum.announcement.type,
+                enotificationbodyaction: NotificationEnum.announcement.actions.publish.code,
+                enotificationbodytitle: NotificationEnum.announcement.actions.publish.title,
+                enotificationbodymessage: NotificationEnum.announcement.actions.publish.message            }
+        
+
+        notificationService.saveNotification(
+            notificiationObj,
+            loggedInUser,
+            getHighestPosition
+        )
+    }
+
+        return announcementLog
+    })
 }
 
-AnnouncementService.publishAnnouncement = async (announcementDTO,announcementId, userIds, user ) => {
+AnnouncementService.publishAnnouncement = async (announcementId, userIds, user ) => {
 
-    const getAnnouncement = await Announcement.query()
-    .where('eannouncementid', announcementId)
-    .andWhere('eannouncementcreateby', user.sub)
-    .first()
+    const announcement = await Announcement.query().findById(announcementId)
 
-    if(!getAnnouncement) return
+    if (!announcement) throw new UnsupportedOperationError(ErrorEnum.ANNOUNCEMENT_NOT_FOUND)
 
-    const announcement = await Announcement.query().insertToTable(announcementDTO,announcementId, user.sub)
-
-    await AnnouncementService.addUser(announcement.eannouncementid, userIds, user);
-
-    return announcement;
+    return AnnouncementService.addUser(announcement.eannouncementid, userIds, user);
 }
 
 AnnouncementService.createAnnouncement = async (announcementDTO,user) => {

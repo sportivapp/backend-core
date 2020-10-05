@@ -5,19 +5,21 @@ announcementController = {}
 
 announcementController.publishAnnouncement = async (req, res, next) => {
     
-    const { announcementTitle, announcementContent, userIds } = req.body;
+    const {userIds } = req.body;
     const user = req.user;
+
+    const { announcementId } = req.params 
 
     try {
 
-        const announcementDTO = {
-            eannouncementtitle: announcementTitle,
-            eannouncementcontent: announcementContent,
-            eannouncementcreateby: user.sub,
-            ecompanyecompanyid: user.companyId
-        }
+        // const announcementDTO = {
+        //     eannouncementtitle: announcementTitle,
+        //     eannouncementcontent: announcementContent,
+        //     eannouncementcreateby: user.sub,
+        //     ecompanyecompanyid: user.companyId
+        // }
 
-        const result = await announcementService.publishAnnouncement(announcementDTO,userIds,user)
+        const result = await announcementService.publishAnnouncement(announcementId,userIds,user)
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
