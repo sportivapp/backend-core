@@ -92,10 +92,10 @@ newsService.editNews = async (newsDTO, newsId, user) => {
 
 newsService.getNews = async (page, size, user, type) => {
 
-    if(type !== 'NOTPUBLISH' && type !== 'PUBLISH')
+    if(type !== 'UNPUBLISH' && type !== 'PUBLISH')
         throw new NotFoundError()
 
-    if(type === 'NOTPUBLISH')
+    if(type === 'UNPUBLISH')
         return News.query()
         .where('ecompanyecompanyid', user.companyId)
         .where('enewsispublished', false)
