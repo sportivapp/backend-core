@@ -9,17 +9,16 @@ const ServiceHelper = require('../helper/ServiceHelper')
 
 const FileService = {};
 
-FileService.createFileWithTransaction = async (trx, file, user) => {
-
-    const fileDTO = {
-        efilename: file.filename,
-        efilepath: file.path,
-        efiletype: file.mimetype,
-        efilesize: file.size
-    }
+FileService.checkFileMaker = async (fileId, user) => {
     
-    return File.query(trx).insertToTable(fileDTO, user.sub);
-
+    return File.query()
+    .findById(fileId)
+    .where('efilecreateby', user.sub)
+    .then(file => {
+        if(!file) return false
+        return true
+    })
+    
 }
 
 FileService.createFile = async (file, user) => {
