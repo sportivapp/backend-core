@@ -36,11 +36,10 @@ controller.previewFile = async (req, res, next) => {
     const { fileId } = req.params;
 
     try {
-        const result = await fileService.getFileById(fileId);
         
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400));
-        return res.status(200).sendFile(result.efilepath);        
+        const result = await fileService.getFileById(fileId);
+        return res.status(200).sendFile(result.efilepath);     
+
     } catch(e) {
         next(e);
     }
@@ -68,11 +67,10 @@ controller.getFile = async (req, res, next) => {
     const { fileId } = req.params;
 
     try {
+
         const result = await fileService.getFileById(fileId);
-        
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400));
         return res.status(200).json(ResponseHelper.toBaseResponse(result)); 
+
     } catch(e) {
         next(e);
     }
@@ -85,7 +83,7 @@ controller.downloadFile = async (req, res, next) => {
 
     try {
 
-        const result = await fileService.downloadFile(fileId)
+        const result = await fileService.getFileById(fileId)
         return res.download(result.efilepath)
         
     } catch (e) {

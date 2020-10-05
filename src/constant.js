@@ -163,6 +163,12 @@ module.exports = {
         },
         file: {
             download: '/file-download/:fileId'
+        },
+        theory: {
+            list: '/theory',
+            download: '/theory/:theoryId/download',
+            preview: '/theory/:theoryId/preview',
+            remove: '/theory/:theoryId/delete'
         }
     }
 }
