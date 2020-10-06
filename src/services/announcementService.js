@@ -13,21 +13,24 @@ const AnnouncementService = {};
 const ErrorEnum = {
     COMPANY_NOT_FOUND: 'COMPANY_NOT_FOUND',
     FILE_NOT_FOUND: 'FILE_NOT_FOUND',
-    ANNOUNCEMENT_NOT_FOUND: "ANNOUNCEMENT_NOT_FOUND"
+    ANNOUNCEMENT_NOT_FOUND: 'ANNOUNCEMENT_NOT_FOUND',
+    USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY'
 }
 
-AnnouncementService.getAllAnnouncement = async (page, size) => {
+AnnouncementService.getAllAnnouncement = async (page, size, user) => {
 
     return Announcement.query()
+        .where('ecompanyecompanyid', user.companyId)
         .withGraphFetched('users(baseAttributes)')
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj));
 }
 
-AnnouncementService.getAnnouncementById = async (announcementId) => {
+AnnouncementService.getAnnouncementById = async (announcementId, user) => {
 
     return Announcement.query()
-        .findById(announcementId)
+        .where('eannouncementid', announcementId)
+        .andWhere('ecompanyecompanyid', user.companyId)
         .withGraphFetched('users(baseAttributes)')
         .then(announcement => {
             if (!announcement) throw new NotFoundError()
@@ -68,9 +71,8 @@ AnnouncementService.addUser = async (announcementId, userIds, loggedInUser, db) 
 
 AnnouncementService.publishAnnouncement = async (announcementId, userIds, user) => {
 
-    const announcement = await Announcement.query().findById(announcementId)
-
-    if (!announcement) throw new UnsupportedOperationError(ErrorEnum.ANNOUNCEMENT_NOT_FOUND)
+    const announcement = await AnnouncementService.getAnnouncementById(announcementId, user)
+        .catch(() => new UnsupportedOperationError(ErrorEnum.ANNOUNCEMENT_NOT_FOUND))
 
     return AnnouncementService.addUser(announcement.eannouncementid, userIds, user, Announcement.knex());
 }
@@ -91,14 +93,10 @@ AnnouncementService.createAnnouncement = async (announcementDTO, user) => {
 
 }
 
-
 AnnouncementService.updateAnnouncement = async (announcementId, announcementDTO, userIds, user) => {
 
-    const announcement = await Announcement.query()
-        .findById(announcementId)
-        .first()
-
-    if (!announcement) throw new UnsupportedOperationError(ErrorEnum.ANNOUNCEMENT_NOT_FOUND)
+    const announcement = await AnnouncementService.getAnnouncementById(announcementId, user)
+        .catch(() => new UnsupportedOperationError(ErrorEnum.ANNOUNCEMENT_NOT_FOUND))
 
     return Announcement.transaction(async trx => {
 
@@ -114,15 +112,9 @@ AnnouncementService.updateAnnouncement = async (announcementId, announcementDTO,
 
 AnnouncementService.deleteAnnouncement = async (announcementId, user) => {
 
-    const announcement = await Announcement.query()
-        .findById(announcementId)
-        .first()
-
-    if (!announcement) return false
-
-    if (announcement.ecompanyecompanyid && announcement.ecompanyecompanyid !== user.companyId) return false
-
-    return announcement.$query().delete().then(rowsAffected => rowsAffected === 1)
+    return AnnouncementService.getAnnouncementById(announcementId, user)
+        .then(announcement => announcement.$query().delete().then(rowsAffected => rowsAffected === 1))
+        .catch(() => false)
 }
 
 module.exports = AnnouncementService;

@@ -15,7 +15,7 @@ announcementController.publishAnnouncement = async (req, res, next) => {
 
     try {
 
-        const result = await announcementService.publishAnnouncement(announcementId,userIds,user)
+        const result = await announcementService.publishAnnouncement(announcementId, userIds, user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
         
     } catch (e) {
@@ -45,12 +45,12 @@ announcementController.deleteAnnouncement = async (req, res, next) => {
 
 announcementController.getAllAnnouncement = async (req, res, next) => {
 
-    const { page, size, type } = req.query
+    const { page, size } = req.query
     const user = req.user;
 
     try {
 
-        const pageObj = await announcementService.getAllAnnouncement(parseInt(page), parseInt(size), type, user);
+        const pageObj = await announcementService.getAllAnnouncement(parseInt(page), parseInt(size), user);
         return res.status(200).json(ResponseHelper.toBaseResponse(pageObj.data, pageObj.paging))
     } catch (e) {
         next(e);
@@ -115,7 +115,7 @@ announcementController.createAnnouncement = async (req,res,next) => {
 
         }
 
-        const result = await announcementService.createAnnouncement(announcementDTO,user)
+        const result = await announcementService.createAnnouncement(announcementDTO, user)
         return res.status(200).json(ResponseHelper.toPageResponse(result))
 
     } catch(e) {
