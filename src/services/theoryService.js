@@ -1,42 +1,87 @@
-const ServiceHelper = require('../helper/ServiceHelper');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
-const { raw } = require('objection');
-const File = require('../models/File');
 const CompanyUserMapping = require('../models/CompanyUserMapping');
+const CompanyFileMapping = require('../models/CompanyFileMapping');
+const fileService = require('../services/fileService')
 
 const theoryService = {};
 
 const UnsupportedOperationErrorEnum = {
-    USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY'
+    USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY',
+    FILE_NOT_EXIST: 'FILE_NOT_EXIST'
 }
 
-theoryService.isUserInCompany = async (companyId, user) => {
+// check if the file exists in company
+theoryService.fileInCompanyExist = async (theoryId, companyId) => {
 
-    return CompanyUserMapping.query()
+    return CompanyFileMapping.query()
     .where('ecompanyecompanyid', companyId)
-    .andWhere('eusereuserid', user.sub)
+    .where('efileefileid', theoryId)
     .first()
-    .then(result => {
-        if (!result)
-            return false
+    .then(file => {
+        if(!file) return false
         return true
     })
 
 }
 
-theoryService.getTheoryList = async (keyword, page, size, companyId, user) => {
+theoryService.createTheory = async ( fileId, user ) => {
 
-    const isUserInCompany = await theoryService.isUserInCompany(companyId, user);
+    const fileMaker = await fileService.getFileByIdAndCreateBy(fileId, user.sub)
 
-    if (!isUserInCompany)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY);
+    if(!fileMaker) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FILE_NOT_EXIST)
 
-    return File.query()
-    .joinRelated('companyMappings')
-    .where('ecompanyecompanyid', companyId)
-    .andWhere(raw('lower("efilename")'), 'like', `%${keyword.toLowerCase()}%`)
-    .page(page, size)
-    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj));
+    return CompanyFileMapping.transaction(async trx => {
+
+        const mappingDTO = {
+            ecompanyecompanyid: user.companyId,
+            efileefileid: fileId
+        }
+
+        return CompanyFileMapping.query(trx)
+        .insertToTable(mappingDTO, user.sub)
+    })
+
+}
+
+theoryService.downloadTheory = async (theoryId, user) => {
+
+    const fileInCompany = await theoryService.fileInCompanyExist(theoryId, user.companyId)
+
+    if(!fileInCompany) 
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FILE_NOT_EXIST)
+
+    return fileService.getFileById(theoryId)
+
+}
+
+theoryService.getTheoryList = async (keyword, page, size, user) => {
+    
+    return fileService.getFilesByCompanyId(page, size, user.companyId, keyword)
+
+}
+
+theoryService.previewTheory = async (theoryId, user) => {
+
+    const fileInCompany = await theoryService.fileInCompanyExist(theoryId, user.companyId)
+
+    if(!fileInCompany)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FILE_NOT_EXIST)
+
+    return fileService.getFileById(theoryId)
+    .then(theory => {
+        if(!theory) throw new NotFoundError()
+        return theory
+    })
+
+}
+
+theoryService.deleteTheoryByFileId = async (theoryId, user) => {
+
+    const fileMaker = await fileService.getFileByIdAndCreateBy(theoryId, user.sub)
+
+    if(!fileMaker) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FILE_NOT_EXIST)
+
+    return fileService.deleteFileById(theoryId)
 
 }
 

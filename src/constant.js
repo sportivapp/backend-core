@@ -46,6 +46,7 @@ module.exports = {
         },
         announcement: {
             create: '/announcement',
+            publish: '/publish-announcement/:announcementId',
             id: '/announcement/:announcementId',
             list: '/announcement-list'
         },
@@ -153,7 +154,11 @@ module.exports = {
             version: '/app/version'
         },
         news: {
-            id: '/news/:newsId'
+            list: '/news',
+            id: '/news/:newsId',
+            publish: '/news/:newsId/publish',
+            count: '/news/:newsId/user',
+            generate: '/news/:newsId/link'
         },
         notification: {
             list: '/notification'
@@ -163,6 +168,12 @@ module.exports = {
         },
         file: {
             download: '/file-download/:fileId'
+        },
+        theory: {
+            list: '/theory',
+            download: '/theory/:theoryId/download',
+            preview: '/theory/:theoryId/preview',
+            remove: '/theory/:theoryId/delete'
         }
     }
 }

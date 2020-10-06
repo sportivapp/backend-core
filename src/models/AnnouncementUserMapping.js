@@ -1,4 +1,5 @@
 const Model = require('./Model');
+const Announcement = require('./Announcement')
 
 class AnnouncementUserMapping extends Model {
   static get tableName() {

@@ -7,15 +7,15 @@ exports.up = (knex) =>
                     .select('ecompanyid')
                     .whereNull('ecompanyparentid')
             })
+            .then(companies => {
+                if (companies.length < 1) return trx.rollback()
+                return companies
+            })
             .then(companies => createAdmins(companies,knex, trx))
             .then(grades => {
                 return knex('efunction')
                     .select('efunctioncode')
                     .then(functions => ({ grades: grades, functions: functions }))
-            })
-            .then(obj => {
-                console.log(obj)
-                return obj
             })
             .then(({ grades, functions }) => createGradeFunctionMappings(grades, functions, knex, trx))
             .then(grades => mapUserAndGrades(grades, knex, trx))
