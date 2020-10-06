@@ -5,40 +5,50 @@ const TimeEnum = require('../models/enum/TimeEnum')
 
 const mobileForumService = {}
 
+mobileForumService.checkFilter = async (filterData) => {
+
+    if(filterData === undefined)
+        return { companyId: null, teamId: null }
+
+    const newFilter = {}
+
+    if(filterData.companyId === undefined || filterData.companyId === null || filterData.companyId === 0) {
+        newFilter.companyId = null
+    } else {
+        newFilter.companyId = filterData.companyId
+    }
+
+    if(filterData.teamId === undefined || filterData.teamId === null || filterData.teamId === 0) {
+        newFilter.teamId = null
+    } else {
+        newFilter.teamId = filterData.teamId
+    }
+
+    return newFilter
+
+}
+
 mobileForumService.getThreadList = async (page, size, filter) => {
 
-    if(filter === undefined)
-        return Thread.query()
-        .modify('baseAttributes')
-        .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
-        .orderBy('ethreadcreatetime', 'DESC')
-        .page(page, size)
-        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+    const getFilter = await mobileForumService.checkFilter(filter)
 
-    if(filter.companyId === undefined)
-        return Thread.query()
-        .modify('baseAttributes')
-        .where('eteameteamid', filter.teamId)
-        .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
-        .orderBy('ethreadcreatetime', 'DESC')
-        .page(page, size)
-        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+    console.log(getFilter);
 
-    if(filter.teamId === undefined)
-        return Thread.query()
-        .modify('baseAttributes')
-        .where('ecompanyecompanyid', filter.companyId)
-        .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
-        .orderBy('ethreadcreatetime', 'DESC')
-        .page(page, size)
-        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
-
-    // if filter isn't undefined and teamid and companyid isn't undefined too, then do this
-    return Thread.query()
+    let threadPromise = Thread.query()
     .modify('baseAttributes')
-    .where('eteameteamid', filter.teamId)
-    .where('ecompanyecompanyid', filter.companyId)
     .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
+
+    if(getFilter.companyId !== null) {
+        threadPromise = threadPromise
+        .where('ecompanyecompanyid', filter.companyId)
+    }
+
+    if(getFilter.teamId !== null) {
+        threadPromise = threadPromise
+        .where('eteameteamid', filter.teamId)
+    }
+
+    return threadPromise
     .orderBy('ethreadcreatetime', 'DESC')
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
