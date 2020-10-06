@@ -20,7 +20,7 @@ mobileForumService.getThreadDetailById = async (threadId) => {
     return Thread.query()
     .findById(threadId)
     .modify('baseAttributes')
-    .withGraphFetched('threadPost')
+    .withGraphFetched('comments')
     .then(thread => {
         if(!thread) throw new NotFoundError()
         return thread
