@@ -34,7 +34,7 @@ class Thread extends Model {
     const ThreadPost = require('./ThreadPost')
 
     return {
-      threadPost: {
+      comments: {
         relation: Model.HasManyRelation,
         modelClass: ThreadPost,
         join: {
