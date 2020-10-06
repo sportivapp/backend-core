@@ -32,8 +32,6 @@ mobileForumService.getThreadList = async (page, size, filter) => {
 
     const getFilter = await mobileForumService.checkFilter(filter)
 
-    console.log(getFilter);
-
     let threadPromise = Thread.query()
     .modify('baseAttributes')
     .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
