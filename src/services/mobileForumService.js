@@ -5,7 +5,7 @@ const TimeEnum = require('../models/enum/TimeEnum')
 
 const mobileForumService = {}
 
-mobileForumService.checkFilter = async (filterData) => {
+mobileForumService.normalizeFilter = async (filterData) => {
 
     if(filterData === undefined)
         return { companyId: null, teamId: null }
@@ -14,14 +14,10 @@ mobileForumService.checkFilter = async (filterData) => {
 
     if(filterData.companyId === undefined || filterData.companyId === null || filterData.companyId === 0) {
         newFilter.companyId = null
-    } else {
-        newFilter.companyId = filterData.companyId
     }
 
     if(filterData.teamId === undefined || filterData.teamId === null || filterData.teamId === 0) {
         newFilter.teamId = null
-    } else {
-        newFilter.teamId = filterData.teamId
     }
 
     return newFilter
@@ -30,7 +26,7 @@ mobileForumService.checkFilter = async (filterData) => {
 
 mobileForumService.getThreadList = async (page, size, filter) => {
 
-    const getFilter = await mobileForumService.checkFilter(filter)
+    const getFilter = await mobileForumService.normalizeFilter(filter)
 
     let threadPromise = Thread.query()
     .modify('baseAttributes')
