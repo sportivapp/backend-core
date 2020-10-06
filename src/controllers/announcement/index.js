@@ -4,6 +4,9 @@ const announcementService = require('../../services/announcementService');
 announcementController = {}
 
 announcementController.publishAnnouncement = async (req, res, next) => {
+
+    if (req.user.functions.indexOf('C11') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
     
     const {userIds } = req.body;
     const user = req.user;
@@ -12,10 +15,7 @@ announcementController.publishAnnouncement = async (req, res, next) => {
 
     try {
 
-        const result = await announcementService.publishAnnouncement(announcementId,userIds,user)
-
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
+        const result = await announcementService.publishAnnouncement(announcementId, userIds, user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
         
     } catch (e) {
@@ -25,6 +25,9 @@ announcementController.publishAnnouncement = async (req, res, next) => {
 
 announcementController.deleteAnnouncement = async (req, res, next) => {
 
+    if (req.user.functions.indexOf('D11') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     
     const user = req.user;
     const { announcementId } = req.params;
@@ -32,9 +35,6 @@ announcementController.deleteAnnouncement = async (req, res, next) => {
     try {
 
         const result = await announcementService.deleteAnnouncement(announcementId, user);
-
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch(e) {
@@ -45,17 +45,13 @@ announcementController.deleteAnnouncement = async (req, res, next) => {
 
 announcementController.getAllAnnouncement = async (req, res, next) => {
 
-    const { page, size, type } = req.query
+    const { page, size } = req.query
     const user = req.user;
 
     try {
-        const pageObj = await announcementService.getAllAnnouncement(parseInt(page), parseInt(size), type, user);
 
-        if(!pageObj)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
-
+        const pageObj = await announcementService.getAllAnnouncement(parseInt(page), parseInt(size), user);
         return res.status(200).json(ResponseHelper.toBaseResponse(pageObj.data, pageObj.paging))
-        
     } catch (e) {
         next(e);
     }
@@ -69,9 +65,6 @@ announcementController.getAnnouncementById = async (req, res, next) => {
     try {
 
         const result = await announcementService.getAnnouncementById(announcementId, user);
-
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
         
     } catch (e) {
@@ -80,6 +73,9 @@ announcementController.getAnnouncementById = async (req, res, next) => {
 }
 
 announcementController.updateAnnouncement = async (req, res, next) => {
+
+    if (req.user.functions.indexOf('U11') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
    
     const user = req.user;
     const { announcementId } = req.params;
@@ -93,9 +89,6 @@ announcementController.updateAnnouncement = async (req, res, next) => {
         }
 
         const result = await announcementService.updateAnnouncement(announcementId, announcementDTO, userIds, user);
-
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch(e) {
@@ -105,6 +98,9 @@ announcementController.updateAnnouncement = async (req, res, next) => {
 }
 
 announcementController.createAnnouncement = async (req,res,next) => {
+
+    if (req.user.functions.indexOf('C11') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { announcementTitle, announcementContent, fileId} = req.body;
     const user = req.user;
@@ -119,7 +115,7 @@ announcementController.createAnnouncement = async (req,res,next) => {
 
         }
 
-        const result = await announcementService.createAnnouncement(announcementDTO,user)
+        const result = await announcementService.createAnnouncement(announcementDTO, user)
         return res.status(200).json(ResponseHelper.toPageResponse(result))
 
     } catch(e) {
