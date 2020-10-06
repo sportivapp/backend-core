@@ -1,6 +1,7 @@
 const Thread = require('../models/Thread')
 const ServiceHelper = require('../helper/ServiceHelper')
 const { NotFoundError } = require('../models/errors')
+const TimeEnum = require('../models/enum/TimeEnum')
 
 const mobileForumService = {}
 
@@ -8,7 +9,7 @@ mobileForumService.getThreadList = async (page, size) => {
 
     return Thread.query()
     .modify('baseAttributes')
-    .where('ethreadcreatetime', '>', Date.now() - (2592000000 * 3)) // 2592000000 equals to 30 days, times 3 to be 3 months
+    .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
     .orderBy('ethreadcreatetime', 'DESC')
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
