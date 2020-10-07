@@ -453,10 +453,13 @@ teamService.getPendingTeamList = async (user, page, size, type) => {
     if (type !== TeamLogTypeEnum.APPLY && type !== TeamLogTypeEnum.INVITE)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TYPE_UNACCEPTED)
 
-    const pendingTeamPage = await TeamLog.query()
-                                    .where('eusereuserid', user.sub)
-                                    .andWhere('eteamlogtype', type)
-                                    .page(page, size);
+    const pendingTeamPage = 
+    await TeamLog.query()
+        .where('eusereuserid', user.sub)
+        .andWhere('eteamlogtype', type)
+        .modify('baseAttributes')
+        .withGraphFetched('team(baseAttributes).industries(baseAttributes)')
+        .page(page, size);
 
     return ServiceHelper.toPageObj(page, size, pendingTeamPage);
 
