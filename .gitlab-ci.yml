@@ -8,6 +8,6 @@ deploy_development:
     name: development
     url: api.quickplay.app
   script:
-    - ssh $SERVER_USER:$SERVER_PASSWORD@$SERVER_HOST "cd /data1/opt/emtiv-backend && sudo git pull origin development-mobile-api && sudo pm2 reload all && exit"
+    - ssh $SERVER_USER@$SERVER_HOST "cd /data1/opt/emtiv-backend && sudo git pull origin development-mobile-api && sudo pm2 reload all && exit"
   only:
     - development-mobile-api
