@@ -25,4 +25,4 @@ deploy:
       - mkdir -p ~/.ssh
       - chmod 700 ~/.ssh
   script:
-    - ssh administrator@103.253.113.215 "cd /data1/opt/emtiv-backend"
+    - ssh -p 40000 administrator@103.253.113.215 "cd /data1/opt/emtiv-backend"
