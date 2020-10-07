@@ -16,6 +16,7 @@ router.post('/team-invite', auth.authenticateToken, controller.invite);
 router.post('/team-change-permission', auth.authenticateToken, controller.changeTeamMemberPosition);
 router.post('/team-kick', auth.authenticateToken, controller.kick);
 router.post('/team-cancel-request', auth.authenticateToken, controller.cancelRequest);
+router.get('/team-user-pending', auth.authenticateToken, controller.getPendingTeamList);
 router.post('/team-process-invitation', auth.authenticateToken, controller.processInvitation);
 
 module.exports = router;

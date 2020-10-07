@@ -22,6 +22,9 @@ class AnnouncementUserMapping extends Model {
   }
 
   static get relationMappings() {
+
+    const Announcement = require('./Announcement');
+    
     return {
       announcement: {
         relation: Model.BelongsToOneRelation,
