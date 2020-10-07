@@ -17,7 +17,7 @@ exports.seed = (knex, Promise) => knex('ethread').del()
                     ethreaddescription: 'Forum ini bertujuan untuk membahas pemanasan atau perenggangan otot terbaik',
                     ethreadtype: 'SPORT',
                     ethreadispublic: true,
-                    ecompanyecompanyid: 2,
+                    ecompanyecompanyid: 1,
                     eteameteamid: null,
                     ethreadcreatetime: Date.now(),
                     ethreadcreateby: 4
