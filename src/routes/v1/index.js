@@ -82,6 +82,7 @@ const mobileClassUserRoutes = require('./mobileClassUser');
 const mobileAppVersionRoutes = require('./mobileAppVersion');
 const mobileNewsRoutes = require('./mobileNews');
 const mobileForumRoutes = require('./mobileForum');
+const mobileCommentRoutes = require('./mobileComment');
 
 router.use('/api/v1/mobile', [
     mobileUserRoutes,
@@ -94,7 +95,8 @@ router.use('/api/v1/mobile', [
     mobileClassUserRoutes,
     mobileAppVersionRoutes,
     mobileNewsRoutes,
-    mobileForumRoutes
+    mobileForumRoutes,
+    mobileCommentRoutes
 ]);
 
 module.exports = router;
