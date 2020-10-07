@@ -2,6 +2,9 @@
 # Official framework image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/node/tags/
 
+stages:
+    - deploy_development
+
 deploy_development:
   type: deploy
   environment:
