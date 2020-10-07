@@ -242,6 +242,22 @@ controller.cancelRequest = async (req, res, next) => {
 
 }
 
+controller.getPendingTeamList = async (req, res, next) => {
+
+    const { page = '0', size = '10', type } = req.query;
+
+    try {
+
+        const result = await teamService.getPendingTeamList(req.user, parseInt(page), parseInt(size), type.toUpperCase());
+
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 controller.processInvitation = async (req, res, next) => {
 
     const { teamId } = req.body;
