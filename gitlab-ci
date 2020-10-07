@@ -1,0 +1,13 @@
+# This file is a template, and might need editing before it works on your project.
+# Official framework image. Look for the different tagged releases at:
+# https://hub.docker.com/r/library/node/tags/
+
+deploy_development:
+  type: deploy
+  environment:
+    name: development
+    url: api.quickplay.app
+  script:
+    - ssh $SERVER_USER:$SERVER_PASSWORD@$SERVER_HOST "cd /data1/opt/emtiv-backend && sudo git pull origin development-mobile-api && sudo pm2 reload all && exit"
+  only:
+    - development-mobile-api
