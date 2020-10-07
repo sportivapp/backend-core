@@ -176,7 +176,7 @@ module.exports = {
             remove: '/theory/:theoryId/delete'
         },
         comment: {
-            commentList: '/comment-thread/:threadId',
+            threadComments: '/thread/:threadId/comments',
             list: '/comment',
             id: '/comment/:commentId'
         }
