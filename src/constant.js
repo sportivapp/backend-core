@@ -174,6 +174,11 @@ module.exports = {
             download: '/theory/:theoryId/download',
             preview: '/theory/:theoryId/preview',
             remove: '/theory/:theoryId/delete'
+        },
+        comment: {
+            threadComments: '/thread/:threadId/comments',
+            list: '/comment',
+            id: '/comment/:commentId'
         }
     }
 }

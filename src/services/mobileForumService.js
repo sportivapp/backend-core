@@ -5,6 +5,19 @@ const TimeEnum = require('../models/enum/TimeEnum')
 
 const mobileForumService = {}
 
+// Method to be used by other service to check if thread exists
+mobileForumService.checkThread = async (threadId) => {
+
+    return Thread.query()
+    .findById(threadId)
+    .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
+    .then(thread => {
+        if(!thread) return false
+        return true
+    })
+    
+}
+
 mobileForumService.normalizeFilter = async (filterData) => {
 
     if(filterData === undefined)
@@ -47,13 +60,13 @@ mobileForumService.getThreadList = async (page, size, filter) => {
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
-    
 }
 
 mobileForumService.getThreadDetailById = async (threadId) => {
 
     return Thread.query()
     .findById(threadId)
+    .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
     .modify('baseAttributes')
     .withGraphFetched('comments')
     .then(thread => {
