@@ -10,7 +10,23 @@ const mobileForumService = {}
 
 const UnsupportedOperationErrorEnum = {
     USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY',
-    USER_NOT_IN_TEAM: 'USER_NOT_IN_TEAM'
+    USER_NOT_IN_TEAM: 'USER_NOT_IN_TEAM',
+    FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
+    THREAD_NOT_EXISTS: 'THREAD_NOT_EXISTS'
+}
+
+mobileForumService.checkModerator = async (threadId, userId) => {
+
+    //if not the maker, check if its the moderator
+    return ThreadModerator.query()
+        .where('ethreadethreadid', threadId)
+        .where('eusereuserid', userId)
+        .first()
+        .then(moderator => {
+            if(!moderator) return false
+            return true
+    })
+
 }
 
 // Method to be used by other service to check if thread exists
@@ -63,6 +79,7 @@ mobileForumService.createThread = async (threadDTO, user) => {
         .then(userInTeam => {
             if(!userInTeam) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
         })
+
     }
 
     return Thread.transaction(async trx => {
@@ -76,8 +93,42 @@ mobileForumService.createThread = async (threadDTO, user) => {
             return { thread, moderator }
         })
     })
-
     
+}
+
+mobileForumService.updateThreadById = async (threadId, threadDTO, user) => {
+
+    const moderator = await mobileForumService.checkModerator(threadId, user.sub)
+
+    if(!moderator) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION)
+
+    if( threadDTO.ecompanyecompanyid !== null ) {
+
+        await mobileCompanyService.checkUserInCompany(threadDTO.ecompanyecompanyid, user.sub)
+        .then(userInCompany => {
+            if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
+
+        })
+
+    }
+
+    if( threadDTO.eteameteamid !== null) {
+
+        await mobileTeamService.checkUserInTeam(threadDTO.eteameteamid, user.sub)
+        .then(userInTeam => {
+            if(!userInTeam) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
+        })
+
+    }
+
+    return Thread.query()
+    .findById(threadId)
+    .updateByUserId(threadDTO, user.sub)
+    .returning('*')
+    .then(thread => {
+        if(!thread) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_NOT_EXISTS)
+        return thread
+    })
     
 }
 
@@ -119,6 +170,19 @@ mobileForumService.getThreadDetailById = async (threadId) => {
         if(!thread) throw new NotFoundError()
         return thread
     })
+    
+}
+
+mobileForumService.deleteThreadById = async (threadId, user) => {
+
+    const moderator = await mobileForumService.checkModerator(threadId, user.sub)
+
+    if(!moderator) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION)
+
+    return Thread.query()
+    .findById(threadId)
+    .delete()
+    .then(rowsAffected => rowsAffected === 1)
     
 }
 
