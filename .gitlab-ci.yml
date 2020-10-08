@@ -29,6 +29,6 @@ deploy:
       - mkdir -p ~/.ssh
       - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
-    - ssh administrator@103.253.113.215 -p 40000 "Quickplay1! && cd /data1/opt/emtiv-backend"
+    - ssh -vvv administrator@103.253.113.215 -p 40000 "Quickplay1! && cd /data1/opt/emtiv-backend"
   only:
     - development-mobile-api
