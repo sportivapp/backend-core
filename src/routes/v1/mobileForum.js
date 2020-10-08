@@ -5,7 +5,7 @@ const { routes } = require('../../constant') //TODO: being used later, to avoid 
 
 router.post( '/thread', auth.authenticateToken, controller.createThread);
 router.put( '/thread/:threadId', auth.authenticateToken, controller.updateThreadById);
-router.get( '/thread', auth.authenticateToken, controller.getThreadList);
+router.post( '/thread-list', auth.authenticateToken, controller.getThreadList);
 router.get( '/thread/:threadId', auth.authenticateToken, controller.getThreadDetailById);
 router.delete( '/thread/:threadId', auth.authenticateToken, controller.deleteThreadById);
 
