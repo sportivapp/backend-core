@@ -10,7 +10,24 @@ const mobileForumService = {}
 
 const UnsupportedOperationErrorEnum = {
     USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY',
-    USER_NOT_IN_TEAM: 'USER_NOT_IN_TEAM'
+    USER_NOT_IN_TEAM: 'USER_NOT_IN_TEAM',
+    FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
+    THREAD_NOT_EXISTS: 'THREAD_NOT_EXISTS',
+    INVALID_TYPE: 'INVALID_TYPE'
+}
+
+mobileForumService.isModerator = async (threadId, userId) => {
+
+    //if not the maker, check if its the moderator
+    return ThreadModerator.query()
+        .where('ethreadethreadid', threadId)
+        .where('eusereuserid', userId)
+        .first()
+        .then(moderator => {
+            if(!moderator) return false
+            return true
+    })
+
 }
 
 // Method to be used by other service to check if thread exists
@@ -33,11 +50,11 @@ mobileForumService.normalizeFilter = async (filterData) => {
 
     const newFilter = {}
 
-    if(filterData.companyId === undefined || filterData.companyId === null || filterData.companyId === 0) {
+    if(!filterData.companyId || filterData.companyId === 0) {
         newFilter.companyId = null
     }
 
-    if(filterData.teamId === undefined || filterData.teamId === null || filterData.teamId === 0) {
+    if(!filterData.teamId || filterData.teamId === 0) {
         newFilter.teamId = null
     }
 
@@ -47,7 +64,10 @@ mobileForumService.normalizeFilter = async (filterData) => {
 
 mobileForumService.createThread = async (threadDTO, user) => {
 
-    if( threadDTO.ecompanyecompanyid !== null ) {
+    if( threadDTO.ecompanyecompanyid && threadDTO.eteameteamid )
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INVALID_TYPE)
+
+    if( threadDTO.ecompanyecompanyid ) {
 
         await mobileCompanyService.checkUserInCompany(threadDTO.ecompanyecompanyid, user.sub)
         .then(userInCompany => {
@@ -57,12 +77,13 @@ mobileForumService.createThread = async (threadDTO, user) => {
 
     }
 
-    if( threadDTO.eteameteamid !== null) {
+    if( threadDTO.eteameteamid ) {
 
         await mobileTeamService.checkUserInTeam(threadDTO.eteameteamid, user.sub)
         .then(userInTeam => {
             if(!userInTeam) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
         })
+
     }
 
     return Thread.transaction(async trx => {
@@ -75,8 +96,29 @@ mobileForumService.createThread = async (threadDTO, user) => {
             return { thread, moderator }
 
     })
-
     
+}
+
+mobileForumService.updateThreadById = async (threadId, threadDTO, user) => {
+    
+    const thread = await Thread.query()
+    .findById(threadId)
+    .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
+
+    if(!thread) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_NOT_EXISTS)
+
+    const moderator = await mobileForumService.isModerator(threadId, user.sub)
+
+    if(!moderator) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION)
+
+    if(!thread.ecompanyecompanyid && !thread.eteameteamid) {
+        threadDTO.ethreadispublic = thread.ethreadispublic
+    }
+
+    return thread
+    .$query()
+    .updateByUserId(threadDTO, user.sub)
+    .returning('*')
     
 }
 
@@ -120,6 +162,19 @@ mobileForumService.getThreadDetailById = async (threadId) => {
         if(!thread) throw new NotFoundError()
         return thread
     })
+    
+}
+
+mobileForumService.deleteThreadById = async (threadId, user) => {
+
+    const moderator = await mobileForumService.isModerator(threadId, user.sub)
+
+    if(!moderator) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION)
+
+    return Thread.query()
+    .findById(threadId)
+    .delete()
+    .then(rowsAffected => rowsAffected === 1)
     
 }
 
