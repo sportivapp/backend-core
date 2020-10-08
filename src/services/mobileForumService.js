@@ -1,9 +1,17 @@
 const Thread = require('../models/Thread')
+const ThreadModerator = require('../models/ThreadModerator')
 const ServiceHelper = require('../helper/ServiceHelper')
-const { NotFoundError } = require('../models/errors')
+const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
 const TimeEnum = require('../models/enum/TimeEnum')
+const mobileCompanyService = require('./mobileCompanyService')
+const mobileTeamService = require('./mobileTeamService')
 
 const mobileForumService = {}
+
+const UnsupportedOperationErrorEnum = {
+    USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY',
+    USER_NOT_IN_TEAM: 'USER_NOT_IN_TEAM'
+}
 
 // Method to be used by other service to check if thread exists
 mobileForumService.checkThread = async (threadId) => {
@@ -37,7 +45,43 @@ mobileForumService.normalizeFilter = async (filterData) => {
 
 }
 
-mobileForumService.getThreadList = async (page, size, filter) => {
+mobileForumService.createThread = async (threadDTO, user) => {
+
+    if( threadDTO.ecompanyecompanyid !== null ) {
+
+        await mobileCompanyService.checkUserInCompany(threadDTO.ecompanyecompanyid, user.sub)
+        .then(userInCompany => {
+            if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
+
+        })
+
+    }
+
+    if( threadDTO.eteameteamid !== null) {
+
+        await mobileTeamService.checkUserInTeam(threadDTO.eteameteamid, user.sub)
+        .then(userInTeam => {
+            if(!userInTeam) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
+        })
+    }
+
+    return Thread.transaction(async trx => {
+        return Thread.query(trx)
+        .insertToTable(threadDTO, user.sub)
+        .then(async thread => {
+
+            const moderator = await ThreadModerator.query(trx)
+            .insertToTable({ethreadethreadid: thread.ethreadid, eusereuserid: user.sub})
+
+            return { thread, moderator }
+        })
+    })
+
+    
+    
+}
+
+mobileForumService.getThreadList = async (page, size, filter, isPublic) => {
 
     const getFilter = await mobileForumService.normalizeFilter(filter)
 
@@ -56,6 +100,7 @@ mobileForumService.getThreadList = async (page, size, filter) => {
     }
 
     return threadPromise
+    .where('ethreadispublic', isPublic)
     .orderBy('ethreadcreatetime', 'DESC')
     .withGraphFetched('company(baseAttributes)')
     .withGraphFetched('team(baseAttributes)')
