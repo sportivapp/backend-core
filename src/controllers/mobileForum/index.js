@@ -29,6 +29,33 @@ controller.createThread = async (req, res, next) => {
     }
 }
 
+controller.updateThreadById = async (req, res, next) => {
+
+    const { threadId } = req.params
+    const thread = req.body
+
+    const threadDTO = {
+        ethreadtitle: thread.title,
+        ethreaddescription: thread.description,
+        ethreadispublic: thread.isPublic,
+        ecompanyecompanyid: thread.companyId,
+        eteameteamid: thread.teamId
+    }
+
+    threadDTO.ecompanyecompanyid = ( thread.companyId === 0 || thread.companyId === undefined) ? null : thread.companyId
+    threadDTO.eteameteamid = ( thread.teamId === 0 || thread.teamId === undefined) ? null : thread.teamId
+    threadDTO.ethreadispublic = ( threadDTO.ecompanyecompanyid === null || threadDTO.eteameteamid === null) ? true : threadDTO.ethreadispublic
+
+    try {
+
+        const result = await mobileForumService.updateThreadById(parseInt(threadId), threadDTO, req.user)
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+        
+    } catch (e) {
+        next(e)
+    }
+}
+
 controller.getThreadList = async (req, res, next) => {
 
     const { page = '0', size = '10', isPublic = true } = req.query
@@ -52,6 +79,20 @@ controller.getThreadDetailById = async (req, res, next) => {
     try {
 
         const result = await mobileForumService.getThreadDetailById(parseInt(threadId))
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+        
+    } catch (e) {
+        next(e)
+    }
+}
+
+controller.deleteThreadById = async (req, res, next) => {
+
+    const { threadId } = req.params
+
+    try {
+
+        const result = await mobileForumService.deleteThreadById(parseInt(threadId), req.user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
         
     } catch (e) {
