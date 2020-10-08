@@ -30,6 +30,6 @@ deploy:
       - mkdir -p ~/.ssh
       - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
-    - ssh -vvv root@103.253.113.215 -p 40000 "Quickplay1! && cd /data1/opt/emtiv-backend && sudo git pull origin development-mobile-api && sudo pm2 reload all && exit"
+    - ssh -vvv root@103.253.113.215 -p 22 "Quickplay1! && cd /data1/opt/emtiv-backend && sudo git pull origin development-mobile-api && sudo pm2 reload all && exit"
   only:
     - development-mobile-api
