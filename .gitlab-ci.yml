@@ -28,6 +28,7 @@ deploy:
       - ssh-add <(echo "$SSH_PRIVATE_KEY")
       # - echo "IdentityFile ~/.ssh/id_rsa" >> /etc/ssh/ssh_config
       - mkdir -p ~/.ssh
+      - chmod 700 ~/.ssh
       - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
     - ssh -vvv administrator@103.253.113.215 -p 40000 "cd /data1/opt/emtiv-backend && sudo git pull origin development-mobile-api && sudo pm2 reload all && exit"
