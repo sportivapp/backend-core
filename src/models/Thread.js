@@ -32,6 +32,8 @@ class Thread extends Model {
   static get relationMappings() {
   
     const ThreadPost = require('./ThreadPost')
+    const Company = require('./Company')
+    const Team = require('./Team')
 
     return {
       comments: {
@@ -40,6 +42,22 @@ class Thread extends Model {
         join: {
           from: 'ethread.ethreadid',
           to: 'ethreadpost.ethreadethreadid'
+        }
+      },
+      company: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Company,
+        join: {
+          from: 'ethread.ecompanyecompanyid',
+          to: 'ecompany.ecompanyid'
+        }
+      },
+      team: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Team,
+        join: {
+          from: 'ethread.eteameteamid',
+          to: 'eteam.eteamid'
         }
       }
     }
