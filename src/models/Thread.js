@@ -24,7 +24,7 @@ class Thread extends Model {
   static get modifiers() {
     return {
       baseAttributes(builder) {
-        builder.select('ethreadid', 'ethreadtitle', 'ethreaddescription', 'ethreadtype', 'ethreadispublic', 'ecompanyecompanyid', 'eteameteamid')
+        builder.select('ethreadid', 'ethreadtitle', 'ethreaddescription', 'ethreadispublic', 'ecompanyecompanyid', 'eteameteamid')
       }
     }
   }
