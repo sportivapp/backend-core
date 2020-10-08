@@ -26,10 +26,10 @@ deploy:
       - 'which ssh-agent || ( apt-get install -qq openssh-client )'
       - eval $(ssh-agent -s)
       - ssh-add <(echo "$SSH_PRIVATE_KEY")
-      - echo "IdentityFile $SSH_PRIVATE_KEY" >> /etc/ssh/ssh_config
+      - echo "IdentityFile ~/.ssh/id_rsa" >> /etc/ssh/ssh_config
       - mkdir -p ~/.ssh
       - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
-    - ssh -vvv root@103.253.113.215 -p 22 "Quickplay1! && cd /data1/opt/emtiv-backend && sudo git pull origin development-mobile-api && sudo pm2 reload all && exit"
+    - ssh -administrator root@103.253.113.215 -p 22 "Quickplay1! && cd /data1/opt/emtiv-backend && sudo git pull origin development-mobile-api && sudo pm2 reload all && exit"
   only:
     - development-mobile-api
