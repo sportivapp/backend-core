@@ -48,22 +48,27 @@ mobileForumService.normalizeFilter = async (filterData) => {
 mobileForumService.createThread = async (threadDTO, user) => {
 
     if( threadDTO.ecompanyecompanyid !== null ) {
-        const userInCompany = await mobileCompanyService.checkUserInCompany(threadDTO.ecompanyecompanyid, user.sub)
 
-        if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
+        await mobileCompanyService.checkUserInCompany(threadDTO.ecompanyecompanyid, user.sub)
+        .then(userInCompany => {
+            if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
+
+        })
+
     }
 
     if( threadDTO.eteameteamid !== null) {
+        
         await mobileTeamService.checkUserInTeam(threadDTO.eteameteamid, user.sub)
-        .then(team => {
-            if(!team) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
+        .then(userInTeam => {
+            if(!userInTeam) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
         })
     }
 
     return Thread.query()
     .insertToTable(threadDTO, user.sub)
     .then(async thread => {
-        
+
         const moderator = await ThreadModerator.query()
         .insertToTable({ethreadethreadid: thread.ethreadid, eusereuserid: user.sub})
 
