@@ -65,15 +65,19 @@ mobileForumService.createThread = async (threadDTO, user) => {
         })
     }
 
-    return Thread.query()
-    .insertToTable(threadDTO, user.sub)
-    .then(async thread => {
+    return Thread.transaction(async trx => {
+        return Thread.query(trx)
+        .insertToTable(threadDTO, user.sub)
+        .then(async thread => {
 
-        const moderator = await ThreadModerator.query()
-        .insertToTable({ethreadethreadid: thread.ethreadid, eusereuserid: user.sub})
+            const moderator = await ThreadModerator.query(trx)
+            .insertToTable({ethreadethreadid: thread.ethreadid, eusereuserid: user.sub})
 
-        return { thread, moderator }
+            return { thread, moderator }
+        })
     })
+
+    
     
 }
 
