@@ -30,6 +30,19 @@ const UnsupportedOperationErrorEnum = {
 
 const companyService = {}
 
+companyService.checkUserInCompany = async (companyId, userId) => {
+
+    return CompanyUserMapping.query()
+    .where('ecompanyecompanyid', companyId)
+    .where('eusereuserid', userId)
+    .first()
+    .then(mapping => {
+        if(!mapping) return false
+        return true
+    })
+
+}
+
 companyService.getHighestPosition = async (companyId) => {
 
     const users = await Grade.relatedQuery('users')
