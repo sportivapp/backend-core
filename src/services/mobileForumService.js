@@ -58,7 +58,7 @@ mobileForumService.createThread = async (threadDTO, user) => {
     }
 
     if( threadDTO.eteameteamid !== null) {
-        
+
         await mobileTeamService.checkUserInTeam(threadDTO.eteameteamid, user.sub)
         .then(userInTeam => {
             if(!userInTeam) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
@@ -77,7 +77,7 @@ mobileForumService.createThread = async (threadDTO, user) => {
     
 }
 
-mobileForumService.getThreadList = async (page, size, filter) => {
+mobileForumService.getThreadList = async (page, size, filter, isPublic) => {
 
     const getFilter = await mobileForumService.normalizeFilter(filter)
 
@@ -96,6 +96,7 @@ mobileForumService.getThreadList = async (page, size, filter) => {
     }
 
     return threadPromise
+    .where('ethreadispublic', isPublic)
     .orderBy('ethreadcreatetime', 'DESC')
     .withGraphFetched('company')
     .withGraphFetched('team')

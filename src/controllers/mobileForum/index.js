@@ -30,13 +30,13 @@ controller.createThread = async (req, res, next) => {
 
 controller.getThreadList = async (req, res, next) => {
 
-    const { page = '0', size = '10' } = req.query
+    const { page = '0', size = '10', isPublic = true } = req.query
     // default value is undefined
     const { filter } = req.body
 
     try {
 
-        const pageObj = await mobileForumService.getThreadList(page, size, filter)
+        const pageObj = await mobileForumService.getThreadList(page, size, filter, isPublic)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
         
     } catch (e) {
