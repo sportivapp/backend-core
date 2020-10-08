@@ -5,7 +5,6 @@ exports.seed = (knex, Promise) => knex('ethread').del()
                 {
                     ethreadtitle: 'Strategi bermain basket terbaik?',
                     ethreaddescription: 'Forum untuk berdiskusi tentang strategi terbaik bermain basket',
-                    ethreadtype: 'SPORT',
                     ethreadispublic: true,
                     ecompanyecompanyid: 1,
                     eteameteamid: null,
@@ -15,7 +14,6 @@ exports.seed = (knex, Promise) => knex('ethread').del()
                 {
                     ethreadtitle: 'Pemanasan yang paling baik sebelum olahraga?',
                     ethreaddescription: 'Forum ini bertujuan untuk membahas pemanasan atau perenggangan otot terbaik',
-                    ethreadtype: 'SPORT',
                     ethreadispublic: true,
                     ecompanyecompanyid: 1,
                     eteameteamid: null,

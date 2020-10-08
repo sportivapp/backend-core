@@ -12,10 +12,9 @@ class Thread extends Model {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['ethreadtitle', 'ethreadtype', 'ethreadispublic'],
+      required: ['ethreadtitle', 'ethreadispublic'],
       properties: {
         ethreadtitle: { type: 'string', minLength: 1, maxLength: 256 },
-        ethreadtype: { type: 'string', minLength: 1, maxLength: 64 },
         ethreadispublic: { type: 'boolean' },
       }
     }
@@ -24,7 +23,7 @@ class Thread extends Model {
   static get modifiers() {
     return {
       baseAttributes(builder) {
-        builder.select('ethreadid', 'ethreadtitle', 'ethreaddescription', 'ethreadtype', 'ethreadispublic', 'ecompanyecompanyid', 'eteameteamid')
+        builder.select('ethreadid', 'ethreadtitle', 'ethreaddescription', 'ethreadispublic', 'ecompanyecompanyid', 'eteameteamid')
       }
     }
   }
