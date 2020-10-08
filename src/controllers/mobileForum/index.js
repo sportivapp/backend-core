@@ -37,15 +37,9 @@ controller.updateThreadById = async (req, res, next) => {
     const threadDTO = {
         ethreadtitle: thread.title,
         ethreaddescription: thread.description,
-        ethreadispublic: thread.isPublic,
-        ecompanyecompanyid: thread.companyId,
-        eteameteamid: thread.teamId
+        ethreadispublic: thread.isPublic
     }
-
-    threadDTO.ecompanyecompanyid = ( thread.companyId === 0 || thread.companyId === undefined) ? null : thread.companyId
-    threadDTO.eteameteamid = ( thread.teamId === 0 || thread.teamId === undefined) ? null : thread.teamId
-    threadDTO.ethreadispublic = ( threadDTO.ecompanyecompanyid === null || threadDTO.eteameteamid === null) ? true : threadDTO.ethreadispublic
-
+    
     try {
 
         const result = await mobileForumService.updateThreadById(parseInt(threadId), threadDTO, req.user)
