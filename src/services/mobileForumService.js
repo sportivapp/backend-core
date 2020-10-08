@@ -1,9 +1,17 @@
 const Thread = require('../models/Thread')
+const ThreadModerator = require('../models/ThreadModerator')
 const ServiceHelper = require('../helper/ServiceHelper')
-const { NotFoundError } = require('../models/errors')
+const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
 const TimeEnum = require('../models/enum/TimeEnum')
+const mobileCompanyService = require('./mobileCompanyService')
+const mobileTeamService = require('./mobileTeamService')
 
 const mobileForumService = {}
+
+const UnsupportedOperationErrorEnum = {
+    USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY',
+    USER_NOT_IN_TEAM: 'USER_NOT_IN_TEAM'
+}
 
 // Method to be used by other service to check if thread exists
 mobileForumService.checkThread = async (threadId) => {
@@ -35,6 +43,33 @@ mobileForumService.normalizeFilter = async (filterData) => {
 
     return newFilter
 
+}
+
+mobileForumService.createThread = async (threadDTO, user) => {
+
+    if( threadDTO.ecompanyecompanyid !== null ) {
+        const userInCompany = await mobileCompanyService.checkUserInCompany(threadDTO.ecompanyecompanyid, user.sub)
+
+        if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
+    }
+
+    if( threadDTO.eteameteamid !== null) {
+        await mobileTeamService.checkUserInTeam(threadDTO.eteameteamid, user.sub)
+        .then(team => {
+            if(!team) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
+        })
+    }
+
+    return Thread.query()
+    .insertToTable(threadDTO, user.sub)
+    .then(async thread => {
+        
+        const moderator = await ThreadModerator.query()
+        .insertToTable({ethreadethreadid: thread.ethreadid, eusereuserid: user.sub})
+
+        return { thread, moderator }
+    })
+    
 }
 
 mobileForumService.getThreadList = async (page, size, filter) => {
