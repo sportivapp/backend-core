@@ -57,8 +57,8 @@ mobileForumService.getThreadList = async (page, size, filter) => {
 
     return threadPromise
     .orderBy('ethreadcreatetime', 'DESC')
-    .withGraphFetched('company')
-    .withGraphFetched('team')
+    .withGraphFetched('company(baseAttributes)')
+    .withGraphFetched('team(baseAttributes)')
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
@@ -70,6 +70,8 @@ mobileForumService.getThreadDetailById = async (threadId) => {
     .findById(threadId)
     .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
     .modify('baseAttributes')
+    .withGraphFetched('company(baseAttributes)')
+    .withGraphFetched('team(baseAttributes)')
     .then(thread => {
         if(!thread) throw new NotFoundError()
         return thread
