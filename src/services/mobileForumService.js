@@ -97,38 +97,24 @@ mobileForumService.createThread = async (threadDTO, user) => {
 }
 
 mobileForumService.updateThreadById = async (threadId, threadDTO, user) => {
+    
+    const threadPromise = await Thread.query()
+    .findById(threadId)
+
+    if(!threadPromise) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_NOT_EXISTS)
 
     const moderator = await mobileForumService.checkModerator(threadId, user.sub)
 
     if(!moderator) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION)
 
-    if( threadDTO.ecompanyecompanyid !== null ) {
-
-        await mobileCompanyService.checkUserInCompany(threadDTO.ecompanyecompanyid, user.sub)
-        .then(userInCompany => {
-            if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
-
-        })
-
+    if(threadPromise.ecompanyecompanyid === null && threadPromise.eteameteamid === null) {
+        threadDTO.ethreadispublic = threadPromise.ethreadispublic
     }
 
-    if( threadDTO.eteameteamid !== null) {
-
-        await mobileTeamService.checkUserInTeam(threadDTO.eteameteamid, user.sub)
-        .then(userInTeam => {
-            if(!userInTeam) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
-        })
-
-    }
-
-    return Thread.query()
-    .findById(threadId)
+    return threadPromise
+    .$query()
     .updateByUserId(threadDTO, user.sub)
     .returning('*')
-    .then(thread => {
-        if(!thread) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_NOT_EXISTS)
-        return thread
-    })
     
 }
 
