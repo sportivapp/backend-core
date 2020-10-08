@@ -15,8 +15,9 @@ controller.createThread = async (req, res, next) => {
         eteameteamid: thread.teamId
     }
 
-    threadDTO.ecompanyecompanyid = (thread.companyId === null || thread.companyId === 0 || thread.companyId === undefined) ? null : thread.companyId
-    threadDTO.eteameteamid = (thread.teamId === null || thread.teamId === 0 || thread.teamId === undefined) ? null : thread.teamId
+    threadDTO.ecompanyecompanyid = ( thread.companyId === 0 || thread.companyId === undefined) ? null : thread.companyId
+    threadDTO.eteameteamid = ( thread.teamId === 0 || thread.teamId === undefined) ? null : thread.teamId
+    threadDTO.ethreadispublic = ( threadDTO.ecompanyecompanyid === null || threadDTO.eteameteamid === null) ? true : threadDTO.ethreadispublic
 
     try {
 
