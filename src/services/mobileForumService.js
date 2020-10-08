@@ -98,20 +98,20 @@ mobileForumService.createThread = async (threadDTO, user) => {
 
 mobileForumService.updateThreadById = async (threadId, threadDTO, user) => {
     
-    const threadPromise = await Thread.query()
+    const thread = await Thread.query()
     .findById(threadId)
 
-    if(!threadPromise) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_NOT_EXISTS)
+    if(!thread) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_NOT_EXISTS)
 
     const moderator = await mobileForumService.checkModerator(threadId, user.sub)
 
     if(!moderator) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION)
 
-    if(threadPromise.ecompanyecompanyid === null && threadPromise.eteameteamid === null) {
-        threadDTO.ethreadispublic = threadPromise.ethreadispublic
+    if(thread.ecompanyecompanyid === null && thread.eteameteamid === null) {
+        threadDTO.ethreadispublic = thread.ethreadispublic
     }
 
-    return threadPromise
+    return thread
     .$query()
     .updateByUserId(threadDTO, user.sub)
     .returning('*')
