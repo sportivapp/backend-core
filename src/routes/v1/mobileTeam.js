@@ -7,17 +7,9 @@ router.get('/team', auth.authenticateToken, controller.getTeams);
 router.get('/team/:teamId', auth.authenticateToken, controller.getTeam);
 router.post('/team', auth.authenticateToken, controller.createTeam);
 router.put('/team/:teamId', auth.authenticateToken, controller.updateTeam);
-router.post('/team-join', auth.authenticateToken, controller.joinTeam);
-router.post('/team-exit', auth.authenticateToken, controller.exitTeam);
-router.post('/team-cancel-invite', auth.authenticateToken, controller.cancelInvite);
-router.post('/team-process-request', auth.authenticateToken, controller.processRequest);
-router.post('/team-members', auth.authenticateToken, controller.getTeamMemberList);
-router.post('/team-invite', auth.authenticateToken, controller.invite);
-router.post('/team-change-permission', auth.authenticateToken, controller.changeTeamMemberPosition);
-router.post('/team-kick', auth.authenticateToken, controller.kick);
-router.post('/team-cancel-request', auth.authenticateToken, controller.cancelRequest);
-router.get('/team-user-pending', auth.authenticateToken, controller.getPendingTeamList);
-router.post('/team-process-invitation', auth.authenticateToken, controller.processInvitation);
-router.get('/team/:teamId/admin', auth.authenticateToken, controller.isAdmin);
+
+router.get('/team/:teamId/process-user/:userId', auth.authenticateToken, controller.processRequest);
+router.get('/team/:teamId/cancel', auth.authenticateToken, controller.cancelRequest);
+router.get('/team/:teamId/process', auth.authenticateToken, controller.processInvitation);
 
 module.exports = router;
