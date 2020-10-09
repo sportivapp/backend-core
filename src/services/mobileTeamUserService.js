@@ -124,14 +124,14 @@ teamUserService.kickMember = async (teamId, userId, user) => {
 
 }
 
-teamUserService.joinTeam = async (teamId, userId) => {
+teamUserService.joinTeam = async (teamId, userId, user, position = TeamUserMappingPositionEnum.MEMBER) => {
 
     return TeamUserMapping.query()
         .insertToTable({
             eteameteamid: teamId,
             eusereuserid: userId,
-            eteamusermappingposition: TeamUserMappingPositionEnum.MEMBER
-        });
+            eteamusermappingposition: position
+        }, user.sub);
 
 }
 

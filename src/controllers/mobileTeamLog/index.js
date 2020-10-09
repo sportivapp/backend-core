@@ -19,6 +19,40 @@ controller.applyTeam = async (req, res, next) => {
 
 }
 
+controller.cancelRequest = async (req, res, next) => {
+
+    const { teamLogId } = req.params;
+
+    try {
+
+        const result = await teamLogService.cancelRequest(parseInt(teamLogId), req.user);
+
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.processRequest = async (req, res, next) => {
+
+    const { teamLogId } = req.params;
+    const { status } = req.query;
+    
+    try {
+
+        const result = await teamLogService.processRequest(parseInt(teamLogId), req.user, status.toUpperCase());
+
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        console.log(e);
+        next(e);
+    }
+
+}
+
 controller.getPendingTeamLogs = async (req, res, next) => {
 
     const { teamId } = req.params;
@@ -82,6 +116,23 @@ controller.cancelInvite = async (req, res, next) => {
 
     } catch(e) {
         console.log(e);
+        next(e);
+    }
+
+}
+
+controller.processInvitation = async (req, res, next) => {
+
+    const { teamLogId } = req.params;
+    const { status } = req.query;
+
+    try {
+
+        const result = await teamLogService.processInvitation(parseInt(teamLogId), req.user, status.toUpperCase());
+
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
         next(e);
     }
 
