@@ -18,5 +18,6 @@ router.post('/team-kick', auth.authenticateToken, controller.kick);
 router.post('/team-cancel-request', auth.authenticateToken, controller.cancelRequest);
 router.get('/team-user-pending', auth.authenticateToken, controller.getPendingTeamList);
 router.post('/team-process-invitation', auth.authenticateToken, controller.processInvitation);
+router.get('/team/:teamId/admin', auth.authenticateToken, controller.isAdmin);
 
 module.exports = router;
