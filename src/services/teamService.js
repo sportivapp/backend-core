@@ -175,15 +175,18 @@ teamService.getTeamDetail = async (teamId, user) => {
     .joinRelated('industry')
     .where('eteameteamid', team.eteamid);
 
-    const teamMemberCount = await TeamUserMapping.query()
+    const memberCount = await TeamUserMapping.query()
     .where('eteameteamid', team.eteamid)
     .first()
     .count()
+    .then(member => {
+        return parseInt(member.count)
+    })
 
     return {
         team,
         teamIndustries,
-        teamMemberCount
+        memberCount
     }
 
 }
