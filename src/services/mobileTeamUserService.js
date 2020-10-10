@@ -16,14 +16,14 @@ const ErrorEnum = {
 
 const teamUserService = {};
 
-teamUserService.isAdmin = async (teamId, userId) => {
+teamUserService.getTeamUserCheckAdmin = async (teamId, userId) => {
 
     const teamUser = await teamUserService.getTeamUserByTeamIdAndUserId(teamId, userId);
 
-    if (!teamUser)
-        throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_TEAM);
+    if (teamUser.eteamusermappingposition !== TeamUserMappingPositionEnum.ADMIN)
+        throw new UnsupportedOperationError(ErrorEnum.NOT_ADMIN);
 
-    return teamUser.eteamusermappingposition === TeamUserMappingPositionEnum.ADMIN;
+    return teamUser;
 
 }
 
@@ -35,7 +35,7 @@ teamUserService.getTeamUserByTeamIdAndUserId = async (teamId, userId) => {
         .first()
         .then(member => {
             if (!member)
-                throw new NotFoundError()
+                throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_TEAM);
             return member
         });
 
@@ -91,10 +91,7 @@ teamUserService.changeTeamMemberPosition = async (teamId, userId, user, position
     if (user.sub === userId)
         throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION);
 
-    const teamUser = await teamUserService.getTeamUserByTeamIdAndUserId(teamId, user.sub);
-
-    if (teamUser.eteamusermappingposition !== TeamUserMappingPositionEnum.ADMIN)
-        throw new UnsupportedOperationError(ErrorEnum.NOT_ADMIN);
+    await teamUserService.getTeamUserCheckAdmin(teamId, user.sub);
 
     const updatedUser = await teamUserService.getTeamUserByTeamIdAndUserId(teamId, userId);
 
@@ -109,16 +106,10 @@ teamUserService.kickMember = async (teamId, userId, user) => {
     if (user.sub === userId)
         throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
 
-    const teamUser = await teamUserService.getTeamUserByTeamIdAndUserId(teamId, user.sub);
-
-    if (teamUser.eteamusermappingposition !== TeamUserMappingPositionEnum.ADMIN)
-        throw new UnsupportedOperationError(ErrorEnum.NOT_ADMIN);
+    await teamUserService.getTeamUserCheckAdmin(teamId, user.sub);
 
     // If user already in team
     const removedUser = await teamUserService.getTeamUserByTeamIdAndUserId(teamId, userId);
-
-    if (!removedUser)
-        throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_TEAM)
 
     return teamUserService.removeUserFromTeam(teamId, removedUser.eusereuserid);
 

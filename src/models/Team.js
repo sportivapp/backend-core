@@ -64,18 +64,6 @@ class Team extends Model {
                     to: 'ecompany.ecompanyid'
                 }
             },
-            // industries: {
-            //     relation: Model.ManyToManyRelation,
-            //     modelClass: Industry,
-            //     join: {
-            //         from: 'eteam.eteamid',
-            //         through: {
-            //             from: 'eteamindustrymapping.eteameteamid',
-            //             to: 'eteamindustrymapping.eindustryeindustryid'
-            //         },
-            //         to: 'eindustry.eindustryid'
-            //     }
-            // },
             teamIndustry: {
                 relation: Model.BelongsToOneRelation,
                 modelClass: Industry,

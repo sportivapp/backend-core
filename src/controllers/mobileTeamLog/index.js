@@ -1,4 +1,5 @@
 const teamLogService = require('../../services/mobileTeamLogService');
+const teamService = require('../../services/mobileTeamService');
 const ResponseHelper = require('../../helper/ResponseHelper');
 
 const controller = {};
@@ -9,11 +10,12 @@ controller.applyTeam = async (req, res, next) => {
     
     try {
 
-        const result = await teamLogService.applyTeam(parseInt(teamId), req.user);
+        const result = await teamService.applyTeam(parseInt(teamId), req.user);
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
+        console.log(e)
         next(e);
     }
 

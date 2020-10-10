@@ -1,11 +1,10 @@
 const TeamUserMapping = require('../models/TeamUserMapping');
-const TeamIndustryMapping = require('../models/TeamIndustryMapping');
-const TeamLog = require('../models/TeamLog');
 const Team = require('../models/Team');
-const User = require('../models/User');
 const ServiceHelper = require('../helper/ServiceHelper');
 const { raw } = require('objection');
-const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
+const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
+const teamLogService = require('./mobileTeamLogService');
+const teamUserService = require('./mobileTeamUserService');
 
 const UnsupportedOperationErrorEnum = {
     NOT_ADMIN: 'NOT_ADMIN',
@@ -23,6 +22,18 @@ const UnsupportedOperationErrorEnum = {
 }
 
 const teamService = {}
+
+teamService.getTeamById = async (teamId) => {
+
+    return Team.query()
+    .findById(teamId)
+    .then(team => {
+        if (!team)
+            throw NotFoundError()
+        return team
+    });
+
+}
 
 teamService.getTeams = async (keyword, page = 0, size = 10) => {
 
@@ -51,14 +62,15 @@ teamService.getTeam = async (teamId, user) => {
     if (!team)
         throw new NotFoundError()
 
-    const isInTeam = teamService.checkUserInTeam(teamId, user.sub);
+    // return null instead not found, because it
+    const isInTeam = teamUserService.checkTeamUserByTeamIdAndUserId(teamId, user.sub);
 
-    // const isPendingApply = teamService.getPendingLog(teamId, user.sub, [TeamLogTypeEnum.APPLY]);
+    const teamLog = teamLogService.getLogByTeamIdAndUserIdDefaultPending(teamId, user.sub);
 
-    return Promise.all([isInTeam]).then(result => ({
+    return Promise.all([isInTeam, teamLog]).then(result => ({
         team: team,
         isInTeam: result[0] ? true : false,
-        // isPendingApply: result[1] ? true : false
+        isPendingApply: result[1] ? true : false
     }));
 
 }
@@ -84,12 +96,9 @@ teamService.createTeam = async (teamDTO, user) => {
 
 }
 
-teamService.updateTeam = async (teamDTO, user, teamId) => {
+teamService.updateTeam = async (teamId, teamDTO, user) => {
 
-    const isAdmin = await teamService.isAdmin(teamId, user.sub);
-
-    if (!isAdmin)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
+    await teamUserService.getTeamUserCheckAdmin(teamId, user.sub);
 
     const team = await teamService.getTeamById(teamId);
 
@@ -102,35 +111,28 @@ teamService.updateTeam = async (teamDTO, user, teamId) => {
 
 }
 
-teamService.checkUserInTeam = async (teamId, userId) => {
+teamService.deleteTeam = async (teamId, user) => {
 
-    return TeamUserMapping.query()
-    .where('eteameteamid', teamId)
-    .andWhere('eusereuserid', userId)
-    .first();
+    await teamUserService.getTeamUserCheckAdmin(teamId, user.sub);
+
+    const team = await teamService.getTeamById(teamId);
+
+    return team.$query()
+        .del()
+        .then(rowsAffected => rowsAffected === 1);
 
 }
 
-teamService.getTeamMemberCount = async (teamId) => {
+teamService.applyTeam = async (teamId, user) => {
 
-    const teamMemberCount = await TeamUserMapping.query()
-    .where('eteameteamid', teamId)
-    .count()
-    .first();
+    const teamUser = await teamUserService.checkTeamUserByTeamIdAndUserId(teamId, user.sub);
 
-    return parseInt(teamMemberCount.count);
-    
-}
+    if (teamUser)
+        throw new UnsupportedOperationError(ErrorEnum.USER_IN_TEAM);
 
-teamService.getTeamById = async (teamId) => {
+    const team = await teamService.getTeamById(teamId);
 
-    return Team.query()
-    .findById(teamId)
-    .then(team => {
-        if (!team)
-            throw NotFoundError()
-        return team
-    });
+    return teamLogService.applyTeam(teamId, user, team.eteamispublic);
 
 }
 

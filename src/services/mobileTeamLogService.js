@@ -2,7 +2,6 @@ const ServiceHelper = require('../helper/ServiceHelper');
 const UnsupportedOperationError = require('../models/errors/UnsupportedOperationError');
 const TeamLog = require('../models/TeamLog');
 const teamUserService = require('./mobileTeamUserService');
-const teamService = require('./mobileTeamService');
 const { NotFoundError } = require('../models/errors');
 const User = require('../models/User');
 
@@ -83,14 +82,12 @@ teamLogService.getLogByTeamIdAndUserIdDefaultPending = async (teamId, userId, st
 
 }
 
-teamLogService.applyTeam = async (teamId, user) => {
+teamLogService.applyTeam = async (teamId, user, isPublic) => {
 
     const teamUser = await teamUserService.checkTeamUserByTeamIdAndUserId(teamId, user.sub);
 
     if (teamUser)
         throw new UnsupportedOperationError(ErrorEnum.USER_IN_TEAM);
-
-    const team = await teamService.getTeamById(teamId);
 
     const teamLog = await teamLogService.getLogByTeamIdAndUserIdDefaultPending(teamId, user.sub);
 
@@ -99,29 +96,31 @@ teamLogService.applyTeam = async (teamId, user) => {
 
         let status = '';
 
-        if (team.eteamispublic)
+        if (isPublic)
             status = TeamLogStatusEnum.ACCEPTED
         else
             status = TeamLogStatusEnum.PENDING
 
         const newTeamLog = await teamLogService.createLog(teamId, user.sub, user, TeamLogTypeEnum.APPLY, status);
 
-        if (team.eteamispublic)
+        if (isPublic)
             return teamUserService.joinTeam(teamId, user.sub, user);
 
         return newTeamLog;
 
     } else if (teamLog.eteamlogtype === TeamLogTypeEnum.APPLY) {
 
-        if (team.eteamispublic) {
+        if (isPublic) {
             await teamUserService.joinTeam(teamId, user.sub, user);
             return teamLogService.updateLogById(teamLog.eteamlogid, TeamLogStatusEnum.ACCEPTED, user.sub);
         } else
             throw new UnsupportedOperationError(ErrorEnum.USER_APPLIED)
 
     } else if (teamLog.eteamlogtype === TeamLogTypeEnum.INVITE) {
+
         await teamUserService.joinTeam(teamId, user.sub, user);
         return teamLogService.updateLogById(teamLog.eteamlogid, TeamLogStatusEnum.ACCEPTED, user);
+
     }
 
 }
@@ -146,10 +145,7 @@ teamLogService.processRequest = async (teamLogId, user, status) => {
 
     const teamLog = await teamLogService.getLogByTeamLogIdOptinalUserId(teamLogId, null);
 
-    const isAdmin = await teamUserService.isAdmin(teamLog.eteameteamid, user.sub);
-
-    if (!isAdmin)
-        throw new UnsupportedOperationError(ErrorEnum.NOT_ADMIN);
+    await teamUserService.getTeamUserCheckAdmin(teamLog.eteameteamid, user.sub);
 
     if (teamLog.eteamlogtype !== TeamLogTypeEnum.APPLY)
         throw new UnsupportedOperationError(ErrorEnum.USER_NOT_APPLIED)
@@ -168,10 +164,7 @@ teamLogService.getPendingLogs = async (teamId, page, size, type, user, filter) =
         throw new UnsupportedOperationError(ErrorEnum.TYPE_UNACCEPTED);
 
     if (filter.teamId !== null) {
-        const isAdmin = await teamUserService.isAdmin(teamId, user.sub);
-
-        if (!isAdmin)
-            throw new UnsupportedOperationError(ErrorEnum.NOT_ADMIN);
+        await teamUserService.getTeamUserCheckAdmin(teamId, user.sub);
     }
 
     const teamLogsPromise = TeamLog.query()
@@ -218,10 +211,7 @@ teamLogService.getPendingUserLogs = async (teamId, page, size, type, user) => {
 
 teamLogService.invite = async (teamId, user, email) => {
 
-    const isAdmin = await teamUserService.isAdmin(teamId, user.sub);
-
-    if (!isAdmin)
-        throw new UnsupportedOperationError(ErrorEnum.NOT_ADMIN);
+    await teamUserService.getTeamUserCheckAdmin(teamId, user.sub);
 
     const invitedUser = await User.query()
     .where('euseremail', email)
@@ -257,10 +247,7 @@ teamLogService.cancelInvite = async (teamLogId, user) => {
 
     const teamLog = await teamLogService.getLogByTeamLogIdOptinalUserId(teamLogId, null);
 
-    const isAdmin = await teamUserService.isAdmin(teamLog.eteameteamid, user.sub);
-
-    if (!isAdmin)
-        throw new UnsupportedOperationError(ErrorEnum.NOT_ADMIN);
+    await teamUserService.getTeamUserCheckAdmin(teamLog.eteameteamid, user.sub);
 
     return teamLog.$query()
         .del()
