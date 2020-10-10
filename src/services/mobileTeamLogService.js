@@ -61,6 +61,7 @@ teamLogService.createLog = async (teamId, userId, user, type, status) => {
 teamLogService.updateLogByIdAndUser = async (teamLogId, user, status) => {
 
     return teamLogService.getLogByTeamLogIdOptinalUserId(teamLogId, user.sub)
+        .catch(() => new UnsupportedOperationError(ErrorEnum.LOG_NOT_FOUND))
         .then(teamLog => {
             teamLog.$query()
                 .updateByUserId({
