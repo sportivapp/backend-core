@@ -181,10 +181,10 @@ teamService.getTeamMemberList = async (teamId, user, page, size, type) => {
     // Return members in team
     if (type === TeamLogTypeEnum.MEMBER) {
 
-        promised = await TeamUserMapping.query()
+        promised = TeamUserMapping.query()
         .select('euserid', 'eusername', 'user.efileefileid', 'eteamusermappingposition')
         .leftJoinRelated('[user, team]')
-        .findById(teamId)
+        .where('eteamid', teamId)
 
     } else if (TeamLogTypeEnum.APPLY !== type && TeamLogTypeEnum.INVITE !== type)
 
@@ -198,11 +198,11 @@ teamService.getTeamMemberList = async (teamId, user, page, size, type) => {
             throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
         // return log by type (APPLY / INVITE)
-        promised = await teamLogService.getPendingLogByType(teamId, type, TeamLogStatusEnum.PENDING)
+        promised = teamLogService.getPendingLogByType(teamId, type, TeamLogStatusEnum.PENDING)
 
     }
 
-    return promised.$query()
+    return promised
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
