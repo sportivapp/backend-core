@@ -58,9 +58,9 @@ teamLogService.createLog = async (teamId, userId, user, type, status) => {
 
 }
 
-teamLogService.updateLogById = async (teamLogId, status, user) => {
+teamLogService.updateLogByIdAndUser = async (teamLogId, user, status) => {
 
-    return teamLogService.getLogByTeamLogIdAndUser(teamLogId, user)
+    return teamLogService.getLogByTeamLogIdOptinalUserId(teamLogId, user.sub)
         .then(teamLog => {
             teamLog.$query()
                 .updateByUserId({
@@ -112,14 +112,14 @@ teamLogService.applyTeam = async (teamId, user, isPublic) => {
 
         if (isPublic) {
             await teamUserService.joinTeam(teamId, user.sub, user);
-            return teamLogService.updateLogById(teamLog.eteamlogid, TeamLogStatusEnum.ACCEPTED, user.sub);
+            return teamLogService.updateLogByIdAndUser(teamLog.eteamlogid, user, TeamLogStatusEnum.ACCEPTED);
         } else
             throw new UnsupportedOperationError(ErrorEnum.USER_APPLIED)
 
     } else if (teamLog.eteamlogtype === TeamLogTypeEnum.INVITE) {
 
         await teamUserService.joinTeam(teamId, user.sub, user);
-        return teamLogService.updateLogById(teamLog.eteamlogid, TeamLogStatusEnum.ACCEPTED, user);
+        return teamLogService.updateLogById(teamLog.eteamlogid, user, TeamLogStatusEnum.ACCEPTED);
 
     }
 
@@ -235,7 +235,7 @@ teamLogService.invite = async (teamId, user, email) => {
 
         if (teamLog.eteamlogtype === TeamLogTypeEnum.APPLY) {
             await teamUserService.joinTeam(teamId, invitedUser.euserid, user)
-            return teamLogService.updateLogById(teamLog.eteamlogid, TeamLogStatusEnum.ACCEPTED, user.sub);
+            return teamLogService.updateLogByIdAndUser(teamLog.eteamlogid, user, TeamLogStatusEnum.ACCEPTED);
         } else 
             throw new UnsupportedOperationError(ErrorEnum.USER_INVITED);
 
