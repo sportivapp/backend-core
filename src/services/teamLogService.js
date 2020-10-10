@@ -37,13 +37,15 @@ teamLogService.getPendingLogByUserIds = async (teamId, userIds, types) => {
 
 }
 
-teamLogService.getPendingLogByType = async (teamId, type, logStatus) => {
+teamLogService.getPendingLogByType = async (teamId, type, page, size, logStatus) => {
     return TeamLog.query()
         .select('eusereuserid', 'user.eusername', 'user.efileefileid')
         .leftJoinRelated('user.file')
         .where('eteameteamid', teamId)
         .andWhere('eteamlogtype', type)
-        .andWhere('eteamlogstatus', logStatus);
+        .andWhere('eteamlogstatus', logStatus)
+        .page(page, size)
+        
 }
 
 teamLogService.createTeamLog = async (teamId, user, userId, type) => {
