@@ -28,10 +28,17 @@ const ErrorEnum = {
 
 const teamLogService = {};
 
-teamLogService.getLogByTeamLogId = async (teamLogId) => {
+// Provide userId on process involving user's not team's
+// Example: process invitation (user accept/reject invitation), cancel request(user cancel apply)
+teamLogService.getLogByTeamLogIdOptinalUserId = async (teamLogId, userId) => {
 
-    return TeamLog.query()
+    const teamLogPromise = TeamLog.query()
         .findById(teamLogId)
+
+    if (userId !== null)
+        teamLogPromise.where('eusereuserid', userId);
+
+    return teamLogPromise
         .then(teamLog => {
             if (!teamLog)
                 throw new NotFoundError();
@@ -54,7 +61,7 @@ teamLogService.createLog = async (teamId, userId, type, status) => {
 
 teamLogService.updateLogById = async (teamLogId, status, user) => {
 
-    return teamLogService.getLogByTeamLogId(teamLogId)
+    return teamLogService.getLogByTeamLogIdAndUser(teamLogId, user)
         .then(teamLog => {
             teamLog.$query()
                 .updateByUserId({
@@ -121,8 +128,7 @@ teamLogService.applyTeam = async (teamId, user) => {
 
 teamLogService.cancelRequest = async (teamLogId, user) => {
 
-    // TODO: check whether log is this user's
-    const teamLog = await teamLogService.getLogByTeamLogId(teamLogId);
+    const teamLog = await teamLogService.getLogByTeamLogIdOptinalUserId(teamLogId, user.sub);
 
     if (teamLog.eteamlogtype !== TeamLogTypeEnum.APPLY)
         throw new UnsupportedOperationError(ErrorEnum.USER_NOT_APPLIED)
@@ -138,7 +144,7 @@ teamLogService.processRequest = async (teamLogId, user, status) => {
     if (status !== TeamLogStatusEnum.ACCEPTED && status !== TeamLogStatusEnum.REJECTED)
         throw new UnsupportedOperationError(ErrorEnum.STATUS_UNACCEPTED)
 
-    const teamLog = await teamLogService.getLogByTeamLogId(teamLogId);
+    const teamLog = await teamLogService.getLogByTeamLogIdOptinalUserId(teamLogId, null);
 
     const isAdmin = await teamUserService.isAdmin(teamLog.eteameteamid, user.sub);
 
@@ -249,7 +255,7 @@ teamLogService.invite = async (teamId, user, email) => {
 
 teamLogService.cancelInvite = async (teamLogId, user) => {
 
-    const teamLog = await teamLogService.getLogByTeamLogId(teamLogId);
+    const teamLog = await teamLogService.getLogByTeamLogIdOptinalUserId(teamLogId, null);
 
     const isAdmin = await teamUserService.isAdmin(teamLog.eteameteamid, user.sub);
 
@@ -277,7 +283,7 @@ teamLogService.processInvitation = async (teamLogId, user, status) => {
     if (status !== TeamLogStatusEnum.ACCEPTED && status !== TeamLogStatusEnum.REJECTED)
         throw new UnsupportedOperationError(ErrorEnum.STATUS_UNACCEPTED)
 
-    const teamLog = await teamLogService.getLogByTeamLogId(teamLogId);
+    const teamLog = await teamLogService.getLogByTeamLogIdOptinalUserId(teamLogId, user.sub);
 
     if (teamLog.eteamlogtype !== TeamLogTypeEnum.INVITE)
         throw new UnsupportedOperationError(ErrorEnum.USER_NOT_INVITED)
