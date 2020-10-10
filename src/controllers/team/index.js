@@ -61,14 +61,11 @@ controller.updateTeam = async (req, res, next) => {
 
 controller.getTeams = async (req, res, next) => {
 
-    const { keyword, page, size } = req.query;
+    const { keyword = '', page = '0', size = '10' } = req.query;
     
     try {
 
-        const pageObj = await teamService.getTeams(keyword, parseInt(page), parseInt(size), req.user);
-
-        if (!pageObj)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        const pageObj = await teamService.getTeams(keyword.toLowerCase(), parseInt(page), parseInt(size), req.user);
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
 
     } catch(e) {

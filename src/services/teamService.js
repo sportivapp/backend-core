@@ -112,21 +112,16 @@ teamService.updateTeam = async (teamDTO, user, teamId) => {
         })
 }
 
-teamService.getTeams = async (keyword, page = 0, size = 10, user) => {
+teamService.getTeams = async (keyword, page, size, user) => {
 
-    let newKeyword = ''
-
-    if (keyword) newKeyword = keyword.toLowerCase();
-
-    const teamsPage = await Team.query()
-    .select('eteamid', 'ecompanyecompanyid', 'efileefileid', 'eteamname', 'eteamcreatetime', 
-    Team.relatedQuery('members').count().as('membersCount'))
-    .withGraphJoined('industries(baseAttributes)')
+    return Team.query()
     .where('ecompanyecompanyid', user.companyId)
-    .where(raw('lower("eteamname")'), 'like', `%${newKeyword}%`)
-    .page(page, size);
+    .modify('baseAttributes')
+    .withGraphFetched('company(baseAttributes')
+    .where(raw('lower("eteamname")'), 'like', `%${keyword}%`)
+    .page(page, size)
+    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
-    return ServiceHelper.toPageObj(page, size, teamsPage)
 }
 
 teamService.getTeamDetail = async (teamId, user) => {
