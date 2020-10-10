@@ -35,7 +35,7 @@ teamLogService.getLogByTeamLogIdOptinalUserId = async (teamLogId, userId) => {
     const teamLogPromise = TeamLog.query()
         .findById(teamLogId)
 
-    if (userId !== null)
+    if (!userId)
         teamLogPromise.where('eusereuserid', userId);
 
     return teamLogPromise
@@ -47,7 +47,7 @@ teamLogService.getLogByTeamLogIdOptinalUserId = async (teamLogId, userId) => {
 
 }
 
-teamLogService.createLog = async (teamId, userId, type, status) => {
+teamLogService.createLog = async (teamId, userId, user, type, status) => {
 
     return TeamLog.query()
         .insertToTable({
@@ -55,7 +55,7 @@ teamLogService.createLog = async (teamId, userId, type, status) => {
             eusereuserid: userId,
             eteamlogtype: type,
             eteamlogstatus: status
-        })
+        }, user.sub);
 
 }
 
@@ -104,7 +104,7 @@ teamLogService.applyTeam = async (teamId, user) => {
         else
             status = TeamLogStatusEnum.PENDING
 
-        const newTeamLog = await teamLogService.createLog(teamId, user.sub, TeamLogTypeEnum.APPLY, status);
+        const newTeamLog = await teamLogService.createLog(teamId, user.sub, user, TeamLogTypeEnum.APPLY, status);
 
         if (team.eteamispublic)
             return teamUserService.joinTeam(teamId, user.sub, user);
@@ -239,7 +239,7 @@ teamLogService.invite = async (teamId, user, email) => {
 
     if (!teamLog)
 
-        return teamLogService.createLog(teamId, invitedUser.euserid, TeamLogTypeEnum.INVITE, TeamLogStatusEnum.PENDING);
+        return teamLogService.createLog(teamId, invitedUser.euserid, user, TeamLogTypeEnum.INVITE, TeamLogStatusEnum.PENDING);
 
     else {
 
