@@ -4,7 +4,7 @@ const ServiceHelper = require('../helper/ServiceHelper')
 const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
 const TimeEnum = require('../models/enum/TimeEnum')
 const mobileCompanyService = require('./mobileCompanyService')
-const mobileTeamService = require('./mobileTeamService')
+const mobileTeamUserService = require('./mobileTeamUserService')
 
 const mobileForumService = {}
 
@@ -79,7 +79,7 @@ mobileForumService.createThread = async (threadDTO, user) => {
 
     if( threadDTO.eteameteamid ) {
 
-        await mobileTeamService.checkUserInTeam(threadDTO.eteameteamid, user.sub)
+        await mobileTeamUserService.checkTeamUserByTeamIdAndUserId(threadDTO.eteameteamid, user.sub)
         .then(userInTeam => {
             if(!userInTeam) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
         })

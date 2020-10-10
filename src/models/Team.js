@@ -25,7 +25,7 @@ class Team extends Model {
     static get modifiers() {
         return {
           baseAttributes(builder) {
-            builder.select('eteamid', 'eteamname').withGraphFetched('teamPicture(baseAttributes)')
+            builder.select('eteamid', 'eteamname', 'eteamdescription', 'eteamispublic').withGraphFetched('teamPicture(baseAttributes)')
           }
         }
       }
@@ -64,15 +64,11 @@ class Team extends Model {
                     to: 'ecompany.ecompanyid'
                 }
             },
-            industries: {
-                relation: Model.ManyToManyRelation,
+            teamIndustry: {
+                relation: Model.BelongsToOneRelation,
                 modelClass: Industry,
                 join: {
-                    from: 'eteam.eteamid',
-                    through: {
-                        from: 'eteamindustrymapping.eteameteamid',
-                        to: 'eteamindustrymapping.eindustryeindustryid'
-                    },
+                    from: 'eteam.eindustryeindustryid',
                     to: 'eindustry.eindustryid'
                 }
             },

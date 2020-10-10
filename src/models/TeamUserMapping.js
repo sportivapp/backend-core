@@ -22,7 +22,9 @@ class TeamUserMapping extends Model {
 
     static get modifiers() {
         return {
-            ...this.baseModifiers()
+            baseAttributes(builder) {
+                builder.select('eteamusermappingid', 'eusereuserid', 'eteameteamid', 'eteamusermappingposition')
+            }
         }
     }
 
