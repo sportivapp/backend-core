@@ -15,8 +15,7 @@ controller.createTeam = async (req, res, next) => {
         eindustryeindustryid: industryId,
         eteamispublic: isPublic
     };
-
-    teamDTO.ecompanyecompanyid = ( !teamDTO.ecompanyecompanyid || teamDTO.ecompanyecompanyid === 0 ) ? null : teamDTO.ecompanyecompanyid;
+    
     teamDTO.efileefileid = ( !teamDTO.efileefileid || teamDTO.efileefileid === 0 ) ? null : teamDTO.efileefileid;
 
     try {
