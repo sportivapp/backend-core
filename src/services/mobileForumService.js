@@ -4,7 +4,7 @@ const ServiceHelper = require('../helper/ServiceHelper')
 const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
 const TimeEnum = require('../models/enum/TimeEnum')
 const mobileCompanyService = require('./mobileCompanyService')
-const mobileTeamService = require('./mobileTeamService')
+const mobileTeamUserService = require('./mobileTeamUserService')
 
 const mobileForumService = {}
 
@@ -79,7 +79,7 @@ mobileForumService.createThread = async (threadDTO, user) => {
 
     if( threadDTO.eteameteamid ) {
 
-        await mobileTeamService.checkUserInTeam(threadDTO.eteameteamid, user.sub)
+        await mobileTeamUserService.checkTeamUserByTeamIdAndUserId(threadDTO.eteameteamid, user.sub)
         .then(userInTeam => {
             if(!userInTeam) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
         })
@@ -87,15 +87,14 @@ mobileForumService.createThread = async (threadDTO, user) => {
     }
 
     return Thread.transaction(async trx => {
-        return Thread.query(trx)
-        .insertToTable(threadDTO, user.sub)
-        .then(async thread => {
+            const thread = await Thread.query(trx)
+            .insertToTable(threadDTO, user.sub)
 
             const moderator = await ThreadModerator.query(trx)
             .insertToTable({ethreadethreadid: thread.ethreadid, eusereuserid: user.sub})
 
             return { thread, moderator }
-        })
+
     })
     
 }
@@ -144,8 +143,8 @@ mobileForumService.getThreadList = async (page, size, filter, isPublic) => {
     return threadPromise
     .where('ethreadispublic', isPublic)
     .orderBy('ethreadcreatetime', 'DESC')
-    .withGraphFetched('company')
-    .withGraphFetched('team')
+    .withGraphFetched('company(baseAttributes)')
+    .withGraphFetched('team(baseAttributes)')
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
@@ -157,6 +156,8 @@ mobileForumService.getThreadDetailById = async (threadId) => {
     .findById(threadId)
     .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
     .modify('baseAttributes')
+    .withGraphFetched('company(baseAttributes)')
+    .withGraphFetched('team(baseAttributes)')
     .then(thread => {
         if(!thread) throw new NotFoundError()
         return thread

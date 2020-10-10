@@ -23,7 +23,7 @@ class TeamLog extends Model {
     static get modifiers() {
         return {
           baseAttributes(builder) {
-            builder.select('eteameteamid', 'eusereuserid', 'eteamlogtype', 'eteamlogstatus')
+            builder.select('eteamlogid', 'eteameteamid', 'eusereuserid', 'eteamlogtype', 'eteamlogstatus')
           }
         }
     }
