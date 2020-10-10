@@ -4,7 +4,7 @@ const controller = require('../../controllers/mobileTeamLog')
 const auth = require('../../middlewares/authentication');
 
 router.get('/team/:teamId/pending', auth.authenticateToken, controller.getPendingTeamLogs);
-router.get('/team/:teamId/user-pending', auth.authenticateToken, controller.getPendingUserLogs);
+router.get('/team-user-pending', auth.authenticateToken, controller.getPendingUserLogs);
 
 router.post('/team/:teamId/apply', auth.authenticateToken, controller.applyTeam);
 router.delete('/team-log/:teamLogId/user-cancel', auth.authenticateToken, controller.cancelRequest);

@@ -73,12 +73,11 @@ controller.getPendingTeamLogs = async (req, res, next) => {
 
 controller.getPendingUserLogs = async (req, res, next) => {
 
-    const { teamId } = req.params;
     const { page = '0', size = '10', type = 'APPLY' } = req.query;
 
     try {
 
-        const pageObj = await teamLogService.getPendingUserLogs(parseInt(teamId), parseInt(page), parseInt(size), type.toUpperCase(), req.user);
+        const pageObj = await teamLogService.getPendingUserLogs(parseInt(page), parseInt(size), type.toUpperCase(), req.user);
 
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
 

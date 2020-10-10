@@ -6,19 +6,9 @@ const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const teamLogService = require('./mobileTeamLogService');
 const teamUserService = require('./mobileTeamUserService');
 
-const UnsupportedOperationErrorEnum = {
-    NOT_ADMIN: 'NOT_ADMIN',
-    USER_NOT_IN_TEAM: 'USER_NOT_IN_TEAM',
-    TEAM_NOT_FOUND: 'TEAM_NOT_FOUND',
-    USER_APPLIED: 'USER_APPLIED',
+const ErrorEnum = {
     USER_IN_TEAM: 'USER_IN_TEAM',
-    USER_NOT_INVITED: 'USER_NOT_INVITED',
-    STATUS_UNACCEPTED: 'STATUS_UNACCEPTED',
-    USER_NOT_APPLIED: 'USER_NOT_APPLIED',
-    TYPE_UNACCEPTED: 'TYPE_UNACCEPTED',
-    USER_NOT_EXIST: 'USER_NOT_EXIST',
-    FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
-    POSITION_UNACCEPTED: 'POSITION_UNACCEPTED'
+    TEAM_NOT_FOUND: 'TEAM_NOT_FOUND'
 }
 
 const teamService = {}
@@ -104,7 +94,7 @@ teamService.updateTeam = async (teamId, teamDTO, user) => {
     const team = await teamService.getTeamById(teamId);
 
     if (!team)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TEAM_NOT_FOUND)
+        throw new UnsupportedOperationError(ErrorEnum.TEAM_NOT_FOUND)
 
     return team.$query()
         .updateByUserId(teamDTO, user.sub)
@@ -125,12 +115,6 @@ teamService.deleteTeam = async (teamId, user) => {
 }
 
 teamService.applyTeam = async (teamId, user) => {
-
-    const teamUser = await teamUserService.getTeamUserByTeamIdAndUserId(teamId, user.sub)
-        .catch(() => null);
-
-    if (teamUser)
-        throw new UnsupportedOperationError(ErrorEnum.USER_IN_TEAM);
 
     const team = await teamService.getTeamById(teamId);
 

@@ -34,7 +34,7 @@ teamLogService.getLogByTeamLogIdOptinalUserId = async (teamLogId, userId) => {
     const teamLogPromise = TeamLog.query()
         .findById(teamLogId)
 
-    if (!userId)
+    if (userId)
         teamLogPromise.where('eusereuserid', userId);
 
     return teamLogPromise
@@ -86,7 +86,7 @@ teamLogService.getLogByTeamIdAndUserIdDefaultPending = async (teamId, userId, st
 teamLogService.applyTeam = async (teamId, user, isPublic) => {
 
     await teamUserService.getTeamUserByTeamIdAndUserId(teamId, user.sub)
-        .catch(new UnsupportedOperationError(ErrorEnum.USER_IN_TEAM));
+        .catch(() => new UnsupportedOperationError(ErrorEnum.USER_IN_TEAM));
 
     const teamLog = await teamLogService.getLogByTeamIdAndUserIdDefaultPending(teamId, user.sub);
 
@@ -153,12 +153,12 @@ teamLogService.processRequest = async (teamLogId, user, status) => {
 
 }
 
-teamLogService.getPendingLogs = async (teamId, page, size, type, user, filter) => {
+teamLogService.getPendingLogs = async (teamId, page, size, type, user) => {
 
     if (TeamLogTypeEnum.APPLY !== type && TeamLogTypeEnum.INVITE !== type)
         throw new UnsupportedOperationError(ErrorEnum.TYPE_UNACCEPTED);
 
-    if (filter.teamId !== null) {
+    if (teamId) {
         const isAdmin = await teamUserService.getTeamUserCheckAdmin(teamId, user.sub)
             .catch(() => false);
 
@@ -173,11 +173,11 @@ teamLogService.getPendingLogs = async (teamId, page, size, type, user, filter) =
         .andWhere('eteamlogtype', type)
         .withGraphFetched('user(baseAttributes)')
 
-    if (filter.teamId !== null)
-        teamLogsPromise.andWhere('eteameteamid', filter.teamId);
+    if (teamId)
+        teamLogsPromise.andWhere('eteameteamid', teamId);
 
-    if (filter.userId !== null)
-        teamLogsPromise.andWhere('eusereuserid', filter.userId);
+    if (!teamId)
+        teamLogsPromise.andWhere('eusereuserid', user.sub);
 
     return teamLogsPromise
         .page(page, size)
@@ -189,23 +189,13 @@ teamLogService.getPendingLogs = async (teamId, page, size, type, user, filter) =
 
 teamLogService.getPendingTeamLogs = async (teamId, page, size, type, user) => {
 
-    const filter = {
-        teamId: teamId,
-        userId: null
-    }
-
-    return teamLogService.getPendingLogs(teamId, page, size, type, user, filter);
+    return teamLogService.getPendingLogs(teamId, page, size, type, user);
 
 }
 
-teamLogService.getPendingUserLogs = async (teamId, page, size, type, user) => {
+teamLogService.getPendingUserLogs = async (page, size, type, user) => {
 
-    const filter = {
-        teamId: null,
-        userId: user.sub
-    }
-
-    return teamLogService.getPendingLogs(teamId, page, size, type, user, filter);
+    return teamLogService.getPendingLogs(null, page, size, type, user);
 
 }
 
