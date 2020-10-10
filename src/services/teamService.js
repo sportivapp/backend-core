@@ -160,8 +160,8 @@ teamService.getTeamDetail = async (teamId, user) => {
 
 }
 
-// TODO: NOT TESTED
-teamService.getTeamMemberList = async (teamId, user, page, size, type) => {
+// TESTED
+teamService.getTeamMemberList = async (teamId, user, page, size) => {
 
     // check if team exist
     await Team.query()
@@ -176,34 +176,41 @@ teamService.getTeamMemberList = async (teamId, user, page, size, type) => {
     
     if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
 
-    let promised
+    return TeamUserMapping.query()
+    .select('euserid', 'eusername', 'user.efileefileid', 'eteamusermappingposition')
+    .leftJoinRelated('[user, team]')
+    .where('eteamid', teamId)
+    .page(page, size)
+    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
-    // Return members in team
-    if (type === TeamLogTypeEnum.MEMBER) {
+}
 
-        promised = TeamUserMapping.query()
-        .select('euserid', 'eusername', 'user.efileefileid', 'eteamusermappingposition')
-        .leftJoinRelated('[user, team]')
-        .where('eteamid', teamId)
+//TESTED
+teamService.getTeamMemberByLogType = async (teamId, user, page, size, type) => {
 
-    } else if (TeamLogTypeEnum.APPLY !== type && TeamLogTypeEnum.INVITE !== type)
+    // check if team exist
+    await Team.query()
+    .findById(teamId)
+    .then(team => {
+        if (!team) throw new NotFoundError()
+        return team
+    })
+
+    // check if user in company
+    const userInCompany = await teamService.isUserInCompany(teamId, user)
+    
+    if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
+
+    if (TeamLogTypeEnum.APPLY !== type && TeamLogTypeEnum.INVITE !== type)
 
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TYPE_UNACCEPTED)
 
-    else {
+    const isAdmin = await teamService.isAdmin(teamId, user.sub);
 
-        const isAdmin = await teamService.isAdmin(teamId, user.sub);
+    if (!isAdmin)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
-        if (!isAdmin)
-            throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
-
-        // return log by type (APPLY / INVITE)
-        promised = teamLogService.getPendingLogByType(teamId, type, TeamLogStatusEnum.PENDING)
-
-    }
-
-    return promised
-    .page(page, size)
+    return teamLogService.getPendingLogByType(teamId, type, page, size, TeamLogStatusEnum.PENDING)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
 }
