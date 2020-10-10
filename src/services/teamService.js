@@ -1,11 +1,11 @@
 const Team = require('../models/Team')
 const TeamUserMapping = require('../models/TeamUserMapping')
-const TeamLog = require('../models/TeamLog')
 const User = require('../models/User')
 const TeamIndustryMapping = require('../models/TeamIndustryMapping')
 const ServiceHelper = require('../helper/ServiceHelper');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const { raw } = require('objection');
+const teamLogService = require('./teamLogService')
 
 const teamService = {}
 
@@ -225,16 +225,11 @@ teamService.getTeamMemberList = async (teamId, user, page = 0, size = 10, type) 
             throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
         // return log by type (APPLY / INVITE)
-        promised = TeamLog.query()
-        .select('eusereuserid', 'user.eusername', 'user.efileefileid')
-        .leftJoinRelated('user.file')
-        .where('eteameteamid', teamId)
-        .andWhere('eteamlogtype', type)
-        .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING);
+        promised = await teamLogService.getPendingLogByType(teamId, type, TeamLogStatusEnum.PENDING)
 
     }
 
-    const membersPage = await promised.page(page, size);
+    const membersPage = promised.$query().page(page, size);
 
     return ServiceHelper.toPageObj(page, size, membersPage)
 
@@ -257,76 +252,6 @@ teamService.checkUserInTeam = async (teamId, userId) => {
 
 }
 
-teamService.getPendingLog = async (teamId, userId, types) => {
-
-    return TeamLog.query()
-    .where('eusereuserid', userId)
-    .andWhere('eteameteamid', teamId)
-    .whereIn('eteamlogtype', types)
-    .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
-    .orderBy('eteamlogcreatetime', 'DESC')
-    .first();
-
-}
-
-teamService.getPendingLogByUserIds = async (teamId, userIds, types) => {
-
-    return TeamLog.query()
-    .whereIn('eusereuserid', userIds)
-    .andWhere('eteameteamid', teamId)
-    .whereIn('eteamlogtype', types)
-    .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
-    .orderBy('eteamlogcreatetime', 'DESC')
-
-}
-
-teamService.createTeamLog = async (teamId, user, userId, type) => {
-
-    return TeamLog.query().insertToTable({
-        eteameteamid: teamId,
-        eusereuserid: userId,
-        eteamlogtype: type
-    }, user.sub);
-
-}
-
-teamService.createTeamLogByUserIds = async (teamId, user, userIds, type) => {
-
-    const logDTOs = userIds.map(userId => ({
-        eteameteamid: teamId,
-        eusereuserid: userId,
-        eteamlogtype: type
-    }))
-
-    return TeamLog.query().insertToTable(logDTOs, user.sub);
-
-}
-
-teamService.updateTeamLog = async (teamId, user, userId, status) => {
-
-    const log = await teamService.getPendingLog(teamId, userId, [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
-
-    return log.$query().updateByUserId({
-        eteamlogstatus: status
-    }, user.sub)
-    .returning('*');
-
-}
-
-teamService.updateTeamLogByUserIds = async (teamId, user, userIds, status) => {
-
-    await teamService.getPendingLogByUserIds(teamId, userIds, [TeamLogTypeEnum.APPLY]);
-
-    return TeamLog.query()
-    .whereIn('eusereuserid', userIds)
-    .where('eteameteamid', teamId)
-    .updateByUserId({
-        eteamlogstatus: status
-    }, user.sub)
-    .returning('*');
-
-}
-
 teamService.processIntoTeam = async (teamId, user, userId) => {
 
     const teamUserMappingPromise = TeamUserMapping.query().insertToTable({
@@ -335,7 +260,7 @@ teamService.processIntoTeam = async (teamId, user, userId) => {
         eteamusermappingposition: TeamUserMappingPositionEnum.MEMBER
     }, user.sub);
 
-    const teamLogPromise = teamService.updateTeamLog(teamId, user, userId, TeamLogStatusEnum.ACCEPTED);
+    const teamLogPromise = teamLogService.updateTeamLog(teamId, user, userId, TeamLogStatusEnum.ACCEPTED);
 
     return Promise.all([teamUserMappingPromise, teamLogPromise])
 
@@ -362,7 +287,7 @@ teamService.processIntoTeamByUserIds = async (teamId, user, appliedUsers) => {
 
     const teamUserMappingPromise = TeamUserMapping.query().insertToTable(mapping, user.sub);
 
-    const teamLogPromise = teamService.updateTeamLogByUserIds(teamId, user, userIds, TeamLogStatusEnum.ACCEPTED);
+    const teamLogPromise = teamLogService.updateTeamLogByUserIds(teamId, user, userIds, TeamLogStatusEnum.ACCEPTED);
 
     return Promise.all([teamUserMappingPromise, teamLogPromise])
     .then(arr => {
@@ -390,7 +315,7 @@ teamService.invite = async (teamId, user, userIds) => {
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_IN_TEAM)
     
     // Check if this user already invited / applied
-    const pendingInviteApply = await teamService.getPendingLogByUserIds(teamId, userIds, [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
+    const pendingInviteApply = await teamLogService.getPendingLogByUserIds(teamId, userIds, [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
 
     const removedElement = (array, elem) => {
         let index = array.indexOf(elem);
@@ -400,7 +325,7 @@ teamService.invite = async (teamId, user, userIds) => {
     }
 
     let invitedUserIds = userIds
-    let userApplyList = await teamService.getPendingLogByUserIds(teamId, userIds, [TeamLogTypeEnum.APPLY]);
+    let userApplyList = await teamLogService.getPendingLogByUserIds(teamId, userIds, [TeamLogTypeEnum.APPLY]);
 
 
     if(pendingInviteApply.length > 0) {
@@ -418,7 +343,7 @@ teamService.invite = async (teamId, user, userIds) => {
     let applied
 
     if(invitedUserIds.length > 0)
-        invited = await teamService.createTeamLogByUserIds(teamId, user, invitedUserIds, TeamLogTypeEnum.INVITE)
+        invited = await teamLogService.createTeamLogByUserIds(teamId, user, invitedUserIds, TeamLogTypeEnum.INVITE)
 
     if(userApplyList.length > 0) 
         applied = await teamService.processIntoTeamByUserIds(teamId, user, userApplyList);
@@ -444,7 +369,7 @@ teamService.cancelInvite = async (teamId, userId, user) => {
     if (!isAdmin)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
     
-    const pendingInvite = await teamService.getPendingLog(teamId, userId, [TeamLogTypeEnum.INVITE]);
+    const pendingInvite = await teamLogService.getPendingLog(teamId, userId, [TeamLogTypeEnum.INVITE]);
 
     if (!pendingInvite)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_INVITED)
@@ -463,13 +388,13 @@ teamService.processRequest = async (teamId, userId, user, status) => {
     if (!isAdmin)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
-    const pendingApply = await teamService.getPendingLog(teamId, userId, [TeamLogTypeEnum.APPLY]);
+    const pendingApply = await teamLogService.getPendingLog(teamId, userId, [TeamLogTypeEnum.APPLY]);
 
     if (!pendingApply)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_APPLIED)
 
     if (status === TeamLogStatusEnum.REJECTED)
-        return teamService.updateTeamLog(teamId, user, userId, TeamLogStatusEnum.REJECTED)
+        return teamLogService.updateTeamLog(teamId, user, userId, TeamLogStatusEnum.REJECTED)
 
     if (status === TeamLogStatusEnum.ACCEPTED)
         return teamService.processIntoTeam(teamId, user, userId);
@@ -478,7 +403,7 @@ teamService.processRequest = async (teamId, userId, user, status) => {
 
 teamService.cancelRequest = async (teamId, user) => {
 
-    const pendingApply = await teamService.getPendingLog(teamId, user.sub, [TeamLogTypeEnum.APPLY]);
+    const pendingApply = await teamLogService.getPendingLog(teamId, user.sub, [TeamLogTypeEnum.APPLY]);
 
     if (!pendingApply)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_APPLIED)
@@ -492,13 +417,13 @@ teamService.processInvitation = async (teamId, user, status) => {
     if (status !== TeamLogStatusEnum.ACCEPTED && status !== TeamLogStatusEnum.REJECTED)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.STATUS_UNACCEPTED)
 
-    const pendingInvite = await teamService.getPendingLog(teamId, user.sub, [TeamLogTypeEnum.INVITE]);
+    const pendingInvite = await teamLogService.getPendingLog(teamId, user.sub, [TeamLogTypeEnum.INVITE]);
 
     if (!pendingInvite)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_INVITED)
 
     if (status === TeamLogStatusEnum.REJECTED)
-        return teamService.updateTeamLog(teamId, user, user.sub, TeamLogStatusEnum.REJECTED)
+        return teamLogService.updateTeamLog(teamId, user, user.sub, TeamLogStatusEnum.REJECTED)
 
     if (status === TeamLogStatusEnum.ACCEPTED)
         return teamService.processIntoTeam(teamId, user, user.sub);
@@ -514,11 +439,11 @@ teamService.joinTeam = async (teamId, user) => {
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_IN_TEAM)
 
     // Check if this user already invited / applied
-    const pendingInviteApply = await teamService.getPendingLog(teamId, user.sub, [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
+    const pendingInviteApply = await teamLogService.getPendingLog(teamId, user.sub, [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
 
     // If there is no pending invite / apply, create apply log
     if (!pendingInviteApply)
-        return teamService.createTeamLog(teamId, user, user.sub, TeamLogTypeEnum.APPLY);
+        return teamLogService.createTeamLog(teamId, user, user.sub, TeamLogTypeEnum.APPLY);
 
     // If apply pending exist, return
     if (pendingInviteApply.eteamlogtype === TeamLogTypeEnum.APPLY && pendingInviteApply.eteamlogstatus === TeamLogStatusEnum.PENDING)
