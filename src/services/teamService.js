@@ -80,7 +80,7 @@ teamService.getTeamMemberCount = async (teamId) => {
     
 }
 
-// TODO: NOT TESTED
+// TESTED
 teamService.createTeam = async (teamDTO, user) => {
 
     return Team.transaction(async trx => {
@@ -99,12 +99,8 @@ teamService.createTeam = async (teamDTO, user) => {
 
 }
 
-// TODO: NOT TESTED
+// TESTED
 teamService.updateTeam = async (teamDTO, user, teamId) => {
-
-    const isAdmin = await teamService.isAdmin(teamId, user.sub)
-    
-    if(!isAdmin) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
     const teamFromDB = await Team.query()
     .findById(teamId)
@@ -112,6 +108,10 @@ teamService.updateTeam = async (teamDTO, user, teamId) => {
         if(!team) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TEAM_NOT_FOUND)
         return team
     })
+
+    const isAdmin = await teamService.isAdmin(teamId, user.sub)
+    
+    if(!isAdmin) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
     return teamFromDB.$query()
         .updateByUserId(teamDTO, user.sub)
@@ -135,7 +135,7 @@ teamService.getTeams = async (keyword, page, size, user) => {
 
 }
 
-// TODO: NOT TESTED
+// TESTED
 teamService.getTeamDetail = async (teamId, user) => {
 
     const userInCompany = await teamService.isUserInCompany(teamId, user)
@@ -442,6 +442,7 @@ teamService.joinTeam = async (teamId, user) => {
 
 }
 
+// TODO: NOT DONE
 teamService.exitTeam = async (teamId, user) => {
 
     // If user already in team
@@ -465,6 +466,7 @@ teamService.exitTeam = async (teamId, user) => {
 
 }
 
+// TODO: NOT DONE
 teamService.removeUserFromTeam = async (userInTeam) => {
 
     return userInTeam.$query()
@@ -473,6 +475,7 @@ teamService.removeUserFromTeam = async (userInTeam) => {
 
 }
 
+//TODO: NOT DONE
 teamService.kickUserFromTeam = async (teamId, user, userId) => {
 
     if (user.sub === userId)
@@ -493,6 +496,7 @@ teamService.kickUserFromTeam = async (teamId, user, userId) => {
 
 }
 
+// TODO: NOT DONE
 teamService.changeTeamMemberPosition = async (teamId, user, userId, position) => {
 
     if (user.sub === userId)
@@ -513,6 +517,7 @@ teamService.changeTeamMemberPosition = async (teamId, user, userId, position) =>
 
 }
 
+// TODO: NOT DONE
 teamService.getMembersToInvite = async (teamId, user, page = 0, size = 10) => {
 
     let existUserIds = [];
