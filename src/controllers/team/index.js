@@ -93,7 +93,7 @@ controller.getTeamDetail = async (req, res, next) => {
 controller.getTeamMemberList = async (req, res, next) => {
 
     // INVITE / APPLY / MEMBER
-    const { page, size, type } = req.query;
+    const { page = '0', size = '10', type } = req.query;
     const { teamId } = req.body;
     
     try {

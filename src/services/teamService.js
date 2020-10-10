@@ -154,33 +154,35 @@ teamService.getTeamDetail = async (teamId, user) => {
     }
 
 }
+// TODO: NOT DONE YET
+teamService.getTeamMemberList = async (teamId, user, page, size, type) => {
 
-teamService.getTeamMemberList = async (teamId, user, page = 0, size = 10, type) => {
+    // check if team exist
+    await Team.query()
+    .findById(teamId)
+    .then(team => {
+        if (!team) throw new NotFoundError()
+        return team
+    })
 
-    const team = await Team.query()
-    .select()
-    .where('eteamid', teamId)
-    .first()
-
-    if (!team)
-        throw new NotFoundError()
-
-    const isUserCompany = await teamService.isUserInCompany(teamId, user);
-
-    if (!isUserCompany)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.UNAUTHORIZED)
+    // check if user in company
+    await teamService.isUserInCompany(teamId, user)
+    .catch(() => new UnsupportedOperationError(UnsupportedOperationErrorEnum.UNAUTHORIZED))
 
     let promised
 
     // Return members in team
     if (type === TeamLogTypeEnum.MEMBER) {
-        promised = TeamUserMapping.query()
+
+        promised = await TeamUserMapping.query()
         .select('euserid', 'eusername', 'user.efileefileid', 'eteamusermappingposition')
         .leftJoinRelated('[user, team]')
-        .where('eteamid', teamId)
-        .page(page, size);
+        .findById(teamId)
+
     } else if (TeamLogTypeEnum.APPLY !== type && TeamLogTypeEnum.INVITE !== type)
+
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TYPE_UNACCEPTED)
+        
     else {
 
         const isAdmin = await teamService.isAdmin(teamId, user.sub);
@@ -193,9 +195,9 @@ teamService.getTeamMemberList = async (teamId, user, page = 0, size = 10, type) 
 
     }
 
-    const membersPage = promised.$query().page(page, size);
-
-    return ServiceHelper.toPageObj(page, size, membersPage)
+    return promised.$query()
+    .page(page, size)
+    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
 }
 
