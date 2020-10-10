@@ -23,7 +23,7 @@ teamUserService.getTeamUserCheckAdmin = async (teamId, userId) => {
     if (teamUser.eteamusermappingposition !== TeamUserMappingPositionEnum.ADMIN)
         throw new UnsupportedOperationError(ErrorEnum.NOT_ADMIN);
 
-    return teamUser;
+    return true;
 
 }
 
@@ -38,16 +38,6 @@ teamUserService.getTeamUserByTeamIdAndUserId = async (teamId, userId) => {
                 throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_TEAM);
             return member
         });
-
-}
-
-// Difference: check can return null
-teamUserService.checkTeamUserByTeamIdAndUserId = async (teamId, userId) => {
-
-    return TeamUserMapping.query()
-        .where('eteameteamid', teamId)
-        .andWhere('eusereuserid', userId)
-        .first();
 
 }
 
@@ -93,9 +83,9 @@ teamUserService.changeTeamMemberPosition = async (teamId, userId, user, position
 
     await teamUserService.getTeamUserCheckAdmin(teamId, user.sub);
 
-    const updatedUser = await teamUserService.getTeamUserByTeamIdAndUserId(teamId, userId);
+    const teamUser = await teamUserService.getTeamUserByTeamIdAndUserId(teamId, userId);
 
-    return updatedUser.$query()
+    return teamUser.$query()
         .updateByUserId({ eteamusermappingposition: position }, user.sub)
         .returning('*');
 
@@ -108,16 +98,16 @@ teamUserService.kickMember = async (teamId, userId, user) => {
 
     await teamUserService.getTeamUserCheckAdmin(teamId, user.sub);
 
-    // If user already in team
-    const removedUser = await teamUserService.getTeamUserByTeamIdAndUserId(teamId, userId);
+    const teamUser = await teamUserService.getTeamUserByTeamIdAndUserId(teamId, userId);
 
-    return teamUserService.removeUserFromTeam(teamId, removedUser.eusereuserid);
+    return teamUserService.removeUserFromTeam(teamId, teamUser.eusereuserid);
 
 }
 
-teamUserService.joinTeam = async (teamId, userId, user, position = TeamUserMappingPositionEnum.MEMBER) => {
+teamUserService.joinTeam = async (teamId, userId, user, position = TeamUserMappingPositionEnum.MEMBER, 
+    db = TeamUserMapping.knex()) => {
 
-    return TeamUserMapping.query()
+    return TeamUserMapping.query(db)
         .insertToTable({
             eteameteamid: teamId,
             eusereuserid: userId,

@@ -29,7 +29,7 @@ teamService.getTeamById = async (teamId) => {
     .findById(teamId)
     .then(team => {
         if (!team)
-            throw NotFoundError()
+            throw new NotFoundError()
         return team
     });
 
@@ -63,14 +63,15 @@ teamService.getTeam = async (teamId, user) => {
         throw new NotFoundError()
 
     // return null instead not found, because it
-    const isInTeam = teamUserService.checkTeamUserByTeamIdAndUserId(teamId, user.sub);
+    const isInTeam = teamUserService.getTeamUserByTeamIdAndUserId(teamId, user.sub)
+        .catch(() => null);
 
     const teamLog = teamLogService.getLogByTeamIdAndUserIdDefaultPending(teamId, user.sub);
 
     return Promise.all([isInTeam, teamLog]).then(result => ({
-        team: team,
-        isInTeam: result[0] ? true : false,
-        isPendingApply: result[1] ? true : false
+        ...team,
+        isInTeam: !!result[0],
+        isPendingApply: !!result[1]
     }));
 
 }
@@ -82,15 +83,15 @@ teamService.createTeam = async (teamDTO, user) => {
         const team = await Team.query(trx)
             .insertToTable(teamDTO, user.sub);
 
-        // const teamUserMapping = await teamUserService.joinTeam(team.eteamid, user.sub, user, 'ADMIN');
-        const teamUserMapping = await TeamUserMapping.query(trx)
-            .insertToTable({
-                eusereuserid: user.sub,
-                eteameteamid: team.eteamid,
-                eteamusermappingposition: 'ADMIN'
-            }, user.sub);
+        await teamUserService.joinTeam(team.eteamid, user.sub, user, 'ADMIN', trx);
+        // await TeamUserMapping.query(trx)
+        //     .insertToTable({
+        //         eusereuserid: user.sub,
+        //         eteameteamid: team.eteamid,
+        //         eteamusermappingposition: 'ADMIN'
+        //     }, user.sub);
 
-        return Promise.resolve({ team, teamUserMapping });
+        return Promise.resolve({ ...team });
 
     });
 
@@ -125,7 +126,8 @@ teamService.deleteTeam = async (teamId, user) => {
 
 teamService.applyTeam = async (teamId, user) => {
 
-    const teamUser = await teamUserService.checkTeamUserByTeamIdAndUserId(teamId, user.sub);
+    const teamUser = await teamUserService.getTeamUserByTeamIdAndUserId(teamId, user.sub)
+        .catch(() => null);
 
     if (teamUser)
         throw new UnsupportedOperationError(ErrorEnum.USER_IN_TEAM);
