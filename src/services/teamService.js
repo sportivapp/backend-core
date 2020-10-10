@@ -69,32 +69,26 @@ teamService.isUserInCompany = async (teamId, user) => {
     });
 }
 
-teamService.createTeam = async (teamDTO, user, industryIds) => {
+teamService.createTeam = async (teamDTO, user) => {
 
-    const team = await Team.query().insertToTable(teamDTO, user.sub)
-    
-    if (industryIds === undefined ) {
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INDUSTRY_NOT_FILLED)
+    // if companyid null or undefined, it's a user team, so it must be public
+    if(!teamDTO.ecompanyecompanyid) {
+        teamDTO.isPublic = true
     }
 
-    const teamUserMappingPromise =  TeamUserMapping.query().insertToTable({
-        eusereuserid: user.sub,
-        eteameteamid: team.eteamid,
-        eteamusermappingposition: TeamUserMappingPositionEnum.ADMIN
-    }, user.sub);
+    return Team.transaction(async trx => {
 
-    const teamIndustryMapping = industryIds.map(industryId => {
-        return {
-            eindustryeindustryid: industryId,
-            eteameteamid: team.eteamid
-        }
-    });
+        const team = await Team.query(trx).insertToTable(teamDTO, user.sub)
+        
+        const teamUserMapping =  await TeamUserMapping.query(trx).insertToTable({
+            eusereuserid: user.sub,
+            eteameteamid: team.eteamid,
+            eteamusermappingposition: TeamUserMappingPositionEnum.ADMIN
+        }, user.sub);
 
-    const teamIndustryMappingPromise = TeamIndustryMapping.query().insertToTable(teamIndustryMapping, user.sub);
+        return Promise.resolve({ team, teamUserMapping })
 
-    await Promise.all([teamUserMappingPromise, teamIndustryMappingPromise]);
-
-    return team
+    })
 
 }
 
