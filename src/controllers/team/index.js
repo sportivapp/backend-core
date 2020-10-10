@@ -5,20 +5,23 @@ const controller = {};
 
 controller.createTeam = async (req, res, next) => {
 
-    const { name, fileId, description, industryIds } = req.body;
+    const { name, fileId, description, industryId, isPublic  } = req.body;
 
     const teamDTO = {
         eteamname: name,
         eteamdescription: description,
         ecompanyecompanyid: req.user.companyId,
-        efileefileid: fileId
+        efileefileid: fileId,
+        eindustryeindustryid: industryId,
+        eteamispublic: isPublic
     };
 
-    teamDTO.efileefileid = teamDTO.efileefileid === 0 ? null : teamDTO.efileefileid;
+    teamDTO.ecompanyecompanyid = ( !teamDTO.ecompanyecompanyid || teamDTO.ecompanyecompanyid === 0 ) ? null : teamDTO.ecompanyecompanyid;
+    teamDTO.efileefileid = ( !teamDTO.efileefileid || teamDTO.efileefileid === 0 ) ? null : teamDTO.efileefileid;
 
     try {
 
-        const result = await teamService.createTeam(teamDTO, req.user, industryIds);
+        const result = await teamService.createTeam(teamDTO, req.user);
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400));
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
