@@ -34,25 +34,22 @@ controller.createTeam = async (req, res, next) => {
 
 controller.updateTeam = async (req, res, next) => {
 
-    const { name, fileId, description, industryIds } = req.body;
+    const { name, fileId, description, industryId, isPublic } = req.body;
     const { teamId } = req.params;
 
     const teamDTO = {
         eteamname: name,
         eteamdescription: description,
-        ecompanyecompanyid: req.user.companyId,
-        efileefileid: fileId
+        efileefileid: fileId,
+        eindustryeindustryid: industryId,
+        eteamispublic: isPublic
     };
 
-    teamDTO.ecompanyecompanyid = teamDTO.ecompanyecompanyid === 0 ? null : 
-    teamDTO.ecompanyecompanyid === undefined ? null : teamDTO.ecompanyecompanyid;
-
-    teamDTO.efileefileid = teamDTO.efileefileid === 0 ? null : 
-    teamDTO.efileefileid === undefined ? null : teamDTO.efileefileid;
+    teamDTO.efileefileid = ( !teamDTO.efileefileid || teamDTO.efileefileid === 0 ) ? null : teamDTO.efileefileid;
 
     try {
 
-        const result = await teamService.updateTeam(teamDTO, req.user, teamId, industryIds);
+        const result = await teamService.updateTeam(teamDTO, req.user, teamId);
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
