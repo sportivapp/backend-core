@@ -11,7 +11,8 @@ router.post( routes.team.join, auth.authenticateToken, controller.joinTeam);
 router.post( routes.team.exit, auth.authenticateToken, controller.exitTeam)
 router.post( routes.team.cancelInvitation, auth.authenticateToken, controller.cancelInvite);
 router.post( routes.team.processRequest, auth.authenticateToken, controller.processRequest);
-router.post( routes.team.member, auth.authenticateToken, controller.getTeamMemberList);
+router.post( routes.team.member, auth.authenticateToken, controller.getTeamMemberList); //TODO: Change route later like the one below?
+router.get( routes.team.memberByLogType, auth.authenticateToken, controller.getTeamMemberByLogType);
 router.post( routes.team.invite, auth.authenticateToken, controller.invite);
 router.put( routes.team.position, auth.authenticateToken, controller.changeTeamMemberPosition);
 router.put( routes.team.id, auth.authenticateToken, controller.updateTeam);
