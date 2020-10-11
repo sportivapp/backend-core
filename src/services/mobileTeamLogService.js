@@ -171,13 +171,16 @@ teamLogService.getPendingLogs = async (teamId, page, size, type, user) => {
         .modify('baseAttributes')
         .where('eteamlogstatus', TeamLogStatusEnum.PENDING)
         .andWhere('eteamlogtype', type)
-        .withGraphFetched('user(baseAttributes)')
 
-    if (teamId)
-        teamLogsPromise.andWhere('eteameteamid', teamId);
+    if (teamId) {
+        teamLogsPromise.andWhere('eteameteamid', teamId)
+        .withGraphFetched('user(baseAttributes).file(baseAttributes)')
+    }
 
-    if (!teamId)
-        teamLogsPromise.andWhere('eusereuserid', user.sub);
+    if (!teamId) {
+        teamLogsPromise.andWhere('eusereuserid', user.sub)
+            .withGraphFetched('team(baseAttributes).teamIndustry(baseAttributes)')
+    }
 
     return teamLogsPromise
         .page(page, size)
