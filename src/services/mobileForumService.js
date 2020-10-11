@@ -5,15 +5,19 @@ const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
 const TimeEnum = require('../models/enum/TimeEnum')
 const mobileCompanyService = require('./mobileCompanyService')
 const mobileTeamUserService = require('./mobileTeamUserService')
+const teamUserService = require('./mobileTeamUserService')
 
 const mobileForumService = {}
 
-const UnsupportedOperationErrorEnum = {
+const ErrorEnum = {
     USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY',
     USER_NOT_IN_TEAM: 'USER_NOT_IN_TEAM',
     FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
     THREAD_NOT_EXISTS: 'THREAD_NOT_EXISTS',
-    INVALID_TYPE: 'INVALID_TYPE'
+    INVALID_TYPE: 'INVALID_TYPE',
+    NOT_ADMIN: 'NOT_ADMIN',
+    TITLE_EXISTED: 'TITLE_EXISTED',
+    PRIVATE_NOT_AVAILABLE: 'PRIVATE_NOT_AVAILABLE'
 }
 
 mobileForumService.isModerator = async (threadId, userId) => {
@@ -62,63 +66,88 @@ mobileForumService.normalizeFilter = async (filterData) => {
 
 }
 
+mobileForumService.checkTitleExist = async (title) => {
+
+    return Thread.query()
+        .whereRaw(`LOWER("ethreadtitle") = LOWER('${title}')`)
+        .first()
+        .then(thread => {
+            if (thread)
+                throw new UnsupportedOperationError(ErrorEnum.TITLE_EXISTED);
+            return false;
+        });
+
+}
+
 mobileForumService.createThread = async (threadDTO, user) => {
 
+    await mobileForumService.checkTitleExist(threadDTO.ethreadtitle);
+
     if( threadDTO.ecompanyecompanyid && threadDTO.eteameteamid )
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INVALID_TYPE)
+        throw new UnsupportedOperationError(ErrorEnum.INVALID_TYPE)
+
+    // If team thread AND it is public, check whether it's made by an Admin
+    if(threadDTO.eteameteamid && threadDTO.ethreadispublic)
+        await teamUserService.getTeamUserCheckAdmin(threadDTO.eteameteamid, user.sub);
 
     if( threadDTO.ecompanyecompanyid ) {
 
         await mobileCompanyService.checkUserInCompany(threadDTO.ecompanyecompanyid, user.sub)
-        .then(userInCompany => {
-            if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
+            .then(userInCompany => {
+                if(!userInCompany) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_COMPANY)
+            })
 
-        })
-
-    }
-
-    if( threadDTO.eteameteamid ) {
-
-        await mobileTeamUserService.checkTeamUserByTeamIdAndUserId(threadDTO.eteameteamid, user.sub)
-        .then(userInTeam => {
-            if(!userInTeam) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
-        })
+        // TODO: Check whether this user have priviledge to make a thread
 
     }
 
     return Thread.transaction(async trx => {
+        
             const thread = await Thread.query(trx)
-            .insertToTable(threadDTO, user.sub)
+                .insertToTable(threadDTO, user.sub)
 
             const moderator = await ThreadModerator.query(trx)
-            .insertToTable({ethreadethreadid: thread.ethreadid, eusereuserid: user.sub})
+                .insertToTable({ethreadethreadid: thread.ethreadid, eusereuserid: user.sub});
 
-            return { thread, moderator }
+            return Promise.resolve({ thread, moderator });
 
     })
     
 }
 
 mobileForumService.updateThreadById = async (threadId, threadDTO, user) => {
+
+    await mobileForumService.checkTitleExist(threadDTO.ethreadtitle);
     
-    const thread = await Thread.query()
-    .findById(threadId)
-    .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
+    const thread = await mobileForumService.getThreadById(threadId);
 
-    if(!thread) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_NOT_EXISTS)
+    const moderator = await mobileForumService.isModerator(thread.ethreadid, user.sub)
 
-    const moderator = await mobileForumService.isModerator(threadId, user.sub)
+    if(!moderator) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION);
 
-    if(!moderator) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION)
+    // If user made the thread, cannot be private
+    if(!thread.eteameteamid && !thread.ecompanyecompanyid && !threadDTO.ethreadispublic)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.PRIVATE_NOT_AVAILABLE);
 
-    if(!thread.ecompanyecompanyid && !thread.eteameteamid) {
-        threadDTO.ethreadispublic = thread.ethreadispublic
+    // If team thread AND it is public, check whether it's made by an Admin
+    if(thread.eteameteamid && thread.ethreadispublic)
+        await teamUserService.getTeamUserCheckAdmin(thread.eteameteamid, user.sub);
+
+    if(thread.ecompanyecompanyid && thread.ethreadispublic) {
+
+        await mobileCompanyService.checkUserInCompany(thread.ecompanyecompanyid, user.sub)
+            .then(userInCompany => {
+                if(!userInCompany) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_COMPANY)
+            });
+
+        // TODO: Check whether this user have privilege to update a thread
+        
     }
 
     return thread
-    .$query()
-    .updateByUserId(threadDTO, user.sub)
-    .returning('*')
+        .$query()
+        .updateByUserId(threadDTO, user.sub)
+        .returning('*')
     
 }
 
@@ -165,16 +194,29 @@ mobileForumService.getThreadDetailById = async (threadId) => {
     
 }
 
+mobileForumService.getThreadById = async (threadId) => {
+
+    return Thread.query()
+        .findById(threadId)
+        .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
+        .then(thread => {
+            if(!thread) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_NOT_EXISTS);
+            return thread;
+        });
+
+}
+
 mobileForumService.deleteThreadById = async (threadId, user) => {
 
     const moderator = await mobileForumService.isModerator(threadId, user.sub)
 
-    if(!moderator) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION)
+    if(!moderator) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION);
 
-    return Thread.query()
-    .findById(threadId)
-    .delete()
-    .then(rowsAffected => rowsAffected === 1)
+    const thread = await mobileForumService.getThreadById(threadId);
+
+    return thread.$query()
+        .del()
+        .then(rowsAffected => rowsAffected === 1);
     
 }
 
