@@ -87,6 +87,8 @@ const mobileAppVersionRoutes = require('./mobileAppVersion');
 const mobileNewsRoutes = require('./mobileNews');
 const mobileForumRoutes = require('./mobileForum');
 const mobileCommentRoutes = require('./mobileComment');
+const mobileTeamUserRoutes = require('./mobileTeamUser');
+const mobileTeamLogRoutes = require('./mobileTeamLog');
 
 router.use('/api/v1/mobile', [
     mobileUserRoutes,
@@ -100,7 +102,9 @@ router.use('/api/v1/mobile', [
     mobileAppVersionRoutes,
     mobileNewsRoutes,
     mobileForumRoutes,
-    mobileCommentRoutes
+    mobileCommentRoutes,
+    mobileTeamUserRoutes,
+    mobileTeamLogRoutes
 ]);
 
 module.exports = router;
