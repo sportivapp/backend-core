@@ -1,7 +1,7 @@
 const Thread = require('../models/Thread')
 const SortEnum = require('../models/enum/SortEnum')
 const ServiceHelper = require('../helper/ServiceHelper')
-const fileService = require('./fileService')
+const teamUserService = require('./mobileTeamUserService')
 const threadModeratorService = require('./threadModeratorService')
 const companyService = require('./companyService')
 const teamService = require('./teamService')
@@ -16,7 +16,8 @@ const ErrorEnum = {
     INVALID_TYPE: 'INVALID_TYPE',
     COMPANY_NOT_FOUND: 'COMPANY_NOT_FOUND',
     TEAM_NOT_FOUND: 'TEAM_NOT_FOUND',
-    FORBIDDEN_ACTION: 'FORBIDDEN_ACTION'
+    FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
+    USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY'
 }
 
 threadService.getAllThreads = async (page, size, keyword, isPublic, filter) => {
@@ -73,14 +74,28 @@ threadService.createThread = async (threadDTO, isPublic, moderatorIds, user) => 
         if (!team) throw new UnsupportedOperationError(ErrorEnum.TEAM_NOT_FOUND)
     }
 
+    // If team thread AND it is public, check whether it's made by an Admin
+    if(threadDTO.eteameteamid && threadDTO.ethreadispublic)
+        await teamUserService.getTeamUserCheckAdmin(threadDTO.eteameteamid, user.sub);
+
+    if(threadDTO.ecompanyecompanyid) {
+
+        const isUserExistInCompany = await companyService.isUserExistInCompany(threadDTO.ecompanyecompanyid, user.sub)
+
+        if (!isUserExistInCompany) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_COMPANY)
+
+        // TODO: Check whether this user have priviledge to make a thread
+
+    }
+
     return Thread.transaction(async trx => {
 
         const thread = await Thread.query(trx)
             .insertToTable(threadDTO, user.sub)
 
-        const threadModerators = await threadModeratorService.saveThreadModerators(thread.ethreadid, moderatorIds, user, trx)
+        const moderators = await threadModeratorService.saveThreadModerators(thread.ethreadid, moderatorIds, user, trx)
 
-        return Promise.resolve({ ...thread, moderators: [threadModerators] })
+        return Promise.resolve({ ...thread, moderators: moderators })
 
     })
 
@@ -91,12 +106,27 @@ threadService.updateThread = async (threadId, threadDTO, isPublic, moderatorIds,
     if (!threadDTO.ecompanyecompanyid && !threadDTO.eteameteamid) threadDTO.ethreadispublic = true
     else threadDTO.ethreadispublic = isPublic
 
-    const thread = await threadService.getThreadById(threadId)
-        .catch(() => new UnsupportedOperationError(ErrorEnum.THREAD_NOT_FOUND))
+    const thread = await Thread.query().findById(threadId)
+
+    if (!thread) throw new UnsupportedOperationError(ErrorEnum.THREAD_NOT_FOUND)
 
     const isModerator = await threadModeratorService.isThreadModerator(threadId, user.sub)
 
     if (!isModerator) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
+
+    // If team thread AND it is public, check whether it's made by an Admin
+    if(threadDTO.eteameteamid && threadDTO.ethreadispublic)
+        await teamUserService.getTeamUserCheckAdmin(threadDTO.eteameteamid, user.sub);
+
+    if(threadDTO.ecompanyecompanyid) {
+
+        const isUserExistInCompany = await companyService.isUserExistInCompany(threadDTO.ecompanyecompanyid, user.sub)
+
+        if (!isUserExistInCompany) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_COMPANY)
+
+        // TODO: Check whether this user have priviledge to make a thread
+
+    }
 
     return Thread.transaction(async trx => {
 
@@ -107,7 +137,7 @@ threadService.updateThread = async (threadId, threadDTO, isPublic, moderatorIds,
         const threadModerators = threadModeratorService.saveThreadModerators(thread.ethreadid, moderatorIds, user, trx)
 
         return Promise.all([updatedThread, threadModerators])
-            .then(([thread, threadModerators]) => ({ ...thread, moderators: [threadModerators] }))
+            .then(([thread, threadModerators]) => ({ ...thread, moderators: threadModerators }))
 
     })
 
@@ -115,13 +145,16 @@ threadService.updateThread = async (threadId, threadDTO, isPublic, moderatorIds,
 
 threadService.deleteThreadById = async (threadId, user) => {
 
+    const thread = await Thread.query().findById(threadId)
+
+    if (!thread) return false
+
     const isModerator = await threadModeratorService.isThreadModerator(threadId, user.sub)
 
     if (!isModerator) return false
 
-    return threadService.getThreadById(threadId)
-        .catch(() => false)
-        .then(thread => thread.$query().delete())
+    return thread.$query()
+        .delete()
         .then(rowsAffected => rowsAffected === 1)
 }
 
