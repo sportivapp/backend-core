@@ -157,6 +157,7 @@ mobileForumService.getThreadList = async (page, size, filter, isPublic) => {
 
     let threadPromise = Thread.query()
     .modify('baseAttributes')
+    .select('ethreadcreatetime', Thread.relatedQuery('comments').count().as('commentsCount'))
     .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
 
     if(getFilter.companyId !== null) {
@@ -172,6 +173,7 @@ mobileForumService.getThreadList = async (page, size, filter, isPublic) => {
     return threadPromise
     .where('ethreadispublic', isPublic)
     .orderBy('ethreadcreatetime', 'DESC')
+    .withGraphFetched('threadCreator(name)')
     .withGraphFetched('company(baseAttributes)')
     .withGraphFetched('team(baseAttributes)')
     .page(page, size)

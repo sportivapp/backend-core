@@ -23,7 +23,7 @@ class Thread extends Model {
   static get modifiers() {
     return {
       baseAttributes(builder) {
-        builder.select('ethreadid', 'ethreadtitle', 'ethreaddescription', 'ethreadispublic', 'ecompanyecompanyid', 'eteameteamid')
+        builder.select('ethreadid', 'ethreadtitle', 'ethreaddescription', 'ethreadispublic', 'ethreadlock')
       }
     }
   }
@@ -33,6 +33,7 @@ class Thread extends Model {
     const ThreadPost = require('./ThreadPost')
     const Company = require('./Company')
     const Team = require('./Team')
+    const User = require('./User')
 
     return {
       comments: {
@@ -57,6 +58,14 @@ class Thread extends Model {
         join: {
           from: 'ethread.eteameteamid',
           to: 'eteam.eteamid'
+        }
+      },
+      threadCreator: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: 'ethread.ethreadcreateby',
+          to: 'euser.euserid'
         }
       }
     }
