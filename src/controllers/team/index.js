@@ -92,11 +92,11 @@ controller.getTeamDetail = async (req, res, next) => {
 controller.getTeamMemberList = async (req, res, next) => {
 
     const { page = '0', size = '10' } = req.query;
-    const { teamId } = req.body;
+    const { teamId } = req.params;
     
     try {
 
-        const pageObj = await teamService.getTeamMemberList(teamId, req.user, parseInt(page), parseInt(size));
+        const pageObj = await teamService.getTeamMemberList(parseInt(teamId), req.user, parseInt(page), parseInt(size));
 
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
 
@@ -241,11 +241,11 @@ controller.exitTeam = async (req, res, next) => {
 
 controller.kickUserFromTeam = async (req, res, next) => {
 
-    const { teamId, userId } = req.body;
+    const { teamId, userId, message = '' } = req.body;
 
     try {
 
-        const result = await teamService.kickUserFromTeam(teamId, req.user, userId);
+        const result = await teamService.kickUserFromTeam(teamId, req.user, userId, message);
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
@@ -274,14 +274,30 @@ controller.changeTeamMemberPosition = async (req, res, next) => {
 
 controller.getMembersToInvite = async (req, res, next) => {
 
-    const { teamId, page, size } = req.query;
+    const { teamId, page = '0', size ='10' } = req.query;
 
     try {
 
-        const pageObj = await teamService.getMembersToInvite(teamId, req.user, parseInt(page), parseInt(size));
+        const pageObj = await teamService.getMembersToInvite(parseInt(teamId), req.user, parseInt(page), parseInt(size));
 
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
         
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.deleteTeam = async (req, res, next) => {
+
+    const { teamId } = req.params;
+    
+    try {
+
+        const result = await teamService.deleteTeam(teamId, req.user);
+
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
     } catch(e) {
         next(e);
     }
