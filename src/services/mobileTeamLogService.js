@@ -146,7 +146,7 @@ teamLogService.processRequest = async (teamLogId, user, status) => {
         throw new UnsupportedOperationError(ErrorEnum.USER_NOT_APPLIED)
 
     if (TeamLogStatusEnum.ACCEPTED === status) {
-        await teamUserService.joinTeam(teamLog.eteameteamid, user.sub, user);
+        await teamUserService.joinTeam(teamLog.eteameteamid, teamLog.eusereuserid, user);
     }
 
     return teamLogService.updateLog(teamLog, status, user);
