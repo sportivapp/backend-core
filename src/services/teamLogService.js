@@ -6,7 +6,8 @@ const teamLogService = {}
 const TeamLogStatusEnum = {
     PENDING: 'PENDING',
     ACCEPTED: 'ACCEPTED',
-    REJECTED: 'REJECTED'
+    REJECTED: 'REJECTED',
+    KICKED: 'KICKED'
 }
 
 const TeamLogTypeEnum = {
@@ -78,6 +79,18 @@ teamLogService.updateTeamLog = async (teamId, user, userId, status) => {
         eteamlogstatus: status
     }, user.sub)
     .returning('*');
+
+}
+
+teamLogService.updateKickedTeamLog = async (teamId, user, userId, logMessage, trx) => {
+
+    return TeamLog.query(trx)
+    .where('eteameteamid', teamId)
+    .where('eusereuserid', userId)
+    .updateByUserId({
+        eteamlogstatus: TeamLogStatusEnum.KICKED,
+        eteamlogmessage: logMessage
+    }, user.sub)
 
 }
 
