@@ -414,6 +414,9 @@ teamService.joinTeam = async (teamId, user) => {
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_IN_TEAM)
 
     const getTeam = await teamService.getTeamDetail(teamId, user)
+    .catch(() => null)
+
+    if(!getTeam) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TEAM_NOT_FOUND)
 
     // Check if this user already invited / applied
     const pendingInviteApply = await teamLogService.getPendingLog(teamId, user.sub, [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
