@@ -152,7 +152,7 @@ mobileForumService.updateThreadById = async (threadId, threadDTO, user) => {
 }
 
 mobileForumService.getThreadList = async (page, size, filter, isPublic) => {
-
+    
     const getFilter = await mobileForumService.normalizeFilter(filter)
 
     let threadPromise = Thread.query()
@@ -187,6 +187,8 @@ mobileForumService.getThreadDetailById = async (threadId) => {
     .findById(threadId)
     .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
     .modify('baseAttributes')
+    .select('ethreadcreatetime', Thread.relatedQuery('comments').count().as('commentsCount'))
+    .withGraphFetched('threadCreator(name)')
     .withGraphFetched('company(baseAttributes)')
     .withGraphFetched('team(baseAttributes)')
     .then(thread => {
