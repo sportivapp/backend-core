@@ -13,7 +13,7 @@ const ErrorEnum = {
     USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY',
     USER_NOT_IN_TEAM: 'USER_NOT_IN_TEAM',
     FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
-    THREAD_NOT_EXISTS: 'THREAD_NOT_EXISTS',
+    THREAD_NOT_FOUND: 'THREAD_NOT_FOUND',
     INVALID_TYPE: 'INVALID_TYPE',
     NOT_ADMIN: 'NOT_ADMIN',
     TITLE_EXISTED: 'TITLE_EXISTED',
@@ -200,7 +200,7 @@ mobileForumService.getThreadById = async (threadId) => {
         .findById(threadId)
         .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
         .then(thread => {
-            if(!thread) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_NOT_EXISTS);
+            if(!thread) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_NOT_FOUND);
             return thread;
         });
 
@@ -212,12 +212,13 @@ mobileForumService.deleteThreadById = async (threadId, user) => {
 
     if(!moderator) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION);
 
-    const thread = await mobileForumService.getThreadById(threadId);
+    return mobileForumService.getThreadById(threadId)
+        .then(thread => {
+            thread.$query()
+                .del()
+                .then(rowsAffected => rowsAffected === 1);
+        });
 
-    return thread.$query()
-        .del()
-        .then(rowsAffected => rowsAffected === 1);
-    
 }
 
 module.exports = mobileForumService
