@@ -12,7 +12,7 @@ router.post( routes.team.exit, auth.authenticateToken, controller.exitTeam)
 router.post( routes.team.cancelInvitation, auth.authenticateToken, controller.cancelInvite);
 router.post( routes.team.processRequest, auth.authenticateToken, controller.processRequest);
 router.get( routes.team.members, auth.authenticateToken, controller.getTeamMemberList);
-router.get( routes.team.memberByLogType, auth.authenticateToken, controller.getTeamMemberByLogType);
+router.get( routes.team.teamLog, auth.authenticateToken, controller.getTeamMemberByLogType);
 router.post( routes.team.invite, auth.authenticateToken, controller.invite);
 router.put( routes.team.position, auth.authenticateToken, controller.changeTeamMemberPosition);
 router.put( routes.team.id, auth.authenticateToken, controller.updateTeam);
