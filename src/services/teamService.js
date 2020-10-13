@@ -142,6 +142,7 @@ teamService.getTeamDetail = async (teamId, user) => {
 
     const team = await Team.query()
     .modify('baseAttributes')
+    .select('eindustryeindustryid')
     .findById(teamId)
     .where('ecompanyecompanyid', user.companyId)
     .then(team => {
