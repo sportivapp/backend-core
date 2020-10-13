@@ -11,7 +11,8 @@ const ErrorEnum = {
     USER_NOT_IN_TEAM: 'USER_NOT_IN_TEAM',
     FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
     NOT_ADMIN: 'NOT_ADMIN',
-    POSITION_UNACCEPTED: 'POSITION_UNACCEPTED'
+    POSITION_UNACCEPTED: 'POSITION_UNACCEPTED',
+    LAST_ADMIN: 'LAST_ADMIN'
 }
 
 const teamUserService = {};
@@ -54,7 +55,24 @@ teamUserService.removeUserFromTeam = async (teamId, userId) => {
 
 }
 
+teamUserService.getAdminCountByTeamId = async (teamId) => {
+
+    const adminCount = TeamUserMapping.query()
+        .where('eteameteamid', teamId)
+        .andWhere('eteamusermappingposition', TeamUserMappingPositionEnum.ADMIN)
+        .count();
+
+    return adminCount[0].count;
+
+}
+
 teamUserService.exitTeam = async (teamId, user) => {
+
+    await teamUserService.getAdminCountByTeamId(teamId)
+        .then(adminCount => {
+            if (adminCount === 1)
+                throw new UnsupportedOperationError(ErrorEnum.LAST_ADMIN);
+        });
 
     return teamUserService.removeUserFromTeam(teamId, user.sub);
 

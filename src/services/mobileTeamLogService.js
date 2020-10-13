@@ -146,7 +146,7 @@ teamLogService.processRequest = async (teamLogId, user, status) => {
         throw new UnsupportedOperationError(ErrorEnum.USER_NOT_APPLIED)
 
     if (TeamLogStatusEnum.ACCEPTED === status) {
-        await teamUserService.joinTeam(teamLog.eteameteamid, user.sub, user);
+        await teamUserService.joinTeam(teamLog.eteameteamid, teamLog.eusereuserid, user);
     }
 
     return teamLogService.updateLog(teamLog, status, user);
@@ -171,13 +171,16 @@ teamLogService.getPendingLogs = async (teamId, page, size, type, user) => {
         .modify('baseAttributes')
         .where('eteamlogstatus', TeamLogStatusEnum.PENDING)
         .andWhere('eteamlogtype', type)
-        .withGraphFetched('user(baseAttributes)')
 
-    if (teamId)
-        teamLogsPromise.andWhere('eteameteamid', teamId);
+    if (teamId) {
+        teamLogsPromise.andWhere('eteameteamid', teamId)
+        .withGraphFetched('user(baseAttributes).file(baseAttributes)')
+    }
 
-    if (!teamId)
-        teamLogsPromise.andWhere('eusereuserid', user.sub);
+    if (!teamId) {
+        teamLogsPromise.andWhere('eusereuserid', user.sub)
+            .withGraphFetched('team(baseAttributes).teamIndustry(baseAttributes)')
+    }
 
     return teamLogsPromise
         .page(page, size)

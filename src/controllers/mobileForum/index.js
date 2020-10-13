@@ -51,10 +51,13 @@ controller.updateThreadById = async (req, res, next) => {
 }
 
 controller.getThreadList = async (req, res, next) => {
-
-    const { page = '0', size = '10', isPublic = true } = req.query
+    
+    const { page = '0', size = '10', isPublic = true, companyId = null, teamId = null } = req.query
     // default value is undefined
-    const { filter } = req.body
+    const filter = {
+        companyId: companyId,
+        teamId: teamId,
+    }
 
     try {
 
