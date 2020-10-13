@@ -140,7 +140,7 @@ teamService.getTeamDetail = async (teamId, user) => {
 
     if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
 
-    const team = await Team.query()
+    return Team.query()
     .modify('baseAttributes')
     .select('eteamcreatetime', Team.relatedQuery('members').count().as('teamMemberCount') )
     .findById(teamId)
@@ -150,10 +150,6 @@ teamService.getTeamDetail = async (teamId, user) => {
         if (!team) throw new NotFoundError()
         return team
     })
-
-    return {
-        ...team
-    }
 
 }
 
