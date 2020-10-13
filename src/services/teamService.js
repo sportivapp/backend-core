@@ -142,7 +142,7 @@ teamService.getTeamDetail = async (teamId, user) => {
 
     const team = await Team.query()
     .modify('baseAttributes')
-    .select('eteamcreatetime')
+    .select('eteamcreatetime', Team.relatedQuery('members').count().as('teamMemberCount') )
     .findById(teamId)
     .where('ecompanyecompanyid', user.companyId)
     .withGraphFetched('teamIndustry(baseAttributes)')
@@ -151,11 +151,8 @@ teamService.getTeamDetail = async (teamId, user) => {
         return team
     })
 
-    const count = await teamService.getTeamMemberCount(teamId)
-
     return {
-        ...team,
-        count
+        ...team
     }
 
 }
