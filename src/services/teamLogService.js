@@ -15,15 +15,42 @@ const TeamLogTypeEnum = {
     INVITE: 'INVITE'
 }
 
-teamLogService.getPendingLog = async (teamId, userId, types) => {
+teamLogService.getPendingLogByTeamLogId = async (teamLogId, types) => {
 
     return TeamLog.query()
-    .where('eusereuserid', userId)
-    .andWhere('eteameteamid', teamId)
+    .findById(teamLogId)
     .whereIn('eteamlogtype', types)
     .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
     .orderBy('eteamlogcreatetime', 'DESC')
     .first();
+
+}
+
+teamLogService.getLogByTeamLogIdOptinalUserId = async (teamLogId, userId) => {
+
+    const teamLogPromise = TeamLog.query()
+        .findById(teamLogId)
+
+    if (userId)
+        teamLogPromise.where('eusereuserid', userId);
+
+    return teamLogPromise
+        .then(teamLog => {
+            if (!teamLog)
+                throw new NotFoundError();
+            return teamLog
+        });
+
+}
+
+teamLogService.getLogByTeamIdAndUserIdDefaultPending = async (teamId, userId, status = TeamLogStatusEnum.PENDING) => {
+
+    return TeamLog.query()
+        .where('eteameteamid', teamId)
+        .andWhere('eusereuserid', userId)
+        .andWhere('eteamlogstatus', status)
+        .orderBy('eteamlogcreatetime', "DESC")
+        .first();
 
 }
 
@@ -71,9 +98,9 @@ teamLogService.createTeamLogByUserIds = async (teamId, user, userIds, type) => {
 
 }
 
-teamLogService.updateTeamLog = async (teamId, user, userId, status) => {
+teamLogService.updateTeamLog = async (teamLogId, user, status) => {
 
-    const log = await teamLogService.getPendingLog(teamId, userId, [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
+    const log = await teamLogService.getPendingLogByTeamLogId(teamLogId, [TeamLogTypeEnum.INVITE, TeamLogTypeEnum.APPLY]);
 
     return log.$query().updateByUserId({
         eteamlogstatus: status
