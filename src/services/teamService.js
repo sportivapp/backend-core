@@ -142,11 +142,13 @@ teamService.getTeamDetail = async (teamId, user) => {
 
     const team = await Team.query()
     .modify('baseAttributes')
-    .select('eindustryeindustryid')
+    .select('eindustryeindustryid', 'eteamcreatetime')
     .findById(teamId)
     .where('ecompanyecompanyid', user.companyId)
     .then(team => {
         if (!team) throw new NotFoundError()
+        // change to integer, for some reason it get a string 
+        team.eteamcreatetime = parseInt(team.eteamcreatetime)
         return team
     })
 
