@@ -57,7 +57,7 @@ teamUserService.removeUserFromTeam = async (teamId, userId) => {
 
 teamUserService.getAdminCountByTeamId = async (teamId) => {
 
-    const adminCount = TeamUserMapping.query()
+    const adminCount = await TeamUserMapping.query()
         .where('eteameteamid', teamId)
         .andWhere('eteamusermappingposition', TeamUserMappingPositionEnum.ADMIN)
         .count();
