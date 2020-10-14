@@ -142,6 +142,7 @@ teamService.getTeams = async (keyword, page, size, user) => {
     return Team.query()
     .where('ecompanyecompanyid', user.companyId)
     .modify('baseAttributes')
+    .select('eteamcreatetime', Team.relatedQuery('members').count().as('teamMemberCount') )
     .withGraphFetched('company(baseAttributes)')
     .where(raw('lower("eteamname")'), 'like', `%${keyword}%`)
     .page(page, size)
