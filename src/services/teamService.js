@@ -1,11 +1,10 @@
 const Team = require('../models/Team')
 const TeamUserMapping = require('../models/TeamUserMapping')
 const User = require('../models/User')
-const TeamIndustryMapping = require('../models/TeamIndustryMapping')
 const ServiceHelper = require('../helper/ServiceHelper');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
-const { raw } = require('objection');
-const teamLogService = require('./teamLogService')
+const { raw, UniqueViolationError } = require('objection');
+const teamLogService = require('./teamLogService');
 
 const teamService = {}
 
@@ -27,7 +26,8 @@ const UnsupportedOperationErrorEnum = {
     POSITION_UNACCEPTED: 'POSITION_UNACCEPTED',
     INDUSTRY_NOT_FILLED: 'INDUSTRY_NOT_FILLED',
     TEAM_NOT_FOUND: 'TEAM_NOT_FOUND',
-    FAILED_TO_REQUEST_JOIN: 'FAILED_TO_REQUEST_JOIN'
+    FAILED_TO_REQUEST_JOIN: 'FAILED_TO_REQUEST_JOIN',
+    NAME_ALREADY_TAKEN: 'NAME_ALREADY_TAKEN'
 
 }
 
@@ -82,6 +82,12 @@ teamService.getTeamMemberCount = async (teamId) => {
     
 }
 
+function isTeamNameUniqueErr(e) {
+
+    return e.nativeError.detail.includes('eteamname') && e instanceof UniqueViolationError
+
+}
+
 teamService.createTeam = async (teamDTO, user) => {
 
     return Team.transaction(async trx => {
@@ -96,6 +102,11 @@ teamService.createTeam = async (teamDTO, user) => {
 
         return Promise.resolve({ team, teamUserMapping })
 
+        
+    })
+    .catch(e => {
+        if (isTeamNameUniqueErr(e)) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NAME_ALREADY_TAKEN)
+        throw e
     })
 
 }
@@ -119,6 +130,10 @@ teamService.updateTeam = async (teamDTO, user, teamId) => {
         .then(newTeam => {
             if(!newTeam) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.UPDATE_FAILED)
             return newTeam
+        })
+        .catch(e => {
+            if (isTeamNameUniqueErr(e)) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NAME_ALREADY_TAKEN)
+            throw e
         })
 }
 
