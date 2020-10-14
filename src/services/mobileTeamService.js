@@ -61,7 +61,7 @@ teamService.getTeam = async (teamId, user) => {
     return Promise.all([isInTeam, teamLog]).then(result => ({
         ...team,
         isInTeam: !!result[0],
-        isPendingApply: !!result[1]
+        teamLog: !result[1] ? null : result[1]
     }));
 
 }
