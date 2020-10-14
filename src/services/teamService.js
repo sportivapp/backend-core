@@ -144,6 +144,7 @@ teamService.getTeams = async (keyword, page, size, user) => {
     .modify('baseAttributes')
     .select('eteamcreatetime', Team.relatedQuery('members').count().as('teamMemberCount') )
     .withGraphFetched('company(baseAttributes)')
+    .withGraphFetched('teamIndustry(baseAttributes)')
     .where(raw('lower("eteamname")'), 'like', `%${keyword}%`)
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
@@ -217,7 +218,7 @@ teamService.getTeamMemberByLogType = async (teamId, user, page, size, type) => {
     if (!isAdmin)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
-    return teamLogService.getPendingLogByType(teamId, type, page, size, TeamLogStatusEnum.PENDING)
+    return teamLogService.getPendingLogByTeamIdAndTypeAndStatus(teamId, type, page, size, TeamLogStatusEnum.PENDING)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
 }
