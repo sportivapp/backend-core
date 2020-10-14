@@ -35,7 +35,7 @@ threadController.getThreadById = async (req, res, next) => {
 
 threadController.createThread = async (req, res, next) => {
 
-    const { title, description, companyId, teamId, isPublic, moderatorIds } = req.body
+    const { title, description, companyId, teamId, fileId, isPublic, moderatorIds } = req.body
 
     const threadDTO = {
         ethreadtitle: title,
@@ -59,7 +59,7 @@ threadController.updateThread = async (req, res, next) => {
 
     const { threadId } = req.params
 
-    const { title, description, lock, isPublic, moderatorIds } = req.body
+    const { title, description, lock, isPublic, fileId, moderatorIds } = req.body
 
     const threadDTO = {
         ethreadtitle: title,

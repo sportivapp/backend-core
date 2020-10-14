@@ -37,7 +37,8 @@ controller.updateThreadById = async (req, res, next) => {
     const threadDTO = {
         ethreadtitle: thread.title,
         ethreaddescription: thread.description,
-        ethreadispublic: thread.isPublic
+        ethreadispublic: thread.isPublic,
+        ethreadlock: thread.lockStatus
     }
     
     try {
