@@ -34,6 +34,8 @@ const licenseRoutes = require('./license');
 const classRoutes = require('./class')
 const classUserRoutes = require('./classUser');
 const newsRoutes = require('./news')
+const threadRoutes = require('./thread')
+const threadPostRoutes = require('./threadPost')
 
 router.use('/api/v1', [
     userRoutes,
@@ -67,7 +69,9 @@ router.use('/api/v1', [
     licenseRoutes,
     classRoutes,
     classUserRoutes,
-    newsRoutes
+    newsRoutes,
+    threadRoutes,
+    threadPostRoutes
     
 ]);
 
@@ -83,6 +87,8 @@ const mobileAppVersionRoutes = require('./mobileAppVersion');
 const mobileNewsRoutes = require('./mobileNews');
 const mobileForumRoutes = require('./mobileForum');
 const mobileCommentRoutes = require('./mobileComment');
+const mobileTeamUserRoutes = require('./mobileTeamUser');
+const mobileTeamLogRoutes = require('./mobileTeamLog');
 
 router.use('/api/v1/mobile', [
     mobileUserRoutes,
@@ -96,7 +102,9 @@ router.use('/api/v1/mobile', [
     mobileAppVersionRoutes,
     mobileNewsRoutes,
     mobileForumRoutes,
-    mobileCommentRoutes
+    mobileCommentRoutes,
+    mobileTeamUserRoutes,
+    mobileTeamLogRoutes
 ]);
 
 module.exports = router;

@@ -147,13 +147,13 @@ AbsenService.listAbsen = async ( page, size, userId ) => {
 }
 
 AbsenService.editAbsen = async ( absenId, absenDTO, user ) => {
-    const absen = await Absen.query().updateByUserId(absenDTO, user.sub)
+    const absenA = await Absen.query().updateByUserId(absenDTO, user.sub)
         .where('eabsenid', absenId)
         .andWhere('eusereuserid', user.sub);
 
-    if (!absen) return
+    if (!absenA) return
 
-    return absen;
+    return absenA;
 }
 
 AbsenService.deleteAbsen = async ( absenId, user ) => {

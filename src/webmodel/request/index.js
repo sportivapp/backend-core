@@ -15,6 +15,8 @@ const approvalSchemas = require('./approval')
 const permitSchemas = require('./permit')
 const classSchemas = require('./class')
 const newsSchemas = require('./news')
+const threadSchemas = require('./thread')
+const threadPostSchemas = require('./threadPost')
 
 module.exports = {
     ...companySchemas,
@@ -33,5 +35,7 @@ module.exports = {
     ...approvalSchemas,
     ...permitSchemas,
     ...classSchemas,
-    ...newsSchemas
+    ...newsSchemas,
+    ...threadSchemas,
+    ...threadPostSchemas
 }

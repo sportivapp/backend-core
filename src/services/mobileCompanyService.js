@@ -277,6 +277,7 @@ companyService.removeUserFromCompany = async (userInCompany, userId, companyId) 
 }
 
 companyService.userCancelJoin = async (companyId, userId) => {
+    
     const userFromDB = User.query()
     .select()
     .where('euserid', userId)
@@ -285,7 +286,7 @@ companyService.userCancelJoin = async (companyId, userId) => {
     if(!userFromDB)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
 
-    const deleteLog = await CompanyLog.query()
+    return CompanyLog.query()
     .delete()
     .where('eusereuserid', userId)
     .where('ecompanyecompanyid', companyId)
@@ -293,9 +294,6 @@ companyService.userCancelJoin = async (companyId, userId) => {
     .where('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
     .first()
     .then(rowsAffected => rowsAffected === 1)
-
-    if (!deleteLog)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_APPLIED)
 
 }
 
