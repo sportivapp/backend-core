@@ -1,11 +1,10 @@
 const Team = require('../models/Team')
 const TeamUserMapping = require('../models/TeamUserMapping')
 const User = require('../models/User')
-const TeamIndustryMapping = require('../models/TeamIndustryMapping')
 const ServiceHelper = require('../helper/ServiceHelper');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
-const { raw } = require('objection');
-const teamLogService = require('./teamLogService')
+const { raw, UniqueViolationError } = require('objection');
+const teamLogService = require('./teamLogService');
 
 const teamService = {}
 
@@ -27,7 +26,8 @@ const UnsupportedOperationErrorEnum = {
     POSITION_UNACCEPTED: 'POSITION_UNACCEPTED',
     INDUSTRY_NOT_FILLED: 'INDUSTRY_NOT_FILLED',
     TEAM_NOT_FOUND: 'TEAM_NOT_FOUND',
-    FAILED_TO_REQUEST_JOIN: 'FAILED_TO_REQUEST_JOIN'
+    FAILED_TO_REQUEST_JOIN: 'FAILED_TO_REQUEST_JOIN',
+    NAME_ALREADY_TAKEN: 'NAME_ALREADY_TAKEN'
 
 }
 
@@ -82,6 +82,12 @@ teamService.getTeamMemberCount = async (teamId) => {
     
 }
 
+function isTeamNameUniqueErr(e) {
+
+    return e.nativeError.detail.includes('eteamname') && e instanceof UniqueViolationError
+
+}
+
 teamService.createTeam = async (teamDTO, user) => {
 
     return Team.transaction(async trx => {
@@ -96,6 +102,11 @@ teamService.createTeam = async (teamDTO, user) => {
 
         return Promise.resolve({ team, teamUserMapping })
 
+        
+    })
+    .catch(e => {
+        if (isTeamNameUniqueErr(e)) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NAME_ALREADY_TAKEN)
+        throw e
     })
 
 }
@@ -120,6 +131,10 @@ teamService.updateTeam = async (teamDTO, user, teamId) => {
             if(!newTeam) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.UPDATE_FAILED)
             return newTeam
         })
+        .catch(e => {
+            if (isTeamNameUniqueErr(e)) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NAME_ALREADY_TAKEN)
+            throw e
+        })
 }
 
 teamService.getTeams = async (keyword, page, size, user) => {
@@ -127,6 +142,7 @@ teamService.getTeams = async (keyword, page, size, user) => {
     return Team.query()
     .where('ecompanyecompanyid', user.companyId)
     .modify('baseAttributes')
+    .select('eteamcreatetime', Team.relatedQuery('members').count().as('teamMemberCount') )
     .withGraphFetched('company(baseAttributes)')
     .where(raw('lower("eteamname")'), 'like', `%${keyword}%`)
     .page(page, size)
@@ -169,7 +185,7 @@ teamService.getTeamMemberList = async (teamId, user, page, size) => {
     if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
 
     return TeamUserMapping.query()
-    .select('euserid', 'eusername', 'user.efileefileid', 'eteamusermappingposition')
+    .select('euserid', 'eusername', 'user.efileefileid', 'eteamusermappingposition', 'eusermobilenumber')
     .leftJoinRelated('[user, team]')
     .where('eteamid', teamId)
     .page(page, size)
@@ -320,7 +336,7 @@ teamService.invite = async (teamId, user, userIds) => {
 
     //if no apply log and no invite log need to be created
     if(invitedUserIds.length <= 0 && userApplyList.length <= 0) {
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_IN_TEAM)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_ALREADY_INVITED)
     }
 
     const result = {
