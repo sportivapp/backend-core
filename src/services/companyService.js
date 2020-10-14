@@ -8,6 +8,7 @@ const bcrypt = require('../helper/bcrypt');
 const CompanyUserMapping = require('../models/CompanyUserMapping')
 const CompanyModuleMapping = require('../models/CompanyModuleMapping')
 const CompanySequence = require('../models/CompanySequence')
+const CompanyIndustryMapping = require('../models/CompanyIndustryMapping')
 const { raw } = require('objection')
 const ServiceHelper = require('../helper/ServiceHelper')
 const settingService = require('./settingService')
@@ -24,7 +25,8 @@ const ErrorEnum = {
     INDUSTRY_NOT_FOUND: 'INDUSTRY_NOT_FOUND',
     NIK_EMPTY: 'NIK_EMPTY',
     FILE_NOT_FOUND: 'FILE_NOT_FOUND',
-    INVALID_TYPE: 'INVALID_TYPE'
+    INVALID_TYPE: 'INVALID_TYPE',
+    INDUSTRY_NOT_PROVIDED: 'INDUSTRY_NOT_PROVIDED'
 }
 
 CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
@@ -158,37 +160,24 @@ CompanyService.saveUsersToCompany = async(companyId, users, loggedInUser) => {
     })
 }
 
-CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
+CompanyService.createCompany = async(companyDTO, addressDTO, industryIds, user) => {
+
+    if (industryIds.length === 0) throw new UnsupportedOperationError(ErrorEnum.INDUSTRY_NOT_PROVIDED);
+
+    const industry = await Industry.query().whereIn('eindustryid', industryIds);
+    if (industryIds.length !== industry.length) throw new UnsupportedOperationError(ErrorEnum.INDUSTRY_NOT_FOUND);
 
     const companyIds = await CompanyUserMapping.query()
         .where('eusereuserid', user.sub)
         .then(resultArr => resultArr.map(result => result.ecompanyecompanyid))
 
-    if (companyDTO.ecompanyolderid && companyDTO.ecompanyparentid) throw new UnsupportedOperationError(ErrorEnum.INVALID_TYPE)
-
-    else if (companyDTO.ecompanyolderid) {
-        const olderSister = await Company.query().findById(companyDTO.ecompanyolderid)
-        if (!olderSister) throw new UnsupportedOperationError(ErrorEnum.SISTER_NOT_FOUND)
-        if (companyIds.indexOf(companyDTO.ecompanyolderid) === -1) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_COMPANY)
-    }
-
-    else if (companyDTO.ecompanyparentid) {
+    if (companyDTO.ecompanyparentid) {
         const parent = await Company.query().findById(companyDTO.ecompanyparentid).withGraphFetched('parent')
         if (!parent) throw new UnsupportedOperationError(ErrorEnum.PARENT_NOT_FOUND)
         else if (companyIds.indexOf(parent.ecompanyid) === -1) {
             if (parent.parent && companyIds.indexOf(parent.parent.ecompanyid) === -1)
                 throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_COMPANY)
         }
-    }
-
-    if (companyDTO.eindustryeindustryid) {
-        const industry = await Industry.query().findById(companyDTO.eindustryeindustryid)
-        if (!industry) throw new UnsupportedOperationError(ErrorEnum.INDUSTRY_NOT_FOUND)
-    }
-
-    if (companyDTO.efileefileid) {
-        const logo = await fileService.getFileById(companyDTO.efileefileid)
-        if (!logo) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_FOUND)
     }
 
     const codes = await settingService.getAllFunctions().then(funcList => funcList.map(func => func.efunctioncode))
@@ -205,16 +194,24 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
             .insertToTable(companyDTO, user.sub)
             .withGraphFetched('logo(baseAttributes)');
 
+        const companyIndustryMappings = industryIds.map(industryId => {
+            return {
+                ecompanyecompanyid: company.ecompanyid,
+                eindustryeindustryid: industryId
+            }
+        });
+
+        // TODO: Create CompanyIndustryMapping
+        const insertCompanyIndustryMapping = CompanyIndustryMapping.query(trx).insertToTable(companyIndustryMappings, user.sub);
+
         if (companyDTO.ecompanyautonik) {
-            if (!companyDTO.ecompanynik) throw new UnsupportedOperationError(ErrorEnum.NIK_EMPTY)
+            // if (!companyDTO.ecompanynik) throw new UnsupportedOperationError(ErrorEnum.NIK_EMPTY)
             await CompanySequence.createSequence(company.ecompanyid, trx)
         }
 
-        const id = ( isNaN(userId) ) ? parseInt(user.sub) : userId
-
         const companyUserMappingDTO = {
             ecompanyecompanyid: company.ecompanyid,
-            eusereuserid: id
+            eusereuserid: user.sub
         }
 
         const companyModuleDTOs = modules.map(module => ({
@@ -233,7 +230,7 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
             ecompanyecompanyid: company.ecompanyid
         }
 
-        const insertGradeAndFunctions = Grades.query(trx).insertToTable(gradeDTO, user.sub)
+        const insertGradeAndFunctions = await Grades.query(trx).insertToTable(gradeDTO, user.sub)
             .then(grade => ({ egradeegradeid: grade.egradeid, eusereuserid: user.sub }))
             .then(userPositionMappingDTO => UserPositionMapping.query(trx).insertToTable(userPositionMappingDTO, user.sub))
             .then(mapping => mapping.egradeegradeid)
@@ -241,9 +238,10 @@ CompanyService.createCompany = async(userId, companyDTO, addressDTO, user) => {
 
         // super user of the company
         const findUserQuery = User.query()
-            .findById(id)
+            .findById(user.sub)
 
-        return Promise.all([findUserQuery, insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery, insertGradeAndFunctions])
+        return Promise.all([findUserQuery, insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery, insertGradeAndFunctions, 
+            insertCompanyIndustryMapping])
             .then(resultArr => ({
                 company: company,
                 address: address,

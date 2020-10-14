@@ -46,48 +46,39 @@ companyController.createCompany = async (req, res, next) => {
         const {
             companyName,
             companyEmail,
-            street,
-            postalCode,
             companyParentId,
-            companyOlderId,
-            industryId,
+            industryIds,
             companyPhoneNumber,
-            supervisorId,
             countryId,
             stateId,
-            isAutoNik,
-            companyNik,
-            fileId
+            street,
+            isAutoNik = true
         } = req.body;
 
         const companyDTO = {
             ecompanyname: companyName,
             ecompanyemailaddress: companyEmail,
-            ecompanyparentid: companyParentId,
-            ecompanyolderid: companyOlderId,
-            eindustryeindustryid: industryId,
             ecompanyphonenumber: companyPhoneNumber,
-            ecompanyautonik: isAutoNik,
-            ecompanynik: companyNik,
-            efileefileid: fileId
+            ecompanyautonik: isAutoNik
         }
 
         const addressDTO = {
             eaddressstreet: street,
-            eaddresspostalcode: postalCode,
+            eaddresspostalcode: 0,
             ecountryecountryid: countryId,
             estateestateid: stateId
         }
 
-        if (companyOlderId || companyParentId) {
+        if (companyParentId) {
             if (user.functions.indexOf('C1') === -1)
                 return res.status(403).json(ResponseHelper.toErrorResponse(403))
         }
 
-        const data = await companyService.createCompany(supervisorId , companyDTO, addressDTO, user);
+        const data = await companyService.createCompany(companyDTO, addressDTO, industryIds, user);
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
 
     } catch(e) {
+        console.log(e);
         next(e);
     }
 }
@@ -158,15 +149,13 @@ companyController.editCompany = async (req, res, next) => {
 
     const { companyName,
         companyEmail,
-        street,
         postalCode,
         companyParentId,
-        companyOlderId,
-        industryId,
-        supervisorId,
+        industryIds,
         companyPhoneNumber,
         countryId,
         stateId,
+        street,
         fileId
     } = req.body
 
@@ -176,8 +165,6 @@ companyController.editCompany = async (req, res, next) => {
             ecompanyname: companyName,
             ecompanyemailaddress: companyEmail,
             ecompanyparentid: companyParentId,
-            ecompanyolderid: companyOlderId,
-            eindustryeindustryid: industryId,
             ecompanyphonenumber: companyPhoneNumber,
             efileefileid: fileId
         }
@@ -189,7 +176,7 @@ companyController.editCompany = async (req, res, next) => {
             estateestateid: stateId
         }
 
-        const result = await companyService.editCompany(parseInt(companyId), supervisorId, companyDTO, addressDTO, user)
+        const result = await companyService.editCompany(parseInt(companyId), companyDTO, addressDTO, industryIds, user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch (e) {
