@@ -185,7 +185,7 @@ teamService.getTeamMemberList = async (teamId, user, page, size) => {
     if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
 
     return TeamUserMapping.query()
-    .select('euserid', 'eusername', 'user.efileefileid', 'eteamusermappingposition')
+    .select('euserid', 'eusername', 'user.efileefileid', 'eteamusermappingposition', 'eusermobilenumber')
     .leftJoinRelated('[user, team]')
     .where('eteamid', teamId)
     .page(page, size)
@@ -336,7 +336,7 @@ teamService.invite = async (teamId, user, userIds) => {
 
     //if no apply log and no invite log need to be created
     if(invitedUserIds.length <= 0 && userApplyList.length <= 0) {
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_IN_TEAM)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_ALREADY_INVITED)
     }
 
     const result = {
