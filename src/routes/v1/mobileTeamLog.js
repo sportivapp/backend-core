@@ -11,7 +11,7 @@ router.delete('/team-log/:teamLogId/user-cancel', auth.authenticateToken, contro
 router.put('/team-log/team-process', auth.authenticateToken, controller.processRequests);
 
 router.post('/team/:teamId/invite', auth.authenticateToken, controller.invite);
-router.delete('/team-log/:teamLogId/invite', auth.authenticateToken, controller.cancelInvite);
+router.delete('/team-log/cancel-invite', auth.authenticateToken, controller.cancelInvites);
 router.put('/team-log/:teamLogId/user-process', auth.authenticateToken, controller.processInvitation);
 
 module.exports = router;
