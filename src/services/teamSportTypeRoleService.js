@@ -19,4 +19,12 @@ teamSportTypeRoleService.insertTeamSportTypeRoles = async (teamUserMappingId, te
 
 }
 
+teamSportTypeRoleService.deleteAllTeamSportTypeRolesByTeamId = async (teamId) => {
+
+    return TeamSportTypeRole.query()
+    .where('eteameteamid', teamId)
+    .delete()
+
+}
+
 module.exports = teamSportTypeRoleService
