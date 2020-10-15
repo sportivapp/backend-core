@@ -119,8 +119,6 @@ teamService.updateTeam = async (teamDTO, user, teamId) => {
     const teamFromDB = await teamService.getTeamDetail(teamId, user)
     .catch( () => null)
 
-    console.log(teamFromDB);
-
     if(!teamFromDB) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TEAM_NOT_FOUND)
 
     const isAdmin = await teamService.isAdmin(teamId, user.sub)
