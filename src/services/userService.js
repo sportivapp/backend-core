@@ -105,35 +105,6 @@ UserService.createUser = async (userDTO, otpCode) => {
 
 }
 
-UserService.createUser = async (userDTO, user) => {
-
-    const getUserByEmail = await User.query().where('euseremail', userDTO.euseremail).first();
-
-    if (getUserByEmail)
-        return
-
-    const trimmedName = userDTO.eusername.replace(/\s+/g, '')
-
-    userDTO.euserpassword = await bcrypt.hash('sportiv'.concat(trimmedName.toLowerCase()));
-
-    const company = await Company.query().findById(user.companyId)
-
-    if (company.ecompanyautonik) {
-        const nikNumber = await CompanySequence.getNextVal(company.ecompanyid)
-        userDTO.eusernik = company.ecompanynik.concat(nikNumber)
-    }
-
-    const createdUser = await User.query().insertToTable(userDTO, user.sub)
-
-    await CompanyUserMapping.query()
-        .insertToTable({
-            ecompanyecompanyid: user.companyId,
-            eusereuserid: createdUser.euserid,
-        }, user.sub)
-
-    return createdUser
-}
-
 UserService.getUserById = async ( userId, user ) => {
 
     const result = await User.query()
