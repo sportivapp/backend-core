@@ -26,6 +26,16 @@ teamLogService.getPendingLogByTeamLogId = async (teamLogId, types) => {
 
 }
 
+teamLogService.getPendingLogByTeamLogIdsAndType = async (teamLogIds, types) => {
+
+    return TeamLog.query()
+    .whereIn('eteamlogid', teamLogIds)
+    .whereIn('eteamlogtype', types)
+    .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
+    .orderBy('eteamlogcreatetime', 'DESC')
+
+}
+
 teamLogService.getLogByTeamLogIdOptinalUserId = async (teamLogId, userId) => {
 
     const teamLogPromise = TeamLog.query()
@@ -106,6 +116,22 @@ teamLogService.updateTeamLog = async (teamLogId, user, status) => {
     return log.$query().updateByUserId({
         eteamlogstatus: status
     }, user.sub)
+    .returning('*');
+
+}
+
+teamLogService.updateTeamLogs = async (teamLogs, user, status) => {
+
+    const teamLogIds = teamLogs.map(teamLog => teamLog.eteamlogid)
+
+    return TeamLog
+    .query()
+    .whereIn('eteamlogid', teamLogIds)
+    .update({
+        eteamlogstatus: status,
+        eteamlogchangetime: Date.now(),
+        eteamlogchangeby: user.sub
+    })
     .returning('*');
 
 }
