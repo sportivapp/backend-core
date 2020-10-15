@@ -1,5 +1,6 @@
 const TeamLog = require('../models/TeamLog')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
+const teamUserMappingService = require('./teamUserMappingService')
 
 const teamLogService = {}
 
@@ -15,6 +16,10 @@ const TeamLogTypeEnum = {
     INVITE: 'INVITE'
 }
 
+const TeamUserMappingPositionEnum = {
+    MEMBER: 'MEMBER'
+}
+
 teamLogService.getPendingLogByTeamLogId = async (teamLogId, types) => {
 
     return TeamLog.query()
@@ -23,6 +28,16 @@ teamLogService.getPendingLogByTeamLogId = async (teamLogId, types) => {
     .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
     .orderBy('eteamlogcreatetime', 'DESC')
     .first();
+
+}
+
+teamLogService.getPendingLogByTeamLogIdsAndType = async (teamLogIds, types) => {
+
+    return TeamLog.query()
+    .whereIn('eteamlogid', teamLogIds)
+    .whereIn('eteamlogtype', types)
+    .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
+    .orderBy('eteamlogcreatetime', 'DESC')
 
 }
 
@@ -107,6 +122,49 @@ teamLogService.updateTeamLog = async (teamLogId, user, status) => {
         eteamlogstatus: status
     }, user.sub)
     .returning('*');
+
+}
+
+teamLogService.updateTeamLogs = async (teamLogs, user, status) => {
+
+    const teamLogIds = teamLogs.map(teamLog => teamLog.eteamlogid)
+
+    return TeamLog
+    .query()
+    .whereIn('eteamlogid', teamLogIds)
+    .update({
+        eteamlogstatus: status,
+        eteamlogchangetime: Date.now(),
+        eteamlogchangeby: user.sub
+    })
+    .returning('*');
+
+}
+
+teamLogService.updateAppliedTeamLogsWithPendingByTeamIdAndStatus = async (teamId, user, status) => {
+
+    return TeamLog.transaction(async trx => {
+        await TeamLog.query(trx)
+        .where('eteameteamid', teamId)
+        .where('eteamlogtype', TeamLogTypeEnum.APPLY)
+        .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
+        .update({
+            eteamlogstatus: status,
+            eteamlogchangetime: Date.now(),
+            eteamlogchangeby: user.sub
+        })
+        .returning('*')
+        .then(teamLogs => {
+
+            const mappings = teamLogs.map(teamLog => ({
+                eusereuserid: teamLog.eusereuserid,
+                eteameteamid: teamLog.eteameteamid,
+                eteamusermappingposition: TeamUserMappingPositionEnum.MEMBER
+            }))
+
+            return teamUserMappingService.createTeamUserMapping(mappings, user, trx)
+        })
+    })
 
 }
 
