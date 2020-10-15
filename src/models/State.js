@@ -8,6 +8,15 @@ class State extends Model {
   static get idColumn() {
     return 'estateid'
   };
+  
+  static get modifiers() {
+    return {
+      baseAttributes(builder) {
+          builder.select('estateid', 'estatename')
+            .withGraphFetched('country(baseAttributes)')
+      }
+    }
+  }
 
   static get jsonSchema() {
     return {
@@ -18,6 +27,23 @@ class State extends Model {
       }
     };
   }
+
+  static get relationMappings() {
+
+    const Country = require('./Country')
+
+    return {
+      country: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Country,
+        join: {
+            from: 'estate.ecountryecountryid',
+            to: 'ecountry.ecountryid'
+        }
+      }
+    }
+  }
+
 }
 
 module.exports = State;

@@ -20,6 +20,15 @@ class Address extends Model {
     };
   }
 
+  static get modifiers() {
+      return {
+          baseAttributes(builder) {
+              builder.select('eaddressid', 'eaddressstreet', 'eaddresspostalcode', 'eaddresslongitude', 'eaddresslatitude')
+                .withGraphFetched('state(baseAttributes)')
+          }
+      }
+  }
+
     static get relationMappings() {
 
       const Country = require('./Country')

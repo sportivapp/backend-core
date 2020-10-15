@@ -187,12 +187,13 @@ CompanyService.createCompany = async(companyDTO, addressDTO, industryIds, user) 
     return Company.transaction(async trx => {
 
         const address = await Address.query(trx).insertToTable(addressDTO, user.sub)
+            .modify('baseAttributes')
 
         companyDTO.eaddresseaddressid = address.eaddressid
 
         const company = await Company.query(trx)
             .insertToTable(companyDTO, user.sub)
-            .withGraphFetched('logo(baseAttributes)');
+            .modify('baseAttributes')
 
         const companyIndustryMappings = industryIds.map(industryId => {
             return {
@@ -239,6 +240,7 @@ CompanyService.createCompany = async(companyDTO, addressDTO, industryIds, user) 
         // super user of the company
         const findUserQuery = User.query()
             .findById(user.sub)
+            .modify('baseAttributes')
 
         return Promise.all([findUserQuery, insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery, insertGradeAndFunctions, 
             insertCompanyIndustryMapping])
