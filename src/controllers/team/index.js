@@ -255,6 +255,22 @@ controller.kickUserFromTeam = async (req, res, next) => {
 
 }
 
+controller.changeTeamMemberSportRoles = async (req, res, next) => {
+
+    const { teamUserMappingId, sportRoleIds } = req.body;
+
+    try {
+
+        const result = await teamService.changeTeamMemberSportRoles(teamUserMappingId, req.user, sportRoleIds);
+
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 controller.changeTeamMemberPosition = async (req, res, next) => {
 
     const { position } = req.query;
