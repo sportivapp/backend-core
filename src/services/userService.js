@@ -286,4 +286,9 @@ UserService.sendForgotPasswordLink = async ( email ) => {
     return true;
 }
 
-module.exports = UserService;
+UsersService.getAllUsersByUserIds = async (userIds) => {
+    return User.query()
+        .whereIn('euserid', userIds)
+}
+
+module.exports = UsersService;

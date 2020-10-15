@@ -17,6 +17,22 @@ class ThreadModerator extends Model {
       }
     }
   }
+
+  static get relationMappings() {
+
+    const User = require('./User')
+
+    return {
+      user: {
+        modelClass: User,
+        relation: Model.BelongsToOneRelation,
+        join: {
+          from: 'ethreadmoderator.eusereuserid',
+          to: 'euser.euserid'
+        }
+      }
+    }
+  }
 }
 
 module.exports = ThreadModerator;

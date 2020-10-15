@@ -180,7 +180,12 @@ module.exports = {
         comment: {
             threadComments: '/thread/:threadId/comments',
             list: '/comment',
-            id: '/comment/:commentId'
+            id: '/comment/:commentId',
+            threadPostId: '/thread/:threadId/comments/:commentId'
+        },
+        thread: {
+            list: '/thread',
+            id: '/thread/:threadId'
         }
     }
 }

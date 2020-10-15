@@ -1,10 +1,12 @@
 const Team = require('../models/Team')
 const TeamUserMapping = require('../models/TeamUserMapping')
+const TeamLog = require('../models/TeamLog')
 const User = require('../models/User')
 const ServiceHelper = require('../helper/ServiceHelper');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const { raw, UniqueViolationError } = require('objection');
 const teamLogService = require('./teamLogService');
+const teamUserMappingService = require('./teamUserMappingService')
 
 const teamService = {}
 
@@ -127,8 +129,11 @@ teamService.updateTeam = async (teamDTO, user, teamId) => {
     return teamFromDB.$query()
         .updateByUserId(teamDTO, user.sub)
         .returning('*')
-        .then(newTeam => {
+        .then(async newTeam => {
             if(!newTeam) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.UPDATE_FAILED)
+    
+            // accept all user log that is applying to this team with pending status
+            if(newTeam.eteamispublic) await teamLogService.updateAppliedTeamLogsWithPendingByTeamIdAndStatus(teamId, user, TeamLogStatusEnum.ACCEPTED)
             return newTeam
         })
         .catch(e => {
@@ -144,6 +149,7 @@ teamService.getTeams = async (keyword, page, size, user) => {
     .modify('baseAttributes')
     .select('eteamcreatetime', Team.relatedQuery('members').count().as('teamMemberCount') )
     .withGraphFetched('company(baseAttributes)')
+    .withGraphFetched('teamIndustry(baseAttributes)')
     .where(raw('lower("eteamname")'), 'like', `%${keyword}%`)
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
@@ -217,7 +223,7 @@ teamService.getTeamMemberByLogType = async (teamId, user, page, size, type) => {
     if (!isAdmin)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
-    return teamLogService.getPendingLogByType(teamId, type, page, size, TeamLogStatusEnum.PENDING)
+    return teamLogService.getPendingLogByTeamIdAndTypeAndStatus(teamId, type, page, size, TeamLogStatusEnum.PENDING)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
 }
@@ -248,6 +254,22 @@ teamService.processIntoTeam = async (teamId, teamLogId, user, userId) => {
     }, user.sub);
 
     const teamLogPromise = teamLogService.updateTeamLog(teamLogId, user, TeamLogStatusEnum.ACCEPTED);
+
+    return Promise.all([teamUserMappingPromise, teamLogPromise])
+
+}
+
+teamService.processIntoTeamByTeamLogs = async (teamLogs, user) => {
+
+    const mappings = teamLogs.map(teamLog => ({
+        eusereuserid: teamLog.eusereuserid,
+        eteameteamid: teamLog.eteameteamid,
+        eteamusermappingposition: TeamUserMappingPositionEnum.MEMBER
+    }))
+
+    const teamUserMappingPromise = teamUserMappingService.createTeamUserMapping(mappings, user);
+
+    const teamLogPromise = teamLogService.updateTeamLogs(teamLogs, user, TeamLogStatusEnum.ACCEPTED);
 
     return Promise.all([teamUserMappingPromise, teamLogPromise])
 
@@ -348,35 +370,42 @@ teamService.invite = async (teamId, user, userIds) => {
 
 }
 
-teamService.cancelInvite = async (teamLogId, user) => {
+teamService.cancelInvites = async (teamLogIds, user) => {
     
-    const pendingInvite = await teamLogService.getPendingLogByTeamLogId(teamLogId, [TeamLogTypeEnum.INVITE]);
+    const pendingLogs = await teamLogService.getPendingLogByTeamLogIdsAndType(teamLogIds, [TeamLogTypeEnum.INVITE])
 
-    if (!pendingInvite)
+    if (pendingLogs.length !== teamLogIds.length)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_INVITED)
 
-    const isAdmin = await teamService.isAdmin(pendingInvite.eteameteamid, user.sub);
+    // take the first teamId from invite log
+    const isAdmin = await teamService.isAdmin(pendingLogs[0].eteameteamid, user.sub);
 
     if (!isAdmin)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
-    return pendingInvite.$query().delete()
-    .then(rowsAffected => rowsAffected === 1)
+    // return pendingInvites.$query().delete()
+    // .then(rowsAffected => rowsAffected === 1)
+
+    //TODO: FIND OTHER WAY TO USE $query() for list so it doesnt need to be like this
+    return TeamLog.query()
+    .whereIn('eteamlogid', teamLogIds)
+    .delete()
+    .then(rowsAffected => rowsAffected === teamLogIds.length)
 
 }
 
-teamService.processRequest = async (teamLogId, user, status) => {
+teamService.processRequests = async (teamLogIds, user, status) => {
 
     if (status !== TeamLogStatusEnum.ACCEPTED && status !== TeamLogStatusEnum.REJECTED)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.STATUS_UNACCEPTED)
 
 
-    const teamLog = await teamLogService.getPendingLogByTeamLogId(teamLogId, [TeamLogTypeEnum.APPLY]);
+    const teamLogs = await teamLogService.getPendingLogByTeamLogIdsAndType(teamLogIds, [TeamLogTypeEnum.APPLY]);
 
-    if (!teamLog)
+    if (teamLogs.length !== teamLogIds.length)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_APPLIED)
 
-    const isAdmin = await teamService.isAdmin(teamLog.eteameteamid, user.sub);
+    const isAdmin = await teamService.isAdmin(teamLogs[0].eteameteamid, user.sub);
 
     if (!isAdmin)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
@@ -384,10 +413,10 @@ teamService.processRequest = async (teamLogId, user, status) => {
     let processPromise
 
     if (status === TeamLogStatusEnum.REJECTED)
-        processPromise = teamLogService.updateTeamLog(teamLogId, user, status)
+        processPromise = teamLogService.updateTeamLogs(teamLogs, user, status)
 
     if (status === TeamLogStatusEnum.ACCEPTED)
-        processPromise = teamService.processIntoTeam(teamLog.eteameteamid, teamLogId, user, teamLog.eusereuserid);
+        processPromise = teamService.processIntoTeamByTeamLogs(teamLogs, user);
 
     return processPromise
 

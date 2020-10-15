@@ -22,7 +22,8 @@ const ErrorEnum = {
     USER_APPLIED: 'USER_APPLIED',
     TYPE_UNACCEPTED: 'TYPE_UNACCEPTED',
     NOT_ADMIN: 'NOT_ADMIN',
-    USER_INVITED: 'USER_INVITED'
+    USER_INVITED: 'USER_INVITED',
+    USER_NOT_EXIST: 'USER_NOT_EXIST'
 }
 
 const teamLogService = {};
@@ -211,7 +212,7 @@ teamLogService.invite = async (teamId, user, email) => {
     .first();
 
     if (!invitedUser)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
+        throw new UnsupportedOperationError(ErrorEnum.USER_NOT_EXIST)
 
     const teamUser = await teamUserService.getTeamUserByTeamIdAndUserId(teamId, invitedUser.euserid)
         .catch(() => null);
