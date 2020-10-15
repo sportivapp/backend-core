@@ -38,6 +38,22 @@ controller.getTeamMemberList = async (req, res, next) => {
 
 }
 
+controller.getTeamByUserId = async (req, res, next) => {
+
+    const { page = '0', size = '10' } = req.query;
+    
+    try {
+
+        const pageObj = await teamUserService.getTeamByUserId(parseInt(page), parseInt(size), req.user);
+
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 controller.changeTeamMemberPosition = async (req, res, next) => {
 
     const { teamId, position } = req.params;

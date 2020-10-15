@@ -1,5 +1,6 @@
 const TeamUserMapping = require('../models/TeamUserMapping')
 const { NotFoundError } = require('../models/errors')
+const ServiceHelper = require('../helper/ServiceHelper')
 
 const teamUserMappingService = {}
 
@@ -33,6 +34,16 @@ teamUserMappingService.getTeamUsermappingByTeamUserMappingId = async (teamUserMa
         return teamUserMapping
     })
 
+}
+
+teamUserMappingService.getTeamByUserId = async (page, size, userId) => {
+
+    return TeamUserMapping.query()
+    .modify('baseAttributes')
+    .where('eusereuserid', userId)
+    .withGraphFetched('team(baseAttributes).teamPicture(baseAttributes)')
+    .page(page, size)
+    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
 }
 
