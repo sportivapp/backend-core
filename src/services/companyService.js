@@ -256,7 +256,19 @@ CompanyService.createCompany = async(companyDTO, addressDTO, industryIds, user) 
         })
 }
 
-CompanyService.getCompanyList = async (page, size, type, keyword, companyId, user) => {
+CompanyService.getMyCompanyList = async (page, size, companyName, user) => {
+
+    return CompanyUserMapping.query()
+        .modify('baseAttributes')
+        .withGraphJoined('company(baseAttributes).logo(baseAttributes)')
+        .where('eusereuserid', user.sub)
+        .whereRaw(`LOWER("ecompanyname") LIKE LOWER('%${companyName}%')`)
+        .page(page, size)
+        .then(companyList => ServiceHelper.toPageObj(page, size, companyList))
+
+}
+
+CompanyService.getAllCompanyList = async (page, size, type, keyword, companyId, user) => {
 
     const companyIds = await CompanyUserMapping.query()
         .where('eusereuserid', user.sub)

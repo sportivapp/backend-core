@@ -83,19 +83,29 @@ companyController.createCompany = async (req, res, next) => {
     }
 }
 
-companyController.getCompanyList = async (req, res, next) => {
+companyController.getAllCompanyList = async (req, res, next) => {
 
     const user = req.user
-
-    if (req.user.functions.indexOf('R1') === -1)
-        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     // type = company or type = branch
     const { page = '0', size = '10', type, keyword = '', companyId } = req.query
 
     try {
-        const pageObj = await companyService.getCompanyList(parseInt(page), parseInt(size), type, keyword.toLowerCase(),
+        const pageObj = await companyService.getAllCompanyList(parseInt(page), parseInt(size), type, keyword.toLowerCase(),
             parseInt(companyId), user)
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+    } catch (e) {
+        next(e)
+    }
+
+}
+
+companyController.getMyCompanyList = async (req, res, next) => {
+
+    const { page = '0', size = '10', keyword = '' } = req.query
+
+    try {
+        const pageObj = await companyService.getMyCompanyList(parseInt(page), parseInt(size), keyword.toLowerCase(), req.user)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
     } catch (e) {
         next(e)
