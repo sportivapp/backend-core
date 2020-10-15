@@ -7,6 +7,7 @@ const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const { raw, UniqueViolationError } = require('objection');
 const teamLogService = require('./teamLogService');
 const teamUserMappingService = require('./teamUserMappingService')
+const teamSportTypeRoleService = require('./teamSportTypeRoleService')
 
 const teamService = {}
 
@@ -191,9 +192,10 @@ teamService.getTeamMemberList = async (teamId, user, page, size) => {
     if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
 
     return TeamUserMapping.query()
-    .select('euserid', 'eusername', 'user.efileefileid', 'eteamusermappingposition', 'eusermobilenumber')
-    .leftJoinRelated('[user, team]')
-    .where('eteamid', teamId)
+    .modify('baseAttributes')
+    .where('eteameteamid', teamId)
+    .withGraphFetched('teamSportTypeRoles(baseAttributes)')
+    .withGraphFetched('user(baseAttributes).file(baseAttributes)')
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
@@ -574,6 +576,23 @@ teamService.kickUserFromTeam = async (teamId, user, userId, logMessage) => {
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
 
     return teamService.removeUserFromTeam(userInTeam, user, userId, TeamLogStatusEnum.KICKED, logMessage);
+
+}
+
+teamService.changeTeamMemberSportRoles = async (teamUserMappingId, user, sportRoleIds) => {
+
+    const teamUserMapping = await teamUserMappingService.getTeamUsermappingByTeamUserMappingId(teamUserMappingId)
+    .catch( () => null)
+
+    if(!teamUserMapping) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
+
+    const isAdmin = await teamService.isAdmin(teamUserMapping.eteameteamid, user.sub);
+
+    if (!isAdmin)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
+
+    return teamSportTypeRoleService
+    .insertTeamSportTypeRoles(teamUserMappingId, teamUserMapping.eteameteamid, sportRoleIds, user)
 
 }
 
