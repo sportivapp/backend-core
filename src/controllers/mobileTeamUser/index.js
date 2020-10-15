@@ -78,7 +78,7 @@ controller.isAdmin = async (req, res, next) => {
 
     try {
          
-        const result = await teamUserService.getTeamUserCheckAdmin(teamId, req.user.sub);
+        const result = await teamUserService.checkTeamUserCheckAdmin(teamId, req.user.sub);
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
