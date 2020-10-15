@@ -46,65 +46,66 @@ companyController.createCompany = async (req, res, next) => {
         const {
             companyName,
             companyEmail,
-            street,
-            postalCode,
             companyParentId,
-            companyOlderId,
-            industryId,
+            industryIds,
             companyPhoneNumber,
-            supervisorId,
             countryId,
             stateId,
-            isAutoNik,
-            companyNik,
-            fileId
+            street,
+            isAutoNik = true
         } = req.body;
 
         const companyDTO = {
             ecompanyname: companyName,
             ecompanyemailaddress: companyEmail,
-            ecompanyparentid: companyParentId,
-            ecompanyolderid: companyOlderId,
-            eindustryeindustryid: industryId,
             ecompanyphonenumber: companyPhoneNumber,
-            ecompanyautonik: isAutoNik,
-            ecompanynik: companyNik,
-            efileefileid: fileId
+            ecompanyautonik: isAutoNik
         }
 
         const addressDTO = {
             eaddressstreet: street,
-            eaddresspostalcode: postalCode,
+            eaddresspostalcode: 0,
             ecountryecountryid: countryId,
             estateestateid: stateId
         }
 
-        if (companyOlderId || companyParentId) {
+        if (companyParentId) {
             if (user.functions.indexOf('C1') === -1)
                 return res.status(403).json(ResponseHelper.toErrorResponse(403))
         }
 
-        const data = await companyService.createCompany(supervisorId , companyDTO, addressDTO, user);
+        const data = await companyService.createCompany(companyDTO, addressDTO, industryIds, user);
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
 
     } catch(e) {
+        console.log(e);
         next(e);
     }
 }
 
-companyController.getCompanyList = async (req, res, next) => {
+companyController.getAllCompanyList = async (req, res, next) => {
 
     const user = req.user
-
-    if (req.user.functions.indexOf('R1') === -1)
-        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     // type = company or type = branch
     const { page = '0', size = '10', type, keyword = '', companyId } = req.query
 
     try {
-        const pageObj = await companyService.getCompanyList(parseInt(page), parseInt(size), type, keyword.toLowerCase(),
+        const pageObj = await companyService.getAllCompanyList(parseInt(page), parseInt(size), type, keyword.toLowerCase(),
             parseInt(companyId), user)
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+    } catch (e) {
+        next(e)
+    }
+
+}
+
+companyController.getMyCompanyList = async (req, res, next) => {
+
+    const { page = '0', size = '10', keyword = '' } = req.query
+
+    try {
+        const pageObj = await companyService.getMyCompanyList(parseInt(page), parseInt(size), keyword.toLowerCase(), req.user)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
     } catch (e) {
         next(e)
@@ -158,15 +159,13 @@ companyController.editCompany = async (req, res, next) => {
 
     const { companyName,
         companyEmail,
-        street,
         postalCode,
         companyParentId,
-        companyOlderId,
-        industryId,
-        supervisorId,
+        industryIds,
         companyPhoneNumber,
         countryId,
         stateId,
+        street,
         fileId
     } = req.body
 
@@ -176,8 +175,6 @@ companyController.editCompany = async (req, res, next) => {
             ecompanyname: companyName,
             ecompanyemailaddress: companyEmail,
             ecompanyparentid: companyParentId,
-            ecompanyolderid: companyOlderId,
-            eindustryeindustryid: industryId,
             ecompanyphonenumber: companyPhoneNumber,
             efileefileid: fileId
         }
@@ -189,7 +186,7 @@ companyController.editCompany = async (req, res, next) => {
             estateestateid: stateId
         }
 
-        const result = await companyService.editCompany(parseInt(companyId), supervisorId, companyDTO, addressDTO, user)
+        const result = await companyService.editCompany(parseInt(companyId), companyDTO, addressDTO, industryIds, user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch (e) {

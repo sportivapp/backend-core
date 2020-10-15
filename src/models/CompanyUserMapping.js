@@ -22,7 +22,10 @@ class CompanyUserMapping extends Model {
 
     static get modifiers() {
         return {
-            ...this.baseModifiers()
+            ...this.baseModifiers(),
+            baseAttributes(builder) {
+                    builder.select('ecompanyecompanyid', 'eusereuserid')
+            }
         }
     }
 

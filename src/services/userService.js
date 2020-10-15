@@ -10,10 +10,18 @@ const readXlsxFile = require("read-excel-file/node");
 const emailService = require('../helper/emailService');
 const ServiceHelper = require('../helper/ServiceHelper')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
+const Otp = require('../models/Otp')
 
-const UsersService = {};
+const ErrorEnum = {
+    EMAIL_INVALID: 'EMAIL_INVALID',
+    USER_ALREADY_EXIST: 'USER_ALREADY_EXIST',
+    OTP_NOT_FOUND: 'OTP_NOT_FOUND',
+    OTP_CODE_NOT_MATCH: 'OTP_CODE_NOT_MATCH'
+}
 
-UsersService.registerEmployees = async (user, path) => {
+const UserService = {};
+
+UserService.registerEmployees = async (user, path) => {
 
     let positions = [];
     const values = await readXlsxFile(path).then((rows) => {
@@ -68,7 +76,36 @@ UsersService.registerEmployees = async (user, path) => {
 
 }
 
-UsersService.createUser = async (userDTO, user) => {
+UserService.createUser = async (userDTO, otpCode) => {
+
+    const isEmail = emailService.validateEmail(userDTO.euseremail);
+
+    if (!isEmail)
+        throw new UnsupportedOperationError(ErrorUserEnum.EMAIL_INVALID)
+
+    const user = await User.query().where('euseremail', userDTO.euseremail).first();
+
+    if (user)
+        throw new UnsupportedOperationError(ErrorUserEnum.USER_ALREADY_EXIST)
+
+    const otp = await Otp.query().where('euseremail', userDTO.euseremail).first();
+
+    if (!otp)
+        throw new UnsupportedOperationError(ErrorUserEnum.OTP_NOT_FOUND)
+
+    if (otp.eotpcode !== otpCode)
+        throw new UnsupportedOperationError(ErrorUserEnum.OTP_CODE_NOT_MATCH)
+
+    // confirm OTP
+    await otp.$query().updateByUserId({ eotpconfirmed: true }, 0);
+
+    userDTO.eusername = userDTO.euseremail.split('@')[0];
+    userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
+    return User.query().insertToTable(userDTO, 0);
+
+}
+
+UserService.createUser = async (userDTO, user) => {
 
     const getUserByEmail = await User.query().where('euseremail', userDTO.euseremail).first();
 
@@ -97,7 +134,7 @@ UsersService.createUser = async (userDTO, user) => {
     return createdUser
 }
 
-UsersService.getUserById = async ( userId, user ) => {
+UserService.getUserById = async ( userId, user ) => {
 
     const result = await User.query()
         .withGraphFetched('file')
@@ -115,7 +152,7 @@ UsersService.getUserById = async ( userId, user ) => {
 
 }
 
-UsersService.getOtherUserById = async (userId, type, companyId) => {
+UserService.getOtherUserById = async (userId, type, companyId) => {
 
     const userInCompany = await CompanyUserMapping.
     query()
@@ -146,14 +183,14 @@ UsersService.getOtherUserById = async (userId, type, companyId) => {
 
 }
 
-UsersService.updateUserById = async (userId, userDTO, user) => {
+UserService.updateUserById = async (userId, userDTO, user) => {
 
     return User.query().findById(userId)
         .updateByUserId(userDTO, user.sub)
         .returning('*')
 }
 
-UsersService.generateJWTToken = async (user, companyId) => {
+UserService.generateJWTToken = async (user, companyId) => {
 
     const config = {
         sub: user.euserid,
@@ -169,7 +206,7 @@ UsersService.generateJWTToken = async (user, companyId) => {
 
 }
 
-UsersService.getAllUserByCompanyId = async ( page, size, companyId ) => {
+UserService.getAllUserByCompanyId = async ( page, size, companyId ) => {
 
     const userPage = Company.relatedQuery('users')
         .for(companyId)
@@ -181,7 +218,7 @@ UsersService.getAllUserByCompanyId = async ( page, size, companyId ) => {
 
 }
 
-UsersService.login = async (loginDTO) => {
+UserService.login = async (loginDTO) => {
 
     const user = await User.query().select().where('euseremail', loginDTO.euseremail).first();
 
@@ -200,7 +237,7 @@ UsersService.login = async (loginDTO) => {
         .where('eusereuserid', user.euserid)
         .orderBy('ecompanyusermappingcreatetime', 'ASC')
         .first();
-        token = await UsersService.generateJWTToken(user, result.ecompanyecompanyid);
+        token = await UserService.generateJWTToken(user, result.ecompanyecompanyid);
 
     }
 
@@ -208,7 +245,7 @@ UsersService.login = async (loginDTO) => {
 
 }
 
-UsersService.changeUserPassword = async ( user , oldPassword, newPassword) => {
+UserService.changeUserPassword = async ( user , oldPassword, newPassword) => {
 
     const userFromDB = await User.query().findById(user.sub);
 
@@ -223,9 +260,9 @@ UsersService.changeUserPassword = async ( user , oldPassword, newPassword) => {
 
 }
 
-UsersService.deleteUserById = async ( userId, loggedInUser ) => {
+UserService.deleteUserById = async ( userId, loggedInUser ) => {
 
-    const user = await UsersService.getUserById(userId, loggedInUser)
+    const user = await UserService.getUserById(userId, loggedInUser)
 
     const projects = await User.relatedQuery('projects')
         .for(user.euserid)
@@ -238,7 +275,7 @@ UsersService.deleteUserById = async ( userId, loggedInUser ) => {
 
 }
 
-UsersService.sendForgotPasswordLink = async ( email ) => {
+UserService.sendForgotPasswordLink = async ( email ) => {
     const isEmailAvailable = await User.query().select().where('euseremail', email).first();
 
     if(isEmailAvailable) {
@@ -249,9 +286,9 @@ UsersService.sendForgotPasswordLink = async ( email ) => {
     return true;
 }
 
-UsersService.getAllUsersByUserIds = async (userIds) => {
+UserService.getAllUsersByUserIds = async (userIds) => {
     return User.query()
         .whereIn('euserid', userIds)
 }
 
-module.exports = UsersService;
+module.exports = UserService;
