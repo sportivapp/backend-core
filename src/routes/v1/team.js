@@ -5,6 +5,7 @@ const auth = require('../../middlewares/authentication');
 const { routes } = require('../../constant');
 
 router.get( routes.team.list, auth.authenticateToken, controller.getTeams);
+router.get( routes.team.myTeam, auth.authenticateToken, controller.getMyTeamList);
 router.get( routes.team.id, auth.authenticateToken, controller.getTeamDetail);
 router.post( routes.team.list, auth.authenticateToken, controller.createTeam);
 router.post( routes.team.join, auth.authenticateToken, controller.joinTeam);
