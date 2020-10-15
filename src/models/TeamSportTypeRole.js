@@ -21,29 +21,29 @@ class TeamSportTypeRole extends Model {
         };
     }
 
+    static get modifiers() {
+        return {
+            baseAttributes(builder) {
+                builder.select('eteamsporttyperolesid', 'eteamusermappingeteamusermappingid', 'esporttyperoleesporttyperoleid', 'eteameteamid')
+                .withGraphFetched('sportTypeRole(baseAttributes)')
+            }
+        }
+    }
+
     static get relationMappings() {
 
-        // const User = require('./User')
-        // const Grades = require('./Grades')
+        const SportTypeRole = require('./SportTypeRole')
 
-        // return {
-        //     user: {
-        //         relation: Model.BelongsToOneRelation,
-        //         modelClass: User,
-        //         join: {
-        //             from: 'euserpositionmapping.eusereuserid',
-        //             to: 'euser.euserid'
-        //         }
-        //     },
-        //     grade: {
-        //         relation: Model.BelongsToOneRelation,
-        //         modelClass: Grades,
-        //         join: {
-        //             from: 'euserpositionmapping.egradeegradeid',
-        //             to: 'egrade.egradeid'
-        //         }
-        //     },
-        // }
+        return {
+            sportTypeRole: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: SportTypeRole,
+                join: {
+                    from: 'eteamsporttyperoles.esporttyperoleesporttyperoleid',
+                    to: 'esporttyperole.esporttyperoleid'
+                }
+            }
+        }
     }
 }
 
