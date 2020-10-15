@@ -14,6 +14,7 @@ router.post( routes.team.processRequest, auth.authenticateToken, controller.proc
 router.get( routes.team.members, auth.authenticateToken, controller.getTeamMemberList);
 router.get( routes.team.teamLog, auth.authenticateToken, controller.getTeamMemberByLogType);
 router.post( routes.team.invite, auth.authenticateToken, controller.invite);
+router.put( routes.team.roles, auth.authenticateToken, controller.changeTeamMemberSportRoles);
 router.put( routes.team.position, auth.authenticateToken, controller.changeTeamMemberPosition);
 router.put( routes.team.id, auth.authenticateToken, controller.updateTeam);
 router.post( routes.team.kick, auth.authenticateToken, controller.kickUserFromTeam);
