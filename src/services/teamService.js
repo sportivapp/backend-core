@@ -6,6 +6,7 @@ const ServiceHelper = require('../helper/ServiceHelper');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const { raw, UniqueViolationError } = require('objection');
 const teamLogService = require('./teamLogService');
+const teamUserMappingService = require('./teamUserMappingService')
 
 const teamService = {}
 
@@ -263,7 +264,7 @@ teamService.processIntoTeamByTeamLogs = async (teamLogs, user) => {
         eteamusermappingposition: TeamUserMappingPositionEnum.MEMBER
     }))
 
-    const teamUserMappingPromise = TeamUserMapping.query().insertToTable(mappings, user.sub);
+    const teamUserMappingPromise = teamUserMappingService.createTeamUserMapping(mappings, user);
 
     const teamLogPromise = teamLogService.updateTeamLogs(teamLogs, user, TeamLogStatusEnum.ACCEPTED);
 
@@ -368,13 +369,13 @@ teamService.invite = async (teamId, user, userIds) => {
 
 teamService.cancelInvites = async (teamLogIds, user) => {
     
-    const pendingInvites = await teamLogService.getPendingLogByTeamLogIdsAndType(teamLogIds, [TeamLogTypeEnum.INVITE])
+    const pendingLogs = await teamLogService.getPendingLogByTeamLogIdsAndType(teamLogIds, [TeamLogTypeEnum.INVITE])
 
-    if (!pendingInvites || pendingInvites.length === 0)
+    if (pendingLogs.length !== teamLogIds.length)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_INVITED)
 
     // take the first teamId from invite log
-    const isAdmin = await teamService.isAdmin(pendingInvites[0].eteameteamid, user.sub);
+    const isAdmin = await teamService.isAdmin(pendingLogs[0].eteameteamid, user.sub);
 
     if (!isAdmin)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
@@ -386,7 +387,7 @@ teamService.cancelInvites = async (teamLogIds, user) => {
     return TeamLog.query()
     .whereIn('eteamlogid', teamLogIds)
     .delete()
-    .then(rowsAffected => rowsAffected >= 1)
+    .then(rowsAffected => rowsAffected === teamLogIds.length)
 
 }
 
@@ -398,7 +399,7 @@ teamService.processRequests = async (teamLogIds, user, status) => {
 
     const teamLogs = await teamLogService.getPendingLogByTeamLogIdsAndType(teamLogIds, [TeamLogTypeEnum.APPLY]);
 
-    if (!teamLogs || teamLogs.length === 0)
+    if (teamLogs.length !== teamLogIds.length)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_APPLIED)
 
     const isAdmin = await teamService.isAdmin(teamLogs[0].eteameteamid, user.sub);
