@@ -17,7 +17,7 @@ const ErrorEnum = {
 
 const teamUserService = {};
 
-teamUserService.getTeamUserCheckAdmin = async (teamId, userId) => {
+teamUserService.checkTeamUserCheckAdmin = async (teamId, userId) => {
 
     const teamUser = await teamUserService.getTeamUserByTeamIdAndUserId(teamId, userId);
 
@@ -131,6 +131,20 @@ teamUserService.joinTeam = async (teamId, userId, user, position = TeamUserMappi
             eusereuserid: userId,
             eteamusermappingposition: position
         }, user.sub);
+
+}
+
+teamUserService.joinTeamByTeamLogs = async (teamLogs, user, position = TeamUserMappingPositionEnum.MEMBER, 
+    db = TeamUserMapping.knex()) => {
+
+    const mappings = teamLogs.map(teamLog => ({
+        eteameteamid: teamLog.eteameteamid,
+        eusereuserid: teamLog.eusereuserid,
+        eteamusermappingposition: position
+    }))
+
+    return TeamUserMapping.query(db)
+        .insertToTable(mappings, user.sub);
 
 }
 
