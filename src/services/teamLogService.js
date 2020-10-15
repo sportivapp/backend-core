@@ -1,5 +1,6 @@
 const TeamLog = require('../models/TeamLog')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
+const teamUserMappingService = require('./teamUserMappingService')
 
 const teamLogService = {}
 
@@ -13,6 +14,10 @@ const TeamLogStatusEnum = {
 const TeamLogTypeEnum = {
     APPLY: 'APPLY',
     INVITE: 'INVITE'
+}
+
+const TeamUserMappingPositionEnum = {
+    MEMBER: 'MEMBER'
 }
 
 teamLogService.getPendingLogByTeamLogId = async (teamLogId, types) => {
@@ -133,6 +138,33 @@ teamLogService.updateTeamLogs = async (teamLogs, user, status) => {
         eteamlogchangeby: user.sub
     })
     .returning('*');
+
+}
+
+teamLogService.updateAppliedTeamLogsWithPendingByTeamIdAndStatus = async (teamId, user, status) => {
+
+    return TeamLog.transaction(async trx => {
+        await TeamLog.query(trx)
+        .where('eteameteamid', teamId)
+        .where('eteamlogtype', TeamLogTypeEnum.APPLY)
+        .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
+        .update({
+            eteamlogstatus: status,
+            eteamlogchangetime: Date.now(),
+            eteamlogchangeby: user.sub
+        })
+        .returning('*')
+        .then(teamLogs => {
+
+            const mappings = teamLogs.map(teamLog => ({
+                eusereuserid: teamLog.eusereuserid,
+                eteameteamid: teamLog.eteameteamid,
+                eteamusermappingposition: TeamUserMappingPositionEnum.MEMBER
+            }))
+
+            return teamUserMappingService.createTeamUserMapping(mappings, user, trx)
+        })
+    })
 
 }
 
