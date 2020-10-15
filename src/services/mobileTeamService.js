@@ -3,6 +3,7 @@ const Team = require('../models/Team');
 const ServiceHelper = require('../helper/ServiceHelper');
 const { raw } = require('objection');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
+const { UniqueViolationError } = require('objection');
 const teamLogService = require('./mobileTeamLogService');
 const teamUserService = require('./mobileTeamUserService');
 
@@ -12,6 +13,17 @@ const ErrorEnum = {
 }
 
 const teamService = {}
+
+const UnsupportedOperationErrorEnum = {
+    NAME_ALREADY_TAKEN: 'NAME_ALREADY_TAKEN'
+
+}
+
+function isTeamNameUniqueErr(e) {
+
+    return e.nativeError.detail.includes('eteamname') && e instanceof UniqueViolationError
+
+}
 
 teamService.getTeamById = async (teamId) => {
 
@@ -61,7 +73,7 @@ teamService.getTeam = async (teamId, user) => {
     return Promise.all([isInTeam, teamLog]).then(result => ({
         ...team,
         isInTeam: !!result[0],
-        isPendingApply: !!result[1]
+        teamLog: !result[1] ? null : result[1]
     }));
 
 }
@@ -83,7 +95,11 @@ teamService.createTeam = async (teamDTO, user) => {
 
         return Promise.resolve({ ...team });
 
-    });
+    })    
+    .catch(e => {
+        if (isTeamNameUniqueErr(e)) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NAME_ALREADY_TAKEN)
+        throw e
+    })
 
 }
 
@@ -98,7 +114,11 @@ teamService.updateTeam = async (teamId, teamDTO, user) => {
 
     return team.$query()
         .updateByUserId(teamDTO, user.sub)
-        .returning('*');
+        .returning('*')
+        .catch(e => {
+            if (isTeamNameUniqueErr(e)) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NAME_ALREADY_TAKEN)
+            throw e
+        })
 
 }
 

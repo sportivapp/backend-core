@@ -114,7 +114,8 @@ module.exports = {
         team: {
             list: '/team',
             id: '/team/:teamId',
-            member: '/team-member',
+            members: '/team/:teamId/members',
+            teamLog: '/team/:teamId/log',
             kick: '/team-kick',
             invite: '/team-invite',
             processInvitation: '/team-process-invitation',

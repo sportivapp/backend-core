@@ -77,7 +77,7 @@ class Thread extends Model {
           to: 'ethreadmoderator.ethreadethreadid'
         }
       },
-      creator: {
+      threadCreator: {
         relation: Model.BelongsToOneRelation,
         modelClass: User,
         join: {

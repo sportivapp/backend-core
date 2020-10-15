@@ -239,6 +239,9 @@ class User extends Model {
       },
       idAndName(builder) {
         builder.select('euserid', 'eusername', 'efileefileid')
+      },
+      name(builder) {
+        builder.select('eusername');
       }
     }
   }

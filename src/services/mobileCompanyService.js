@@ -67,26 +67,44 @@ companyService.getCompany = async (companyId, user) => {
 
 }
 
-companyService.getCompanies = async (page, size, keyword) => {
+companyService.getCompanies = async (page, size, keyword, companyIds) => {
 
-    if(isNaN(page) || isNaN(size)) {
-        page = 0
-        size = 10
-    }
-
-    let newKeyword = ''
-
-    if (keyword) newKeyword = keyword.toLowerCase()
-
-    return Company.query()
+    const companyPromise = Company.query()
         .select('ecompanyid', 'ecompanyname', 'eindustryname', 'eaddressstreet', 'efileefileid')
         .joinRelated('address')
         .joinRelated('industry')
         .where('ecompanyolderid', null)
         .andWhere('ecompanyparentid', null)
-        .andWhere(raw('lower("ecompanyname")'), 'like', `%${newKeyword}%`)
-        .page(page, size)
+        .andWhere(raw('lower("ecompanyname")'), 'like', `%${keyword.toLowerCase()}%`)
+
+    // If all companies, companyIds will be undefined
+    if (companyIds) {
+        companyPromise.whereIn('ecompanyid', companyIds)
+    }
+
+    return companyPromise.page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+
+}
+
+companyService.getAllCompanies = async (page, size, keyword) => {
+
+    return companyService.getCompanies(page, size, keyword);
+    
+}
+
+companyService.getMyCompanies = async (page, size, keyword, user) => {
+
+    const companyIds = await CompanyUserMapping.query()
+        .select('ecompanyecompanyid')
+        .where('eusereuserid', user.sub)
+        .then(companyUserMappings => companyUserMappings.map(companyUserMapping => companyUserMapping.ecompanyecompanyid));
+
+    
+        // .map(companyUserMapping => companyUserMapping.ecompanyecompanyid);
+
+    return companyService.getCompanies(page, size, keyword, companyIds);
+
 }
 
 companyService.getUsersByCompanyId = async (companyId, page, size, keyword) => {
