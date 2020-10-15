@@ -126,6 +126,7 @@ module.exports = {
             cancelInvitation: '/team-cancel-invite',
             cancelRequest: '/team-cancel-request',
             exit: '/team-exit',
+            myTeam: '/team-user'
         },
         class: {
             list: '/class',
