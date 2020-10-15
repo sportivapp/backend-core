@@ -116,12 +116,12 @@ teamService.createTeam = async (teamDTO, user) => {
 
 teamService.updateTeam = async (teamDTO, user, teamId) => {
 
-    const teamFromDB = await Team.query()
-    .findById(teamId)
-    .then(team => {
-        if(!team) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TEAM_NOT_FOUND)
-        return team
-    })
+    const teamFromDB = await teamService.getTeamDetail(teamId, user)
+    .catch( () => null)
+
+    console.log(teamFromDB);
+
+    if(!teamFromDB) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TEAM_NOT_FOUND)
 
     const isAdmin = await teamService.isAdmin(teamId, user.sub)
     
@@ -132,9 +132,24 @@ teamService.updateTeam = async (teamDTO, user, teamId) => {
         .returning('*')
         .then(async newTeam => {
             if(!newTeam) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.UPDATE_FAILED)
+
+            // if teamIndustry is changed, remove all sportroles in team
+            if(newTeam.eindustryeindustryid !== teamFromDB.teamIndustry.eindustryid) 
+                await teamSportTypeRoleService.deleteAllTeamSportTypeRolesByTeamId(teamId)
     
-            // accept all user log that is applying to this team with pending status
-            if(newTeam.eteamispublic) await teamLogService.updateAppliedTeamLogsWithPendingByTeamIdAndStatus(teamId, user, TeamLogStatusEnum.ACCEPTED)
+            // to check if the log in team exist
+            await teamLogService.getPendingLogByTeamIdAndTypeAndStatus(teamId, TeamLogTypeEnum.APPLY, 0, 10, TeamLogStatusEnum.PENDING)
+            .then(async applyPendingLog => {
+
+                if(applyPendingLog.results.length !== 0){
+
+                    // accept all user log that is applying to this team with pending status
+                    if(newTeam.eteamispublic) await teamLogService.updateAppliedTeamLogsWithPendingByTeamIdAndStatus(teamId, user, TeamLogStatusEnum.ACCEPTED)
+
+                }
+
+            })
+            
             return newTeam
         })
         .catch(e => {
