@@ -34,6 +34,8 @@ const licenseRoutes = require('./license');
 const classRoutes = require('./class')
 const classUserRoutes = require('./classUser');
 const newsRoutes = require('./news')
+const threadRoutes = require('./thread')
+const threadPostRoutes = require('./threadPost')
 
 router.use('/api/v1', [
     userRoutes,
@@ -67,7 +69,9 @@ router.use('/api/v1', [
     licenseRoutes,
     classRoutes,
     classUserRoutes,
-    newsRoutes
+    newsRoutes,
+    threadRoutes,
+    threadPostRoutes
     
 ]);
 
