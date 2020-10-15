@@ -1,5 +1,3 @@
-const { uniqueId } = require("lodash");
-
 exports.up = (knex, Promise) => knex.schema.createTable('euser', t => {
     t.increments('euserid').primary().unsigned();
     t.integer('euseruserstatus').notNullable().defaultTo(1);

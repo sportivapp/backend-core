@@ -1,3 +1,4 @@
+// NOT USED ANYMORE
 exports.up = (knex, Promise) => knex.schema.createTable('eteamindustrymapping', t => {
     t.increments('eteamindustrymappingid').primary().unsigned();
     t.integer('eteameteamid').notNullable().references('eteam.eteamid').onDelete('CASCADE')

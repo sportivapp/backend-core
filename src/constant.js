@@ -3,6 +3,7 @@ module.exports = {
         base: '/api/v1',
         company: {
             list: '/company',
+            myList: '/my-company',
             register: '/company-register',
             id: '/company/:companyId',
             users: '/company/:companyId/users',
