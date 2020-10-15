@@ -335,4 +335,20 @@ controller.deleteTeam = async (req, res, next) => {
 
 }
 
+controller.isAdmin = async (req, res, next) => {
+
+    const { teamId } = req.params;
+
+    try {
+         
+        const result = await teamService.isAdmin(teamId, req.user.sub);
+
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = controller
