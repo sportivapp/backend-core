@@ -156,6 +156,12 @@ teamService.updateTeam = async (teamDTO, user, teamId) => {
         })
 }
 
+teamService.getMyTeamList = async (page, size, user) => {
+    
+    return teamUserMappingService.getTeamByUserId(page, size, user.sub)
+
+}
+
 teamService.getTeams = async (keyword, page, size, user) => {
 
     return Team.query()
