@@ -1,4 +1,5 @@
 const Model = require('./Model');
+const { raw } = require('objection')
 
 class ThreadPost extends Model {
   static get tableName() {
@@ -15,6 +16,48 @@ class ThreadPost extends Model {
       required: ['ethreadpostcomment'],
       properties: {
         ethreadpostcomment: { type: 'string', minLength: 1, maxLength: 501 }
+      }
+    }
+  }
+
+  static get modifiers() {
+    return {
+      baseAttributes(builder) {
+        builder.select('ethreadpostcomment', 'ethreadpostcreatetime')
+      }
+    }
+  }
+
+  static get relationMappings() {
+
+    const Thread = require('./Thread')
+    const User = require('./User')
+    const ThreadModerator = require('./ThreadModerator')
+
+    return {
+      thread: {
+        modelClass: Thread,
+        relation: Model.BelongsToOneRelation,
+        join: {
+          from: 'ethreadpost.ethreadethreadid',
+          to: 'ethread.ethreadid'
+        }
+      },
+      user: {
+        modelClass: User,
+        relation: Model.BelongsToOneRelation,
+        join: {
+          from: 'ethreadpost.ethreadpostcreateby',
+          to: 'euser.euserid'
+        }
+      },
+      moderator: {
+        modelClass: ThreadModerator,
+        relation: Model.BelongsToOneRelation,
+        join: {
+          from: 'ethreadpost.ethreadpostcreateby',
+          to: 'ethreadmoderator.eusereuserid'
+        },
       }
     }
   }
