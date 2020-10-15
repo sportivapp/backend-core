@@ -185,6 +185,9 @@ module.exports = {
         thread: {
             list: '/thread',
             id: '/thread/:threadId'
+        },
+        sportTypeRole: {
+            industry: '/sport-type-role/industry/:industryId'
         }
     }
 }
