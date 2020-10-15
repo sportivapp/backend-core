@@ -2,11 +2,24 @@ const TeamUserMapping = require('../models/TeamUserMapping')
 
 const teamUserMappingService = {}
 
-teamUserMappingService.createTeamUserMapping = async (mappings, user) => {
+teamUserMappingService.createTeamUserMapping = async (mappings, user, trx) => {
 
-    return TeamUserMapping
-    .query()
-    .insertToTable(mappings, user.sub)
+    let createPromise
+
+    if(!trx) {
+
+        createPromise = TeamUserMapping
+        .query()
+        .insertToTable(mappings, user.sub)
+
+    } else {
+        createPromise = TeamUserMapping
+        .query(trx)
+        .insertToTable(mappings, user.sub)
+
+    }
+
+    return createPromise
 
 }
 
