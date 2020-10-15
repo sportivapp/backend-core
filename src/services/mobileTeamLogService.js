@@ -25,7 +25,8 @@ const ErrorEnum = {
     USER_INVITED: 'USER_INVITED',
     USER_NOT_EXIST: 'USER_NOT_EXIST',
     USER_NOT_APPLIED: 'USER_NOT_APPLIED',
-    STATUS_UNACCEPTED: 'STATUS_UNACCEPTED'
+    STATUS_UNACCEPTED: 'STATUS_UNACCEPTED',
+    USER_NOT_INVITED: 'USER_NOT_INVITED'
 }
 
 const teamLogService = {};
@@ -250,15 +251,19 @@ teamLogService.invite = async (teamId, user, email) => {
     
 }
 
-teamLogService.cancelInvite = async (teamLogId, user) => {
+teamLogService.cancelInvites = async (teamLogIds, user) => {
 
-    const teamLog = await teamLogService.getLogByTeamLogIdOptinalUserId(teamLogId, null);
+    const teamLogs = await teamLogService.getPendingLogByTeamLogIdsAndType(teamLogIds, [TeamLogTypeEnum.INVITE])
 
-    await teamUserService.getTeamUserCheckAdmin(teamLog.eteameteamid, user.sub);
+    if (teamLogs.length !== teamLogIds.length)
+        throw new UnsupportedOperationError(ErrorEnum.USER_NOT_INVITED)
 
-    return teamLog.$query()
-        .del()
-        .then(rowsAffected => rowsAffected === 1);
+    await teamUserService.getTeamUserCheckAdmin(teamLogs[0].eteameteamid, user.sub);
+
+    return TeamLog.query()
+        .whereIn('eteamlogid', teamLogIds)
+        .delete()
+        .then(rowsAffected => rowsAffected === teamLogIds.length);
     
 }
 
