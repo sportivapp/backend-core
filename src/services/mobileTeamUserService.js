@@ -17,7 +17,7 @@ const ErrorEnum = {
 
 const teamUserService = {};
 
-teamUserService.checkTeamUserCheckAdmin = async (teamId, userId) => {
+teamUserService.getTeamUserCheckAdmin = async (teamId, userId) => {
 
     const teamUser = await teamUserService.getTeamUserByTeamIdAndUserId(teamId, userId);
 
