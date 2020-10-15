@@ -129,8 +129,11 @@ teamService.updateTeam = async (teamDTO, user, teamId) => {
     return teamFromDB.$query()
         .updateByUserId(teamDTO, user.sub)
         .returning('*')
-        .then(newTeam => {
+        .then(async newTeam => {
             if(!newTeam) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.UPDATE_FAILED)
+    
+            // accept all user log that is applying to this team with pending status
+            if(newTeam.eteamispublic) await teamLogService.updateAppliedTeamLogsWithPendingByTeamIdAndStatus(teamId, user, TeamLogStatusEnum.ACCEPTED)
             return newTeam
         })
         .catch(e => {
