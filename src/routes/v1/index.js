@@ -36,6 +36,7 @@ const classUserRoutes = require('./classUser');
 const newsRoutes = require('./news')
 const threadRoutes = require('./thread')
 const threadPostRoutes = require('./threadPost')
+const sportTypeRoleRoutes = require('./sportTypeRole')
 
 router.use('/api/v1', [
     userRoutes,
@@ -71,7 +72,8 @@ router.use('/api/v1', [
     classUserRoutes,
     newsRoutes,
     threadRoutes,
-    threadPostRoutes
+    threadPostRoutes,
+    sportTypeRoleRoutes
     
 ]);
 
