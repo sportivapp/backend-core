@@ -1,6 +1,7 @@
 const ServiceHelper = require('../helper/ServiceHelper');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
 const TeamUserMapping = require('../models/TeamUserMapping');
+const { raw } = require('objection')
 
 const TeamUserMappingPositionEnum = {
     ADMIN: 'ADMIN',
@@ -89,12 +90,14 @@ teamUserService.exitTeam = async (teamId, user) => {
 
 }
 
-teamUserService.getTeamMemberList = async (teamId, page, size) => {
+teamUserService.getTeamMemberList = async (teamId, page, size, keyword) => {
 
     return TeamUserMapping.query()
+        .leftJoinRelated('user')
         .modify('baseAttributes')
         .where('eteameteamid', teamId)
         .withGraphFetched('user(baseAttributes)')
+        .where(raw('lower("eusername")'), 'like', `%${keyword}%`)
         .page(page, size)
         .then(members =>
             ServiceHelper.toPageObj(page, size, members)
