@@ -230,7 +230,7 @@ CompanyService.createCompany = async(companyDTO, addressDTO, industryIds, user) 
             ecompanyecompanyid: company.ecompanyid
         }
 
-        const insertGradeAndFunctions = await Grades.query(trx).insertToTable(gradeDTO, user.sub)
+        const insertGradeAndFunctions = Grades.query(trx).insertToTable(gradeDTO, user.sub)
             .then(grade => ({ egradeegradeid: grade.egradeid, eusereuserid: user.sub }))
             .then(userPositionMappingDTO => UserPositionMapping.query(trx).insertToTable(userPositionMappingDTO, user.sub))
             .then(mapping => mapping.egradeegradeid)
@@ -247,7 +247,7 @@ CompanyService.createCompany = async(companyDTO, addressDTO, industryIds, user) 
                 address: address,
                 user: resultArr[0],
                 employeeCount: 1,
-                departments: 1,
+                departments: 0,
                 childrenCount: 0
             }))
 
