@@ -43,6 +43,7 @@ class Thread extends Model {
     const Team = require('./Team')
     const ThreadModerator = require('./ThreadModerator')
     const User = require('./User')
+    const File = require('./File')
 
     return {
       comments: {
@@ -84,8 +85,17 @@ class Thread extends Model {
           from: 'ethread.ethreadcreateby',
           to: 'euser.euserid'
         }
+      },
+      file: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: File,
+        join: {
+          from: 'ethread.efileefileid',
+          to: 'efile.efileid'
+        }
       }
     }
+
 
   }
 }

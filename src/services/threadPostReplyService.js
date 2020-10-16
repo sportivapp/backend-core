@@ -21,6 +21,7 @@ threadPostReplyService.getAllByThreadPostId = async (threadPostId) => {
     const replies = await ThreadPostReply.query()
         .where('ethreadpostethreadpostid', threadPostId)
         .withGraphFetched('user(idAndName)')
+        .withGraphFetched('file(baseAttributes)')
         .withGraphFetched('moderator')
         .modifyGraph('moderator', builder => {
             builder

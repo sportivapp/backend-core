@@ -35,6 +35,7 @@ threadService.getAllThreads = async (page, size, keyword, isPublic, filter) => {
     return Thread.query()
         .select(Thread.relatedQuery('comments').count().as('commentCount'))
         .modify('baseAttributes')
+        .withGraphFetched('file(baseAttributes)')
         .where(raw('lower("ethreadtitle")'), 'like', `%${keyword}%`)
         .andWhere('ecompanyecompanyid', filter.companyId)
         .andWhere('eteameteamid', filter.teamId)
@@ -48,6 +49,7 @@ threadService.getThreadById = async (threadId) => {
         .findById(threadId)
         .select(Thread.relatedQuery('comments').count().as('commentCount'))
         .modify('baseAttributes')
+        .withGraphFetched('file(baseAttributes)')
         .then(thread => {
             if (!thread) throw new NotFoundError()
             return thread
