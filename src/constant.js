@@ -190,6 +190,9 @@ module.exports = {
             list: '/thread',
             id: '/thread/:threadId'
         },
+        authentication: {
+            login: '/login'
+        },
         sportTypeRole: {
             industry: '/sport-type-role/industry/:industryId'
         },
