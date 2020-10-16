@@ -6,18 +6,27 @@ const emailService = require('../helper/emailService')
 
 const reportThreadService = {}
 
+const ErrorEnum = {
+    THREAD_NOT_FOUND: 'THREAD_NOT_FOUND',
+    COMMENT_NOT_FOUND: 'COMMENT_NOT_FOUND',
+    REPLY_NOT_FOUND: 'REPLY_NOT_FOUND'
+}
+
 reportThreadService.report = async (message, threadId, commentId, replyId, user) => {
 
     if (threadId) {
-        const thread = await threadService.getThreadById(threadId)
+        const thread = await threadService.getThreadDetailById(threadId)
+        if (!thread) throw new UnsupportedOperationError(ErrorEnum.THREAD_NOT_FOUND)
     }
 
     if (commentId) {
-        const comment = await threadPostService.getPostById(commentId)
+        const comment = await threadPostService.getPostById(commentId).catch(() => null)
+        if (!comment) throw new UnsupportedOperationError(ErrorEnum.COMMENT_NOT_FOUND)
     }
 
     if (replyId) {
         const reply = await threadPostReplyService.getReplyById(replyId)
+        if (!reply) throw new UnsupportedOperationError(ErrorEnum.REPLY_NOT_FOUND)
     }
 
     const dto = {
@@ -33,11 +42,12 @@ reportThreadService.report = async (message, threadId, commentId, replyId, user)
     report = await report.$query()
         .modify('baseAttributes')
 
-    const callback = (_, data) => {
-        if (data) {
+    const callback = (error, _) => {
+        if (error) {
+            console.log(error)
             report = ReportThread.query()
                 .findById(report.ereportthreadid)
-                .updateByUserId({ ereportthreadsent: true })
+                .updateByUserId({ ereportthreadsent: false })
         }
     }
 

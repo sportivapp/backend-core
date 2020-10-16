@@ -1,5 +1,4 @@
 const Model = require('./Model');
-const { raw } = require('objection')
 
 class ThreadPost extends Model {
   static get tableName() {
@@ -32,6 +31,7 @@ class ThreadPost extends Model {
 
     const Thread = require('./Thread')
     const User = require('./User')
+    const File = require('./File')
     const ThreadModerator = require('./ThreadModerator')
     const ThreadPostReply = require('./ThreadPostReply')
 
@@ -66,6 +66,14 @@ class ThreadPost extends Model {
         join: {
           from: 'ethreadpost.ethreadpostid',
           to: 'ethreadpostreply.ethreadpostethreadpostid'
+        }
+      },
+      file: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: File,
+        join: {
+          from: 'ethreadpost.efileefileid',
+          to: 'efile.efileid'
         }
       }
     }

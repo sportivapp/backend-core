@@ -105,27 +105,25 @@ exports.sendForgotPasswordLink = async ( userId, email ) => {
 
 exports.sendReportThread = async (report, callback) => {
 
-    const receiver = 'developer.emtiv@gmail.com'
-
     let html
     let type
 
-    if (report.ethreadpostreplyethreadpostreplyid) {
+    if (report.reply) {
         type = 'COMMENT REPLY'
         html = `Report - ${type} <br/><br/>
                 Thread Id: ${report.thread.ethreadid}<br/><br/>
-                Thread Name: ${report.thread.ethreadname}<br/><br/>
+                Thread Title: ${report.thread.ethreadtitle}<br/><br/>
                 Comment Id: ${report.comment.ethreadpostid}<br/><br/>
                 Comment Text: ${report.comment.ethreadpostcomment}<br/><br/>
                 Comment Type: ${report.comment.efileefileid ? 'FILE' : 'TEXT'}<br/><br/>
                 Comment Reply Id: ${report.reply.ethreadpostreplyid}<br/><br/>
                 Comment Reply Text: ${report.reply.ethreadpostreplycomment}<br/><br/>
                 Comment Reply Type: ${report.reply.efileefileid ? 'FILE': 'TEXT'}`
-    } else if (report.ethreadpostethreadpostid) {
+    } else if (report.comment) {
         type = 'REPLY THREAD'
         html = `Report - ${type} <br/><br/>
                 Thread Id: ${report.thread.ethreadid}<br/><br/>
-                Thread Name: ${report.thread.ethreadname}<br/><br/>
+                Thread Title: ${report.thread.ethreadtitle}<br/><br/>
                 Comment Id: ${report.comment.ethreadpostid}<br/><br/>
                 Comment Text: ${report.comment.ethreadpostcomment}<br/><br/>
                 Comment Type: ${report.comment.efileefileid ? 'FILE' : 'TEXT'}`
@@ -133,12 +131,12 @@ exports.sendReportThread = async (report, callback) => {
         type = 'THREAD'
         html = `Report - ${type} <br/><br/>
                 Thread Id: ${report.thread.ethreadid}<br/><br/>
-                Thread Name: ${report.thread.ethreadname}`
+                Thread Title: ${report.thread.ethreadtitle}<br/><br/>`
     }
 
     const info = await transporter.sendMail({
-        from: 'oliverrsebastian@gmail.com', // sender address
-        to: receiver, // list of receivers
+        from: report.reporter.euseremail, // sender address
+        to: 'noreply@sportiv.app', // list of receivers
         subject: `REPORT - ${type}`, // Subject line
         text: "", // plain text body
         html: html

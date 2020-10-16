@@ -57,7 +57,15 @@ class ThreadPostReply extends Model {
                 join: {
                     from: 'ethreadpostreply.ethreadpostreplycreateby',
                     to: 'ethreadmoderator.eusereuserid'
-                },
+                }
+            },
+            file: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: File,
+                join: {
+                    from: 'ethread.efileefileid',
+                    to: 'efile.efileid'
+                }
             }
         }
     }

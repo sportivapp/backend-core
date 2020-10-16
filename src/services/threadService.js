@@ -114,7 +114,7 @@ threadService.updateThread = async (threadId, threadDTO, isPublic, moderatorIds,
     if (!threadDTO.ecompanyecompanyid && !threadDTO.eteameteamid) threadDTO.ethreadispublic = true
     else threadDTO.ethreadispublic = isPublic
 
-    const thread = await Thread.query().findById(threadId)
+    const thread = await threadService.getThreadDetailById(threadId)
 
     if (!thread) throw new UnsupportedOperationError(ErrorEnum.THREAD_NOT_FOUND)
 
@@ -158,7 +158,7 @@ threadService.updateThread = async (threadId, threadDTO, isPublic, moderatorIds,
 
 threadService.deleteThreadById = async (threadId, user) => {
 
-    const thread = await Thread.query().findById(threadId)
+    const thread = await threadService.getThreadDetailById(threadId)
 
     if (!thread) return false
 
@@ -169,6 +169,11 @@ threadService.deleteThreadById = async (threadId, user) => {
     return thread.$query()
         .delete()
         .then(rowsAffected => rowsAffected === 1)
+}
+
+threadService.getThreadDetailById = async (threadId) => {
+
+    return Thread.query().findById(threadId)
 }
 
 module.exports = threadService
