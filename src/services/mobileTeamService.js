@@ -37,16 +37,12 @@ teamService.getTeamById = async (teamId) => {
 
 }
 
-teamService.getTeams = async (keyword, page = 0, size = 10) => {
-
-    let newKeyword = ''
-
-    if (keyword) newKeyword = keyword.toLowerCase()
+teamService.getTeams = async (page, size, keyword) => {
 
     const teamsPage = await Team.query()
     .modify('baseAttributes')
     .withGraphFetched('company(baseAttributes)')
-    .where(raw('lower("eteamname")'), 'like', `%${newKeyword}%`)
+    .whereRaw(`LOWER("eteamname") LIKE LOWER('%${keyword}%')`)
     .page(page, size);
 
     return ServiceHelper.toPageObj(page, size, teamsPage)
@@ -147,8 +143,10 @@ teamService.getMyTeams = async (page, size, keyword, user) => {
     const teamIds = await teamUserService.getTeamIdsByUser(user);
 
     return Team.query()
+        .modify('baseAttributes')
+        .withGraphFetched('company(baseAttributes)')
         .whereRaw(`LOWER("eteamname") LIKE LOWER('%${keyword}%')`)
-        .whereIn('eteameteamid', teamIds)
+        .whereIn('eteamid', teamIds)
         .page(page, size)
         .then(teams => ServiceHelper.toPageObj(page, size, teams));
 
