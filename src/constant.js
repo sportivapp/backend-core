@@ -123,9 +123,12 @@ module.exports = {
             processRequest: '/team-process-request',
             join: '/team-join',
             position: '/team-member-position',
+            roles: '/team-member-roles',
             cancelInvitation: '/team-cancel-invite',
             cancelRequest: '/team-cancel-request',
             exit: '/team-exit',
+            myTeam: '/team-user',
+            isAdmin: '/team/:teamId/admin'
         },
         class: {
             list: '/class',
@@ -189,6 +192,13 @@ module.exports = {
         },
         authentication: {
             login: '/login'
+        },
+        sportTypeRole: {
+            industry: '/sport-type-role/industry/:industryId'
+        },
+        commentReply: {
+            list: '/comments/:commentId/replies',
+            id: '/comments/:commentId/replies/:replyId'
         }
     }
 }

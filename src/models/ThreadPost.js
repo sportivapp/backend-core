@@ -23,7 +23,7 @@ class ThreadPost extends Model {
   static get modifiers() {
     return {
       baseAttributes(builder) {
-        builder.select('ethreadpostcomment', 'ethreadpostcreatetime')
+        builder.select('ethreadpostid', 'ethreadpostcomment', 'ethreadpostcreatetime')
       }
     }
   }
@@ -33,6 +33,7 @@ class ThreadPost extends Model {
     const Thread = require('./Thread')
     const User = require('./User')
     const ThreadModerator = require('./ThreadModerator')
+    const ThreadPostReply = require('./ThreadPostReply')
 
     return {
       thread: {
@@ -58,6 +59,14 @@ class ThreadPost extends Model {
           from: 'ethreadpost.ethreadpostcreateby',
           to: 'ethreadmoderator.eusereuserid'
         },
+      },
+      replies: {
+        modelClass: ThreadPostReply,
+        relation: Model.HasManyRelation,
+        join: {
+          from: 'ethreadpost.ethreadpostid',
+          to: 'ethreadpostreply.ethreadpostethreadpostid'
+        }
       }
     }
   }

@@ -32,6 +32,7 @@ class TeamUserMapping extends Model {
 
         const User = require('./User');
         const Team = require('./Team');
+        const TeamSportTypeRole = require('./TeamSportTypeRole')
 
         return {
             user: {
@@ -48,6 +49,15 @@ class TeamUserMapping extends Model {
                 join: {
                     from: 'eteamusermapping.eteameteamid',
                     to: 'eteam.eteamid'
+                }
+            },
+            teamSportTypeRoles: {
+                relation: Model.HasManyRelation,
+                modelClass: TeamSportTypeRole,
+                join: {
+
+                    from: 'eteamusermapping.eteamusermappingid',
+                    to: 'eteamsporttyperoles.eteamusermappingeteamusermappingid',
                 }
             }
         }

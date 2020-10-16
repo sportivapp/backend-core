@@ -23,12 +23,28 @@ controller.getTeamMemberList = async (req, res, next) => {
 
     // INVITE / APPLY / MEMBER
     // const { page, size, type } = req.query;
-    const { page = '0', size = '10' } = req.query;
+    const { page = '0', size = '10', keyword = '' } = req.query;
     const { teamId } = req.params;
     
     try {
 
-        const pageObj = await teamUserService.getTeamMemberList(parseInt(teamId), parseInt(page), parseInt(size));
+        const pageObj = await teamUserService.getTeamMemberList(parseInt(teamId), parseInt(page), parseInt(size), keyword);
+
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.getTeamByUserId = async (req, res, next) => {
+
+    const { page = '0', size = '10' } = req.query;
+    
+    try {
+
+        const pageObj = await teamUserService.getTeamByUserId(parseInt(page), parseInt(size), req.user);
 
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
 

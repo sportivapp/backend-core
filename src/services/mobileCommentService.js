@@ -9,7 +9,8 @@ const mobileCommentService = {}
 const UnsupportedOperationErrorEnum = {
     FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
     COMMENT_NOT_EXISTS: 'COMMENT_NOT_EXIST',
-    THREAD_NOT_EXISTS: 'THREAD_NOT_EXISTS'
+    THREAD_NOT_EXISTS: 'THREAD_NOT_EXISTS',
+    THREAD_LOCKED: 'THREAD_LOCKED'
 }
 
 // Change name from commentId to threadPostId here to match the column name in migration table
@@ -19,7 +20,7 @@ mobileCommentService.checkCommentMaker = async (threadPostId, userId) => {
     .findById(threadPostId)
     .where('ethreadpostcreateby', userId)
     .then(comment => {
-        if(!comment) return false
+        if (!comment) return false
         return true
     })
 
@@ -56,6 +57,8 @@ mobileCommentService.createComment = async (commentDTO, user) => {
 
     if(!threadExist) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_NOT_EXISTS)
 
+    if (threadExist.ethreadlock) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_LOCKED)
+
     //Normalize fileId if frontend insert this kind of data
     if(commentDTO.efileefileid === undefined || commentDTO.efileefileid === null || commentDTO.efileefileid === 0) {
         commentDTO.efileefileid = null
@@ -67,6 +70,17 @@ mobileCommentService.createComment = async (commentDTO, user) => {
 }
 
 mobileCommentService.updateComment = async (commentId, commentDTO, user) => {
+
+    const comment = await ThreadPost.query()
+        .findById(commentId)
+
+    if (!comment) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.COMMENT_NOT_EXISTS)
+
+    const threadExist = await mobileForumService.checkThread(comment.ethreadethreadid)
+
+    if(!threadExist) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_NOT_EXISTS)
+
+    if (threadExist.ethreadlock) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_LOCKED)
 
     const commentMaker = await mobileCommentService.checkCommentMaker(commentId, user.sub)
 
@@ -99,6 +113,17 @@ mobileCommentService.getAllComments = async (page, size, threadId) => {
 }
 
 mobileCommentService.deleteComment = async (commentId, user) => {
+
+    const comment = await ThreadPost.query()
+        .findById(commentId)
+
+    if (!comment) return false
+
+    const threadExist = await mobileForumService.checkThread(comment.ethreadethreadid)
+
+    if(!threadExist) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_NOT_EXISTS)
+
+    if (threadExist.ethreadlock) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_LOCKED)
 
     const checkMakerAndModerator = await mobileCommentService.checkMakerAndModerator(commentId, user.sub)
 

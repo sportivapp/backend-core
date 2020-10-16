@@ -8,10 +8,10 @@ router.get('/team-user-pending', auth.authenticateToken, controller.getPendingUs
 
 router.post('/team/:teamId/apply', auth.authenticateToken, controller.applyTeam);
 router.delete('/team-log/:teamLogId/user-cancel', auth.authenticateToken, controller.cancelRequest);
-router.put('/team-log/:teamLogId/team-process', auth.authenticateToken, controller.processRequest);
+router.put('/team-log/team-process', auth.authenticateToken, controller.processRequests);
 
 router.post('/team/:teamId/invite', auth.authenticateToken, controller.invite);
-router.delete('/team-log/:teamLogId/invite', auth.authenticateToken, controller.cancelInvite);
+router.delete('/team-log/cancel-invite', auth.authenticateToken, controller.cancelInvites);
 router.put('/team-log/:teamLogId/user-process', auth.authenticateToken, controller.processInvitation);
 
 module.exports = router;

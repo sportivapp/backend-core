@@ -19,6 +19,7 @@ threadPostService.getAllPostByThreadId = async (threadId, page, size) => {
 
     let threadPostPage = await ThreadPost.query()
         .modify('baseAttributes')
+        .select(ThreadPost.relatedQuery('replies').count().as('replyCount'))
         .where('ethreadethreadid', threadId)
         .withGraphFetched('user(idAndName)')
         .withGraphFetched('moderator')
@@ -32,8 +33,10 @@ threadPostService.getAllPostByThreadId = async (threadId, page, size) => {
         .page(page, size)
 
     threadPostPage.results = threadPostPage.results.map(threadPost => ({
+        ethreadpostid: threadPost.ethreadpostid,
         ethreadpostcomment: threadPost.ethreadpostcomment,
         ethreadpostcreatetime: threadPost.ethreadpostcreatetime,
+        replyCount: parseInt(threadPost.replyCount),
         user: threadPost.user,
         isModerator: !!threadPost.moderator
     }))
@@ -52,15 +55,15 @@ threadPostService.getPostById = async (threadPostId) => {
 
 threadPostService.createPost = async (threadId, postDTO, user) => {
 
-    if (postDTO.efileefileid) {
-        const file = await fileService.getFileById(postDTO.efileefileid)
-        if (!file) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_FOUND)
-    }
-
     const thread = await threadService.getThreadById(threadId)
         .catch(() => { throw new UnsupportedOperationError(ErrorEnum.THREAD_NOT_FOUND) })
 
     if (thread.ethreadlock) throw new UnsupportedOperationError(ErrorEnum.THREAD_LOCKED)
+
+    if (postDTO.efileefileid) {
+        const file = await fileService.getFileById(postDTO.efileefileid)
+        if (!file) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_FOUND)
+    }
 
     postDTO.ethreadethreadid = thread.ethreadid
 
@@ -70,15 +73,15 @@ threadPostService.createPost = async (threadId, postDTO, user) => {
 
 threadPostService.updatePost = async (commentId, postDTO, user) => {
 
-    if (postDTO.efileefileid) {
-        const file = await fileService.getFileById(postDTO.efileefileid)
-        if (!file) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_FOUND)
-    }
-
     const thread = await threadService.getThreadById(threadId)
         .catch(() => new UnsupportedOperationError(ErrorEnum.THREAD_NOT_FOUND))
 
     if (thread.ethreadlock) throw new UnsupportedOperationError(ErrorEnum.THREAD_LOCKED)
+
+    if (postDTO.efileefileid) {
+        const file = await fileService.getFileById(postDTO.efileefileid)
+        if (!file) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_FOUND)
+    }
 
     return threadPostService.getPostById(commentId)
         .catch(() => new UnsupportedOperationError(ErrorEnum.POST_NOT_FOUND))
@@ -91,13 +94,18 @@ threadPostService.updatePost = async (commentId, postDTO, user) => {
 
 threadPostService.deletePost = async (commentId, user) => {
 
-    const post = threadPostService.getPostById(commentId).catch(() => null)
+    const post = await threadPostService.getPostById(commentId).catch(() => null)
 
     if (!post) return false
 
+    const thread = await threadService.getThreadById(post.ethreadethreadid)
+        .catch(() => new UnsupportedOperationError(ErrorEnum.THREAD_NOT_FOUND))
+
+    if (thread.ethreadlock) throw new UnsupportedOperationError(ErrorEnum.THREAD_LOCKED)
+
     if (post.ethreadpostcreateby !== user.sub) {
         const isModerator = await threadModeratorService.isThreadModerator(post.ethreadethreadid, user.sub)
-        if (!isModerator) return false
+        if (!isModerator) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
     }
 
     return post.$query()
