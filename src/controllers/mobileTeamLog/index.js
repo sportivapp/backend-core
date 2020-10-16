@@ -37,14 +37,14 @@ controller.cancelRequest = async (req, res, next) => {
 
 }
 
-controller.processRequest = async (req, res, next) => {
+controller.processRequests = async (req, res, next) => {
 
-    const { teamLogId } = req.params;
+    const { teamLogIds } = req.body;
     const { status } = req.query;
     
     try {
 
-        const result = await teamLogService.processRequest(parseInt(teamLogId), req.user, status.toUpperCase());
+        const result = await teamLogService.processRequests(teamLogIds, req.user, status.toUpperCase());
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
@@ -104,13 +104,13 @@ controller.invite = async (req, res, next) => {
 
 }
 
-controller.cancelInvite = async (req, res, next) => {
+controller.cancelInvites = async (req, res, next) => {
 
-    const { teamLogId } = req.params;
+    const { teamLogIds } = req.body;
     
     try {
 
-        const result = await teamLogService.cancelInvite(parseInt(teamLogId), req.user);
+        const result = await teamLogService.cancelInvites(teamLogIds, req.user);
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 

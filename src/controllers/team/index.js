@@ -58,6 +58,21 @@ controller.updateTeam = async (req, res, next) => {
 
 }
 
+controller.getMyTeamList = async (req, res, next) => {
+
+    const { page = '0', size = '10' } = req.query;
+    
+    try {
+
+        const pageObj = await teamService.getMyTeamList(parseInt(page), parseInt(size), req.user);
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 controller.getTeams = async (req, res, next) => {
 
     const { keyword = '', page = '0', size = '10' } = req.query;
@@ -255,6 +270,22 @@ controller.kickUserFromTeam = async (req, res, next) => {
 
 }
 
+controller.changeTeamMemberSportRoles = async (req, res, next) => {
+
+    const { teamUserMappingId, sportRoleIds } = req.body;
+
+    try {
+
+        const result = await teamService.changeTeamMemberSportRoles(teamUserMappingId, req.user, sportRoleIds);
+
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 controller.changeTeamMemberPosition = async (req, res, next) => {
 
     const { position } = req.query;
@@ -295,6 +326,22 @@ controller.deleteTeam = async (req, res, next) => {
     try {
 
         const result = await teamService.deleteTeam(teamId, req.user);
+
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.isAdmin = async (req, res, next) => {
+
+    const { teamId } = req.params;
+
+    try {
+         
+        const result = await teamService.isAdmin(teamId, req.user.sub);
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 

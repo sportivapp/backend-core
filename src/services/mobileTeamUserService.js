@@ -1,6 +1,7 @@
 const ServiceHelper = require('../helper/ServiceHelper');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
 const TeamUserMapping = require('../models/TeamUserMapping');
+const { raw } = require('objection')
 
 const TeamUserMappingPositionEnum = {
     ADMIN: 'ADMIN',
@@ -42,6 +43,17 @@ teamUserService.getTeamUserByTeamIdAndUserId = async (teamId, userId) => {
 
 }
 
+teamUserService.getTeamByUserId = async (page, size, user) => {
+
+    return TeamUserMapping.query()
+    .modify('baseAttributes')
+    .where('eusereuserid', user.sub)
+    .withGraphFetched('team(baseAttributes).teamPicture(baseAttributes)')
+    .page(page, size)
+    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+
+}
+
 teamUserService.removeUserFromTeam = async (teamId, userId) => {
 
     return teamUserService.getTeamUserByTeamIdAndUserId(teamId, userId)
@@ -78,12 +90,14 @@ teamUserService.exitTeam = async (teamId, user) => {
 
 }
 
-teamUserService.getTeamMemberList = async (teamId, page, size) => {
+teamUserService.getTeamMemberList = async (teamId, page, size, keyword) => {
 
     return TeamUserMapping.query()
+        .leftJoinRelated('user')
         .modify('baseAttributes')
         .where('eteameteamid', teamId)
         .withGraphFetched('user(baseAttributes)')
+        .where(raw('lower("eusername")'), 'like', `%${keyword}%`)
         .page(page, size)
         .then(members =>
             ServiceHelper.toPageObj(page, size, members)
@@ -131,6 +145,20 @@ teamUserService.joinTeam = async (teamId, userId, user, position = TeamUserMappi
             eusereuserid: userId,
             eteamusermappingposition: position
         }, user.sub);
+
+}
+
+teamUserService.joinTeamByTeamLogs = async (teamLogs, user, position = TeamUserMappingPositionEnum.MEMBER, 
+    db = TeamUserMapping.knex()) => {
+
+    const mappings = teamLogs.map(teamLog => ({
+        eteameteamid: teamLog.eteameteamid,
+        eusereuserid: teamLog.eusereuserid,
+        eteamusermappingposition: position
+    }))
+
+    return TeamUserMapping.query(db)
+        .insertToTable(mappings, user.sub);
 
 }
 
