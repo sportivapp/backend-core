@@ -14,7 +14,11 @@ class ReportThread extends Model {
     static get modifiers() {
         return {
             baseAttributes(builder) {
-                builder.select('ereportthreadid', 'ereportthreadmessage').withGraphFetched('[thread, comment, reply, reporter]')
+                builder.select('ereportthreadid', 'ereportthreadmessage')
+                    .withGraphFetched('thread(baseAttributes)')
+                    .withGraphFetched('comment(baseAttributes)')
+                    .withGraphFetched('reply(baseAttributes)')
+                    .withGraphFetched('reporter(baseAttributes)')
             }
         }
     }
