@@ -44,17 +44,6 @@ teamUserService.getTeamUserByTeamIdAndUserId = async (teamId, userId) => {
 
 }
 
-teamUserService.getTeamByUserId = async (page, size, user) => {
-
-    return TeamUserMapping.query()
-    .modify('baseAttributes')
-    .where('eusereuserid', user.sub)
-    .withGraphFetched('team(baseAttributes).teamPicture(baseAttributes)')
-    .page(page, size)
-    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
-
-}
-
 teamUserService.removeUserFromTeam = async (teamId, userId) => {
 
     return teamUserService.getTeamUserByTeamIdAndUserId(teamId, userId)
@@ -189,6 +178,13 @@ teamUserService.joinTeamByTeamLogs = async (teamLogs, user, position = TeamUserM
 
     return TeamUserMapping.query(db)
         .insertToTable(mappings, user.sub);
+
+}
+
+teamUserService.getTeamIdsByUser = async (user) => {
+
+    return TeamUserMapping.query()
+        .where('eusereuserid', user.sub);
 
 }
 

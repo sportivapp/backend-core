@@ -142,4 +142,16 @@ teamService.applyTeam = async (teamId, user) => {
 
 }
 
+teamService.getMyTeams = async (page, size, keyword, user) => {
+
+    const teamIds = await teamUserService.getTeamIdsByUser(user);
+
+    return Team.query()
+        .whereRaw(`LOWER("eteamname") LIKE LOWER('%${keyword}%')`)
+        .whereIn('eteameteamid', teamIds)
+        .page(page, size)
+        .then(teams => ServiceHelper.toPageObj(page, size, teams));
+
+}
+
 module.exports = teamService;
