@@ -6,6 +6,7 @@ const schema = Joi.object({
     isPublic: Joi.boolean().required(),
     companyId: Joi.number().allow(null),
     teamId: Joi.number().allow(null),
+    fileId: Joi.number().allow(null),
     moderatorIds: Joi.array().required().min(1).items(Joi.number().required())
 })
 

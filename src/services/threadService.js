@@ -4,6 +4,7 @@ const ServiceHelper = require('../helper/ServiceHelper')
 const teamUserService = require('./mobileTeamUserService')
 const threadModeratorService = require('./threadModeratorService')
 const companyService = require('./companyService')
+const fileService = require('./fileService')
 const teamService = require('./teamService')
 const { raw } = require('objection')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
@@ -64,6 +65,11 @@ threadService.createThread = async (threadDTO, isPublic, moderatorIds, user) => 
     if (!threadDTO.ecompanyecompanyid && !threadDTO.eteameteamid) threadDTO.ethreadispublic = true
     else threadDTO.ethreadispublic = isPublic
 
+    if (threadDTO.efileefileid) {
+        const file = await fileService.getFileById(threadDTO.efileefileid)
+        if (!file) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_FOUND)
+    }
+
     if (threadDTO.ecompanyecompanyid) {
         const company = await companyService.getCompanyById(threadDTO.ecompanyecompanyid)
         if (!company) throw new UnsupportedOperationError(ErrorEnum.COMPANY_NOT_FOUND)
@@ -113,6 +119,11 @@ threadService.updateThread = async (threadId, threadDTO, isPublic, moderatorIds,
     const isModerator = await threadModeratorService.isThreadModerator(threadId, user.sub)
 
     if (!isModerator) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
+
+    if (threadDTO.efileefileid) {
+        const file = await fileService.getFileById(threadDTO.efileefileid)
+        if (!file) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_FOUND)
+    }
 
     // If team thread AND it is public, check whether it's made by an Admin
     if(threadDTO.eteameteamid && threadDTO.ethreadispublic)
