@@ -3,6 +3,7 @@ const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
 const { UnsupportedOperationError } = require('../models/errors');
 const companyService = require('./companyService');
+const userService = require('./userService');
 
 const ErrorEnum = {
     UNSUCCESSFUL_LOGIN: 'UNSUCCESSFUL_LOGIN',
@@ -40,13 +41,33 @@ AuthenticationService.login = async (loginDTO) => {
 
 }
 
+AuthenticationService.generateJWTToken = async (user, companyId) => {
+
+    const config = {
+        sub: user.euserid,
+        iat: Date.now() / 1000.0,
+        email: user.euseremail,
+        name: user.eusername,
+        mobileNumber: user.eusermobilenumber,
+        companyId: companyId
+    }
+    const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' });
+
+    return token;
+
+}
+
 AuthenticationService.loginCompany = async(companyId, user) => {
 
     const isInCompany = await companyService.isUserExistInCompany(companyId, user.sub);
 
     if (!isInCompany) throw new UnsupportedOperationError(ErrorEnum.NOT_IN_COMPANY);
 
-    return AuthenticationService.generateCompanyJWTToken(user);
+    const singleUser = await userService.getSingleUserById(user.sub);
+
+    if (!singleUser)
+
+    return AuthenticationService.generateCompanyJWTToken(singleUser);
 
 }
 

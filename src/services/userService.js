@@ -16,7 +16,8 @@ const ErrorEnum = {
     EMAIL_INVALID: 'EMAIL_INVALID',
     USER_ALREADY_EXIST: 'USER_ALREADY_EXIST',
     OTP_NOT_FOUND: 'OTP_NOT_FOUND',
-    OTP_CODE_NOT_MATCH: 'OTP_CODE_NOT_MATCH'
+    OTP_CODE_NOT_MATCH: 'OTP_CODE_NOT_MATCH',
+    USER_NOT_FOUND: 'USER_NOT_FOUND'
 }
 
 const UserService = {};
@@ -102,6 +103,18 @@ UserService.createUser = async (userDTO, otpCode) => {
     userDTO.eusername = userDTO.euseremail.split('@')[0];
     userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
     return User.query().insertToTable(userDTO, 0);
+
+}
+
+UserService.getSingleUserById = async (userId) => {
+
+    return User.query()
+        .modify('baseAttributes')
+        .findById(userId)
+        .then(user => {
+            if (!user) throw UnsupportedOperationError(ErrorEnum.USER_NOT_FOUND);
+            return user;
+        });
 
 }
 
