@@ -192,6 +192,10 @@ module.exports = {
         },
         sportTypeRole: {
             industry: '/sport-type-role/industry/:industryId'
+        },
+        commentReply: {
+            list: '/comments/:commentId/replies',
+            id: '/comments/:commentId/replies/:replyId'
         }
     }
 }
