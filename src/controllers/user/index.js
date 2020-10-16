@@ -222,14 +222,19 @@ userController.login = async (req, res, next) => {
 
         const result = await userService.login(loginDTO);
 
-        res.cookie('tok', result, {
-            secure: true,
-            httpOnly: true,
-            domain: process.env.COOKIE_DOMAIN,
-            maxAge: 15 * 60 * 1000
-        })
+        // res.cookie('tok', result, {
+        //     secure: true,
+        //     httpOnly: true,
+        //     domain: process.env.COOKIE_DOMAIN,
+        //     maxAge: 15 * 60 * 1000
+        // })
 
-        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+        return res.cookie('tok', result, {
+            // secure: true,
+            // httpOnly: true,
+            // domain: process.env.COOKIE_DOMAIN,
+            maxAge: 15 * 60 * 1000
+        }).json(ResponseHelper.toBaseResponse(result))
 
     } catch(e) {
         next(e);

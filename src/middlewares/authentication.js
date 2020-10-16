@@ -4,10 +4,12 @@ const ResponseHelper = require('../helper/ResponseHelper')
 const profileService = require('../services/profileService')
 
 exports.authenticateToken = async (req, res, next) => {
+ 
+    let token = req.headers['authorization'];
 
-    const authHeader = req.headers['authorization'];
-    const token = authHeader //&& authHeader.split(' ')[1];
-    if (token === null) return res.status(401).json("You need to log in first.");
+    if (!token) token = req.cookies.tok;
+
+    if (!token) return res.status(401).json("You need to log in first.");
 
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, { ignoreExpiration: true }, async function(err, user) {
         if (err) { 

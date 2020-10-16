@@ -24,4 +24,27 @@ controller.login = async (req, res, next) => {
 
 }
 
+controller.loginCompany = async (req, res, next) => {
+
+    const { companyId } = req.body;
+
+    try {
+
+        const result = await authenticationService.loginCompany(companyId, req.user);
+
+        // return res.status(200).json(ResponseHelper.toBaseResponse(result));
+        res.cookie('tok', result, {
+            secure: true,
+            httpOnly: true,
+            domain: process.env.COOKIE_DOMAIN,
+            maxAge: 15 * 60 * 1000
+        })
+        return res.redirect(302, process.env.ORG_DOMAIN);
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = controller
