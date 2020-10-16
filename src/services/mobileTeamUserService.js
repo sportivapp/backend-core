@@ -2,6 +2,7 @@ const ServiceHelper = require('../helper/ServiceHelper');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
 const TeamUserMapping = require('../models/TeamUserMapping');
 const { raw } = require('objection')
+const mobileTeamSportTypeRoleService = require('./mobileTeamSportTypeRoleService')
 
 const TeamUserMappingPositionEnum = {
     ADMIN: 'ADMIN',
@@ -40,17 +41,6 @@ teamUserService.getTeamUserByTeamIdAndUserId = async (teamId, userId) => {
                 throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_TEAM);
             return member
         });
-
-}
-
-teamUserService.getTeamByUserId = async (page, size, user) => {
-
-    return TeamUserMapping.query()
-    .modify('baseAttributes')
-    .where('eusereuserid', user.sub)
-    .withGraphFetched('team(baseAttributes).teamPicture(baseAttributes)')
-    .page(page, size)
-    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
 }
 
@@ -96,12 +86,41 @@ teamUserService.getTeamMemberList = async (teamId, page, size, keyword) => {
         .leftJoinRelated('user')
         .modify('baseAttributes')
         .where('eteameteamid', teamId)
+        .withGraphFetched('teamSportTypeRoles(baseAttributes)')
         .withGraphFetched('user(baseAttributes)')
         .where(raw('lower("eusername")'), 'like', `%${keyword}%`)
         .page(page, size)
         .then(members =>
             ServiceHelper.toPageObj(page, size, members)
         );
+
+}
+
+teamUserService.getTeamUsermappingByTeamUserMappingId = async (teamUserMappingId) => {
+
+    return TeamUserMapping.query()
+    .findById(teamUserMappingId)
+    .then(teamUserMapping => {
+        if(!teamUserMapping) throw new NotFoundError()
+        return teamUserMapping
+    })
+
+}
+
+teamUserService.changeTeamMemberSportRoles = async (teamUserMappingId, user, sportRoleIds) => {
+
+    const teamUserMapping = await teamUserService.getTeamUsermappingByTeamUserMappingId(teamUserMappingId)
+    .catch( () => null)
+
+    if(!teamUserMapping) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
+
+    const isAdmin = await teamUserService.getTeamUserCheckAdmin(teamUserMapping.eteameteamid, user.sub);
+
+    if (!isAdmin)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
+
+    return mobileTeamSportTypeRoleService
+    .insertTeamSportTypeRoles(teamUserMappingId, teamUserMapping.eteameteamid, sportRoleIds, user)
 
 }
 
@@ -159,6 +178,16 @@ teamUserService.joinTeamByTeamLogs = async (teamLogs, user, position = TeamUserM
 
     return TeamUserMapping.query(db)
         .insertToTable(mappings, user.sub);
+
+}
+
+teamUserService.getTeamIdsByUser = async (user) => {
+
+    return TeamUserMapping.query()
+        .where('eusereuserid', user.sub)
+        .then(teamUserMappings => {
+            return teamUserMappings.map(teamUserMapping => teamUserMapping.eteameteamid)
+        });
 
 }
 

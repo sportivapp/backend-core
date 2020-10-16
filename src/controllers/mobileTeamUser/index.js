@@ -38,15 +38,15 @@ controller.getTeamMemberList = async (req, res, next) => {
 
 }
 
-controller.getTeamByUserId = async (req, res, next) => {
+controller.changeTeamMemberSportRoles = async (req, res, next) => {
 
-    const { page = '0', size = '10' } = req.query;
-    
+    const { teamUserMappingId, sportRoleIds } = req.body;
+
     try {
 
-        const pageObj = await teamUserService.getTeamByUserId(parseInt(page), parseInt(size), req.user);
+        const result = await teamUserService.changeTeamMemberSportRoles(teamUserMappingId, req.user, sportRoleIds);
 
-        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
         next(e);
