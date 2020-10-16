@@ -106,4 +106,20 @@ controller.deleteTeam = async (req, res, next) => {
 
 }
 
+controller.getMyTeams = async (req, res, next) => {
+
+    const { page = '0', size = '10', keyword = '' } = req.query;
+
+    try {
+
+        const result = await teamService.getMyTeams(parseInt(page), parseInt(size), keyword.toLowerCase(), req.user);
+
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = controller;
