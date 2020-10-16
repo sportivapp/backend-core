@@ -186,6 +186,9 @@ module.exports = {
         thread: {
             list: '/thread',
             id: '/thread/:threadId'
+        },
+        authentication: {
+            login: '/login'
         }
     }
 }
