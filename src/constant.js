@@ -185,6 +185,10 @@ module.exports = {
         thread: {
             list: '/thread',
             id: '/thread/:threadId'
+        },
+        commentReply: {
+            list: '/comments/:commentId/replies',
+            id: '/comments/:commentId/replies/:replyId'
         }
     }
 }
