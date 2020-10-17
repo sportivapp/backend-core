@@ -6,5 +6,6 @@ const { routes } = require('../../constant')
 
 router.post(routes.authentication.login, controller.login);
 router.post(routes.authentication.loginCompany, auth.authenticateToken, controller.loginCompany);
+router.post(routes.authentication.loginAuto, auth.authenticateToken, controller.autoLogin);
 
 module.exports = router;

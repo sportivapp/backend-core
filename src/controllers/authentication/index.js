@@ -39,12 +39,35 @@ controller.loginCompany = async (req, res, next) => {
         //     maxAge: 15 * 60 * 1000
         // }).json(ResponseHelper.toBaseResponse(process.env.ORG_DOMAIN));
 
+        // return res.cookie('tok', result, {
+        //     secure: true,
+        //     httpOnly: true,
+        //     domain: process.env.COOKIE_DOMAIN,
+        //     maxAge: 15 * 60 * 1000
+        // }).redirect(process.env.ORG_DOMAIN);
+
+        return res.redirect(result);
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.autoLogin = async (req, res, next) => {
+
+    const { token, companyId } = req.body;
+
+    try {
+
+        const result = await authenticationService.autoLogin(token, companyId);
+
         return res.cookie('tok', result, {
             secure: true,
             httpOnly: true,
             domain: process.env.COOKIE_DOMAIN,
             maxAge: 15 * 60 * 1000
-        }).redirect(process.env.ORG_DOMAIN);
+        }).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
         next(e);

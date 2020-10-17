@@ -192,7 +192,8 @@ module.exports = {
         },
         authentication: {
             login: '/login',
-            loginCompany: '/login-company'
+            loginCompany: '/login-company',
+            loginAuto: '/login-auto'
         },
         sportTypeRole: {
             industry: '/sport-type-role/industry/:industryId'
