@@ -58,15 +58,47 @@ AuthenticationService.generateCompanyJWTToken = async (user, companyId) => {
 
 }
 
-AuthenticationService.loginCompany = async(companyId, user) => {
+AuthenticationService.checkInCompanyAndGetSingleUser = async (companyId, userId) => {
 
-    const isInCompany = await companyService.isUserExistInCompany(companyId, user.sub);
+    const isInCompany = await companyService.isUserExistInCompany(companyId, userId);
 
     if (!isInCompany) throw new UnsupportedOperationError(ErrorEnum.NOT_IN_COMPANY);
 
-    const singleUser = await userService.getSingleUserById(user.sub);
+    return userService.getSingleUserById(userId)
+        .then(singleUser => {
+            if (!singleUser) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_FOUND);
+            return singleUser;
+        });
 
-    if (!singleUser) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_FOUND);
+}
+
+AuthenticationService.loginCompany = async(companyId, user) => {
+
+    const singleUser = AuthenticationService.checkInCompanyAndGetSingleUser(companyId, user.sub);
+
+    const token = await AuthenticationService.generateCompanyJWTToken(singleUser, companyId);
+
+    return process.env.ORG_DOMAIN + `/api/v1/login-auto?token=${token}&companyId=${companyId}`
+
+    // map randomKey:token save to DB
+    // return https://organization.quickplay.app/login-auto?token=randomKey&companyId=1
+
+}
+
+AuthenticationService.autoLogin = async(token, companyId) => {
+
+    let userId = null;
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, { ignoreExpiration: true }, async function(err, user) {
+        if (err) { 
+            return res.status(401).json("You need to log in first.");
+        }
+
+        userId = user.sub;
+
+    });
+
+    const singleUser = AuthenticationService.checkInCompanyAndGetSingleUser(companyId, userId);
 
     return AuthenticationService.generateCompanyJWTToken(singleUser, companyId);
 
