@@ -23,6 +23,5 @@ router.post( routes.team.cancelRequest, auth.authenticateToken, controller.cance
 router.post( routes.team.processInvitation, auth.authenticateToken, controller.processInvitation);
 router.get(routes.team.invite, auth.authenticateToken, controller.getMembersToInvite);
 router.delete(routes.team.id, auth.authenticateToken, controller.deleteTeam);
-router.get( routes.team.isAdmin, auth.authenticateToken, controller.isAdmin);
 
 module.exports = router;
