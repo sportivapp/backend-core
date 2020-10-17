@@ -60,11 +60,11 @@ controller.updateTeam = async (req, res, next) => {
 
 controller.getMyTeamList = async (req, res, next) => {
 
-    const { page = '0', size = '10' } = req.query;
+    const { page = '0', size = '10', keyword = '' } = req.query;
     
     try {
 
-        const pageObj = await teamService.getMyTeamList(parseInt(page), parseInt(size), req.user);
+        const pageObj = await teamService.getMyTeamList(parseInt(page), parseInt(size), keyword.toLowerCase(), req.user);
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
 
     } catch(e) {
@@ -326,22 +326,6 @@ controller.deleteTeam = async (req, res, next) => {
     try {
 
         const result = await teamService.deleteTeam(teamId, req.user);
-
-        return res.status(200).json(ResponseHelper.toBaseResponse(result));
-
-    } catch(e) {
-        next(e);
-    }
-
-}
-
-controller.isAdmin = async (req, res, next) => {
-
-    const { teamId } = req.params;
-
-    try {
-         
-        const result = await teamService.isAdmin(teamId, req.user.sub);
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
