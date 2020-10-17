@@ -23,7 +23,7 @@ class ThreadPostReply extends Model {
     static get modifiers() {
         return {
             baseAttributes(builder) {
-                builder.select('ethreadpostreplycomment', 'ethreadpostreplycreatetime')
+                builder.select('ethreadpostreplyid', 'ethreadpostreplycomment', 'ethreadpostreplycreatetime')
             }
         }
     }
