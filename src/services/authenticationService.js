@@ -76,7 +76,7 @@ AuthenticationService.loginCompany = async(companyId, user) => {
 
     const singleUser = AuthenticationService.checkInCompanyAndGetSingleUser(companyId, user.sub);
 
-    const token = AuthenticationService.generateCompanyJWTToken(singleUser, companyId);
+    const token = await AuthenticationService.generateCompanyJWTToken(singleUser, companyId);
 
     return process.env.ORG_DOMAIN + `/api/v1/login-auto?token=${token}&companyId=${companyId}`
 
