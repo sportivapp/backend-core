@@ -67,7 +67,7 @@ AuthenticationService.loginCompany = async(companyId, user) => {
 
     if (!singleUser)
 
-    return AuthenticationService.generateCompanyJWTToken(singleUser);
+    return AuthenticationService.generateCompanyJWTToken(singleUser, companyId);
 
 }
 
