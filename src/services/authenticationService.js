@@ -41,7 +41,7 @@ AuthenticationService.login = async (loginDTO) => {
 
 }
 
-AuthenticationService.generateJWTToken = async (user, companyId) => {
+AuthenticationService.generateCompanyJWTToken = async (user, companyId) => {
 
     const config = {
         sub: user.euserid,
