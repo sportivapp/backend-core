@@ -32,13 +32,19 @@ controller.loginCompany = async (req, res, next) => {
 
         const result = await authenticationService.loginCompany(companyId, req.user);
 
-        // return res.redirect(302, process.env.ORG_DOMAIN);
-        return res.status(200).cookie('tok', result, {
+        // return res.status(200).cookie('tok', result, {
+        //     secure: true,
+        //     httpOnly: true,
+        //     domain: process.env.COOKIE_DOMAIN,
+        //     maxAge: 15 * 60 * 1000
+        // }).json(ResponseHelper.toBaseResponse(process.env.ORG_DOMAIN));
+
+        return res.cookie('tok', result, {
             secure: true,
             httpOnly: true,
             domain: process.env.COOKIE_DOMAIN,
             maxAge: 15 * 60 * 1000
-        }).json(ResponseHelper.toBaseResponse(process.env.ORG_DOMAIN));
+        }).redirect(process.env.ORG_DOMAIN);
 
     } catch(e) {
         next(e);
