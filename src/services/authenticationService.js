@@ -7,7 +7,8 @@ const userService = require('./userService');
 
 const ErrorEnum = {
     UNSUCCESSFUL_LOGIN: 'UNSUCCESSFUL_LOGIN',
-    NOT_IN_COMPANY: 'NOT_IN_COMPANY'
+    NOT_IN_COMPANY: 'NOT_IN_COMPANY',
+    USER_NOT_FOUND: 'USER_NOT_FOUND'
 }
 
 const AuthenticationService = {};
@@ -65,7 +66,7 @@ AuthenticationService.loginCompany = async(companyId, user) => {
 
     const singleUser = await userService.getSingleUserById(user.sub);
 
-    if (!singleUser)
+    if (!singleUser) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_FOUND);
 
     return AuthenticationService.generateCompanyJWTToken(singleUser, companyId);
 
