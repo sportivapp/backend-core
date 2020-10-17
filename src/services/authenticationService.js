@@ -41,7 +41,7 @@ AuthenticationService.login = async (loginDTO) => {
 
 }
 
-AuthenticationService.generateJWTToken = async (user, companyId) => {
+AuthenticationService.generateCompanyJWTToken = async (user, companyId) => {
 
     const config = {
         sub: user.euserid,
@@ -67,7 +67,7 @@ AuthenticationService.loginCompany = async(companyId, user) => {
 
     if (!singleUser)
 
-    return AuthenticationService.generateCompanyJWTToken(singleUser);
+    return AuthenticationService.generateCompanyJWTToken(singleUser, companyId);
 
 }
 
