@@ -46,7 +46,9 @@ controller.loginCompany = async (req, res, next) => {
         //     maxAge: 15 * 60 * 1000
         // }).redirect(process.env.ORG_DOMAIN);
 
-        return res.redirect(result);
+        // return res.redirect(result);
+
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
         next(e);
