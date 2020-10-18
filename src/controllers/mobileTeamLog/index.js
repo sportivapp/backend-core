@@ -23,11 +23,11 @@ controller.applyTeam = async (req, res, next) => {
 
 controller.cancelRequests = async (req, res, next) => {
 
-    const { teamLogId } = req.params;
+    const { teamLogIds } = req.body;
 
     try {
 
-        const result = await teamLogService.cancelRequests(parseInt(teamLogId), req.user);
+        const result = await teamLogService.cancelRequests(teamLogIds, req.user);
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
