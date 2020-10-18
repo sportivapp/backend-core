@@ -6,6 +6,8 @@ const threadModeratorService = require('./threadModeratorService')
 const companyService = require('./companyService')
 const fileService = require('./fileService')
 const teamService = require('./teamService')
+const teamUserMappingService = require('./teamUserMappingService')
+const profileService = require('./profileService')
 const { raw } = require('objection')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
@@ -35,6 +37,7 @@ threadService.getAllThreads = async (page, size, keyword, isPublic, filter) => {
     return Thread.query()
         .select(Thread.relatedQuery('comments').count().as('commentCount'))
         .modify('baseAttributes')
+        .withGraphFetched('threadPicture(baseAttributes)')
         .where(raw('lower("ethreadtitle")'), 'like', `%${keyword}%`)
         .andWhere('ecompanyecompanyid', filter.companyId)
         .andWhere('eteameteamid', filter.teamId)
@@ -48,6 +51,7 @@ threadService.getThreadById = async (threadId) => {
         .findById(threadId)
         .select(Thread.relatedQuery('comments').count().as('commentCount'))
         .modify('baseAttributes')
+        .withGraphFetched('threadPicture(baseAttributes)')
         .then(thread => {
             if (!thread) throw new NotFoundError()
             return thread
@@ -99,7 +103,10 @@ threadService.createThread = async (threadDTO, isPublic, moderatorIds, user) => 
         const thread = await Thread.query(trx)
             .insertToTable(threadDTO, user.sub)
 
-        const moderators = await threadModeratorService.saveThreadModerators(thread.ethreadid, moderatorIds, user, trx)
+        //TODO: use this when moderator can be more than 1
+        // const moderators = await threadModeratorService.saveThreadModerators(thread.ethreadid, moderatorIds, user, trx)
+
+        const moderators = await threadModeratorService.saveThreadModerators(thread.ethreadid, [user.sub], user, trx)
 
         return Promise.resolve({ ...thread, moderators: moderators })
 
@@ -112,9 +119,25 @@ threadService.updateThread = async (threadId, threadDTO, isPublic, moderatorIds,
     if (!threadDTO.ecompanyecompanyid && !threadDTO.eteameteamid) threadDTO.ethreadispublic = true
     else threadDTO.ethreadispublic = isPublic
 
-    const thread = await Thread.query().findById(threadId)
+    const thread = await threadService.getThreadDetailById(threadId)
 
     if (!thread) throw new UnsupportedOperationError(ErrorEnum.THREAD_NOT_FOUND)
+
+    if (thread.eteameteamid && isPublic) {
+
+        const isTeamAdmin = await teamUserMappingService.isAdmin(thread.eteameteamid, user.sub)
+
+        if (!isTeamAdmin) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
+    }
+
+    if (thread.ecompanyecompanyid && isPublic) {
+
+        const isCompanyPermissionValid = await profileService.getFunctionCodes(user)
+            .then(codes => codes.indexOf('D11') !== -1)
+
+        if (!isCompanyPermissionValid) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
+
+    }
 
     const isModerator = await threadModeratorService.isThreadModerator(threadId, user.sub)
 
@@ -139,16 +162,16 @@ threadService.updateThread = async (threadId, threadDTO, isPublic, moderatorIds,
 
     }
 
+    const moderators = await threadModeratorService.getThreadModerators(threadId)
+
     return Thread.transaction(async trx => {
 
-        const updatedThread = thread.$query(trx)
+        return thread.$query(trx)
             .updateByUserId(threadDTO, user.sub)
             .returning('*')
+            .then(thread => ({ ...thread, moderators: moderators }))
 
-        const threadModerators = threadModeratorService.saveThreadModerators(thread.ethreadid, moderatorIds, user, trx)
-
-        return Promise.all([updatedThread, threadModerators])
-            .then(([thread, threadModerators]) => ({ ...thread, moderators: threadModerators }))
+        // const threadModerators = threadModeratorService.saveThreadModerators(thread.ethreadid, moderatorIds, user, trx)
 
     })
 
@@ -156,17 +179,36 @@ threadService.updateThread = async (threadId, threadDTO, isPublic, moderatorIds,
 
 threadService.deleteThreadById = async (threadId, user) => {
 
-    const thread = await Thread.query().findById(threadId)
+    const thread = await threadService.getThreadDetailById(threadId)
 
     if (!thread) return false
 
     const isModerator = await threadModeratorService.isThreadModerator(threadId, user.sub)
 
-    if (!isModerator) return false
+    if (thread.eteameteamid) {
+
+        const isTeamAdmin = await teamUserMappingService.isAdmin(thread.eteameteamid, user.sub)
+
+        if (!isModerator && !isTeamAdmin) return false
+    }
+
+    if (thread.ecompanyecompanyid) {
+
+        const isCompanyPermissionValid = await profileService.getFunctionCodes(user)
+            .then(codes => codes.indexOf('D11') !== -1)
+
+        if (!isModerator && !isCompanyPermissionValid) return false
+
+    }
 
     return thread.$query()
         .delete()
         .then(rowsAffected => rowsAffected === 1)
+}
+
+threadService.getThreadDetailById = async (threadId) => {
+
+    return Thread.query().findById(threadId)
 }
 
 module.exports = threadService

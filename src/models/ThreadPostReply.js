@@ -23,7 +23,7 @@ class ThreadPostReply extends Model {
     static get modifiers() {
         return {
             baseAttributes(builder) {
-                builder.select('ethreadpostreplycomment', 'ethreadpostreplycreatetime')
+                builder.select('ethreadpostreplyid', 'ethreadpostreplycomment', 'ethreadpostreplycreatetime')
             }
         }
     }
@@ -57,7 +57,15 @@ class ThreadPostReply extends Model {
                 join: {
                     from: 'ethreadpostreply.ethreadpostreplycreateby',
                     to: 'ethreadmoderator.eusereuserid'
-                },
+                }
+            },
+            threadPostReplyPicture: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: File,
+                join: {
+                    from: 'ethread.efileefileid',
+                    to: 'efile.efileid'
+                }
             }
         }
     }

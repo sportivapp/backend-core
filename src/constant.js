@@ -201,6 +201,9 @@ module.exports = {
         commentReply: {
             list: '/comments/:commentId/replies',
             id: '/comments/:commentId/replies/:replyId'
-        }
+        },
+        report: {
+            thread: '/report/thread'
+        },
     }
 }

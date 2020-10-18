@@ -22,6 +22,7 @@ threadPostService.getAllPostByThreadId = async (threadId, page, size) => {
         .select(ThreadPost.relatedQuery('replies').count().as('replyCount'))
         .where('ethreadethreadid', threadId)
         .withGraphFetched('user(idAndName)')
+        .withGraphFetched('threadPostPicture(baseAttributes)')
         .withGraphFetched('moderator')
         .modifyGraph('moderator', builder => {
             builder
