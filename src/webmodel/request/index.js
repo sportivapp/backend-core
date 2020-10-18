@@ -17,6 +17,8 @@ const classSchemas = require('./class')
 const newsSchemas = require('./news')
 const threadSchemas = require('./thread')
 const threadPostSchemas = require('./threadPost')
+const threadPostReplySchemas = require('./threadPostReply')
+const reportThreadSchemas = require('./reportThread')
 
 module.exports = {
     ...companySchemas,
@@ -37,5 +39,7 @@ module.exports = {
     ...classSchemas,
     ...newsSchemas,
     ...threadSchemas,
-    ...threadPostSchemas
+    ...threadPostSchemas,
+    ...threadPostReplySchemas,
+    ...reportThreadSchemas
 }

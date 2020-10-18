@@ -15,7 +15,7 @@ class ThreadPostReply extends Model {
             type: 'object',
             required: ['ethreadpostreplycomment'],
             properties: {
-                ethreadpostreplycomment: { type: 'string', minLength: 1, maxLength: 501 }
+                ethreadpostreplycomment: { type: 'string', maxLength: 501 }
             }
         }
     }
@@ -34,6 +34,7 @@ class ThreadPostReply extends Model {
         const ThreadPost = require('./ThreadPost')
         const User = require('./User')
         const ThreadModerator = require('./ThreadModerator')
+        const File = require('./File')
 
         return {
             user: {
@@ -64,7 +65,7 @@ class ThreadPostReply extends Model {
                 relation: Model.BelongsToOneRelation,
                 modelClass: File,
                 join: {
-                    from: 'ethread.efileefileid',
+                    from: 'ethreadpostreply.efileefileid',
                     to: 'efile.efileid'
                 }
             }

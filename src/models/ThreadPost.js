@@ -14,7 +14,7 @@ class ThreadPost extends Model {
       type: 'object',
       required: ['ethreadpostcomment'],
       properties: {
-        ethreadpostcomment: { type: 'string', minLength: 1, maxLength: 501 }
+        ethreadpostcomment: { type: 'string', maxLength: 501 }
       }
     }
   }

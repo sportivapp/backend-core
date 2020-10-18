@@ -35,6 +35,7 @@ threadPostReplyService.getAllByThreadPostId = async (threadPostId) => {
     return replies.map(reply => ({
         ethreadpostreplycomment: reply.ethreadpostreplycomment,
         ethreadpostreplycreatetime: reply.ethreadpostreplycreatetime,
+        threadPostReplyPicture: reply.threadPostReplyPicture,
         user: reply.user,
         isModerator: !!reply.moderator
     }))

@@ -7,7 +7,7 @@ const schema = Joi.object({
     companyId: Joi.number().allow(null),
     teamId: Joi.number().allow(null),
     fileId: Joi.number().allow(null),
-    moderatorIds: Joi.array().required().min(1).items(Joi.number().required())
+    moderatorIds: Joi.array().min(1).items(Joi.number().required())
 })
 
 module.exports = schema

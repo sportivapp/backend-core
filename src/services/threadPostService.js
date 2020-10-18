@@ -38,6 +38,7 @@ threadPostService.getAllPostByThreadId = async (threadId, page, size) => {
         ethreadpostcomment: threadPost.ethreadpostcomment,
         ethreadpostcreatetime: threadPost.ethreadpostcreatetime,
         replyCount: parseInt(threadPost.replyCount),
+        threadPostPicture: threadPost.threadPostPicture,
         user: threadPost.user,
         isModerator: !!threadPost.moderator
     }))
