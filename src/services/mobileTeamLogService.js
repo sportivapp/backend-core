@@ -126,7 +126,7 @@ teamLogService.applyTeam = async (teamId, user, isPublic) => {
 
 teamLogService.cancelRequests = async (teamLogIds, user) => {
 
-    const teamLogs = await teamLogService.getPendingLogByTeamLogIdsAndTypeOptinalUserId(teamLogIds, user.sub);
+    const teamLogs = await teamLogService.getPendingLogByTeamLogIdsAndTypeOptinalUserId(teamLogIds, [TeamLogTypeEnum.APPLY], user.sub);
 
     if (teamLogs.length !== teamLogIds.length)
         throw new UnsupportedOperationError(ErrorEnum.USER_NOT_APPLIED)
@@ -135,10 +135,6 @@ teamLogService.cancelRequests = async (teamLogIds, user) => {
         .whereIn('eteamlogid', teamLogIds)
         .delete()
         .then(rowsAffected => rowsAffected === teamLogIds.length);
-
-    return teamLog.$query()
-        .del()
-        .then(rowsAffected => rowsAffected === 1);
 
 }
 
