@@ -101,7 +101,7 @@ teamLogService.applyTeam = async (teamId, user, isPublic) => {
 
         if (isPublic) {
             status = TeamLogStatusEnum.ACCEPTED;
-            await teamUserService.joinTeam(teamId, user.sub, user);
+            await teamUserService.joinTeamByTeamLogs([teamLog], user);
         } else
             status = TeamLogStatusEnum.PENDING;
 
@@ -112,24 +112,29 @@ teamLogService.applyTeam = async (teamId, user, isPublic) => {
         if (!isPublic)
             throw new UnsupportedOperationError(ErrorEnum.USER_APPLIED)
 
-        await teamUserService.joinTeam(teamId, user.sub, user);
-        return teamLogService.updateLogByIdAndUser(teamLog.eteamlogid, user, TeamLogStatusEnum.ACCEPTED);
+        await teamUserService.joinTeamByTeamLogs([teamLog], user);
+        return teamLogService.updateLogsByTeamLogs([teamLog], TeamLogStatusEnum.ACCEPTED, user);
 
     } else if (TeamLogTypeEnum.INVITE === teamLog.eteamlogtype) {
 
-        await teamUserService.joinTeam(teamId, user.sub, user);
-        return teamLogService.updateLogByIdAndUser(teamLog.eteamlogid, user, TeamLogStatusEnum.ACCEPTED);
+        await teamUserService.joinTeamByTeamLogs([teamLog], user);
+        return teamLogService.updateLogsByTeamLogs([teamLog], TeamLogStatusEnum.ACCEPTED, user);
 
     }
 
 }
 
-teamLogService.cancelRequest = async (teamLogId, user) => {
+teamLogService.cancelRequests = async (teamLogIds, user) => {
 
-    const teamLog = await teamLogService.getLogByTeamLogIdOptinalUserId(teamLogId, user.sub);
+    const teamLogs = await teamLogService.getPendingLogByTeamLogIdsAndTypeOptinalUserId(teamLogIds, user.sub);
 
-    if (TeamLogTypeEnum.APPLY !== teamLog.eteamlogtype)
+    if (teamLogs.length !== teamLogIds.length)
         throw new UnsupportedOperationError(ErrorEnum.USER_NOT_APPLIED)
+
+    return TeamLog.query()
+        .whereIn('eteamlogid', teamLogIds)
+        .delete()
+        .then(rowsAffected => rowsAffected === teamLogIds.length);
 
     return teamLog.$query()
         .del()
@@ -142,7 +147,7 @@ teamLogService.processRequests = async (teamLogIds, user, status) => {
     if (TeamLogStatusEnum.ACCEPTED !== status && TeamLogStatusEnum.REJECTED !== status)
         throw new UnsupportedOperationError(ErrorEnum.STATUS_UNACCEPTED)
 
-    const teamLogs = await teamLogService.getPendingLogByTeamLogIdsAndType(teamLogIds, [TeamLogTypeEnum.APPLY])
+    const teamLogs = await teamLogService.getPendingLogByTeamLogIdsAndTypeOptinalUserId(teamLogIds, [TeamLogTypeEnum.APPLY])
 
     if (teamLogs.length !== teamLogIds.length)
         throw new UnsupportedOperationError(ErrorEnum.USER_NOT_APPLIED)
@@ -200,12 +205,20 @@ teamLogService.getPendingTeamLogs = async (teamId, page, size, type, user) => {
 
 }
 
-teamLogService.getPendingLogByTeamLogIdsAndType = async (teamLogIds, types) => {
+teamLogService.getPendingLogByTeamLogIdsAndTypeOptinalUserId = async (teamLogIds, types, userId = null) => {
 
-    return TeamLog.query()
+    const teamLogsPromise = TeamLog.query()
     .whereIn('eteamlogid', teamLogIds)
     .whereIn('eteamlogtype', types)
     .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
+
+    if (userId)
+        teamLogsPromise.andWhere('eusereuserid', userId);
+
+    return teamLogsPromise
+        .then(teamLogs => {
+            return teamLogs
+        })
 
 }
 
@@ -243,8 +256,8 @@ teamLogService.invite = async (teamId, user, email) => {
         if (TeamLogTypeEnum.INVITE === teamLog.eteamlogtype)
             throw new UnsupportedOperationError(ErrorEnum.USER_INVITED);
         else {
-            await teamUserService.joinTeam(teamId, invitedUser.euserid, user)
-            return teamLogService.updateLogByIdAndUser(teamLog.eteamlogid, user, TeamLogStatusEnum.ACCEPTED);
+            await teamUserService.joinTeamByTeamLogs([teamLog], user)
+            return teamLogService.updateLogsByTeamLogs([teamLog], TeamLogStatusEnum.ACCEPTED, user);
         }
 
     }
@@ -253,7 +266,7 @@ teamLogService.invite = async (teamId, user, email) => {
 
 teamLogService.cancelInvites = async (teamLogIds, user) => {
 
-    const teamLogs = await teamLogService.getPendingLogByTeamLogIdsAndType(teamLogIds, [TeamLogTypeEnum.INVITE])
+    const teamLogs = await teamLogService.getPendingLogByTeamLogIdsAndTypeOptinalUserId(teamLogIds, [TeamLogTypeEnum.INVITE])
 
     if (teamLogs.length !== teamLogIds.length)
         throw new UnsupportedOperationError(ErrorEnum.USER_NOT_INVITED)
@@ -293,21 +306,21 @@ teamLogService.updateLogsByTeamLogs = async (teamLogs, status, user) => {
 
 }
 
-teamLogService.processInvitation = async (teamLogId, user, status) => {
+teamLogService.processInvitations = async (teamLogIds, user, status) => {
 
     if (TeamLogStatusEnum.ACCEPTED !== status && TeamLogStatusEnum.REJECTED !== status)
         throw new UnsupportedOperationError(ErrorEnum.STATUS_UNACCEPTED)
 
-    const teamLog = await teamLogService.getLogByTeamLogIdOptinalUserId(teamLogId, user.sub);
+    const teamLogs = await teamLogService.getPendingLogByTeamLogIdsAndTypeOptinalUserId(teamLogIds, [TeamLogTypeEnum.INVITE], user.sub);
 
-    if (TeamLogTypeEnum.INVITE !== teamLog.eteamlogtype)
+    if (teamLogs.length !== teamLogIds.length)
         throw new UnsupportedOperationError(ErrorEnum.USER_NOT_INVITED)
 
     if (TeamLogStatusEnum.ACCEPTED === status) {
-        await teamUserService.joinTeam(teamLog.eteameteamid, user.sub, user);
+        await teamUserService.joinTeamByTeamLogs(teamLogs, user);
     }
 
-    return teamLogService.updateLog(teamLog, status, user);
+    return teamLogService.updateLogsByTeamLogs(teamLogs, status, user);
 
 }
 

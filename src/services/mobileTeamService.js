@@ -81,7 +81,7 @@ teamService.createTeam = async (teamDTO, user) => {
         const team = await Team.query(trx)
             .insertToTable(teamDTO, user.sub);
 
-        await teamUserService.joinTeam(team.eteamid, user.sub, user, 'ADMIN', trx);
+        await teamUserService.initializeTeamAdmin(team.eteamid, user, trx);
         // await TeamUserMapping.query(trx)
         //     .insertToTable({
         //         eusereuserid: user.sub,
