@@ -6,6 +6,7 @@ const threadModeratorService = require('./threadModeratorService')
 const companyService = require('./companyService')
 const fileService = require('./fileService')
 const teamService = require('./teamService')
+const teamUserMappingService = require('./teamUserMappingService')
 const profileService = require('./profileService')
 const { raw } = require('objection')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
@@ -122,6 +123,22 @@ threadService.updateThread = async (threadId, threadDTO, isPublic, moderatorIds,
 
     if (!thread) throw new UnsupportedOperationError(ErrorEnum.THREAD_NOT_FOUND)
 
+    if (thread.eteameteamid && isPublic) {
+
+        const isTeamAdmin = await teamUserMappingService.isAdmin(thread.eteameteamid, user.sub)
+
+        if (!isTeamAdmin) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
+    }
+
+    if (thread.ecompanyecompanyid && isPublic) {
+
+        const isCompanyPermissionValid = await profileService.getFunctionCodes(user)
+            .then(codes => codes.indexOf('D11') !== -1)
+
+        if (!isCompanyPermissionValid) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
+
+    }
+
     const isModerator = await threadModeratorService.isThreadModerator(threadId, user.sub)
 
     if (!isModerator) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
@@ -170,7 +187,7 @@ threadService.deleteThreadById = async (threadId, user) => {
 
     if (thread.eteameteamid) {
 
-        const isTeamAdmin = await teamService.isAdmin(thread.eteameteamid, user.sub)
+        const isTeamAdmin = await teamUserMappingService.isAdmin(thread.eteameteamid, user.sub)
 
         if (!isModerator && !isTeamAdmin) return false
     }
