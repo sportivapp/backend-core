@@ -52,18 +52,6 @@ const TeamUserMappingPositionEnum = {
     MEMBER: 'MEMBER'
 }
 
-teamService.isAdmin = async (teamId, userId) => {
-    return TeamUserMapping.query()
-    .where('eusereuserid', userId)
-    .andWhere('eteameteamid', teamId)
-    .andWhere('eteamusermappingposition', TeamUserMappingPositionEnum.ADMIN)
-    .first()
-    .then(user => {
-        if(!user) return false
-        return user.eteamusermappingposition === TeamUserMappingPositionEnum.ADMIN
-    })
-}
-
 teamService.isUserInCompany = async (teamId, user) => {
     return Team.query()
     .where('eteamid', teamId)
@@ -72,17 +60,6 @@ teamService.isUserInCompany = async (teamId, user) => {
         if(!team) return false
         return team.ecompanyecompanyid === user.companyId;
     });
-}
-
-teamService.getTeamMemberCount = async (teamId) => {
-
-    const teamMemberCount = await TeamUserMapping.query()
-    .where('eteameteamid', teamId)
-    .count()
-    .first();
-
-    return parseInt(teamMemberCount.count);
-    
 }
 
 function isTeamNameUniqueErr(e) {
@@ -121,7 +98,7 @@ teamService.updateTeam = async (teamDTO, user, teamId) => {
 
     if(!teamFromDB) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TEAM_NOT_FOUND)
 
-    const isAdmin = await teamService.isAdmin(teamId, user.sub)
+    const isAdmin = await teamUserMappingService.isAdmin(teamId, user.sub)
     
     if(!isAdmin) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
@@ -156,9 +133,19 @@ teamService.updateTeam = async (teamDTO, user, teamId) => {
         })
 }
 
-teamService.getMyTeamList = async (page, size, user) => {
+teamService.getMyTeamList = async (page, size, keyword, user) => {
     
-    return teamUserMappingService.getTeamByUserId(page, size, user.sub)
+    const teamIds = await teamUserMappingService.getTeamIdsByUser(user)
+
+    return Team.query()
+    .modify('baseAttributes')
+    .withGraphFetched('company(baseAttributes)')
+    .withGraphFetched('teamPicture(baseAttributes)')
+    .withGraphFetched('teamIndustry(baseAttributes)')
+    .whereRaw(`LOWER("eteamname") LIKE LOWER('%${keyword}%')`)
+    .whereIn('eteamid', teamIds)
+    .page(page, size)
+    .then(teams => ServiceHelper.toPageObj(page, size, teams));
 
 }
 
@@ -210,13 +197,7 @@ teamService.getTeamMemberList = async (teamId, user, page, size) => {
     
     if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
 
-    return TeamUserMapping.query()
-    .modify('baseAttributes')
-    .where('eteameteamid', teamId)
-    .withGraphFetched('teamSportTypeRoles(baseAttributes)')
-    .withGraphFetched('user(baseAttributes).file(baseAttributes)')
-    .page(page, size)
-    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+    return teamUserMappingService.getTeamMemberListByTeamId(page, size, teamId)
 
 }
 
@@ -239,30 +220,13 @@ teamService.getTeamMemberByLogType = async (teamId, user, page, size, type) => {
 
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TYPE_UNACCEPTED)
 
-    const isAdmin = await teamService.isAdmin(teamId, user.sub);
+    const isAdmin = await teamUserMappingService.isAdmin(teamId, user.sub);
 
     if (!isAdmin)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
     return teamLogService.getPendingLogByTeamIdAndTypeAndStatus(teamId, type, page, size, TeamLogStatusEnum.PENDING)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
-
-}
-
-teamService.checkUserInTeamByUserIds = async (teamId, userIds) => {
-
-    return TeamUserMapping.query()
-    .where('eteameteamid', teamId)
-    .whereIn('eusereuserid', userIds)
-
-}
-
-teamService.checkUserInTeam = async (teamId, userId) => {
-
-    return TeamUserMapping.query()
-    .where('eteameteamid', teamId)
-    .andWhere('eusereuserid', userId)
-    .first();
 
 }
 
@@ -328,7 +292,7 @@ teamService.processIntoTeamByUserIds = async (teamId, user, appliedUsers) => {
 
 teamService.invite = async (teamId, user, userIds) => {
 
-    const isAdmin = await teamService.isAdmin(teamId, user.sub)
+    const isAdmin = await teamUserMappingService.isAdmin(teamId, user.sub)
     
     if(!isAdmin) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
@@ -338,7 +302,7 @@ teamService.invite = async (teamId, user, userIds) => {
     if (invitedUsers.length !== userIds.length)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
 
-    const userInTeam = await teamService.checkUserInTeamByUserIds(teamId, userIds);
+    const userInTeam = await teamUserMappingService.checkUserInTeamByUserIds(teamId, userIds);
 
     if (userInTeam.length > 0)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_IN_TEAM)
@@ -399,7 +363,7 @@ teamService.cancelInvites = async (teamLogIds, user) => {
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_INVITED)
 
     // take the first teamId from invite log
-    const isAdmin = await teamService.isAdmin(pendingLogs[0].eteameteamid, user.sub);
+    const isAdmin = await teamUserMappingService.isAdmin(pendingLogs[0].eteameteamid, user.sub);
 
     if (!isAdmin)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
@@ -426,7 +390,7 @@ teamService.processRequests = async (teamLogIds, user, status) => {
     if (teamLogs.length !== teamLogIds.length)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_APPLIED)
 
-    const isAdmin = await teamService.isAdmin(teamLogs[0].eteameteamid, user.sub);
+    const isAdmin = await teamUserMappingService.isAdmin(teamLogs[0].eteameteamid, user.sub);
 
     if (!isAdmin)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
@@ -480,7 +444,7 @@ teamService.processInvitation = async (teamLogId, user, status) => {
 teamService.joinTeam = async (teamId, user) => {
 
     // If user already in team
-    const userInTeam = await teamService.checkUserInTeam(teamId, user.sub);
+    const userInTeam = await teamUserMappingService.checkUserInTeam(teamId, user.sub);
 
     if (userInTeam)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_IN_TEAM)
@@ -533,15 +497,15 @@ teamService.exitTeam = async (teamId, user) => {
     })
 
     // If user already in team
-    const userInTeam = await teamService.checkUserInTeam(teamId, user.sub);
+    const userInTeam = await teamUserMappingService.checkUserInTeam(teamId, user.sub);
 
     if (!userInTeam)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
 
     // keep other undefined because not used
-    const removeUser = await teamService.removeUserFromTeam(userInTeam);
+    const removeUser = await teamUserMappingService.removeUserFromTeam(userInTeam);
 
-    const teamMemberCount = await teamService.getTeamMemberCount(teamId);
+    const teamMemberCount = await teamUserMappingService.getTeamMemberCount(teamId);
 
     // If team has no member after user leaving
     if (teamMemberCount === 0) {
@@ -551,23 +515,6 @@ teamService.exitTeam = async (teamId, user) => {
     }
 
     return removeUser
-
-}
-
-teamService.removeUserFromTeam = async (userInTeam, user, userId, type, logMessage) => {
-
-    return TeamUserMapping.transaction(async trx => {
-
-        // if user kicked
-        if(type === TeamLogStatusEnum.KICKED) {
-            await teamLogService.updateKickedTeamLog(userInTeam.eteameteamid, user, userId, logMessage, trx)
-        }
-
-        return userInTeam.$query(trx)
-        .delete()
-        .then(rowsAffected => rowsAffected === 1);
-
-    })
 
 }
 
@@ -583,18 +530,18 @@ teamService.kickUserFromTeam = async (teamId, user, userId, logMessage) => {
     if (user.sub === userId)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION)
 
-    const isAdmin = await teamService.isAdmin(teamId, user.sub);
+    const isAdmin = await teamUserMappingService.isAdmin(teamId, user.sub);
 
     if (!isAdmin)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
     // If user already in team
-    const userInTeam = await teamService.checkUserInTeam(teamId, userId);
+    const userInTeam = await teamUserMappingService.checkUserInTeam(teamId, userId);
 
     if (!userInTeam)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
 
-    return teamService.removeUserFromTeam(userInTeam, user, userId, TeamLogStatusEnum.KICKED, logMessage);
+    return teamUserMappingService.removeUserFromTeam(userInTeam, user, userId, TeamLogStatusEnum.KICKED, logMessage);
 
 }
 
@@ -605,7 +552,7 @@ teamService.changeTeamMemberSportRoles = async (teamUserMappingId, user, sportRo
 
     if(!teamUserMapping) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
 
-    const isAdmin = await teamService.isAdmin(teamUserMapping.eteameteamid, user.sub);
+    const isAdmin = await teamUserMappingService.isAdmin(teamUserMapping.eteameteamid, user.sub);
 
     if (!isAdmin)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
@@ -620,7 +567,7 @@ teamService.changeTeamMemberPosition = async (teamId, user, userId, position) =>
     if (user.sub === userId)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION)
 
-    const isAdmin = await teamService.isAdmin(teamId, user.sub);
+    const isAdmin = await teamUserMappingService.isAdmin(teamId, user.sub);
 
     if (!isAdmin)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
@@ -663,7 +610,7 @@ teamService.deleteTeam = async (teamId, user) => {
 
     if(!getTeam) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TEAM_NOT_FOUND)
 
-    const isAdmin = await teamService.isAdmin(teamId, user.sub)
+    const isAdmin = await teamUserMappingService.isAdmin(teamId, user.sub)
 
     if(!isAdmin) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
 
