@@ -155,20 +155,18 @@ teamUserService.kickMember = async (teamId, userId, user) => {
 
 }
 
-teamUserService.joinTeam = async (teamId, userId, user, position = TeamUserMappingPositionEnum.MEMBER, 
-    db = TeamUserMapping.knex()) => {
+teamUserService.initializeTeamAdmin = async (teamId, user, db = TeamUserMapping.knex()) => {
 
     return TeamUserMapping.query(db)
         .insertToTable({
             eteameteamid: teamId,
-            eusereuserid: userId,
-            eteamusermappingposition: position
+            eusereuserid: user.sub,
+            eteamusermappingposition: TeamUserMappingPositionEnum.ADMIN
         }, user.sub);
 
 }
 
-teamUserService.joinTeamByTeamLogs = async (teamLogs, user, position = TeamUserMappingPositionEnum.MEMBER, 
-    db = TeamUserMapping.knex()) => {
+teamUserService.joinTeamByTeamLogs = async (teamLogs, user, position = TeamUserMappingPositionEnum.MEMBER) => {
 
     const mappings = teamLogs.map(teamLog => ({
         eteameteamid: teamLog.eteameteamid,
@@ -176,7 +174,7 @@ teamUserService.joinTeamByTeamLogs = async (teamLogs, user, position = TeamUserM
         eteamusermappingposition: position
     }))
 
-    return TeamUserMapping.query(db)
+    return TeamUserMapping.query()
         .insertToTable(mappings, user.sub);
 
 }

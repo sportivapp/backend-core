@@ -21,13 +21,13 @@ controller.applyTeam = async (req, res, next) => {
 
 }
 
-controller.cancelRequest = async (req, res, next) => {
+controller.cancelRequests = async (req, res, next) => {
 
     const { teamLogId } = req.params;
 
     try {
 
-        const result = await teamLogService.cancelRequest(parseInt(teamLogId), req.user);
+        const result = await teamLogService.cancelRequests(parseInt(teamLogId), req.user);
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
@@ -120,14 +120,14 @@ controller.cancelInvites = async (req, res, next) => {
 
 }
 
-controller.processInvitation = async (req, res, next) => {
+controller.processInvitations = async (req, res, next) => {
 
-    const { teamLogId } = req.params;
     const { status } = req.query;
+    const { teamLogIds } = req.body;
 
     try {
 
-        const result = await teamLogService.processInvitation(parseInt(teamLogId), req.user, status.toUpperCase());
+        const result = await teamLogService.processInvitations(teamLogIds, req.user, status.toUpperCase());
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
