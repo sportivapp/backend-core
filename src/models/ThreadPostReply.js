@@ -59,7 +59,7 @@ class ThreadPostReply extends Model {
                     to: 'ethreadmoderator.eusereuserid'
                 }
             },
-            file: {
+            threadPostReplyPicture: {
                 relation: Model.BelongsToOneRelation,
                 modelClass: File,
                 join: {

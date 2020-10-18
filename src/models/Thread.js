@@ -86,7 +86,7 @@ class Thread extends Model {
           to: 'euser.euserid'
         }
       },
-      file: {
+      threadPicture: {
         relation: Model.BelongsToOneRelation,
         modelClass: File,
         join: {

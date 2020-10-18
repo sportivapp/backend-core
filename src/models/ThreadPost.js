@@ -68,7 +68,7 @@ class ThreadPost extends Model {
           to: 'ethreadpostreply.ethreadpostethreadpostid'
         }
       },
-      file: {
+      threadPostPicture: {
         relation: Model.BelongsToOneRelation,
         modelClass: File,
         join: {

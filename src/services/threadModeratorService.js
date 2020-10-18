@@ -24,6 +24,7 @@ threadModeratorService.saveThreadModerators = async (threadId, userIds, user, db
 threadModeratorService.getThreadModerators = async (threadId) => {
     return ThreadModerator.relatedQuery('user')
         .for(ThreadModerator.query().where('ethreadethreadid', threadId))
+        .modify('baseAttributes')
 }
 
 threadModeratorService.isThreadModerator = async (threadId, userId) => {
