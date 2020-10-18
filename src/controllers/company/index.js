@@ -78,7 +78,6 @@ companyController.createCompany = async (req, res, next) => {
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
 
     } catch(e) {
-        console.log(e);
         next(e);
     }
 }

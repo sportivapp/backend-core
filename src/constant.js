@@ -191,7 +191,9 @@ module.exports = {
             id: '/thread/:threadId'
         },
         authentication: {
-            login: '/login'
+            login: '/login',
+            loginCompany: '/login-company',
+            loginAuto: '/login-auto'
         },
         sportTypeRole: {
             industry: '/sport-type-role/industry/:industryId'
@@ -199,6 +201,9 @@ module.exports = {
         commentReply: {
             list: '/comments/:commentId/replies',
             id: '/comments/:commentId/replies/:replyId'
-        }
+        },
+        report: {
+            thread: '/report/thread'
+        },
     }
 }

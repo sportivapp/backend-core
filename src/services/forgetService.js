@@ -40,7 +40,7 @@ ForgetService.sendForgetEmail = async (email) => {
     const token = [...Array(22)].map(i=>(~~(Math.random()*36)).toString(36)).join('');
     const tokenValue = Date.now() + ':' + token;
     const encryptedValue = cryptojs.AES.encrypt(tokenValue, email + process.env.FORGET_SECRET).toString();
-    const link = 'https://org.sportiv.app/changePassword/' + token + '/' + email;
+    const link = process.env.CHANGE_PASSWORD_URL + token + '/' + email;
     
     if (forget) {
         await forget.$query().updateByUserId({

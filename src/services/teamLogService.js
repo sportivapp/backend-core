@@ -168,18 +168,6 @@ teamLogService.updateAppliedTeamLogsWithPendingByTeamIdAndStatus = async (teamId
 
 }
 
-teamLogService.updateKickedTeamLog = async (teamId, user, userId, logMessage, trx) => {
-
-    return TeamLog.query(trx)
-    .where('eteameteamid', teamId)
-    .where('eusereuserid', userId)
-    .updateByUserId({
-        eteamlogstatus: TeamLogStatusEnum.KICKED,
-        eteamlogmessage: logMessage
-    }, user.sub)
-
-}
-
 teamLogService.updateTeamLogByUserIds = async (teamId, user, userIds, status) => {
 
     await teamLogService.getPendingLogByUserIds(teamId, userIds, [TeamLogTypeEnum.APPLY]);
