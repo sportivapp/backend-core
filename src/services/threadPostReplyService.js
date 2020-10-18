@@ -20,6 +20,7 @@ threadPostReplyService.getAllByThreadPostId = async (threadPostId) => {
 
     const replies = await ThreadPostReply.query()
         .where('ethreadpostethreadpostid', threadPostId)
+        .modify('baseAttributes')
         .withGraphFetched('user(idAndName)')
         .withGraphFetched('threadPostReplyPicture(baseAttributes)')
         .withGraphFetched('moderator')
@@ -51,7 +52,7 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
 
     if (!post) throw new UnsupportedOperationError(ErrorEnum.POST_NOT_FOUND)
 
-    const thread = await threadService.getThreadById(post.ethreadethreadid)
+    const thread = await threadService.getThreadDetailById(post.ethreadethreadid)
         .catch(() => new UnsupportedOperationError(ErrorEnum.THREAD_NOT_FOUND))
 
     if (thread.ethreadlock) throw new UnsupportedOperationError(ErrorEnum.THREAD_LOCKED)
@@ -73,7 +74,7 @@ threadPostReplyService.editReplyById = async (replyId, replyDTO, user) => {
 
     if (!post) throw new UnsupportedOperationError(ErrorEnum.POST_NOT_FOUND)
 
-    const thread = await threadService.getThreadById(post.ethreadethreadid)
+    const thread = await threadService.getThreadDetailById(post.ethreadethreadid)
         .catch(() => new UnsupportedOperationError(ErrorEnum.THREAD_NOT_FOUND))
 
     if (thread.ethreadlock) throw new UnsupportedOperationError(ErrorEnum.THREAD_LOCKED)

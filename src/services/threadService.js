@@ -38,6 +38,7 @@ threadService.getAllThreads = async (page, size, keyword, isPublic, filter) => {
         .select(Thread.relatedQuery('comments').count().as('commentCount'))
         .modify('baseAttributes')
         .withGraphFetched('threadPicture(baseAttributes)')
+        .withGraphFetched('threadCreator(baseAttributes).file(baseAttributes)')
         .where(raw('lower("ethreadtitle")'), 'like', `%${keyword}%`)
         .andWhere('ecompanyecompanyid', filter.companyId)
         .andWhere('eteameteamid', filter.teamId)
@@ -52,6 +53,7 @@ threadService.getThreadById = async (threadId) => {
         .select(Thread.relatedQuery('comments').count().as('commentCount'))
         .modify('baseAttributes')
         .withGraphFetched('threadPicture(baseAttributes)')
+        .withGraphFetched('threadCreator(baseAttributes).file(baseAttributes)')
         .then(thread => {
             if (!thread) throw new NotFoundError()
             return thread
@@ -202,13 +204,13 @@ threadService.deleteThreadById = async (threadId, user) => {
     }
 
     return thread.$query()
-        .delete()
+        .deleteByUserId(user.sub)
         .then(rowsAffected => rowsAffected === 1)
 }
 
 threadService.getThreadDetailById = async (threadId) => {
 
-    return Thread.query().findById(threadId)
+    return Thread.query().findById(threadId).modify('baseAttributes')
 }
 
 module.exports = threadService

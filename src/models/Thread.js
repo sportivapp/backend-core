@@ -32,6 +32,7 @@ class Thread extends Model {
             'ethreadlock',
             'ethreadcreatetime',
             'ethreadcreateby')
+            .where('ethreaddeletestatus', false)
       }
     }
   }

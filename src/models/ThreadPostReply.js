@@ -24,6 +24,7 @@ class ThreadPostReply extends Model {
         return {
             baseAttributes(builder) {
                 builder.select('ethreadpostreplyid', 'ethreadpostreplycomment', 'ethreadpostreplycreatetime')
+                    .withGraphFetched('user(baseAttributes).file(baseAttributes)')
             }
         }
     }

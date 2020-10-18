@@ -56,7 +56,7 @@ threadPostService.getPostById = async (threadPostId) => {
 
 threadPostService.createPost = async (threadId, postDTO, user) => {
 
-    const thread = await threadService.getThreadById(threadId)
+    const thread = await threadService.getThreadDetailById(threadId)
         .catch(() => { throw new UnsupportedOperationError(ErrorEnum.THREAD_NOT_FOUND) })
 
     if (thread.ethreadlock) throw new UnsupportedOperationError(ErrorEnum.THREAD_LOCKED)
@@ -74,23 +74,22 @@ threadPostService.createPost = async (threadId, postDTO, user) => {
 
 threadPostService.updatePost = async (commentId, postDTO, user) => {
 
-    const thread = await threadService.getThreadById(threadId)
-        .catch(() => new UnsupportedOperationError(ErrorEnum.THREAD_NOT_FOUND))
-
-    if (thread.ethreadlock) throw new UnsupportedOperationError(ErrorEnum.THREAD_LOCKED)
+    const post = await threadPostService.getPostById(commentId)
+        .catch(() => new UnsupportedOperationError(ErrorEnum.POST_NOT_FOUND))
 
     if (postDTO.efileefileid) {
         const file = await fileService.getFileById(postDTO.efileefileid)
         if (!file) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_FOUND)
     }
 
-    return threadPostService.getPostById(commentId)
-        .catch(() => new UnsupportedOperationError(ErrorEnum.POST_NOT_FOUND))
-        .then(post => {
-            if (post.ethreadpostcreateby !== user.sub) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
-            return post
-        })
-        .then(post => post.$query().updateByUserId(postDTO, user.sub).returning('*'))
+    const thread = await threadService.getThreadDetailById(post.ethreadethreadid)
+        .catch(() => new UnsupportedOperationError(ErrorEnum.THREAD_NOT_FOUND))
+
+    if (thread.ethreadlock) throw new UnsupportedOperationError(ErrorEnum.THREAD_LOCKED)
+
+    if (post.ethreadpostcreateby !== user.sub) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
+
+    return post.$query().updateByUserId(postDTO, user.sub).returning('*')
 }
 
 threadPostService.deletePost = async (commentId, user) => {
@@ -99,7 +98,7 @@ threadPostService.deletePost = async (commentId, user) => {
 
     if (!post) return false
 
-    const thread = await threadService.getThreadById(post.ethreadethreadid)
+    const thread = await threadService.getThreadDetailById(post.ethreadethreadid)
         .catch(() => new UnsupportedOperationError(ErrorEnum.THREAD_NOT_FOUND))
 
     if (thread.ethreadlock) throw new UnsupportedOperationError(ErrorEnum.THREAD_LOCKED)

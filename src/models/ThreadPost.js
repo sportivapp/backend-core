@@ -23,6 +23,7 @@ class ThreadPost extends Model {
     return {
       baseAttributes(builder) {
         builder.select('ethreadpostid', 'ethreadpostcomment', 'ethreadpostcreatetime')
+            .withGraphFetched('user(baseAttributes).file(baseAttributes)')
       }
     }
   }
