@@ -14,7 +14,9 @@ const ErrorEnum = {
     FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
     NOT_ADMIN: 'NOT_ADMIN',
     POSITION_UNACCEPTED: 'POSITION_UNACCEPTED',
-    LAST_ADMIN: 'LAST_ADMIN'
+    LAST_ADMIN: 'LAST_ADMIN',
+    NOT_ADMIN: 'NOT_ADMIN',
+    USER_NOT_IN_TEAM: 'USER_NOT_IN_TEAM'
 }
 
 const teamUserService = {};
@@ -109,15 +111,17 @@ teamUserService.getTeamUsermappingByTeamUserMappingId = async (teamUserMappingId
 
 teamUserService.changeTeamMemberSportRoles = async (teamUserMappingId, user, sportRoleIds) => {
 
+    sportRoleIds = (!sportRoleIds || sportRoleIds.length === 0 ) ? null : sportRoleIds
+
     const teamUserMapping = await teamUserService.getTeamUsermappingByTeamUserMappingId(teamUserMappingId)
     .catch( () => null)
 
-    if(!teamUserMapping) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
+    if(!teamUserMapping) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_TEAM)
 
     const isAdmin = await teamUserService.getTeamUserCheckAdmin(teamUserMapping.eteameteamid, user.sub);
 
     if (!isAdmin)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
+        throw new UnsupportedOperationError(ErrorEnum.NOT_ADMIN)
 
     return mobileTeamSportTypeRoleService
     .insertTeamSportTypeRoles(teamUserMappingId, teamUserMapping.eteameteamid, sportRoleIds, user)
