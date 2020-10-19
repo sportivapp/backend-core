@@ -14,6 +14,7 @@ router.post( routes.team.cancelInvitation, auth.authenticateToken, controller.ca
 router.post( routes.team.processRequest, auth.authenticateToken, controller.processRequests);
 router.get( routes.team.members, auth.authenticateToken, controller.getTeamMemberList);
 router.get( routes.team.teamLog, auth.authenticateToken, controller.getTeamMemberByLogType);
+router.get( routes.team.userPendingLog, auth.authenticateToken, controller.getUserTeamPendingListByLogType);
 router.post( routes.team.invite, auth.authenticateToken, controller.invite);
 router.put( routes.team.roles, auth.authenticateToken, controller.changeTeamMemberSportRoles);
 router.put( routes.team.position, auth.authenticateToken, controller.changeTeamMemberPosition);
