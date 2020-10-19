@@ -197,9 +197,12 @@ teamLogService.updateTeamLogByUserIds = async (teamId, user, userIds, status) =>
 teamLogService.getUserTeamPendingApplyOrTeamInvitationByLogTypeAndUserId = async (page, size, logType, userId) => {
 
     return TeamLog.query()
+    .modify('baseAttributes')
+    .select('eteamlogcreatetime')
     .where('eusereuserid', userId)
     .where('eteamlogtype', logType)
     .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
+    .withGraphFetched('team(baseAttributes).teamIndustry(baseAttributes)')
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
