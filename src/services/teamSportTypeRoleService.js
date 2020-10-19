@@ -1,4 +1,3 @@
-const { NotFoundError } = require('../models/errors')
 const TeamSportTypeRole = require('../models/TeamSportTypeRole')
 
 const teamSportTypeRoleService = {}
