@@ -20,8 +20,8 @@ router.put( routes.team.roles, auth.authenticateToken, controller.changeTeamMemb
 router.put( routes.team.position, auth.authenticateToken, controller.changeTeamMemberPosition);
 router.put( routes.team.id, auth.authenticateToken, controller.updateTeam);
 router.post( routes.team.kick, auth.authenticateToken, controller.kickUserFromTeam);
-router.post( routes.team.cancelRequest, auth.authenticateToken, controller.cancelRequest)
-router.post( routes.team.processInvitation, auth.authenticateToken, controller.processInvitation);
+router.post( routes.team.cancelRequest, auth.authenticateToken, controller.cancelRequests)
+router.post( routes.team.processInvitation, auth.authenticateToken, controller.processInvitations);
 router.get(routes.team.invite, auth.authenticateToken, controller.getMembersToInvite);
 router.delete(routes.team.id, auth.authenticateToken, controller.deleteTeam);
 
