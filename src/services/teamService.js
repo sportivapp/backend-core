@@ -230,6 +230,15 @@ teamService.getTeamMemberByLogType = async (teamId, user, page, size, type) => {
 
 }
 
+teamService.getUserTeamPendingListByLogType = async (page, size, type, user) => {
+
+    if(type !== 'APPLY' && type !== 'INVITE') 
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TYPE_UNACCEPTED)
+
+    return teamLogService.getUserTeamPendingApplyOrTeamInvitationByLogTypeAndUserId(page, size, type, user.sub)
+    
+}
+
 teamService.processIntoTeam = async (teamId, teamLogId, user, userId) => {
 
     const teamUserMappingPromise = TeamUserMapping.query().insertToTable({
