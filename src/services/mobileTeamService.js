@@ -6,18 +6,26 @@ const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const { UniqueViolationError } = require('objection');
 const teamLogService = require('./mobileTeamLogService');
 const teamUserService = require('./mobileTeamUserService');
+const mobileTeamSportTypeRoleService = require('./mobileTeamSportTypeRoleService');
 
 const ErrorEnum = {
     USER_IN_TEAM: 'USER_IN_TEAM',
-    TEAM_NOT_FOUND: 'TEAM_NOT_FOUND'
+    TEAM_NOT_FOUND: 'TEAM_NOT_FOUND',
+    NAME_ALREADY_TAKEN: 'NAME_ALREADY_TAKEN',
+    UPDATE_FAILED: 'UPDATE_FAILED'
+
+}
+
+const TeamLogStatusEnum = {
+    PENDING: 'PENDING',
+    ACCEPTED: 'ACCEPTED'
+}
+
+const TeamLogTypeEnum = {
+    APPLY: 'APPLY'
 }
 
 const teamService = {}
-
-const UnsupportedOperationErrorEnum = {
-    NAME_ALREADY_TAKEN: 'NAME_ALREADY_TAKEN'
-
-}
 
 function isTeamNameUniqueErr(e) {
 
@@ -93,7 +101,7 @@ teamService.createTeam = async (teamDTO, user) => {
 
     })    
     .catch(e => {
-        if (isTeamNameUniqueErr(e)) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NAME_ALREADY_TAKEN)
+        if (isTeamNameUniqueErr(e)) throw new UnsupportedOperationError(ErrorEnum.NAME_ALREADY_TAKEN)
         throw e
     })
 
@@ -103,7 +111,11 @@ teamService.updateTeam = async (teamId, teamDTO, user) => {
 
     await teamUserService.getTeamUserCheckAdmin(teamId, user.sub);
 
-    const team = await teamService.getTeamById(teamId);
+    let team = await teamService.getTeamById(teamId)
+    .then(team => {
+        return team.$query()
+        .withGraphFetched('teamIndustry(baseAttributes)')
+    })
 
     if (!team)
         throw new UnsupportedOperationError(ErrorEnum.TEAM_NOT_FOUND)
@@ -111,8 +123,31 @@ teamService.updateTeam = async (teamId, teamDTO, user) => {
     return team.$query()
         .updateByUserId(teamDTO, user.sub)
         .returning('*')
+        .then(async newTeam => {
+
+            if(!newTeam) throw new UnsupportedOperationError(ErrorEnum.UPDATE_FAILED)
+
+            // if teamIndustry is changed, remove all sportroles in team
+            if(newTeam.eindustryeindustryid !== team.teamIndustry.eindustryid) 
+                await mobileTeamSportTypeRoleService.deleteAllTeamSportTypeRolesByTeamId(teamId)
+    
+            // to check if the log in team exist
+            await teamLogService.getPendingLogByTeamIdAndTypeAndStatus(teamId, TeamLogTypeEnum.APPLY, 0, 10, TeamLogStatusEnum.PENDING)
+            .then(async applyPendingLog => {
+
+                if(applyPendingLog.results.length !== 0){
+
+                    // accept all user log that is applying to this team with pending status
+                    if(newTeam.eteamispublic) await teamLogService.updateAppliedTeamLogsWithPendingByTeamIdAndStatus(teamId, user, TeamLogStatusEnum.ACCEPTED)
+
+                }
+
+            })
+            
+            return newTeam
+        })
         .catch(e => {
-            if (isTeamNameUniqueErr(e)) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NAME_ALREADY_TAKEN)
+            if (isTeamNameUniqueErr(e)) throw new UnsupportedOperationError(ErrorEnum.NAME_ALREADY_TAKEN)
             throw e
         })
 
