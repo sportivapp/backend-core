@@ -1,6 +1,7 @@
 const TeamLog = require('../models/TeamLog')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const teamUserMappingService = require('./teamUserMappingService')
+const ServiceHelper = require('../helper/ServiceHelper')
 
 const teamLogService = {}
 
@@ -182,6 +183,15 @@ teamLogService.updateTeamLogByUserIds = async (teamId, user, userIds, status) =>
 
 }
 
+teamLogService.getUserTeamPendingApplyOrTeamInvitationByLogTypeAndUserId = async (page, size, logType, userId) => {
 
+    return TeamLog.query()
+    .where('eusereuserid', userId)
+    .where('eteamlogtype', logType)
+    .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
+    .page(page, size)
+    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+
+}
 
 module.exports = teamLogService
