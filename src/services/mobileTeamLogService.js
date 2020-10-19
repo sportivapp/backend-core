@@ -148,7 +148,10 @@ teamLogService.processRequests = async (teamLogIds, user, status) => {
     if (teamLogs.length !== teamLogIds.length)
         throw new UnsupportedOperationError(ErrorEnum.USER_NOT_APPLIED)
 
-    await teamUserService.getTeamUserCheckAdmin(teamLogs[0].eteameteamid, user.sub);
+    const isAdmin = await teamUserService.checkAdminByTeamLogsAndUserId(teamLogs, user.sub);
+
+    if(!isAdmin)
+        throw new UnsupportedOperationError(ErrorEnum.NOT_ADMIN)
 
     if (TeamLogStatusEnum.ACCEPTED === status) {
         await teamUserService.joinTeamByTeamLogs(teamLogs, user);
@@ -267,7 +270,10 @@ teamLogService.cancelInvites = async (teamLogIds, user) => {
     if (teamLogs.length !== teamLogIds.length)
         throw new UnsupportedOperationError(ErrorEnum.USER_NOT_INVITED)
 
-    await teamUserService.getTeamUserCheckAdmin(teamLogs[0].eteameteamid, user.sub);
+    const isAdmin = await teamUserService.checkAdminByTeamLogsAndUserId(teamLogs, user.sub);
+
+    if(!isAdmin)
+        throw new UnsupportedOperationError(ErrorEnum.NOT_ADMIN)
 
     return TeamLog.query()
         .whereIn('eteamlogid', teamLogIds)

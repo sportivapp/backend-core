@@ -43,7 +43,7 @@ controller.changeTeamMemberSportRoles = async (req, res, next) => {
     const { teamUserMappingId, sportRoleIds } = req.body;
 
     try {
-
+        
         const result = await teamUserService.changeTeamMemberSportRoles(teamUserMappingId, req.user, sportRoleIds);
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));

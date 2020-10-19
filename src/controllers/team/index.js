@@ -139,6 +139,22 @@ controller.getTeamMemberByLogType = async (req, res, next) => {
 
 }
 
+controller.getUserTeamPendingListByLogType = async (req, res, next) => {
+
+    // INVITE / APPLY
+    const { page = '0', size = '10', type = 'APPLY' } = req.query;
+    
+    try {
+
+        const pageObj = await teamService.getUserTeamPendingListByLogType(parseInt(page), parseInt(size), type.toUpperCase(), req.user);
+
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
 
 controller.invite = async (req, res, next) => {
 
@@ -189,13 +205,13 @@ controller.processRequests = async (req, res, next) => {
 
 }
 
-controller.cancelRequest = async (req, res, next) => {
+controller.cancelRequests = async (req, res, next) => {
 
-    const { teamLogId } = req.body;
+    const { teamLogIds } = req.body;
 
     try {
 
-        const result = await teamService.cancelRequest(teamLogId, req.user);
+        const result = await teamService.cancelRequests(teamLogIds, req.user);
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
@@ -205,14 +221,14 @@ controller.cancelRequest = async (req, res, next) => {
 
 }
 
-controller.processInvitation = async (req, res, next) => {
+controller.processInvitations = async (req, res, next) => {
 
-    const { teamLogId } = req.body;
+    const { teamLogIds } = req.body;
     const { status } = req.query;
 
     try {
 
-        const result = await teamService.processInvitation(teamLogId, req.user, status.toUpperCase());
+        const result = await teamService.processInvitations(teamLogIds, req.user, status.toUpperCase());
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
