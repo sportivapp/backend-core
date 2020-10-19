@@ -101,7 +101,7 @@ teamLogService.applyTeam = async (teamId, user, isPublic) => {
 
         if (isPublic) {
             status = TeamLogStatusEnum.ACCEPTED;
-            await teamUserService.joinTeamByTeamLogs([teamLog], user);
+            await teamUserService.joinTeam(teamId, user);
         } else
             status = TeamLogStatusEnum.PENDING;
 
