@@ -1,21 +1,32 @@
+const { NotFoundError } = require('../models/errors')
 const TeamSportTypeRole = require('../models/TeamSportTypeRole')
 
 const teamSportTypeRoleService = {}
 
 teamSportTypeRoleService.insertTeamSportTypeRoles = async (teamUserMappingId, teamId, sportRoleIds, user) => {
 
-    await TeamSportTypeRole.query()
-    .where('eteamusermappingeteamusermappingid', teamUserMappingId)
-    .delete()
+    return TeamSportTypeRole.transaction(async trx => {
 
-    const mappings = sportRoleIds.map(sportRoleId => ({
-        eteamusermappingeteamusermappingid: teamUserMappingId,
-        esporttyperoleesporttyperoleid: sportRoleId,
-        eteameteamid: teamId
-    }))
+        await TeamSportTypeRole.query(trx)
+        .where('eteamusermappingeteamusermappingid', teamUserMappingId)
+        .delete()
 
-    return TeamSportTypeRole.query()
-    .insertToTable(mappings, user.sub)
+        if (sportRoleIds !== null) {
+
+            const mappings = sportRoleIds.map(sportRoleId => ({
+                eteamusermappingeteamusermappingid: teamUserMappingId,
+                esporttyperoleesporttyperoleid: sportRoleId,
+                eteameteamid: teamId
+            }))
+
+            return TeamSportTypeRole.query(trx)
+            .insertToTable(mappings, user.sub)
+
+        }
+
+        return true
+
+    })
 
 }
 
