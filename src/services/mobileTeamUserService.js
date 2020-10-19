@@ -32,6 +32,30 @@ teamUserService.getTeamUserCheckAdmin = async (teamId, userId) => {
 
 }
 
+function onlyUnique(value, index, self) {
+    return self.indexOf(value) === index;
+}
+
+teamUserService.checkAdminByTeamLogsAndUserId = async (teamLogs, userId) => {
+
+    let teamIds = [];
+
+    for(let i = 0; i < teamLogs.length; i++) {
+        teamIds.push(teamLogs[i].eteameteamid);
+    }
+
+    const teamIdsUnique = teamIds.filter(onlyUnique);
+
+    const counts = await TeamUserMapping.query()
+        .whereIn('eteameteamid', teamIdsUnique)
+        .where('eusereuserid', userId)
+        .andWhere('eteamusermappingposition', TeamUserMappingPositionEnum.ADMIN)
+        .count();
+
+    return teamIdsUnique.length === parseInt(counts[0].count);
+    
+}
+
 teamUserService.getTeamUserByTeamIdAndUserId = async (teamId, userId) => {
 
     return TeamUserMapping.query()
