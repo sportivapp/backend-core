@@ -128,7 +128,8 @@ module.exports = {
             cancelRequest: '/team-cancel-request',
             exit: '/team-exit',
             myTeam: '/team-user',
-            isAdmin: '/team/:teamId/admin'
+            isAdmin: '/team/:teamId/admin',
+            userPendingLog: '/team-user-pending'
         },
         class: {
             list: '/class',
