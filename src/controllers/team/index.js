@@ -139,6 +139,22 @@ controller.getTeamMemberByLogType = async (req, res, next) => {
 
 }
 
+controller.getUserTeamPendingListByLogType = async (req, res, next) => {
+
+    // INVITE / APPLY
+    const { page = '0', size = '10', type = 'APPLY' } = req.query;
+    
+    try {
+
+        const pageObj = await teamService.getUserTeamPendingListByLogType(parseInt(page), parseInt(size), type.toUpperCase(), req.user);
+
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
 
 controller.invite = async (req, res, next) => {
 
