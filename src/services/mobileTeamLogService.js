@@ -16,6 +16,11 @@ const TeamLogStatusEnum = {
     ACCEPTED: 'ACCEPTED',
     REJECTED: 'REJECTED'
 }
+
+const TeamUserMappingPositionEnum = {
+    MEMBER: 'MEMBER'
+}
+
 const ErrorEnum = {
     USER_IN_TEAM: 'USER_IN_TEAM',
     LOG_NOT_FOUND: 'LOG_NOT_FOUND',
@@ -47,6 +52,45 @@ teamLogService.getLogByTeamLogIdOptinalUserId = async (teamLogId, userId) => {
                 throw new NotFoundError();
             return teamLog
         });
+
+}
+
+teamLogService.getPendingLogByTeamIdAndTypeAndStatus = async (teamId, type, page, size, logStatus) => {
+    
+    return TeamLog.query()
+    .modify('baseAttributes')
+    .withGraphFetched('user(baseAttributes).file(baseAttributes)')
+    .where('eteameteamid', teamId)
+    .andWhere('eteamlogtype', type)
+    .andWhere('eteamlogstatus', logStatus)
+    .page(page, size)
+
+}
+
+teamLogService.updateAppliedTeamLogsWithPendingByTeamIdAndStatus = async (teamId, user, status) => {
+
+    return TeamLog.transaction(async trx => {
+        await TeamLog.query(trx)
+        .where('eteameteamid', teamId)
+        .where('eteamlogtype', TeamLogTypeEnum.APPLY)
+        .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
+        .update({
+            eteamlogstatus: status,
+            eteamlogchangetime: Date.now(),
+            eteamlogchangeby: user.sub
+        })
+        .returning('*')
+        .then(teamLogs => {
+
+            const mappings = teamLogs.map(teamLog => ({
+                eusereuserid: teamLog.eusereuserid,
+                eteameteamid: teamLog.eteameteamid,
+                eteamusermappingposition: TeamUserMappingPositionEnum.MEMBER
+            }))
+
+            return teamUserService.createTeamUserMapping(mappings, user, trx)
+        })
+    })
 
 }
 
