@@ -194,6 +194,17 @@ teamUserService.initializeTeamAdmin = async (teamId, user, db = TeamUserMapping.
 
 }
 
+teamUserService.joinTeam = async (teamId, user, position = TeamUserMappingPositionEnum.MEMBER) => {
+
+    return TeamUserMapping.query()
+        .insertToTable({
+            eteameteamid: teamId,
+            eusereuserid: user.sub,
+            eteamusermappingposition: position
+        }, user.sub);
+
+}
+
 teamUserService.joinTeamByTeamLogs = async (teamLogs, user, position = TeamUserMappingPositionEnum.MEMBER) => {
 
     const mappings = teamLogs.map(teamLog => ({
