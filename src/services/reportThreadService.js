@@ -3,6 +3,7 @@ const threadService = require('./threadService')
 const threadPostService = require('./threadPostService')
 const threadPostReplyService = require('./threadPostReplyService')
 const emailService = require('../helper/emailService')
+const { UnsupportedOperationError } = require('../models/errors')
 
 const reportThreadService = {}
 
