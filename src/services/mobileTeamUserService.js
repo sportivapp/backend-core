@@ -32,6 +32,27 @@ teamUserService.getTeamUserCheckAdmin = async (teamId, userId) => {
 
 }
 
+teamUserService.createTeamUserMapping = async (mappings, user, trx) => {
+
+    let createPromise
+
+    if(!trx) {
+
+        createPromise = TeamUserMapping
+        .query()
+        .insertToTable(mappings, user.sub)
+
+    } else {
+        createPromise = TeamUserMapping
+        .query(trx)
+        .insertToTable(mappings, user.sub)
+
+    }
+
+    return createPromise
+
+}
+
 function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
 }
