@@ -14,7 +14,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage })
 const { routes } = require('../../constant')
 
-router.post( routes.user.register, auth.authenticateToken, upload.single('employee'), userController.registerEmployees);
+router.post( routes.user.register, userController.register);
 router.post( routes.user.create, auth.authenticateToken, userController.createUser);
 router.post( routes.user.login, userController.login);
 router.post( routes.user.forgot, userController.forgotPassword);

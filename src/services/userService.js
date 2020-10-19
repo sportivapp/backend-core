@@ -22,62 +22,7 @@ const ErrorEnum = {
 
 const UserService = {};
 
-UserService.registerEmployees = async (user, path) => {
-
-    let positions = [];
-    const values = await readXlsxFile(path).then((rows) => {
-        // skip header
-        rows.shift();
-
-        let values = [];
-
-        for (const row of rows) {
-
-            values.push({
-                eusernik: row[0],
-                eusername: row[1],
-                euseremail: row[2],
-                eusermobilenumber: row[3].toString(),
-                euserpassword: 'emtiv' + row[1],
-                ecompanyecompanyid: user.companyId
-            });
-            positions.push(row[4].replace(/\w+/g, 
-                    function(w){
-                        return w[0].toUpperCase() + w.slice(1).toLowerCase();
-                    }
-                ));
-        }
-
-        return values;
-    });
-    
-    const encryptedPasswordValues = values;
-
-    for (const v of encryptedPasswordValues) {
-        v.euserpassword = await bcrypt.hash(v.euserpassword);
-    }
-
-    const distinctGrade = (value, index, self) => {
-        return self.indexOf(value) === index
-    }
-
-    const newPositions = positions.filter(distinctGrade);
-
-    const positionList = newPositions.map(newPosition => 
-        ({ 
-            egradename: newPosition,
-            egradecreateby: user.sub,
-            ecompanyecompanyid: user.companyId 
-        }));  
-
-    await User.query().insert(encryptedPasswordValues);
-    await Grade.query().insert(positionList);
-
-    return values;
-
-}
-
-UserService.createUser = async (userDTO, otpCode) => {
+UserService.register = async (userDTO, otpCode) => {
 
     const isEmail = emailService.validateEmail(userDTO.euseremail);
 
