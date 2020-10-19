@@ -42,6 +42,17 @@ teamLogService.getPendingLogByTeamLogIdsAndType = async (teamLogIds, types) => {
 
 }
 
+teamLogService.getPendingLogByTeamLogIdsAndTypeAndUserId = async (teamLogIds, types, userId) => {
+
+    return TeamLog.query()
+    .whereIn('eteamlogid', teamLogIds)
+    .whereIn('eteamlogtype', types)
+    .where('eusereuserid', userId)
+    .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
+    .orderBy('eteamlogcreatetime', 'DESC')
+
+}
+
 teamLogService.getLogByTeamLogIdOptinalUserId = async (teamLogId, userId) => {
 
     const teamLogPromise = TeamLog.query()
