@@ -547,6 +547,8 @@ teamService.kickUserFromTeam = async (teamId, user, userId, logMessage) => {
 
 teamService.changeTeamMemberSportRoles = async (teamUserMappingId, user, sportRoleIds) => {
 
+    sportRoleIds = (!sportRoleIds || sportRoleIds.length === 0 ) ? null : sportRoleIds
+
     const teamUserMapping = await teamUserMappingService.getTeamUsermappingByTeamUserMappingId(teamUserMappingId)
     .catch( () => null)
 
