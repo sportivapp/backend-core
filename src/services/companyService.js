@@ -183,8 +183,8 @@ CompanyService.createCompany = async(companyDTO, addressDTO, industryIds, user) 
 
     const codes = await settingService.getAllFunctions().then(funcList => funcList.map(func => func.efunctioncode))
 
-    const memberCode = await settingService.getAllFunctions('R1').then(funcList => funcList.map(func => func.efunctioncode))
-
+    const memberCode = await settingService.getAllFunctions('r').then(funcList => funcList.map(func => func.efunctioncode))
+    
     const modules = await settingService.getAllModules()
 
     return Company.transaction(async trx => {
