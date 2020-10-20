@@ -8,6 +8,7 @@ const { raw, UniqueViolationError } = require('objection');
 const teamLogService = require('./teamLogService');
 const teamUserMappingService = require('./teamUserMappingService')
 const teamSportTypeRoleService = require('./teamSportTypeRoleService')
+const fileService = require('./fileService')
 
 const teamService = {}
 
@@ -30,7 +31,8 @@ const UnsupportedOperationErrorEnum = {
     INDUSTRY_NOT_FILLED: 'INDUSTRY_NOT_FILLED',
     TEAM_NOT_FOUND: 'TEAM_NOT_FOUND',
     FAILED_TO_REQUEST_JOIN: 'FAILED_TO_REQUEST_JOIN',
-    NAME_ALREADY_TAKEN: 'NAME_ALREADY_TAKEN'
+    NAME_ALREADY_TAKEN: 'NAME_ALREADY_TAKEN',
+    FILE_NOT_FOUND: 'FILE_NOT_FOUND'
 
 }
 
@@ -70,6 +72,15 @@ function isTeamNameUniqueErr(e) {
 
 teamService.createTeam = async (teamDTO, user) => {
 
+    if(!teamDTO.efileefiled) {
+
+        await fileService.getFileByIdAndCreateBy(teamDTO.efileefileid, user.sub)
+        .then(file => {
+            if(!file) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FILE_NOT_FOUND)
+        })
+
+    }
+
     return Team.transaction(async trx => {
 
         const team = await Team.query(trx).insertToTable(teamDTO, user.sub)
@@ -92,6 +103,15 @@ teamService.createTeam = async (teamDTO, user) => {
 }
 
 teamService.updateTeam = async (teamDTO, user, teamId) => {
+
+    if(!teamDTO.efileefiled) {
+
+        await fileService.getFileByIdAndCreateBy(teamDTO.efileefileid, user.sub)
+        .then(file => {
+            if(!file) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FILE_NOT_FOUND)
+        })
+
+    }
 
     const teamFromDB = await teamService.getTeamDetail(teamId, user)
     .catch( () => null)
