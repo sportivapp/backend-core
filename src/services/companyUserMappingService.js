@@ -6,7 +6,7 @@ const companyUserMappingService = {}
 companyUserMappingService.insertUserToCompanyByCompanyLogsWithTransaction = async (companyLogs, trx, user) => {
 
     const defaultPosition = await CompanyDefaultPosition.query(trx)
-    .where('ecompanyecompanyid', companyLogs[0].ecompanyecompanyid)
+    .where('ecompanyecompanyid', user.companyId)
     .first()
 
     const companyUserMapping = companyLogs.map(companyLog => ({
