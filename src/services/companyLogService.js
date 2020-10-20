@@ -74,7 +74,7 @@ companyLogService.processRequests = async (companyLogIds, status, user) => {
     if (status !== CompanyLogStatusEnum.ACCEPTED && status !== CompanyLogStatusEnum.REJECTED)
         throw new UnsupportedOperationError('STATUS_INVALID')
 
-    const companyLogs = await companyLogService.getPendingLogsByCompanyLogIdsAndType(companyLogIds, CompanyLogTypeEnum.APPLY, user)
+    const companyLogs = await companyLogService.getPendingLogsByCompanyLogIdsAndType(companyLogIds, [CompanyLogTypeEnum.APPLY], user)
 
     if(companyLogs.length !== companyLogIds.length)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_APPLIED)
@@ -171,19 +171,19 @@ companyLogService.inviteMember = async (companyId, email, loggedInUser) => {
         return companyLog
 }
 
-companyLogService.getPendingLogsByCompanyLogIdsAndType = async (companyLogIds, type, user) => {
+companyLogService.getPendingLogsByCompanyLogIdsAndType = async (companyLogIds, types, user) => {
 
     return CompanyLog.query()
     .whereIn('ecompanylogid', companyLogIds)
+    .whereIn('ecompanylogtype', types)
     .where('ecompanyecompanyid', user.companyId)
-    .where('ecompanylogtype', type)
     .andWhere('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
 
 }
 
 companyLogService.cancelInvites = async (companyLogIds, user) => {
 
-    const companyLogs = await companyLogService.getPendingLogsByCompanyLogIdsAndType(companyLogIds, CompanyLogTypeEnum.INVITE, user)
+    const companyLogs = await companyLogService.getPendingLogsByCompanyLogIdsAndType(companyLogIds, [CompanyLogTypeEnum.INVITE], user)
 
     if(companyLogs.length !== companyLogIds.length)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_INVITED)
