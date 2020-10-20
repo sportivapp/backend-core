@@ -72,7 +72,7 @@ function isTeamNameUniqueErr(e) {
 
 teamService.createTeam = async (teamDTO, user) => {
 
-    if(!teamDTO.efileefiled) {
+    if(teamDTO.efileefileid) {
 
         await fileService.getFileByIdAndCreateBy(teamDTO.efileefileid, user.sub)
         .then(file => {
@@ -104,7 +104,7 @@ teamService.createTeam = async (teamDTO, user) => {
 
 teamService.updateTeam = async (teamDTO, user, teamId) => {
 
-    if(!teamDTO.efileefiled) {
+    if(teamDTO.efileefileid) {
 
         await fileService.getFileByIdAndCreateBy(teamDTO.efileefileid, user.sub)
         .then(file => {
