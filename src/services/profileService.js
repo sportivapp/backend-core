@@ -19,7 +19,7 @@ profileService.updateProfile = async (userDTO, user) => {
 
 profileService.getProfile = async (user) => {
 
-    return userService.getUserById(user.sub, user);
+    return userService.getSingleUserById(user.sub);
 
 }
 

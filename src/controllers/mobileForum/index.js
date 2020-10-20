@@ -80,7 +80,8 @@ controller.getMyOrganizationListWithAccess = async (req, res, next) => {
 
     try {
 
-        const pageObj = await mobileForumService.getUserOrganizationListWithPermission(parseInt(page), parseInt(size), keyword, type, req.user)
+        const pageObj = await mobileForumService.getUserOrganizationListWithPermission(parseInt(page), parseInt(size), keyword,
+            type.toUpperCase(), req.user)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
 
     } catch (e) {
@@ -94,7 +95,7 @@ controller.getMyTeamListWithAccess = async (req, res, next) => {
 
     try {
 
-        const pageObj = await mobileForumService.getUserTeamListWithAdminStatus(parseInt(page), parseInt(size), keyword, type, req.user)
+        const pageObj = await mobileForumService.getUserTeamListWithAdminStatus(parseInt(page), parseInt(size), keyword, type.toUpperCase(), req.user)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
 
     } catch (e) {
