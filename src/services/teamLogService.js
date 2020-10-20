@@ -1,6 +1,7 @@
 const TeamLog = require('../models/TeamLog')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const teamUserMappingService = require('./teamUserMappingService')
+const ServiceHelper = require('../helper/ServiceHelper')
 
 const teamLogService = {}
 
@@ -36,6 +37,17 @@ teamLogService.getPendingLogByTeamLogIdsAndType = async (teamLogIds, types) => {
     return TeamLog.query()
     .whereIn('eteamlogid', teamLogIds)
     .whereIn('eteamlogtype', types)
+    .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
+    .orderBy('eteamlogcreatetime', 'DESC')
+
+}
+
+teamLogService.getPendingLogByTeamLogIdsAndTypeAndUserId = async (teamLogIds, types, userId) => {
+
+    return TeamLog.query()
+    .whereIn('eteamlogid', teamLogIds)
+    .whereIn('eteamlogtype', types)
+    .where('eusereuserid', userId)
     .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
     .orderBy('eteamlogcreatetime', 'DESC')
 
@@ -182,6 +194,18 @@ teamLogService.updateTeamLogByUserIds = async (teamId, user, userIds, status) =>
 
 }
 
+teamLogService.getUserTeamPendingApplyOrTeamInvitationByLogTypeAndUserId = async (page, size, logType, userId) => {
 
+    return TeamLog.query()
+    .modify('baseAttributes')
+    .select('eteamlogcreatetime')
+    .where('eusereuserid', userId)
+    .where('eteamlogtype', logType)
+    .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
+    .withGraphFetched('team(baseAttributes).teamIndustry(baseAttributes)')
+    .page(page, size)
+    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+
+}
 
 module.exports = teamLogService

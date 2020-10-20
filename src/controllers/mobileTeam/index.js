@@ -37,7 +37,7 @@ controller.getTeam = async (req, res, next) => {
 
 controller.createTeam = async (req, res, next) => {
 
-    const { name, fileId, description, industryId, isPublic } = req.body;
+    const { name, fileId, description, industryId, isPublic, stateId, countryId } = req.body;
 
     const teamDTO = {
         eteamname: name,
@@ -50,9 +50,15 @@ controller.createTeam = async (req, res, next) => {
     teamDTO.efileefileid = teamDTO.efileefileid === 0 ? null : 
     teamDTO.efileefileid === undefined ? null : teamDTO.efileefileid;
 
+    const addressDTO = {
+        eaddressstreet: '',
+        ecountryecountryid: countryId,
+        estateestateid: stateId
+    }
+
     try {
 
-        const result = await teamService.createTeam(teamDTO, req.user);
+        const result = await teamService.createTeam(teamDTO, addressDTO, req.user);
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
@@ -64,7 +70,7 @@ controller.createTeam = async (req, res, next) => {
 
 controller.updateTeam = async (req, res, next) => {
 
-    const { name, fileId, description, industryId, isPublic } = req.body;
+    const { name, fileId, description, industryId, isPublic, stateId, countryId } = req.body;
     const { teamId } = req.params;
 
     const teamDTO = {
@@ -78,9 +84,15 @@ controller.updateTeam = async (req, res, next) => {
     teamDTO.efileefileid = teamDTO.efileefileid === 0 ? null : 
     teamDTO.efileefileid === undefined ? null : teamDTO.efileefileid;
 
+    const addressDTO = {
+        eaddressstreet: '',
+        ecountryecountryid: countryId,
+        estateestateid: stateId
+    }
+
     try {
 
-        const result = await teamService.updateTeam(parseInt(teamId), teamDTO, req.user);
+        const result = await teamService.updateTeam(parseInt(teamId), teamDTO, addressDTO, req.user);
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 

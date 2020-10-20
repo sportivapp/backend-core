@@ -4,21 +4,22 @@ const templatePath = require('../../../templates/index');
 
 const userController = {}
 
-userController.registerEmployees = async (req, res, next) => {
+userController.register = async (req, res, next) => {
 
-    if (req.user.functions.indexOf('C5') === -1)
-        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+    const { nik, name, email, mobileNumber, password, otpCode } = req.body;
 
-    const path = req.file.path;
-    const user = req.user;
+    const userDTO = {
+        eusernik: nik,
+        eusername: name,
+        euseremail: email.toLowerCase(),
+        eusermobilenumber: mobileNumber,
+        euserpassword: password
+    }
 
     try {
 
-        const result = await userService.registerEmployees(user, path);
-
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
-        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+        const result = await userService.register(userDTO, otpCode);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
         next(e);

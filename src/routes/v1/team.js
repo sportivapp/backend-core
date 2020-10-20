@@ -14,13 +14,14 @@ router.post( routes.team.cancelInvitation, auth.authenticateToken, controller.ca
 router.post( routes.team.processRequest, auth.authenticateToken, controller.processRequests);
 router.get( routes.team.members, auth.authenticateToken, controller.getTeamMemberList);
 router.get( routes.team.teamLog, auth.authenticateToken, controller.getTeamMemberByLogType);
+router.get( routes.team.userPendingLog, auth.authenticateToken, controller.getUserTeamPendingListByLogType);
 router.post( routes.team.invite, auth.authenticateToken, controller.invite);
 router.put( routes.team.roles, auth.authenticateToken, controller.changeTeamMemberSportRoles);
 router.put( routes.team.position, auth.authenticateToken, controller.changeTeamMemberPosition);
 router.put( routes.team.id, auth.authenticateToken, controller.updateTeam);
 router.post( routes.team.kick, auth.authenticateToken, controller.kickUserFromTeam);
-router.post( routes.team.cancelRequest, auth.authenticateToken, controller.cancelRequest)
-router.post( routes.team.processInvitation, auth.authenticateToken, controller.processInvitation);
+router.post( routes.team.cancelRequest, auth.authenticateToken, controller.cancelRequests)
+router.post( routes.team.processInvitation, auth.authenticateToken, controller.processInvitations);
 router.get(routes.team.invite, auth.authenticateToken, controller.getMembersToInvite);
 router.delete(routes.team.id, auth.authenticateToken, controller.deleteTeam);
 

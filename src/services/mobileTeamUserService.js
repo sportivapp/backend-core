@@ -14,7 +14,9 @@ const ErrorEnum = {
     FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
     NOT_ADMIN: 'NOT_ADMIN',
     POSITION_UNACCEPTED: 'POSITION_UNACCEPTED',
-    LAST_ADMIN: 'LAST_ADMIN'
+    LAST_ADMIN: 'LAST_ADMIN',
+    NOT_ADMIN: 'NOT_ADMIN',
+    USER_NOT_IN_TEAM: 'USER_NOT_IN_TEAM'
 }
 
 const teamUserService = {};
@@ -27,6 +29,51 @@ teamUserService.getTeamUserCheckAdmin = async (teamId, userId) => {
         throw new UnsupportedOperationError(ErrorEnum.NOT_ADMIN);
 
     return true;
+
+}
+
+teamUserService.createTeamUserMapping = async (mappings, user, trx) => {
+
+    let createPromise
+
+    if(!trx) {
+
+        createPromise = TeamUserMapping
+        .query()
+        .insertToTable(mappings, user.sub)
+
+    } else {
+        createPromise = TeamUserMapping
+        .query(trx)
+        .insertToTable(mappings, user.sub)
+
+    }
+
+    return createPromise
+
+}
+
+function onlyUnique(value, index, self) {
+    return self.indexOf(value) === index;
+}
+
+teamUserService.checkAdminByTeamLogsAndUserId = async (teamLogs, userId) => {
+
+    let teamIds = [];
+
+    for(let i = 0; i < teamLogs.length; i++) {
+        teamIds.push(teamLogs[i].eteameteamid);
+    }
+
+    const teamIdsUnique = teamIds.filter(onlyUnique);
+
+    const counts = await TeamUserMapping.query()
+        .whereIn('eteameteamid', teamIdsUnique)
+        .where('eusereuserid', userId)
+        .andWhere('eteamusermappingposition', TeamUserMappingPositionEnum.ADMIN)
+        .count();
+
+    return teamIdsUnique.length === parseInt(counts[0].count);
 
 }
 
@@ -125,15 +172,17 @@ teamUserService.getTeamUsermappingByTeamUserMappingId = async (teamUserMappingId
 
 teamUserService.changeTeamMemberSportRoles = async (teamUserMappingId, user, sportRoleIds) => {
 
+    sportRoleIds = (!sportRoleIds || sportRoleIds.length === 0 ) ? null : sportRoleIds
+
     const teamUserMapping = await teamUserService.getTeamUsermappingByTeamUserMappingId(teamUserMappingId)
     .catch( () => null)
 
-    if(!teamUserMapping) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
+    if(!teamUserMapping) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_TEAM)
 
     const isAdmin = await teamUserService.getTeamUserCheckAdmin(teamUserMapping.eteameteamid, user.sub);
 
     if (!isAdmin)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_ADMIN)
+        throw new UnsupportedOperationError(ErrorEnum.NOT_ADMIN)
 
     return mobileTeamSportTypeRoleService
     .insertTeamSportTypeRoles(teamUserMappingId, teamUserMapping.eteameteamid, sportRoleIds, user)
@@ -178,6 +227,17 @@ teamUserService.initializeTeamAdmin = async (teamId, user, db = TeamUserMapping.
             eteameteamid: teamId,
             eusereuserid: user.sub,
             eteamusermappingposition: TeamUserMappingPositionEnum.ADMIN
+        }, user.sub);
+
+}
+
+teamUserService.joinTeam = async (teamId, user, position = TeamUserMappingPositionEnum.MEMBER) => {
+
+    return TeamUserMapping.query()
+        .insertToTable({
+            eteameteamid: teamId,
+            eusereuserid: user.sub,
+            eteamusermappingposition: position
         }, user.sub);
 
 }

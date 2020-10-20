@@ -16,6 +16,11 @@ const TeamLogStatusEnum = {
     ACCEPTED: 'ACCEPTED',
     REJECTED: 'REJECTED'
 }
+
+const TeamUserMappingPositionEnum = {
+    MEMBER: 'MEMBER'
+}
+
 const ErrorEnum = {
     USER_IN_TEAM: 'USER_IN_TEAM',
     LOG_NOT_FOUND: 'LOG_NOT_FOUND',
@@ -47,6 +52,45 @@ teamLogService.getLogByTeamLogIdOptinalUserId = async (teamLogId, userId) => {
                 throw new NotFoundError();
             return teamLog
         });
+
+}
+
+teamLogService.getPendingLogByTeamIdAndTypeAndStatus = async (teamId, type, page, size, logStatus) => {
+    
+    return TeamLog.query()
+    .modify('baseAttributes')
+    .withGraphFetched('user(baseAttributes).file(baseAttributes)')
+    .where('eteameteamid', teamId)
+    .andWhere('eteamlogtype', type)
+    .andWhere('eteamlogstatus', logStatus)
+    .page(page, size)
+
+}
+
+teamLogService.updateAppliedTeamLogsWithPendingByTeamIdAndStatus = async (teamId, user, status) => {
+
+    return TeamLog.transaction(async trx => {
+        await TeamLog.query(trx)
+        .where('eteameteamid', teamId)
+        .where('eteamlogtype', TeamLogTypeEnum.APPLY)
+        .andWhere('eteamlogstatus', TeamLogStatusEnum.PENDING)
+        .update({
+            eteamlogstatus: status,
+            eteamlogchangetime: Date.now(),
+            eteamlogchangeby: user.sub
+        })
+        .returning('*')
+        .then(teamLogs => {
+
+            const mappings = teamLogs.map(teamLog => ({
+                eusereuserid: teamLog.eusereuserid,
+                eteameteamid: teamLog.eteameteamid,
+                eteamusermappingposition: TeamUserMappingPositionEnum.MEMBER
+            }))
+
+            return teamUserService.createTeamUserMapping(mappings, user, trx)
+        })
+    })
 
 }
 
@@ -101,7 +145,7 @@ teamLogService.applyTeam = async (teamId, user, isPublic) => {
 
         if (isPublic) {
             status = TeamLogStatusEnum.ACCEPTED;
-            await teamUserService.joinTeamByTeamLogs([teamLog], user);
+            await teamUserService.joinTeam(teamId, user);
         } else
             status = TeamLogStatusEnum.PENDING;
 
@@ -148,7 +192,10 @@ teamLogService.processRequests = async (teamLogIds, user, status) => {
     if (teamLogs.length !== teamLogIds.length)
         throw new UnsupportedOperationError(ErrorEnum.USER_NOT_APPLIED)
 
-    await teamUserService.getTeamUserCheckAdmin(teamLogs[0].eteameteamid, user.sub);
+    const isAdmin = await teamUserService.checkAdminByTeamLogsAndUserId(teamLogs, user.sub);
+
+    if(!isAdmin)
+        throw new UnsupportedOperationError(ErrorEnum.NOT_ADMIN)
 
     if (TeamLogStatusEnum.ACCEPTED === status) {
         await teamUserService.joinTeamByTeamLogs(teamLogs, user);
@@ -267,7 +314,10 @@ teamLogService.cancelInvites = async (teamLogIds, user) => {
     if (teamLogs.length !== teamLogIds.length)
         throw new UnsupportedOperationError(ErrorEnum.USER_NOT_INVITED)
 
-    await teamUserService.getTeamUserCheckAdmin(teamLogs[0].eteameteamid, user.sub);
+    const isAdmin = await teamUserService.checkAdminByTeamLogsAndUserId(teamLogs, user.sub);
+
+    if(!isAdmin)
+        throw new UnsupportedOperationError(ErrorEnum.NOT_ADMIN)
 
     return TeamLog.query()
         .whereIn('eteamlogid', teamLogIds)

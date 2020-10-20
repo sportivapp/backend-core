@@ -2,7 +2,6 @@ const Company = require('../models/Company')
 const CompanyUserMapping = require('../models/CompanyUserMapping')
 const CompanyFileMapping = require('../models/CompanyFileMapping')
 const Approval = require('../models/Approval')
-const CompanyLog = require('../models/CompanyLog')
 const User = require('../models/User')
 const RosterUserMapping = require('../models/RosterUserMapping')
 const ShiftRosterUserMapping = require('../models/ShiftRosterUserMapping')
@@ -12,10 +11,12 @@ const UserPositionMapping = require('../models/UserPositionMapping')
 const NotificationEnum = require('../models/enum/NotificationEnum')
 const CompanyLogTypeEnum = require('../models/enum/CompanyLogTypeEnum')
 const CompanyLogStatusEnum = require('../models/enum/CompanyLogStatusEnum')
+const CompanyLogRemoveEnum = require('../models/enum/CompanyLogRemoveEnum')
 const { raw } = require('objection');
 const ServiceHelper = require('../helper/ServiceHelper')
 const notificationService = require('./notificationService')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
+const companyLogService = require('./companyLogService')
 
 const UnsupportedOperationErrorEnum = {
     USER_APPLIED: 'USER_APPLIED',
@@ -158,39 +159,6 @@ companyService.checkUserInCompany = async (companyId, userId) => {
 
 }
 
-companyService.getPendingLog = async (companyId, userId, types) => {
-
-    return CompanyLog.query()
-    .where('eusereuserid', userId)
-    .andWhere('ecompanyecompanyid', companyId)
-    .whereIn('ecompanylogtype', types)
-    .andWhere('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
-    .orderBy('ecompanylogcreatetime', 'DESC')
-    .first();
-
-}
-
-companyService.createCompanyLog = async (companyId, user, userId, type) => {
-
-    return CompanyLog.query().insertToTable({
-        ecompanyecompanyid: companyId,
-        eusereuserid: userId,
-        ecompanylogtype: type
-    }, user.sub)
-
-}
-
-companyService.updateCompanyLog = async (companyId, user, userId, status) => {
-
-    const log = await companyService.getPendingLog(companyId, userId, [CompanyLogTypeEnum.INVITE, CompanyLogTypeEnum.APPLY]);
-
-    return log.$query().updateByUserId({
-        ecompanylogstatus: status
-    }, user.sub)
-    .returning('*');
-
-}
-
 companyService.processIntoCompany = async (companyId, user, userId) => {
 
     const companyUserMappingPromise = CompanyUserMapping.query().insertToTable({
@@ -199,7 +167,7 @@ companyService.processIntoCompany = async (companyId, user, userId) => {
         ecompanyusermappingpermission: 1
     }, user.sub);
 
-    const companyLogPromise = companyService.updateCompanyLog(companyId, user, userId, CompanyLogStatusEnum.ACCEPTED);
+    const companyLogPromise = companyLogService.updateCompanyLog(companyId, user, userId, CompanyLogStatusEnum.ACCEPTED);
 
     return Promise.all([companyUserMappingPromise, companyLogPromise]);
 
@@ -217,12 +185,12 @@ companyService.joinCompany = async (companyId, user) => {
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_IN_COMPANY)
 
     // Check if this user already invited / applied
-    const pendingInviteApply = await companyService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.INVITE, CompanyLogTypeEnum.APPLY]);
+    const pendingInviteApply = await companyLogService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.INVITE, CompanyLogTypeEnum.APPLY]);
 
     // If there is no pending invite / apply, create apply log
     if (!pendingInviteApply) {
         // after create the company log, create notification for admin
-        return companyService.createCompanyLog(companyId, user, user.sub, CompanyLogTypeEnum.APPLY)
+        return companyLogService.createCompanyLog(companyId, user, user.sub, CompanyLogTypeEnum.APPLY)
         .then(companyLog => {
 
             if(getHighestPosition.length > 0 ) {
@@ -304,14 +272,12 @@ companyService.userCancelJoin = async (companyId, userId) => {
     if(!userFromDB)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
 
-    return CompanyLog.query()
-    .delete()
-    .where('eusereuserid', userId)
-    .where('ecompanyecompanyid', companyId)
-    .where('ecompanylogtype', CompanyLogTypeEnum.APPLY)
-    .where('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
-    .first()
-    .then(rowsAffected => rowsAffected === 1)
+    const deleteLog = await companyLogService.removeCompanyLog(userId, companyId, CompanyLogRemoveEnum.USER_CANCEL_JOIN)
+
+    if (!deleteLog)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_APPLIED)
+
+    return deleteLog
 
 }
 
@@ -326,7 +292,7 @@ companyService.exitCompany = async (companyId, user) => {
     const getHighestPosition = await companyService.getHighestPosition(companyId)
 
     const removeUser = await companyService.removeUserFromCompany(userInCompany, user.sub, companyId)
-    .then(ignore => {
+    .then(removedUser => {
 
         if(getHighestPosition.length > 0 ) {
             const notificationObj = {
@@ -342,7 +308,9 @@ companyService.exitCompany = async (companyId, user) => {
                 user,
                 getHighestPosition
             )
-        } 
+        }
+
+        return removedUser
     })
 
     // delete approval user mapping
@@ -384,10 +352,7 @@ companyService.exitCompany = async (companyId, user) => {
     .where('eusereuserid', user.sub)
     .delete()
 
-    const removeCompanyLog = CompanyLog.query()
-    .where('eusereuserid', user.sub)
-    .where('ecompanyecompanyid', companyId)
-    .delete()
+    const removeCompanyLog = companyLogService.removeCompanyLog(user.sub, companyId, CompanyLogRemoveEnum.EXIT_COMPANY)
 
     await Promise.all([removeApprovalUser, removeApproval, removePermits, removePositionUserMapping, removeRosterUserMapping, removeShiftRoster, removeUserFromTeam, removeCompanyLog])
     const companyMemberCount = await companyService.getCompanyMemberCount(companyId);
@@ -410,13 +375,13 @@ companyService.processInvitation = async (companyId, user, status) => {
 
     const getHighestPosition = await companyService.getHighestPosition(companyId)
 
-    const pendingInvite = await companyService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.INVITE]);
+    const pendingInvite = await companyLogService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.INVITE]);
 
     if (!pendingInvite)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_INVITED)
 
     if (status === CompanyLogStatusEnum.REJECTED)
-        return companyService.updateCompanyLog(companyId, user, user.sub, CompanyLogStatusEnum.REJECTED)
+        return companyLogService.updateCompanyLog(companyId, user, user.sub, CompanyLogStatusEnum.REJECTED)
         .then(companyLog => {
             
             if(getHighestPosition.length > 0 ) {

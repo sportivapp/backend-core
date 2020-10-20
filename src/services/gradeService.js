@@ -3,6 +3,7 @@ const Department = require('../models/Department')
 const Company = require('../models/Company')
 const UserPositionMapping = require('../models/UserPositionMapping')
 const ServiceHelper = require('../helper/ServiceHelper')
+const departmentService = require('../services/departmentService')
 const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
 
 const gradeService = {}
@@ -17,6 +18,9 @@ const ErrorEnum = {
 gradeService.getAllGrades = async (page, size, companyId, departmentId) => {
 
     if (departmentId) {
+
+        const department = departmentService.getDepartementId(departmentId)
+        if (!department) return ServiceHelper.toEmptyPage(page, size)
 
         const gradePage = await Grade.query()
             .where('edepartmentedepartmentid', departmentId)
@@ -72,7 +76,7 @@ gradeService.createGrade = async (gradeDTO, userId) => {
     if (!company) throw new UnsupportedOperationError(ErrorEnum.COMPANY_NOT_FOUND)
 
     if (gradeDTO.edepartmentedepartmentid) {
-        const department = await Department.query().findById(gradeDTO.edepartmentedepartmentid)
+        const department = await departmentService.getDepartementId(gradeDTO.edepartmentedepartmentid)
         if (!department) throw new UnsupportedOperationError(ErrorEnum.DEPARTMENT_NOT_FOUND)
     }
 
@@ -99,8 +103,7 @@ gradeService.updateGradeById = async (gradeId, gradeDTO, user) => {
         if (grade.edepartmentedepartmentid !== gradeDTO.edepartmentedepartmentid) {
 
             if (gradeDTO.edepartmentedepartmentid !== null) {
-
-                const department = await Department.query().findById(gradeDTO.edepartmentedepartmentid)
+                const department = await departmentService.getDepartementId(gradeDTO.edepartmentedepartmentid)
                 if (!department) throw new UnsupportedOperationError(ErrorEnum.DEPARTMENT_NOT_FOUND)
             }
 
