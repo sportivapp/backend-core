@@ -57,7 +57,7 @@ controller.updateThreadById = async (req, res, next) => {
 
 controller.getThreadList = async (req, res, next) => {
     
-    const { page = '0', size = '10', isPublic = true, companyId = null, teamId = null } = req.query
+    const { page = '0', size = '10', isPublic = true, companyId = null, teamId = null, keyword = '' } = req.query
     // default value is undefined
     const filter = {
         companyId: companyId,
@@ -66,7 +66,7 @@ controller.getThreadList = async (req, res, next) => {
 
     try {
 
-        const pageObj = await mobileForumService.getThreadList(page, size, filter, isPublic)
+        const pageObj = await mobileForumService.getThreadList(page, size, filter, isPublic, keyword)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
         
     } catch (e) {

@@ -167,7 +167,7 @@ mobileForumService.updateThreadById = async (threadId, threadDTO, user) => {
     
 }
 
-mobileForumService.getThreadList = async (page, size, filter, isPublic) => {
+mobileForumService.getThreadList = async (page, size, filter, isPublic, keyword) => {
     
     const getFilter = await mobileForumService.normalizeFilter(filter)
 
@@ -188,6 +188,7 @@ mobileForumService.getThreadList = async (page, size, filter, isPublic) => {
 
     return threadPromise
     .where('ethreadispublic', isPublic)
+        .where(raw('lower(ethreadtitle)'), 'like', `%${keyword.toLowerCase()}%`)
     .orderBy('ethreadcreatetime', 'DESC')
     .withGraphFetched('threadCreator(name)')
     .withGraphFetched('company(baseAttributes)')
