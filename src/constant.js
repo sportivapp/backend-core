@@ -154,7 +154,10 @@ module.exports = {
         },
         companyLog: {
             list: '/company/:companyId/log',
-            id: '/company/:companyId/log/:companyLogId'
+            id: '/company/:companyId/log/:companyLogId',
+            cancelInvite: '/company-cancel-invite',
+            processRequest: '/company-process-request'
+
         },
         app: {
             version: '/app/version'
