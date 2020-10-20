@@ -12,10 +12,9 @@ class Address extends Model {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['eaddressstreet', 'eaddresspostalcode'],
+      required: [],
       properties: {
-        eaddressstreet: { type: 'string', minLength: 1, maxLength: 256 },
-        eaddresspostalcode: { type: 'integer' }
+
       }
     };
   }
@@ -23,8 +22,9 @@ class Address extends Model {
   static get modifiers() {
       return {
           baseAttributes(builder) {
-              builder.select('eaddressid', 'eaddressstreet', 'eaddresspostalcode', 'eaddresslongitude', 'eaddresslatitude')
+              builder.select('eaddressid', 'eaddressstreet', 'eaddresslongitude', 'eaddresslatitude')
                 .withGraphFetched('state(baseAttributes)')
+                .withGraphFetched('country(baseAttributes)')
           }
       }
   }

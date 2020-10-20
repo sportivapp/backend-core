@@ -13,7 +13,6 @@ class State extends Model {
     return {
       baseAttributes(builder) {
           builder.select('estateid', 'estatename')
-            .withGraphFetched('country(baseAttributes)')
       }
     }
   }
