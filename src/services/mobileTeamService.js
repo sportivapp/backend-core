@@ -30,6 +30,9 @@ const teamService = {}
 
 function isTeamNameUniqueErr(e) {
 
+    if (!e.nativeError)
+        return false;
+
     return e.nativeError.detail.includes('eteamname') && e instanceof UniqueViolationError
 
 }
@@ -128,10 +131,6 @@ teamService.updateTeam = async (teamId, teamDTO, addressDTO, user) => {
     if (!team)
         throw new UnsupportedOperationError(ErrorEnum.TEAM_NOT_FOUND)
 
-    const address = await AddressService.createAddress(addressDTO, user);
-
-    teamDTO.eaddresseaddressid = address.eaddressid;
-
     return team.$query()
         .updateByUserId(teamDTO, user.sub)
         .returning('*')
@@ -155,6 +154,8 @@ teamService.updateTeam = async (teamId, teamDTO, addressDTO, user) => {
                 }
 
             })
+
+            const address = await AddressService.updateAddress(team.eaddresseaddressid, addressDTO, user);
             
             return { 
                 ...newTeam, 
