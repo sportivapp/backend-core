@@ -52,7 +52,17 @@ const NotificationEnum = {
                 title: 'User Rejected',
                 code: 'USER_REJECTED',
                 message: 'User has rejected your Organization Invitation!'
-            },
+            }
+        }
+    },
+    announcement: {
+        type : 'ANNOUNCEMENT',
+        actions : {
+            publish : {
+                title: 'New Announcement',
+                code: 'NEW_ANNOUNCEMENT',
+                message: 'You got a new Announcement!'
+            }
         }
     }
 }

@@ -3,7 +3,7 @@ exports.seed = (knex, Promise) => knex('enotificationbody').del()
         knex('enotificationbody').insert(
             [
                 {
-                    enotificationbodyentityid: 1,
+                    // enotificationbodyentityid: 1,
                     enotificationbodyentitytype: 'COMPANY',
                     enotificationbodyaction: 'COMPANY_INVITE',
                     enotificationbodytitle: 'Company Invitation',
@@ -15,7 +15,7 @@ exports.seed = (knex, Promise) => knex('enotificationbody').del()
                     enotificationbodychangetime: 1575158400
                 },
                 {
-                    enotificationbodyentityid: 2,
+                    // enotificationbodyentityid: 2,
                     enotificationbodyentitytype: 'COMPANY',
                     enotificationbodyaction: 'COMPANY_INVITE',
                     enotificationbodytitle: 'Company Invitation',
@@ -27,7 +27,7 @@ exports.seed = (knex, Promise) => knex('enotificationbody').del()
                     enotificationbodychangetime: Date.now()
                 },
                 {
-                    enotificationbodyentityid: 3,
+                    // enotificationbodyentityid: 3,
                     enotificationbodyentitytype: 'COMPANY',
                     enotificationbodyaction: 'COMPANY_INVITE',
                     enotificationbodytitle: 'Company Invitation',
@@ -39,7 +39,7 @@ exports.seed = (knex, Promise) => knex('enotificationbody').del()
                     enotificationbodychangetime: 1519084800
                 },
                 {
-                    enotificationbodyentityid: 4,
+                    // enotificationbodyentityid: 4,
                     enotificationbodyentitytype: 'COMPANY',
                     enotificationbodyaction: 'COMPANY_INVITE',
                     enotificationbodytitle: 'Company Invitation',

@@ -3,6 +3,7 @@ module.exports = {
         base: '/api/v1',
         company: {
             list: '/company',
+            myList: '/my-company',
             register: '/company-register',
             id: '/company/:companyId',
             users: '/company/:companyId/users',
@@ -31,7 +32,7 @@ module.exports = {
             changePassword: '/change-password',
             profile: '/profile',
             modules: '/profile/modules',
-            functions: '/profile/modules/:moduleId/functions'
+            functions: '/profile/functions'
         },
         grade: {
             list: '/grades',
@@ -46,6 +47,7 @@ module.exports = {
         },
         announcement: {
             create: '/announcement',
+            publish: '/publish-announcement/:announcementId',
             id: '/announcement/:announcementId',
             list: '/announcement-list'
         },
@@ -113,20 +115,28 @@ module.exports = {
         team: {
             list: '/team',
             id: '/team/:teamId',
-            member: '/team-member',
+            members: '/team/:teamId/members',
+            teamLog: '/team/:teamId/log',
             kick: '/team-kick',
             invite: '/team-invite',
             processInvitation: '/team-process-invitation',
             processRequest: '/team-process-request',
             join: '/team-join',
             position: '/team-member-position',
+            roles: '/team-member-roles',
             cancelInvitation: '/team-cancel-invite',
             cancelRequest: '/team-cancel-request',
             exit: '/team-exit',
+            myTeam: '/team-user',
+            isAdmin: '/team/:teamId/admin',
+            userPendingLog: '/team-user-pending'
         },
         class: {
             list: '/class',
-            id: '/class/:classId'
+            id: '/class/:classId',
+            classUser: '/class/:classId/users',
+            pendingUser: '/class/:classId/pending-users',
+            processRegistration: '/class/process-registration'
         },
         classUser: {
             registration: '/user-class/registration',
@@ -150,7 +160,11 @@ module.exports = {
             version: '/app/version'
         },
         news: {
-            id: '/news/:newsId'
+            list: '/news',
+            id: '/news/:newsId',
+            publish: '/news/:newsId/publish',
+            count: '/news/:newsId/user',
+            generate: '/news/:newsId/link'
         },
         notification: {
             list: '/notification'
@@ -160,6 +174,37 @@ module.exports = {
         },
         file: {
             download: '/file-download/:fileId'
-        }
+        },
+        theory: {
+            list: '/theory',
+            download: '/theory/:theoryId/download',
+            preview: '/theory/:theoryId/preview',
+            remove: '/theory/:theoryId/delete'
+        },
+        comment: {
+            threadComments: '/thread/:threadId/comments',
+            list: '/comment',
+            id: '/comment/:commentId',
+            threadPostId: '/thread/:threadId/comments/:commentId'
+        },
+        thread: {
+            list: '/thread',
+            id: '/thread/:threadId'
+        },
+        authentication: {
+            login: '/login',
+            loginCompany: '/login-company',
+            loginAuto: '/login-auto'
+        },
+        sportTypeRole: {
+            industry: '/sport-type-role/industry/:industryId'
+        },
+        commentReply: {
+            list: '/comments/:commentId/replies',
+            id: '/comments/:commentId/replies/:replyId'
+        },
+        report: {
+            thread: '/report/thread'
+        },
     }
 }

@@ -90,7 +90,7 @@ UserService.createUser = async (userDTO, otpCode) => {
 
     userDTO.eusername = userDTO.euseremail.split('@')[0];
     userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
-    return User.query().insert(userDTO);
+    return User.query().insertToTable(userDTO, 0);
 
 }
 

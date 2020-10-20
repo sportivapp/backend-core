@@ -66,8 +66,6 @@ mobileClassUserService.registerByClassId = async (classId, user) => {
         .orderBy('eclassusermappingcreatetime', 'DESC')
         .first()
 
-
-
     if (!classUserMapping)
 
         return ClassUserMapping.query()
@@ -129,37 +127,6 @@ mobileClassUserService.cancelRegistrationByClassUserId = async (classUserId, use
     }
         return classLog
     })
-}
-
-mobileClassUserService.processRegistration = async (classUserId, status, user) => {
-
-    if (ClassUserStatusEnum.APPROVED !== status.toUpperCase() && ClassUserStatusEnum.REJECTED !== status.toUpperCase())
-        throw new UnsupportedOperationError(ErrorEnum.STATUS_INVALID)
-
-    const classUser = await ClassUserMapping.query()
-        .where('eclasseclassid', classId)
-        .where('eusereuserid', user.sub)
-        .orderBy('eclassusermappingcreatetime', 'DESC')
-        .withGraphFetched('class(baseAttributes)')
-        .first()
-
-    if (!classUser || !classUser.class) throw new UnsupportedOperationError(ErrorEnum.CLASS_NOT_FOUND)
-
-    const loggedInUserCompanies = await CompanyUserMapping.query()
-        .where('eusereuserid', user.sub)
-        .then(list => list.map(company => company.ecompanyid))
-
-    if (loggedInUserCompanies.indexOf(classUser.class.ecompanyecompanyid) === -1)
-        throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_ORGANIZATION)
-
-    if (classUser.eclassusermappingstatus === ClassUserStatusEnum.PENDING)
-
-        return classUser.$query()
-            .updateByUserId({ eclassusermappingstatus: status }, user.sub)
-            .returning('*')
-            .withGraphFetched('class(baseAttributes)')
-
-    else return classUser
 }
 
 mobileClassUserService.getMyClasses = async (companyId, page, size, user) => {

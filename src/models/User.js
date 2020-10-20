@@ -236,6 +236,12 @@ class User extends Model {
       ...this.baseModifiers(),
       baseAttributes(builder) {
         builder.select('euserid', 'eusername', 'euseremail', 'eusernik', 'eusermobilenumber', 'euseridentitynumber', 'euserdob', 'eusergender', 'efileefileid')
+      },
+      idAndName(builder) {
+        builder.select('euserid', 'eusername', 'efileefileid')
+      },
+      name(builder) {
+        builder.select('eusername');
       }
     }
   }

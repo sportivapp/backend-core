@@ -13,6 +13,12 @@ const shiftPatternSchemas = require('./shiftPattern')
 const experienceSchemas = require('./experience')
 const approvalSchemas = require('./approval')
 const permitSchemas = require('./permit')
+const classSchemas = require('./class')
+const newsSchemas = require('./news')
+const threadSchemas = require('./thread')
+const threadPostSchemas = require('./threadPost')
+const threadPostReplySchemas = require('./threadPostReply')
+const reportThreadSchemas = require('./reportThread')
 
 module.exports = {
     ...companySchemas,
@@ -29,5 +35,11 @@ module.exports = {
     ...shiftPatternSchemas,
     ...experienceSchemas,
     ...approvalSchemas,
-    ...permitSchemas
+    ...permitSchemas,
+    ...classSchemas,
+    ...newsSchemas,
+    ...threadSchemas,
+    ...threadPostSchemas,
+    ...threadPostReplySchemas,
+    ...reportThreadSchemas
 }

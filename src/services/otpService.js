@@ -60,7 +60,7 @@ OtpService.createOtp = async (email) => {
 
     emailService.sendEmailOTP(email, otpCode);
 
-    return 1;
+    return true;
 
 }
 

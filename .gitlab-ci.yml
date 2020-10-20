@@ -1,0 +1,36 @@
+# This file is a template, and might need editing before it works on your project.
+# Official framework image. Look for the different tagged releases at:
+# https://hub.docker.com/r/library/node/tags/
+
+# deploy_development:
+#   type: deploy
+#   environment:
+#     name: development
+#     url: api.quickplay.app
+#   script:
+#     - ssh $SERVER_USER@$SERVER_HOST "cd /data1/opt/emtiv-backend && sudo git pull origin development-mobile-api && sudo pm2 reload all && exit"
+#   only:
+#     - development-mobile-api
+
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  environment:
+    name: development
+    url: api.quickplay.app
+  before_script:  
+      - apt-get update -qq
+      - apt-get install -qq git
+      - 'which ssh-agent || ( apt-get install -qq openssh-client )'
+      - eval $(ssh-agent -s)
+      - ssh-add <(echo "$SSH_PRIVATE_KEY")
+      # - echo "IdentityFile ~/.ssh/id_rsa" >> /etc/ssh/ssh_config
+      - mkdir -p ~/.ssh
+      - chmod 700 ~/.ssh
+      - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - ssh -tt $SERVER_USER@$SERVER_HOST "cd /data1/opt/emtiv-backend && sudo git pull http://$GIT_USER:$GIT_PASSWORD@103.253.113.215:8090/emtiv/backend/emtiv-backend.git development-mobile-api && sudo npm install && sudo pm2 reload all && exit"
+  only:
+    - development-mobile-api

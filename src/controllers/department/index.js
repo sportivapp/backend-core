@@ -10,7 +10,7 @@ controller.getAllDepartmentbyCompanyId = async (req, res, next) => {
     if (user.functions.indexOf('R3') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
-    const { page, size, companyId, type, superiorId } = req.query
+    const { page = '0', size = '10', companyId, type, superiorId } = req.query
 
     try {
         const pageObj = await departmentService.getAllDepartmentbyCompanyId(parseInt(page), parseInt(size), type, companyId, superiorId)
@@ -33,9 +33,7 @@ controller.getDepartmentByDepartmentId = async (req, res, next) => {
     const { departmentId } = req.params
 
     try {
-        const result = await departmentService.getDepartmentByDepartmentId( departmentId )
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        const result = await departmentService.getDepartmentByDepartmentId(departmentId)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)
@@ -63,8 +61,6 @@ controller.createDepartment = async (req, res, next) => {
         }
 
         const result = await departmentService.createDepartment(departmentDTO, user)
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch (e) {
@@ -92,8 +88,6 @@ controller.updateDepartment = async (req, res, next) => {
         }
 
         const result = await departmentService.updateDepartment(departmentId, departmentDTO, user)
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch (e) {
@@ -113,8 +107,6 @@ controller.deleteDepartment = async (req, res, next) => {
     try {
 
         const result = await departmentService.deleteDepartment(departmentId)
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch (e) {
@@ -130,14 +122,12 @@ controller.getAllUsersByDepartmentId = async (req, res, next) => {
     if (user.functions.indexOf('R3') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
-    const { page, size } = req.query
+    const { page = '0', size = '10' } = req.query
 
     const { departmentId } = req.params
 
     try {
         const pageObj = await departmentService.getAllUsersWithinDepartment(parseInt(page), parseInt(size), departmentId)
-        if (!pageObj)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
     } catch (e) {
         next(e)
