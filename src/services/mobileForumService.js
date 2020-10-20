@@ -4,8 +4,13 @@ const ServiceHelper = require('../helper/ServiceHelper')
 const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
 const TimeEnum = require('../models/enum/TimeEnum')
 const mobileCompanyService = require('./mobileCompanyService')
+const gradeService = require('./gradeService')
+const settingService = require('./settingService')
 const mobileTeamUserService = require('./mobileTeamUserService')
+const mobileTeamService = require('./mobileTeamService')
 const teamUserService = require('./mobileTeamUserService')
+const fileService = require('./fileService')
+const ModuleNameEnum = require('../models/enum/ModuleNameEnum')
 
 const mobileForumService = {}
 
@@ -17,7 +22,8 @@ const ErrorEnum = {
     INVALID_TYPE: 'INVALID_TYPE',
     NOT_ADMIN: 'NOT_ADMIN',
     TITLE_EXISTED: 'TITLE_EXISTED',
-    PRIVATE_NOT_AVAILABLE: 'PRIVATE_NOT_AVAILABLE'
+    PRIVATE_NOT_AVAILABLE: 'PRIVATE_NOT_AVAILABLE',
+    FILE_NOT_EXIST: 'FILE_NOT_EXIST'
 }
 
 mobileForumService.isModerator = async (threadId, userId) => {
@@ -101,6 +107,11 @@ mobileForumService.createThread = async (threadDTO, user) => {
 
     }
 
+    if (threadDTO.efileefileid) {
+        const file = await fileService.getFileById(threadDTO.efileefileid)
+        if (!file) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_EXIST)
+    }
+
     return Thread.transaction(async trx => {
         
             const thread = await Thread.query(trx)
@@ -142,6 +153,11 @@ mobileForumService.updateThreadById = async (threadId, threadDTO, user) => {
 
         // TODO: Check whether this user have privilege to update a thread
         
+    }
+
+    if (threadDTO.efileefileid) {
+        const file = await fileService.getFileById(threadDTO.efileefileid)
+        if (!file) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_EXIST)
     }
 
     return thread
@@ -223,6 +239,61 @@ mobileForumService.deleteThreadById = async (threadId, user) => {
                 .then(rowsAffected => rowsAffected === 1);
         });
 
+}
+
+mobileForumService.getUserOrganizationListWithPermission = async (page, size, keyword, type, user) => {
+
+    if (type === 'PUBLIC') {
+        const myCompaniesPage = await mobileCompanyService.getMyCompanies(page, Number.MAX_SAFE_INTEGER, keyword, user)
+        let myCompanies = myCompaniesPage.data
+        const promises = []
+        myCompanies.forEach(company => {
+            const promise = gradeService.getAllGradesByUserIdAndCompanyId(company.ecompanyid, user.sub)
+                .then(grades => grades.map(grade => grade.egradeid))
+                .then(gradeIds => settingService.isUserHaveFunctions(['C', 'U'], gradeIds, ModuleNameEnum.FORUM, company.ecompanyid))
+                .then(result => result ? company.ecompanyid : null)
+            promises.push(promise)
+        })
+        const myCompanyIds = await Promise.all(promises).then(companyIds => companyIds.filter(company => !!company))
+        myCompanies = myCompanies.filter(company => myCompanyIds.indexOf(company.ecompanyid) !== -1)
+        let newCompanies = myCompanies
+        if (myCompanies.length > (page * size)) {
+            newCompanies = []
+            for (let i = page * size; i < myCompanies.length; i++) {
+                newCompanies.push(myCompanies[i])
+            }
+        }
+        myCompaniesPage.data = newCompanies
+        myCompaniesPage.paging.size = size
+        myCompaniesPage.paging.totalSize = myCompanies.length
+        return myCompaniesPage
+    }
+
+    return mobileCompanyService.getMyCompanies(page, size, keyword, user)
+}
+
+mobileForumService.getUserTeamListWithAdminStatus = async (page, size, keyword, type, user) => {
+
+    if (type === 'PUBLIC') {
+        const myTeamsPage = await mobileTeamService.getMyTeams(page, Number.MAX_SAFE_INTEGER, keyword, user)
+        let myTeams = myTeamsPage.data
+        const myTeamIds = myTeams.map(team => team.eteamid)
+        const adminTeamIds = await mobileTeamUserService.checkAdminOnTeamIds(myTeamIds, user.sub)
+        myTeams = myTeams.filter(team => adminTeamIds.indexOf(team.eteamid) !== -1)
+        let newTeams = myTeams
+        if (myTeams.length > (page * size)) {
+            newTeams = []
+            for (let i = page * size; i < myTeams.length; i++) {
+                newTeams.push(myTeams[i])
+            }
+        }
+        myTeamsPage.data = newTeams
+        myTeamsPage.paging.size = size
+        myTeamsPage.paging.totalSize = myTeams.length
+        return myTeamsPage
+    }
+
+    return mobileTeamService.getMyTeams(page, size, keyword, user)
 }
 
 module.exports = mobileForumService

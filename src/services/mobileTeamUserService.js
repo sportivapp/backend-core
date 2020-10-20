@@ -30,6 +30,22 @@ teamUserService.getTeamUserCheckAdmin = async (teamId, userId) => {
 
 }
 
+teamUserService.checkAdminOnTeamIds = async (teamIds, userId) => {
+
+    const promises = []
+
+    teamIds.forEach(teamId => {
+        const promise = teamUserService.getTeamUserCheckAdmin(teamId, userId)
+            .then(() => teamId)
+            .catch(() => null)
+        promises.push(promise)
+    })
+
+    return Promise.all(promises)
+        .then(teamIds => teamIds.filter(teamId => !!teamId))
+
+}
+
 teamUserService.getTeamUserByTeamIdAndUserId = async (teamId, userId) => {
 
     return TeamUserMapping.query()
