@@ -4,6 +4,7 @@ const Department = require('../models/Department')
 const Company = require('../models/Company')
 const UserPositionMapping = require('../models/UserPositionMapping')
 const ServiceHelper = require('../helper/ServiceHelper')
+const departmentService = require('../services/departmentService')
 
 const gradeService = {}
 
@@ -11,7 +12,7 @@ gradeService.getAllGrades = async (page, size, companyId, departmentId) => {
 
     if (departmentId) {
 
-        const department = Department.query().findById(departmentId)
+        const department = departmentService.getDepartementId(departmentId)
         if (!department) return ServiceHelper.toEmptyPage(page, size)
 
         const gradePage = await Grade.query()
@@ -64,7 +65,7 @@ gradeService.createGrade = async (gradeDTO, userId) => {
     if (!company) return
 
     if (gradeDTO.edepartmentedepartmentid) {
-        const department = await Department.query().findById(gradeDTO.edepartmentedepartmentid)
+        const department = await departmentService.getDepartementId(gradeDTO.edepartmentedepartmentid)
         if (!department) return
     }
 
@@ -89,7 +90,7 @@ gradeService.updateGradeById = async (gradeId, gradeDTO, user) => {
 
         if (gradeDTO.edepartmentedepartmentid !== null) {
 
-            const department = await Department.query().findById(gradeDTO.edepartmentedepartmentid)
+            const department = await departmentService.getDepartementId(gradeDTO.edepartmentedepartmentid)
 
             if (!department) return
         }
