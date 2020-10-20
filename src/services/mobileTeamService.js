@@ -7,6 +7,7 @@ const { UniqueViolationError } = require('objection');
 const teamLogService = require('./mobileTeamLogService');
 const teamUserService = require('./mobileTeamUserService');
 const mobileTeamSportTypeRoleService = require('./mobileTeamSportTypeRoleService');
+const AddressService = require('./addressService');
 
 const ErrorEnum = {
     USER_IN_TEAM: 'USER_IN_TEAM',
@@ -28,6 +29,9 @@ const TeamLogTypeEnum = {
 const teamService = {}
 
 function isTeamNameUniqueErr(e) {
+
+    if (!e.nativeError)
+        return false;
 
     return e.nativeError.detail.includes('eteamname') && e instanceof UniqueViolationError
 
@@ -82,9 +86,13 @@ teamService.getTeam = async (teamId, user) => {
 
 }
 
-teamService.createTeam = async (teamDTO, user) => {
+teamService.createTeam = async (teamDTO, addressDTO, user) => {
 
     return Team.transaction(async trx => {
+
+        const address = await AddressService.createAddress(addressDTO, user, trx);
+
+        teamDTO.eaddresseaddressid = address.eaddressid;
 
         const team = await Team.query(trx)
             .insertToTable(teamDTO, user.sub);
@@ -97,7 +105,10 @@ teamService.createTeam = async (teamDTO, user) => {
         //         eteamusermappingposition: 'ADMIN'
         //     }, user.sub);
 
-        return Promise.resolve({ ...team });
+        return Promise.resolve({ 
+            ...team,
+            address: address
+        });
 
     })    
     .catch(e => {
@@ -107,7 +118,7 @@ teamService.createTeam = async (teamDTO, user) => {
 
 }
 
-teamService.updateTeam = async (teamId, teamDTO, user) => {
+teamService.updateTeam = async (teamId, teamDTO, addressDTO, user) => {
 
     await teamUserService.getTeamUserCheckAdmin(teamId, user.sub);
 
@@ -143,8 +154,13 @@ teamService.updateTeam = async (teamId, teamDTO, user) => {
                 }
 
             })
+
+            const address = await AddressService.updateAddress(team.eaddresseaddressid, addressDTO, user);
             
-            return newTeam
+            return { 
+                ...newTeam, 
+                address: address
+            }
         })
         .catch(e => {
             if (isTeamNameUniqueErr(e)) throw new UnsupportedOperationError(ErrorEnum.NAME_ALREADY_TAKEN)

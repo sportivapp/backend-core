@@ -9,6 +9,7 @@ const teamLogService = require('./teamLogService');
 const teamUserMappingService = require('./teamUserMappingService')
 const teamSportTypeRoleService = require('./teamSportTypeRoleService')
 const fileService = require('./fileService')
+const AddressService = require('./addressService')
 
 const teamService = {}
 
@@ -66,11 +67,14 @@ teamService.isUserInCompany = async (teamId, user) => {
 
 function isTeamNameUniqueErr(e) {
 
+    if (!e.nativeError)
+        return false;
+
     return e.nativeError.detail.includes('eteamname') && e instanceof UniqueViolationError
 
 }
 
-teamService.createTeam = async (teamDTO, user) => {
+teamService.createTeam = async (teamDTO, addressDTO, user) => {
 
     if(teamDTO.efileefileid) {
 
@@ -82,6 +86,10 @@ teamService.createTeam = async (teamDTO, user) => {
     }
 
     return Team.transaction(async trx => {
+
+        const address = AddressService.createAddress(addressDTO, user, trx);
+
+        teamDTO.eaddresseaddressid = address.eaddressid;
 
         const team = await Team.query(trx).insertToTable(teamDTO, user.sub)
         
@@ -102,7 +110,7 @@ teamService.createTeam = async (teamDTO, user) => {
 
 }
 
-teamService.updateTeam = async (teamDTO, user, teamId) => {
+teamService.updateTeam = async (teamId, teamDTO, addressDTO, user) => {
 
     if(teamDTO.efileefileid) {
 
@@ -144,8 +152,13 @@ teamService.updateTeam = async (teamDTO, user, teamId) => {
                 }
 
             })
+
+            const address = await AddressService.updateAddress(teamFromDB.eaddresseaddressid, addressDTO, user);
             
-            return newTeam
+            return { 
+                ...newTeam,
+                address: address
+            }
         })
         .catch(e => {
             if (isTeamNameUniqueErr(e)) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NAME_ALREADY_TAKEN)

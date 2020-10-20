@@ -12,7 +12,8 @@ exports.seed = (knex, Promise) => knex('eteam').del()
             eteamcreatetime: Date.now(),
             eteamcreateby: 1,
             eteamchangetime: Date.now(),
-            eteamchangeby: 1
+            eteamchangeby: 1,
+            eaddresseaddressid: 1
         },
         {
           ecompanyecompanyid: 1,
@@ -24,7 +25,8 @@ exports.seed = (knex, Promise) => knex('eteam').del()
           eteamcreatetime: Date.now(),
           eteamcreateby: 1,
           eteamchangetime: Date.now(),
-          eteamchangeby: 1
+          eteamchangeby: 1,
+          eaddresseaddressid: 2
         },
         {
           ecompanyecompanyid: 1,
@@ -36,7 +38,8 @@ exports.seed = (knex, Promise) => knex('eteam').del()
           eteamcreatetime: Date.now(),
           eteamcreateby: 1,
           eteamchangetime: Date.now(),
-          eteamchangeby: 1
+          eteamchangeby: 1,
+          eaddresseaddressid: 3
         },
     ]
   ));
