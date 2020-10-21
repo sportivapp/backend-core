@@ -155,6 +155,7 @@ module.exports = {
         companyLog: {
             list: '/company/:companyId/log',
             id: '/company/:companyId/log/:companyLogId',
+            listPending: '/company-user-pending',
             cancelInvite: '/company-cancel-invite',
             processRequest: '/company-process-request'
 
