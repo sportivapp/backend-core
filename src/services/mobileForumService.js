@@ -103,7 +103,14 @@ mobileForumService.createThread = async (threadDTO, user) => {
                 if(!userInCompany) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_COMPANY)
             })
 
-        // TODO: Check whether this user have priviledge to make a thread
+        if (threadDTO.ethreadispublic) {
+
+            const isAllowed = await gradeService.getAllGradesByUserIdAndCompanyId(thread.ecompanyecompanyid, user.sub)
+                .then(grades => grades.map(grade => grade.egradeid))
+                .then(gradeIds => settingService.isUserHaveFunctions(['P'], gradeIds, ModuleNameEnum.FORUM, thread.ecompanyecompanyid))
+
+            if (!isAllowed) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
+        }
 
     }
 
@@ -134,11 +141,11 @@ mobileForumService.updateThreadById = async (threadId, threadDTO, user) => {
 
     const moderator = await mobileForumService.isModerator(thread.ethreadid, user.sub)
 
-    if(!moderator) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION);
+    if(!moderator) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION);
 
     // If user made the thread, cannot be private
     if(!thread.eteameteamid && !thread.ecompanyecompanyid && !threadDTO.ethreadispublic)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.PRIVATE_NOT_AVAILABLE);
+        throw new UnsupportedOperationError(ErrorEnum.PRIVATE_NOT_AVAILABLE);
 
     // If team thread AND it is public, check whether it's made by an Admin
     if(thread.eteameteamid && thread.ethreadispublic)
@@ -151,7 +158,11 @@ mobileForumService.updateThreadById = async (threadId, threadDTO, user) => {
                 if(!userInCompany) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_COMPANY)
             });
 
-        // TODO: Check whether this user have privilege to update a thread
+        const isAllowed = await gradeService.getAllGradesByUserIdAndCompanyId(thread.ecompanyecompanyid, user.sub)
+            .then(grades => grades.map(grade => grade.egradeid))
+            .then(gradeIds => settingService.isUserHaveFunctions(['P'], gradeIds, ModuleNameEnum.FORUM, thread.ecompanyecompanyid))
+
+        if (!isAllowed) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
         
     }
 
@@ -221,7 +232,7 @@ mobileForumService.getThreadById = async (threadId) => {
         .findById(threadId)
         .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
         .then(thread => {
-            if(!thread) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_NOT_FOUND);
+            if(!thread) throw new UnsupportedOperationError(ErrorEnum.THREAD_NOT_FOUND);
             return thread;
         });
 
@@ -231,7 +242,7 @@ mobileForumService.deleteThreadById = async (threadId, user) => {
 
     const moderator = await mobileForumService.isModerator(threadId, user.sub)
 
-    if(!moderator) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION);
+    if(!moderator) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION);
 
     return mobileForumService.getThreadById(threadId)
         .then(thread => {
@@ -251,7 +262,7 @@ mobileForumService.getUserOrganizationListWithPermission = async (page, size, ke
         myCompanies.forEach(company => {
             const promise = gradeService.getAllGradesByUserIdAndCompanyId(company.ecompanyid, user.sub)
                 .then(grades => grades.map(grade => grade.egradeid))
-                .then(gradeIds => settingService.isUserHaveFunctions(['C', 'U'], gradeIds, ModuleNameEnum.FORUM, company.ecompanyid))
+                .then(gradeIds => settingService.isUserHaveFunctions(['P'], gradeIds, ModuleNameEnum.FORUM, company.ecompanyid))
                 .then(result => result ? company.ecompanyid : null)
             promises.push(promise)
         })
