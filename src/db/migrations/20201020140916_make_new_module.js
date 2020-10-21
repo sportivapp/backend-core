@@ -140,18 +140,8 @@ function newFunctions(modules) {
 
     let forumFunctions = [
         {
-            efunctioncode: 'C' + forumId,
-            efunctionname: 'Create Forum',
-            emoduleemoduleid: forumId
-        },
-        {
-            efunctioncode: 'R' + forumId,
-            efunctionname: 'Read Forum',
-            emoduleemoduleid: forumId
-        },
-        {
-            efunctioncode: 'U' + forumId,
-            efunctionname: 'Update Forum',
+            efunctioncode: 'P' + forumId,
+            efunctionname: 'Set Public Status Forum',
             emoduleemoduleid: forumId
         },
         {
