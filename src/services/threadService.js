@@ -8,6 +8,9 @@ const fileService = require('./fileService')
 const teamService = require('./teamService')
 const teamUserMappingService = require('./teamUserMappingService')
 const profileService = require('./profileService')
+const gradeService = require('./gradeService')
+const settingService = require('./settingService')
+const ModuleNameEnum = require('../models/enum/ModuleNameEnum')
 const { raw } = require('objection')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
@@ -96,6 +99,14 @@ threadService.createThread = async (threadDTO, isPublic, moderatorIds, user) => 
 
         if (!isUserExistInCompany) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_COMPANY)
 
+        if (threadDTO.ethreadispublic) {
+            const isAllowed = await gradeService.getAllGradesByUserIdAndCompanyId(threadDTO.ecompanyecompanyid, user.sub)
+                .then(grades => grades.map(grade => grade.egradeid))
+                .then(gradeIds => settingService.isUserHaveFunctions(['P'], gradeIds, ModuleNameEnum.FORUM, threadDTO.ecompanyecompanyid))
+
+            if (!isAllowed) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
+        }
+
         // TODO: Check whether this user have priviledge to make a thread
 
     }
@@ -134,10 +145,11 @@ threadService.updateThread = async (threadId, threadDTO, isPublic, moderatorIds,
 
     if (thread.ecompanyecompanyid && isPublic) {
 
-        const isCompanyPermissionValid = await profileService.getFunctionCodes(user)
-            .then(codes => codes.indexOf('D11') !== -1)
+        const isAllowed = await gradeService.getAllGradesByUserIdAndCompanyId(thread.ecompanyecompanyid, user.sub)
+            .then(grades => grades.map(grade => grade.egradeid))
+            .then(gradeIds => settingService.isUserHaveFunctions(['P'], gradeIds, ModuleNameEnum.FORUM, thread.ecompanyecompanyid))
 
-        if (!isCompanyPermissionValid) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
+        if (!isAllowed) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
 
     }
 
@@ -196,10 +208,11 @@ threadService.deleteThreadById = async (threadId, user) => {
 
     if (thread.ecompanyecompanyid) {
 
-        const isCompanyPermissionValid = await profileService.getFunctionCodes(user)
-            .then(codes => codes.indexOf('D11') !== -1)
+        const isAllowed = await gradeService.getAllGradesByUserIdAndCompanyId(thread.ecompanyecompanyid, user.sub)
+            .then(grades => grades.map(grade => grade.egradeid))
+            .then(gradeIds => settingService.isUserHaveFunctions(['P'], gradeIds, ModuleNameEnum.FORUM, thread.ecompanyecompanyid))
 
-        if (!isModerator && !isCompanyPermissionValid) return false
+        if (!isModerator && !isAllowed) return false
 
     }
 

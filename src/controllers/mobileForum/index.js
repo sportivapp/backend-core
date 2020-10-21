@@ -12,12 +12,14 @@ controller.createThread = async (req, res, next) => {
         ethreaddescription: thread.description,
         ethreadispublic: thread.isPublic,
         ecompanyecompanyid: thread.companyId,
-        eteameteamid: thread.teamId
+        eteameteamid: thread.teamId,
+        efileefileid: thread.fileId
     }
 
     threadDTO.ecompanyecompanyid = ( thread.companyId === 0 || thread.companyId === undefined) ? null : thread.companyId
     threadDTO.eteameteamid = ( thread.teamId === 0 || thread.teamId === undefined) ? null : thread.teamId
-    threadDTO.ethreadispublic = ( threadDTO.ecompanyecompanyid === null || threadDTO.eteameteamid === null) ? true : threadDTO.ethreadispublic
+    threadDTO.efileefileid = ( thread.fileId === 0 || thread.fileId === undefined) ? null : thread.fileId
+    threadDTO.ethreadispublic = ( threadDTO.ecompanyecompanyid === null && threadDTO.eteameteamid === null) ? true : threadDTO.ethreadispublic
 
     try {
 
@@ -40,6 +42,8 @@ controller.updateThreadById = async (req, res, next) => {
         ethreadispublic: thread.isPublic,
         ethreadlock: thread.lockStatus
     }
+
+    threadDTO.efileefileid = ( thread.fileId === 0 || thread.fileId === undefined) ? null : thread.fileId
     
     try {
 
@@ -53,7 +57,7 @@ controller.updateThreadById = async (req, res, next) => {
 
 controller.getThreadList = async (req, res, next) => {
     
-    const { page = '0', size = '10', isPublic = true, companyId = null, teamId = null } = req.query
+    const { page = '0', size = '10', isPublic = true, companyId = null, teamId = null, keyword = '' } = req.query
     // default value is undefined
     const filter = {
         companyId: companyId,
@@ -62,9 +66,38 @@ controller.getThreadList = async (req, res, next) => {
 
     try {
 
-        const pageObj = await mobileForumService.getThreadList(page, size, filter, isPublic)
+        const pageObj = await mobileForumService.getThreadList(page, size, filter, isPublic, keyword)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
         
+    } catch (e) {
+        next(e)
+    }
+}
+
+controller.getMyOrganizationListWithAccess = async (req, res, next) => {
+
+    const { page = '0', size = '10', type = 'PRIVATE', keyword = '' } = req.query
+
+    try {
+
+        const pageObj = await mobileForumService.getUserOrganizationListWithPermission(parseInt(page), parseInt(size), keyword,
+            type.toUpperCase(), req.user)
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+
+    } catch (e) {
+        next(e)
+    }
+}
+
+controller.getMyTeamListWithAccess = async (req, res, next) => {
+
+    const { page = '0', size = '10', type = 'PRIVATE', keyword = '' } = req.query
+
+    try {
+
+        const pageObj = await mobileForumService.getUserTeamListWithAdminStatus(parseInt(page), parseInt(size), keyword, type.toUpperCase(), req.user)
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+
     } catch (e) {
         next(e)
     }

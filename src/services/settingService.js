@@ -22,6 +22,27 @@ SettingService.getModulesByCompanyId = async (companyId) => {
 
 }
 
+SettingService.getModuleByNameAndCompanyId = async (name, companyId) => {
+
+    return CompanyModuleMapping.relatedQuery('module')
+        .for(CompanyModuleMapping.query().where('ecompanyecompanyid', companyId))
+        .where('emodulename', name)
+        .first()
+}
+
+SettingService.isUserHaveFunctions = async (codes, gradeIds, moduleName, companyId) => {
+
+    const moduleId = await SettingService.getModuleByNameAndCompanyId(moduleName, companyId)
+        .then(module => module.emoduleid)
+
+    const functionCodes = await SettingService.getAllFunctionCodesByGradeIds(gradeIds)
+
+    return codes.map(code => `${code}${moduleId}`)
+        .map(code => functionCodes.indexOf(code))
+        .filter(result => result !== -1)
+        .length === codes.length
+}
+
 SettingService.getModulesByIds = async (companyId, moduleIds) => {
 
     if (!companyId) return []
