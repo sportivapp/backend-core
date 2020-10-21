@@ -228,5 +228,4 @@ companyLogService.getUserCompanyPendingListByLogType = async (page, size, type, 
     
 }
 
-
 module.exports = companyLogService
