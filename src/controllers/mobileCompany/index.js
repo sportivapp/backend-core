@@ -96,13 +96,13 @@ controller.joinCompany = async (req, res, next) => {
 
 }
 
-controller.userCancelJoin = async (req, res, next) => {
+controller.userCancelJoins = async (req, res, next) => {
 
-    const { companyId } = req.params
+    const { companyLogIds } = req.body
 
     try {
 
-        const result = await companyService.userCancelJoin(parseInt(companyId), req.user.sub);
+        const result = await companyService.userCancelJoins(companyLogIds, req.user);
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 

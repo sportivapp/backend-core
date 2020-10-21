@@ -17,6 +17,7 @@ const ServiceHelper = require('../helper/ServiceHelper')
 const notificationService = require('./notificationService')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const companyLogService = require('./companyLogService')
+const mobileCompanyLogService = require('./mobileCompanyLogService')
 
 const UnsupportedOperationErrorEnum = {
     USER_APPLIED: 'USER_APPLIED',
@@ -263,22 +264,14 @@ companyService.removeUserFromCompany = async (userInCompany, userId, companyId) 
 
 }
 
-companyService.userCancelJoin = async (companyId, userId) => {
-    
-    const userFromDB = User.query()
-    .select()
-    .where('euserid', userId)
-    .first()
+companyService.userCancelJoins = async (companyLogIds, user) => {
 
-    if(!userFromDB)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
+    const companyLogs = await mobileCompanyLogService.getPendingLogByCompanyLogIdsAndTypeOptinalUserId(companyLogIds, [CompanyLogTypeEnum.APPLY], user.sub);
 
-    const deleteLog = await companyLogService.removeCompanyLog(userId, companyId, CompanyLogRemoveEnum.USER_CANCEL_JOIN)
-
-    if (!deleteLog)
+    if (companyLogs.length !== companyLogIds.length)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_APPLIED)
 
-    return deleteLog
+    return mobileCompanyLogService.deleteCompanyLogsByLogIds(companyLogIds)
 
 }
 
