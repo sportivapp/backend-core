@@ -26,6 +26,9 @@ function newModules() {
             emodulename: 'Team'
         },
         {
+            emodulename: 'Theory'
+        },
+        {
             emodulename: 'Forum'
         }
     ]
@@ -57,11 +60,13 @@ function newFunctions(modules) {
     let classId = 0
     let teamId = 0
     let forumId = 0
+    let theoryId = 0
 
     modules.forEach(module => {
         if (module.emodulename.includes('Class')) classId = module.emoduleid
         else if (module.emodulename.includes('Team')) teamId = module.emoduleid
         else if (module.emodulename.includes('Forum')) forumId = module.emoduleid
+        else if (module.emodulename.includes('Theory')) theoryId = module.emoduleid
     })
 
     let classFunctions = [
@@ -110,6 +115,29 @@ function newFunctions(modules) {
         }
     ]
 
+    let theoryFunctions = [
+        {
+            efunctioncode: 'C' + theoryId,
+            efunctionname: 'Create Theory',
+            emoduleemoduleid: theoryId
+        },
+        {
+            efunctioncode: 'R' + teamId,
+            efunctionname: 'Read Theory',
+            emoduleemoduleid: theoryId
+        },
+        {
+            efunctioncode: 'U' + teamId,
+            efunctionname: 'Update Theory',
+            emoduleemoduleid: theoryId
+        },
+        {
+            efunctioncode: 'D' + teamId,
+            efunctionname: 'Delete Theory',
+            emoduleemoduleid: theoryId
+        }
+    ]
+
     let forumFunctions = [
         {
             efunctioncode: 'C' + forumId,
@@ -133,9 +161,9 @@ function newFunctions(modules) {
         }
     ]
 
-    return classFunctions.concat(teamFunctions).concat(forumFunctions)
+    return classFunctions.concat(teamFunctions).concat(forumFunctions).concat(theoryFunctions)
 }
 
 exports.down = (knex, Promise) => knex('emodule')
-    .whereIn('emodulename', ['Class', 'Team', 'Forum'])
+    .whereIn('emodulename', ['Class', 'Team', 'Theory', 'Forum'])
     .delete();
