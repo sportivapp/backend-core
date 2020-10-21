@@ -34,4 +34,30 @@ mobileCompanyLogService.getUserCompanyPendingListByLogType = async (page, size, 
     
 }
 
+mobileCompanyLogService.getPendingLogByCompanyLogIdsAndTypeOptinalUserId = async (companyLogIds, types, userId = null) => {
+
+    const companyLogsPromise = CompanyLog.query()
+    .whereIn('ecompanylogid', companyLogIds)
+    .whereIn('ecompanylogtype', types)
+    .andWhere('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
+
+    if (userId)
+        companyLogsPromise.andWhere('eusereuserid', userId);
+
+    return companyLogsPromise
+        .then(companyLogs => {
+            return companyLogs
+        })
+
+}
+
+mobileCompanyLogService.deleteCompanyLogsByLogIds = async (companyLogIds) => {
+
+    return CompanyLog.query()
+        .whereIn('ecompanylogid', companyLogIds)
+        .delete()
+        .then(rowsAffected => rowsAffected === companyLogIds.length);
+    
+}
+
 module.exports = mobileCompanyLogService
