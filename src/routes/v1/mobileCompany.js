@@ -12,7 +12,7 @@ router.get(routes.company.users, auth.authenticateToken, controller.getUsersByCo
 router.post('/company-join', auth.authenticateToken, controller.joinCompany);
 router.post( routes.company.exit, auth.authenticateToken, controller.exitCompany);
 router.post( routes.company.processInvitation, auth.authenticateToken, controller.processInvitation);
-router.delete( routes.company.cancelJoin, auth.authenticateToken, controller.userCancelJoin);
+router.delete( routes.company.cancelJoin, auth.authenticateToken, controller.userCancelJoins);
 // user request join
 
 module.exports = router;
