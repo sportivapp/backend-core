@@ -53,7 +53,7 @@ companyService.getCompany = async (companyId, user) => {
     .where('eusereuserid', user.sub)
     .first()
 
-    const isPendingApply = companyService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.APPLY]);
+    const isPendingApply = companyLogService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.APPLY]);
 
     return Promise.all([companyDetailPromise, isInCompany, isPendingApply])
     .then(result => {
