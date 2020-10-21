@@ -8,7 +8,7 @@ module.exports = {
             id: '/company/:companyId',
             users: '/company/:companyId/users',
             exit: '/company-exit',
-            cancelJoin: '/company-cancel-join/:companyId',
+            cancelJoin: '/company-cancel-join',
             processInvitation: '/company-process-invitation'
         },
         user: {
