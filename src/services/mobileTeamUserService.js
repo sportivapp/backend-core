@@ -74,7 +74,23 @@ teamUserService.checkAdminByTeamLogsAndUserId = async (teamLogs, userId) => {
         .count();
 
     return teamIdsUnique.length === parseInt(counts[0].count);
-    
+
+}
+
+teamUserService.checkAdminOnTeamIds = async (teamIds, userId) => {
+
+    const promises = []
+
+    teamIds.forEach(teamId => {
+        const promise = teamUserService.getTeamUserCheckAdmin(teamId, userId)
+            .then(() => teamId)
+            .catch(() => null)
+        promises.push(promise)
+    })
+
+    return Promise.all(promises)
+        .then(teamIds => teamIds.filter(teamId => !!teamId))
+
 }
 
 teamUserService.getTeamUserByTeamIdAndUserId = async (teamId, userId) => {

@@ -19,7 +19,7 @@ profileService.updateProfile = async (userDTO, user) => {
 
 profileService.getProfile = async (user) => {
 
-    return userService.getUserById(user.sub, user);
+    return userService.getSingleUserById(user.sub);
 
 }
 
@@ -45,9 +45,7 @@ profileService.changeUserCompany = async (companyId, user) => {
 
     const loggedInUser = await userService.getUserById(user.sub, user)
 
-    const functions = await profileService.getFunctionCodes({ ...loggedInUser, companyId: companyId })
-
-    return userService.generateJWTToken(loggedInUser, companyId, functions);
+    return userService.generateJWTToken(loggedInUser, companyId);
 }
 
 profileService.getFunctions = async (user) => {

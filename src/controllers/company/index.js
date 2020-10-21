@@ -64,7 +64,6 @@ companyController.createCompany = async (req, res, next) => {
 
         const addressDTO = {
             eaddressstreet: street,
-            eaddresspostalcode: 0,
             ecountryecountryid: countryId,
             estateestateid: stateId
         }
@@ -158,7 +157,6 @@ companyController.editCompany = async (req, res, next) => {
 
     const { companyName,
         companyEmail,
-        postalCode,
         companyParentId,
         industryIds,
         companyPhoneNumber,
@@ -180,7 +178,6 @@ companyController.editCompany = async (req, res, next) => {
 
         const addressDTO = {
             eaddressstreet: street,
-            eaddresspostalcode: postalCode,
             ecountryecountryid: countryId,
             estateestateid: stateId
         }
