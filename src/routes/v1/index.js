@@ -98,6 +98,7 @@ const mobileForumRoutes = require('./mobileForum');
 const mobileCommentRoutes = require('./mobileComment');
 const mobileTeamUserRoutes = require('./mobileTeamUser');
 const mobileTeamLogRoutes = require('./mobileTeamLog');
+const mobileCompanyLogRoutes = require('./mobileCompanyLog')
 
 router.use('/api/v1/mobile', [
     mobileUserRoutes,
@@ -114,7 +115,8 @@ router.use('/api/v1/mobile', [
     mobileCommentRoutes,
     mobileTeamUserRoutes,
     mobileTeamLogRoutes,
-    threadPostReplyRoutes
+    threadPostReplyRoutes,
+    mobileCompanyLogRoutes
 ]);
 
 module.exports = router;
