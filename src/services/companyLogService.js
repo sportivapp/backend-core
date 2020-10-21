@@ -1,7 +1,6 @@
 const CompanyLog = require('../models/CompanyLog')
 const Company = require('../models/Company')
 const User = require('../models/User')
-const CompanyUserMapping = require('../models/CompanyUserMapping')
 const CompanyLogRemoveEnum = require('../models/enum/CompanyLogRemoveEnum')
 const CompanyLogStatusEnum = require('../models/enum/CompanyLogStatusEnum')
 const CompanyLogTypeEnum = require('../models/enum/CompanyLogTypeEnum')
@@ -11,7 +10,8 @@ const companyUserMappingService = require('./companyUserMappingService')
 
 const UnsupportedOperationErrorEnum = {
     USER_NOT_INVITED: 'USER_NOT_INVITED',
-    USER_NOT_APPLIED: 'USER_NOT_APPLIED'
+    USER_NOT_APPLIED: 'USER_NOT_APPLIED',
+    TYPE_UNACCEPTED: 'TYPE_UNACCEPTED'
 }
 
 const companyLogService = {}
@@ -204,5 +204,29 @@ companyLogService.getListPendingByUserId = async (userId, type, sortDirection, p
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
+
+companyLogService.getUserCompanyPendingApplyOrCompanyInvitationByLogTypeAndUserId = async (page, size, logType, userId) => {
+
+    return CompanyLog.query()
+    .modify('baseAttributes')
+    .select('ecompanylogcreatetime')
+    .where('eusereuserid', userId)
+    .where('ecompanylogtype', logType)
+    .andWhere('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
+    .withGraphFetched('company(baseAttributes).industry(baseAttributes)')
+    .page(page, size)
+    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+
+}
+
+companyLogService.getUserCompanyPendingListByLogType = async (page, size, type, user) => {
+
+    if(type !== 'APPLY' && type !== 'INVITE') 
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TYPE_UNACCEPTED)
+
+    return companyLogService.getUserCompanyPendingApplyOrCompanyInvitationByLogTypeAndUserId(page, size, type, user.sub)
+    
+}
+
 
 module.exports = companyLogService
