@@ -215,7 +215,7 @@ teamService.getTeamDetail = async (teamId, user) => {
 
 }
 
-teamService.getTeamMemberList = async (teamId, user, page, size) => {
+teamService.getTeamMemberList = async (teamId, user, page, size, keyword) => {
 
     // check if team exist
     await Team.query()
@@ -230,7 +230,7 @@ teamService.getTeamMemberList = async (teamId, user, page, size) => {
     
     if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
 
-    return teamUserMappingService.getTeamMemberListByTeamId(page, size, teamId)
+    return teamUserMappingService.getTeamMemberListByTeamId(page, size, teamId, keyword)
 
 }
 
