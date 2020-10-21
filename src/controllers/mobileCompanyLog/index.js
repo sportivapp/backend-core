@@ -6,7 +6,7 @@ const mobileCompanyLogController = {}
 mobileCompanyLogController.getUserCompanyPendingListByLogType = async (req, res, next) => {
 
     const { page = '0', size = '10', type = 'APPLY' } = req.query
-
+    
     try {
 
         const pageObj = await mobileCompanyLogService.getUserCompanyPendingListByLogType(parseInt(page), parseInt(size), type.toUpperCase(), req.user)
