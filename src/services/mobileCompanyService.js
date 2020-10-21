@@ -77,6 +77,7 @@ companyService.getCompanies = async (page, size, keyword, companyIds) => {
         .where('ecompanyolderid', null)
         .andWhere('ecompanyparentid', null)
         .andWhere(raw('lower("ecompanyname")'), 'like', `%${keyword.toLowerCase()}%`)
+        .withGraphFetched('industry(baseAttributes)')
 
     // If all companies, companyIds will be undefined
     if (companyIds) {
