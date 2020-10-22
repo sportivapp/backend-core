@@ -85,19 +85,15 @@ companyLogService.processRequests = async (companyLogIds, status, user) => {
 
             return CompanyLog.query(trx)
             .whereIn('ecompanylogid', companyLogIds)
-            .update({
+            .updateByUserId({
                 ecompanylogstatus: status,
-                ecompanylogchangeby: user.sub,
-                ecompanylogchangetime: Date.now()
-            })
+            },user.sub)
             .returning('*')
-            .then(async updatedCompanyLogs => {
+            .then(updatedCompanyLogs => {
                 
                 // insert user to company user mapping and set grade base on CompanyDefaultPosition
-                await companyUserMappingService.insertUserToCompanyByCompanyLogsWithTransaction(companyLogs, trx, user)
-
-                return updatedCompanyLogs
-
+                return companyUserMappingService.insertUserToCompanyByCompanyLogsWithTransaction(companyLogs, trx, user)
+                .then(() => updatedCompanyLogs)
             })
 
         })
@@ -106,11 +102,9 @@ companyLogService.processRequests = async (companyLogIds, status, user) => {
 
         return CompanyLog.query()
             .whereIn('ecompanylogid', companyLogIds)
-            .update({ 
+            .updateByUserId({ 
                 ecompanylogstatus: status,
-                ecompanylogchangeby: user.sub,
-                ecompanylogchangetime: Date.now()
-            })
+            }, user.sub)
             .returning('*')
     }
 
