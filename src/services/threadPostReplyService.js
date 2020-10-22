@@ -33,6 +33,7 @@ threadPostReplyService.getAllByThreadPostId = async (threadPostId) => {
         })
 
     return replies.map(reply => ({
+        ethreadpostreplyid: reply.ethreadpostreplyid,
         ethreadpostreplycomment: reply.ethreadpostreplycomment,
         ethreadpostreplycreatetime: reply.ethreadpostreplycreatetime,
         threadPostReplyPicture: reply.threadPostReplyPicture,
