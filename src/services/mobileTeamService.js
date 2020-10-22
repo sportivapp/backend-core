@@ -68,6 +68,7 @@ teamService.getTeam = async (teamId, user) => {
     .modify('baseAttributes')
     .withGraphFetched('company(baseAttributes)')
     .withGraphFetched('teamIndustry(baseAttributes)')
+    .withGraphFetched('teamAddress(baseAttributes)')
 
     if (!team)
         throw new NotFoundError()
