@@ -216,6 +216,7 @@ mobileForumService.getThreadDetailById = async (threadId) => {
     .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
     .modify('baseAttributes')
     .select('ethreadcreatetime', Thread.relatedQuery('comments').count().as('commentsCount'))
+    .withGraphFetched('threadPicture(baseAttributes)')
     .withGraphFetched('threadCreator(name).file(baseAttributes)')
     .withGraphFetched('company(baseAttributes)')
     .withGraphFetched('team(baseAttributes)')
