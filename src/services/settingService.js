@@ -243,8 +243,6 @@ SettingService.getAllModules = async () => {
 
 SettingService.getAllFunctions = async (codeKeyword = '') => {
 
-    console.log(codeKeyword)
-
     return Function.query()
         .where(raw('lower("efunctioncode")'), 'like', `%${codeKeyword}%`)
 }
