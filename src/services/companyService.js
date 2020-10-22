@@ -245,19 +245,13 @@ CompanyService.createCompany = async(companyDTO, addressDTO, industryIds, user) 
         const insertGradeAndFunctions = Grades.query(trx).insertToTable(gradeDTO, user.sub)
             .then(grade => ({ egradeegradeid: grade.egradeid, eusereuserid: user.sub }))
             .then(userPositionMappingDTO => UserPositionMapping.query(trx).insertToTable(userPositionMappingDTO, user.sub))
-            .then(mapping => {
-                adminGradeId = mapping.egradeegradeid
-                return adminGradeId
-            })
+            .then(mapping =>  mapping.egradeegradeid)
             .then(gradeId => settingService.mapFunctionsToGrade(gradeId, codes, trx))
 
         const insertMemberGradeAndFunction = Grades.query(trx).insertToTable(memberDTO, user.sub)
             .then(grade => ({ egradeegradeid: grade.egradeid, eusereuserid: user.sub }))
             .then(userPositionMappingDTO => UserPositionMapping.query(trx).insertToTable(userPositionMappingDTO, user.sub))
-            .then(mapping => {
-                memberGradeId = mapping.egradeegradeid
-                return memberGradeId
-            })
+            .then(mapping => mapping.egradeegradeid)
             .then(gradeId => settingService.mapFunctionsToGrade(gradeId, memberCode, trx))
 
         // super user of the company
@@ -267,17 +261,17 @@ CompanyService.createCompany = async(companyDTO, addressDTO, industryIds, user) 
 
         return Promise.all([findUserQuery, insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery, insertGradeAndFunctions, 
             insertMemberGradeAndFunction, insertCompanyIndustryMapping])
-            .then(async resultArr => {
+            .then(resultArr => {
 
                 // add company default position when created
-                await CompanyDefaultPosition.query(trx)
+                return CompanyDefaultPosition.query(trx)
                 .insertToTable({
                     ecompanyecompanyid: company.ecompanyid, 
                     eadmingradeid: adminGradeId, 
                     emembergradeid: memberGradeId
                 }, user.sub)
-
-                return resultArr
+                .then(() => resultArr)
+                
             })
             .then(resultArr => ({
                 company: company,
