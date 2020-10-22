@@ -10,6 +10,6 @@ router.get( '/mobile/thread/:threadId', auth.authenticateToken, controller.getTh
 router.delete( '/mobile/thread/:threadId', auth.authenticateToken, controller.deleteThreadById);
 router.get('/thread-companies', auth.authenticateToken, controller.getMyOrganizationListWithAccess)
 router.get('/thread-teams', auth.authenticateToken, controller.getMyTeamListWithAccess)
-router.get('/thread-is-moderator/:threadId', auth.authenticateToken, controller.isThreadModerator);
+router.get('/thread/:threadId/moderator-status', auth.authenticateToken, controller.isThreadModerator);
 
 module.exports = router.expressRouter;
