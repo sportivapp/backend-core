@@ -60,4 +60,21 @@ mobileCompanyLogService.deleteCompanyLogsByLogIds = async (companyLogIds) => {
     
 }
 
+
+mobileCompanyLogService.updateLogsByCompanyLogsWithTransaction = async (companyLogs, status, user, trx) => {
+
+    const companyLogIds = companyLogs.map(companyLog => companyLog.ecompanylogid)
+
+    return CompanyLog
+    .query(trx)
+    .whereIn('ecompanylogid', companyLogIds)
+    .update({
+        ecompanylogstatus: status,
+        ecompanylogchangetime: Date.now(),
+        ecompanylogchangeby: user.sub
+    })
+    .returning('*');
+
+}
+
 module.exports = mobileCompanyLogService
