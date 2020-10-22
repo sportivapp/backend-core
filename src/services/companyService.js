@@ -9,6 +9,7 @@ const CompanyUserMapping = require('../models/CompanyUserMapping')
 const CompanyModuleMapping = require('../models/CompanyModuleMapping')
 const CompanySequence = require('../models/CompanySequence')
 const CompanyIndustryMapping = require('../models/CompanyIndustryMapping')
+const CompanyDefaultPosition = require('../models/CompanyDefaultPosition')
 const { raw } = require('objection')
 const ServiceHelper = require('../helper/ServiceHelper')
 const settingService = require('./settingService')
@@ -182,6 +183,8 @@ CompanyService.createCompany = async(companyDTO, addressDTO, industryIds, user) 
 
     const codes = await settingService.getAllFunctions().then(funcList => funcList.map(func => func.efunctioncode))
 
+    const memberCode = await settingService.getAllFunctions('r').then(funcList => funcList.map(func => func.efunctioncode))
+    
     const modules = await settingService.getAllModules()
 
     return Company.transaction(async trx => {
@@ -231,11 +234,25 @@ CompanyService.createCompany = async(companyDTO, addressDTO, industryIds, user) 
             ecompanyecompanyid: company.ecompanyid
         }
 
+        const memberDTO = {
+            egradename: 'Member',
+            egradedescription: 'Member of Company',
+            ecompanyecompanyid: company.ecompanyid
+        }
+
+        let adminGradeId, memberGradeId
+
         const insertGradeAndFunctions = Grades.query(trx).insertToTable(gradeDTO, user.sub)
             .then(grade => ({ egradeegradeid: grade.egradeid, eusereuserid: user.sub }))
             .then(userPositionMappingDTO => UserPositionMapping.query(trx).insertToTable(userPositionMappingDTO, user.sub))
-            .then(mapping => mapping.egradeegradeid)
+            .then(mapping =>  mapping.egradeegradeid)
             .then(gradeId => settingService.mapFunctionsToGrade(gradeId, codes, trx))
+
+        const insertMemberGradeAndFunction = Grades.query(trx).insertToTable(memberDTO, user.sub)
+            .then(grade => ({ egradeegradeid: grade.egradeid, eusereuserid: user.sub }))
+            .then(userPositionMappingDTO => UserPositionMapping.query(trx).insertToTable(userPositionMappingDTO, user.sub))
+            .then(mapping => mapping.egradeegradeid)
+            .then(gradeId => settingService.mapFunctionsToGrade(gradeId, memberCode, trx))
 
         // super user of the company
         const findUserQuery = User.query()
@@ -243,7 +260,19 @@ CompanyService.createCompany = async(companyDTO, addressDTO, industryIds, user) 
             .modify('baseAttributes')
 
         return Promise.all([findUserQuery, insertCompanyModuleMappingQuery, insertCompanyUserMappingQuery, insertGradeAndFunctions, 
-            insertCompanyIndustryMapping])
+            insertMemberGradeAndFunction, insertCompanyIndustryMapping])
+            .then(resultArr => {
+
+                // add company default position when created
+                return CompanyDefaultPosition.query(trx)
+                .insertToTable({
+                    ecompanyecompanyid: company.ecompanyid, 
+                    eadmingradeid: adminGradeId, 
+                    emembergradeid: memberGradeId
+                }, user.sub)
+                .then(() => resultArr)
+                
+            })
             .then(resultArr => ({
                 company: company,
                 address: address,

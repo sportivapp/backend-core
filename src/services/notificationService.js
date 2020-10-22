@@ -67,5 +67,30 @@ notificationService.saveNotification = async (notificationObj, loggedInUser, tar
 
 }
 
+notificationService.saveNotificationWithTransaction = async (notificationObj, loggedInUser, targetUserIds, trx) => {
+
+    const notificationBodyDTO = {
+        enotificationbodyentityid: notificationObj.enotificationbodyentityid,
+        enotificationbodyentitytype: notificationObj.enotificationbodyentitytype,
+        enotificationbodyaction: notificationObj.enotificationbodyaction,
+        enotificationbodytitle: notificationObj.enotificationbodytitle,
+        enotificationbodymessage: notificationObj.enotificationbodymessage,
+        enotificationbodysenderid: loggedInUser.sub
+    }
+    
+    return NotificationBody.query(trx)
+    .insertToTable(notificationBodyDTO, loggedInUser.sub)
+    .then(notificationBody => {
+
+        const notificationDTO = targetUserIds.map(targetUserId => ({
+            eusereuserid: targetUserId.euserid,
+            enotificationbodyenotificationbodyid: notificationBody.enotificationbodyid
+        }))
+
+        return Notification.query(trx)
+        .insertToTable(notificationDTO, loggedInUser.sub)
+    })
+
+}
 
 module.exports = notificationService;

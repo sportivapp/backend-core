@@ -1,12 +1,18 @@
 const CompanyLog = require('../models/CompanyLog')
 const Company = require('../models/Company')
 const User = require('../models/User')
-const CompanyUserMapping = require('../models/CompanyUserMapping')
 const CompanyLogRemoveEnum = require('../models/enum/CompanyLogRemoveEnum')
 const CompanyLogStatusEnum = require('../models/enum/CompanyLogStatusEnum')
 const CompanyLogTypeEnum = require('../models/enum/CompanyLogTypeEnum')
 const ServiceHelper = require('../helper/ServiceHelper')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
+const companyUserMappingService = require('./companyUserMappingService')
+
+const UnsupportedOperationErrorEnum = {
+    USER_NOT_INVITED: 'USER_NOT_INVITED',
+    USER_NOT_APPLIED: 'USER_NOT_APPLIED',
+    TYPE_UNACCEPTED: 'TYPE_UNACCEPTED'
+}
 
 const companyLogService = {}
 
@@ -31,7 +37,6 @@ companyLogService.getPendingLog = async (companyId, userId, types) => {
     .first();
 
 }
-
 
 companyLogService.updateCompanyLog = async (companyId, user, userId, status) => {
 
@@ -64,40 +69,45 @@ companyLogService.removeCompanyLog = async (userId, companyId, removeType ) => {
 
 }
 
-companyLogService.processRequest = async (companyLogId, status, user) => {
+companyLogService.processRequests = async (companyLogIds, status, user) => {
 
     if (status !== CompanyLogStatusEnum.ACCEPTED && status !== CompanyLogStatusEnum.REJECTED)
         throw new UnsupportedOperationError('STATUS_INVALID')
 
-    const companyLog = await CompanyLog.query()
-        .findById(companyLogId)
+    const companyLogs = await companyLogService.getPendingLogsByCompanyLogIdsAndType(companyLogIds, [CompanyLogTypeEnum.APPLY], user)
 
-    if (!companyLog) throw new NotFoundError()
+    if(companyLogs.length !== companyLogIds.length)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_APPLIED)
 
-    else if (companyLog.ecompanylogtype !== CompanyLogTypeEnum.APPLY) throw new UnsupportedOperationError('TYPE_INVALID')
-
-    if (status === CompanyLogStatusEnum.ACCEPTED)
+    if (status === CompanyLogStatusEnum.ACCEPTED) {
 
         return CompanyLog.transaction(async trx => {
 
-            return companyLog.$query(trx)
-                .updateByUserId({ ecompanylogstatus: status }, user.sub)
-                .returning('*')
-                .withGraphFetched('user(baseAttributes)')
-                .then(updatedCompanyLog => CompanyUserMapping.query(trx).insertToTable({
-                    ecompanyecompanyid: companyLog.ecompanyecompanyid,
-                    eusereuserid: companyLog.eusereuserid,
-                    ecompanyusermappingpermission: 1
-                    }, user.sub).then(ignored => updatedCompanyLog)
-                )
+            return CompanyLog.query(trx)
+            .whereIn('ecompanylogid', companyLogIds)
+            .updateByUserId({
+                ecompanylogstatus: status,
+            },user.sub)
+            .returning('*')
+            .then(updatedCompanyLogs => {
+                
+                // insert user to company user mapping and set grade base on CompanyDefaultPosition
+                return companyUserMappingService.insertUserToCompanyByCompanyLogsWithTransaction(companyLogs, trx, user)
+                .then(() => updatedCompanyLogs)
+            })
+
         })
 
-    else
+    } else {
 
-        return companyLog.$query()
-            .updateByUserId({ ecompanylogstatus: status }, user.sub)
+        return CompanyLog.query()
+            .whereIn('ecompanylogid', companyLogIds)
+            .updateByUserId({ 
+                ecompanylogstatus: status,
+            }, user.sub)
             .returning('*')
-            .withGraphFetched('user(baseAttributes)')
+    }
+
 }
 
 companyLogService.getLogList = async (page, size, companyId, type, status) => {
@@ -155,12 +165,27 @@ companyLogService.inviteMember = async (companyId, email, loggedInUser) => {
         return companyLog
 }
 
-companyLogService.cancelInvite = async (companyLogId) => {
+companyLogService.getPendingLogsByCompanyLogIdsAndType = async (companyLogIds, types, user) => {
 
     return CompanyLog.query()
-        .findById(companyLogId)
+    .whereIn('ecompanylogid', companyLogIds)
+    .whereIn('ecompanylogtype', types)
+    .where('ecompanyecompanyid', user.companyId)
+    .andWhere('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
+
+}
+
+companyLogService.cancelInvites = async (companyLogIds, user) => {
+
+    const companyLogs = await companyLogService.getPendingLogsByCompanyLogIdsAndType(companyLogIds, [CompanyLogTypeEnum.INVITE], user)
+
+    if(companyLogs.length !== companyLogIds.length)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_INVITED)
+
+    return CompanyLog.query()
+        .whereIn('ecompanylogid', companyLogIds)
         .delete()
-        .then(rowsAffected => rowsAffected === 1)
+        .then(rowsAffected => rowsAffected === companyLogIds.length)
 }
 
 companyLogService.getListPendingByUserId = async (userId, type, sortDirection, page, size) => {
@@ -172,6 +197,29 @@ companyLogService.getListPendingByUserId = async (userId, type, sortDirection, p
     .orderBy('ecompanylogcreatetime', sortDirection)
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+}
+
+companyLogService.getUserCompanyPendingApplyOrCompanyInvitationByLogTypeAndUserId = async (page, size, logType, userId) => {
+
+    return CompanyLog.query()
+    .modify('baseAttributes')
+    .select('ecompanylogcreatetime')
+    .where('eusereuserid', userId)
+    .where('ecompanylogtype', logType)
+    .andWhere('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
+    .withGraphFetched('company(baseAttributes).industry(baseAttributes)')
+    .page(page, size)
+    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+
+}
+
+companyLogService.getUserCompanyPendingListByLogType = async (page, size, type, user) => {
+
+    if(type !== 'APPLY' && type !== 'INVITE') 
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.TYPE_UNACCEPTED)
+
+    return companyLogService.getUserCompanyPendingApplyOrCompanyInvitationByLogTypeAndUserId(page, size, type, user.sub)
+    
 }
 
 module.exports = companyLogService
