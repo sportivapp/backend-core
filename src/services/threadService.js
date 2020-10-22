@@ -13,6 +13,7 @@ const settingService = require('./settingService')
 const ModuleNameEnum = require('../models/enum/ModuleNameEnum')
 const { raw } = require('objection')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
+const { UniqueViolationError } = require('objection');
 
 const threadService = {}
 
@@ -23,7 +24,16 @@ const ErrorEnum = {
     COMPANY_NOT_FOUND: 'COMPANY_NOT_FOUND',
     TEAM_NOT_FOUND: 'TEAM_NOT_FOUND',
     FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
-    USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY'
+    USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY',
+    TITLE_EXISTED: 'TITLE_EXISTED'
+}
+
+function isNameUniqueValidationError(e) {
+
+    if (!e.nativeError)
+        return false;
+
+    return e.nativeError.detail.includes('ethreadtitle') && e instanceof UniqueViolationError
 }
 
 threadService.getAllThreads = async (page, size, keyword, isPublic, filter) => {
@@ -123,6 +133,9 @@ threadService.createThread = async (threadDTO, isPublic, moderatorIds, user) => 
 
         return Promise.resolve({ ...thread, moderators: moderators })
 
+    }).catch(e => {
+        if (isNameUniqueValidationError(e)) throw new UnsupportedOperationError(ErrorEnum.TITLE_EXISTED)
+        throw e
     })
 
 }
@@ -187,6 +200,9 @@ threadService.updateThread = async (threadId, threadDTO, isPublic, moderatorIds,
 
         // const threadModerators = threadModeratorService.saveThreadModerators(thread.ethreadid, moderatorIds, user, trx)
 
+    }).catch(e => {
+        if (isNameUniqueValidationError(e)) throw new UnsupportedOperationError(ErrorEnum.TITLE_EXISTED)
+        throw e
     })
 
 }
