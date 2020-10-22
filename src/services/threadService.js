@@ -242,4 +242,14 @@ threadService.getThreadDetailById = async (threadId) => {
     return Thread.query().findById(threadId).modify('baseAttributes')
 }
 
+threadService.isModerator = async (threadId, userId) => {
+
+    return threadModeratorService.isThreadModerator(threadId, userId)
+        .then(threadModerator => {
+            if (!threadModerator) return false
+            return true
+        })
+
+}
+
 module.exports = threadService

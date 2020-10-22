@@ -189,7 +189,8 @@ module.exports = {
         },
         thread: {
             list: '/thread',
-            id: '/thread/:threadId'
+            id: '/thread/:threadId',
+            moderator: '/thread-is-moderator/:threadId'
         },
         authentication: {
             login: '/login',
