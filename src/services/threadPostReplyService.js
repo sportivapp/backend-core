@@ -71,6 +71,8 @@ threadPostReplyService.editReplyById = async (replyId, replyDTO, user) => {
 
     if (!reply) throw new UnsupportedOperationError(ErrorEnum.REPLY_NOT_FOUND)
 
+    if (reply.ethreadpostreplycreateby !== user.sub) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
+
     const post = await threadPostService.getPostById(reply.ethreadpostethreadpostid).catch(() => null)
 
     if (!post) throw new UnsupportedOperationError(ErrorEnum.POST_NOT_FOUND)

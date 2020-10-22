@@ -7,6 +7,7 @@ router.get(routes.thread.list, auth.authenticateToken, threadController.getAllTh
 router.post(routes.thread.list, auth.authenticateToken, threadController.createThread)
 router.get(routes.thread.id, auth.authenticateToken, threadController.getThreadById);
 router.put(routes.thread.id, auth.authenticateToken, threadController.updateThread);
-router.delete(routes.thread.id, auth.authenticateToken, threadController.deleteThreadById)
+router.delete(routes.thread.id, auth.authenticateToken, threadController.deleteThreadById);
+router.get(routes.thread.moderator, auth.authenticateToken, threadController.isModerator);
 
 module.exports = router.expressRouter;

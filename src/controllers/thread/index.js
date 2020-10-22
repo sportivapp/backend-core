@@ -89,4 +89,17 @@ threadController.deleteThreadById = async (req, res, next) => {
     }
 }
 
+threadController.isModerator = async (req, res, next) => {
+
+    const { threadId } = req.params
+
+    try {
+        const result = await threadService.isModerator(threadId, req.user.sub)
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+    } catch (e) {
+        next(e)
+    }
+
+}
+
 module.exports = threadController
