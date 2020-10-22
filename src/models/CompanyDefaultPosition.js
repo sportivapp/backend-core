@@ -22,7 +22,18 @@ class CompanyDefaultPosition extends Model {
   }
 
   static get relationMappings() {
-    return {}
+
+    const Grades = require('./Grades')
+    return {
+      memberGrade: {
+          relation: Model.BelongsToOneRelation,
+          modelClass: Grades,
+          join: {
+              from: 'ecompanydefaultposition.emembergradeid',
+              to: 'egrade.egradeid'
+          },
+      }
+    }
   }
   
 }
