@@ -7,7 +7,7 @@ const RosterUserMapping = require('../models/RosterUserMapping')
 const ShiftRosterUserMapping = require('../models/ShiftRosterUserMapping')
 const Team = require('../models/Team')
 const Grade = require('../models/Grades')
-const UserPositionMapping = require('../models/UserPositionMapping')
+const CompanyDefaultPosition = require('../models/CompanyDefaultPosition')
 const NotificationEnum = require('../models/enum/NotificationEnum')
 const CompanyLogTypeEnum = require('../models/enum/CompanyLogTypeEnum')
 const CompanyLogStatusEnum = require('../models/enum/CompanyLogStatusEnum')
@@ -18,6 +18,8 @@ const notificationService = require('./notificationService')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const companyLogService = require('./companyLogService')
 const mobileCompanyLogService = require('./mobileCompanyLogService')
+const mobileCompanyUserService = require('./mobileCompanyUserService')
+const CompanyLog = require('../models/CompanyLog')
 
 const UnsupportedOperationErrorEnum = {
     USER_APPLIED: 'USER_APPLIED',
@@ -26,12 +28,14 @@ const UnsupportedOperationErrorEnum = {
     USER_NOT_EXIST: 'USER_NOT_EXIST',
     STATUS_UNACCEPTED: 'STATUS_UNACCEPTED',
     USER_NOT_INVITED: 'USER_NOT_INVITED',
-    USER_NOT_APPLIED: 'USER_NOT_APPLIED'
+    USER_NOT_APPLIED: 'USER_NOT_APPLIED',
+    COMPANY_NOT_EXIST: 'COMPANY_NOT_EXIST'
 
 }
 
 const companyService = {}
 
+// TODO: might be change to new getHighestPositionByCompanyId later
 companyService.getHighestPosition = async (companyId) => {
 
     const users = await Grade.relatedQuery('users')
@@ -362,62 +366,79 @@ companyService.exitCompany = async (companyId, user) => {
 
 }
 
-companyService.processInvitation = async (companyId, user, status) => {
+companyService.processInvitation = async (companyLogIds, user, status) => {
 
-    if (status !== CompanyLogStatusEnum.ACCEPTED && status !== CompanyLogStatusEnum.REJECTED)
+    if (CompanyLogStatusEnum.ACCEPTED !== status && CompanyLogStatusEnum.REJECTED !== status)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.STATUS_UNACCEPTED)
 
-    const getHighestPosition = await companyService.getHighestPosition(companyId)
+    const companyLogs = await mobileCompanyLogService.getPendingLogByCompanyLogIdsAndTypeOptinalUserId(companyLogIds, [CompanyLogTypeEnum.INVITE], user.sub);
 
-    const pendingInvite = await companyLogService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.INVITE]);
-
-    if (!pendingInvite)
+    if (companyLogs.length !== companyLogIds.length)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_INVITED)
-
-    if (status === CompanyLogStatusEnum.REJECTED)
-        return companyLogService.updateCompanyLog(companyId, user, user.sub, CompanyLogStatusEnum.REJECTED)
-        .then(companyLog => {
-            
-            if(getHighestPosition.length > 0 ) {
-                const notificationObj = {
-                    enotificationbodyentityid: user.sub,
-                    enotificationbodyentitytype: NotificationEnum.user.type,
-                    enotificationbodyaction: NotificationEnum.user.actions.rejected.code,
-                    enotificationbodytitle: NotificationEnum.user.actions.rejected.title,
-                    enotificationbodymessage: NotificationEnum.user.actions.rejected.message
-                }
     
-                notificationService.saveNotification(
-                    notificationObj,
-                    user,
-                    getHighestPosition
-                )
-            }
-            return companyLog
+    return CompanyLog.transaction(async trx => {
+
+        if (CompanyLogStatusEnum.ACCEPTED === status) {
+
+            await mobileCompanyUserService.insertUserToCompanyByCompanyLogsWithTransaction(companyLogs, trx, user);
+        }
+
+        const newCompanyLogs = await mobileCompanyLogService.updateLogsByCompanyLogsWithTransaction(companyLogs, status, user, trx)
+
+        const companyIds = newCompanyLogs.map(newCompanyLog => newCompanyLog.ecompanyecompanyid)
+
+        const getAdminsInCompany = await CompanyDefaultPosition.query(trx)
+        .whereIn('ecompanyecompanyid', companyIds)
+        .then(positions => {
+
+            if(positions.length !== companyIds.length) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.COMPANY_NOT_EXIST)
+            
+            const adminGradeIds = positions.map(position => position.eadmingradeid)
+
+            return Grade.relatedQuery('users')
+            .for(Grade.query().whereIn('egradeid', adminGradeIds))
+            .distinct('euserid')
+
         })
 
-    if (status === CompanyLogStatusEnum.ACCEPTED)
-        return companyService.processIntoCompany(companyId, user, user.sub)
-        .then(processedUser => {
+        if(getAdminsInCompany.length > 0 ) {
 
-            if(getHighestPosition.length > 0 ) {
-                const notificationObj = {
+            let notificationObj 
+
+            if(CompanyLogStatusEnum.ACCEPTED === status) {
+
+                notificationObj = {                    
                     enotificationbodyentityid: user.sub,
                     enotificationbodyentitytype: NotificationEnum.user.type,
                     enotificationbodyaction: NotificationEnum.user.actions.accepted.code,
                     enotificationbodytitle: NotificationEnum.user.actions.accepted.title,
                     enotificationbodymessage: NotificationEnum.user.actions.accepted.message
                 }
-    
-                notificationService.saveNotification(
-                    notificationObj,
-                    user,
-                    getHighestPosition
-                )
+
+            } else {
+
+                notificationObj = {                    
+                    enotificationbodyentityid: user.sub,
+                    enotificationbodyentitytype: NotificationEnum.user.type,
+                    enotificationbodyaction: NotificationEnum.user.actions.rejected.code,
+                    enotificationbodytitle: NotificationEnum.user.actions.rejected.title,
+                    enotificationbodymessage: NotificationEnum.user.actions.rejected.message
+                }
+
             }
 
-            return processedUser
-        })
+            await notificationService.saveNotificationWithTransaction(
+                notificationObj,
+                user,
+                getAdminsInCompany,
+                trx
+            )
+        }
+
+
+        return newCompanyLogs
+
+    })
 
 }
 
