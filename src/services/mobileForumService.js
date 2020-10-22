@@ -11,6 +11,7 @@ const mobileTeamService = require('./mobileTeamService')
 const teamUserService = require('./mobileTeamUserService')
 const fileService = require('./fileService')
 const ModuleNameEnum = require('../models/enum/ModuleNameEnum')
+const { raw } = require('objection')
 
 const mobileForumService = {}
 
@@ -105,9 +106,9 @@ mobileForumService.createThread = async (threadDTO, user) => {
 
         if (threadDTO.ethreadispublic) {
 
-            const isAllowed = await gradeService.getAllGradesByUserIdAndCompanyId(thread.ecompanyecompanyid, user.sub)
+            const isAllowed = await gradeService.getAllGradesByUserIdAndCompanyId(threadDTO.ecompanyecompanyid, user.sub)
                 .then(grades => grades.map(grade => grade.egradeid))
-                .then(gradeIds => settingService.isUserHaveFunctions(['P'], gradeIds, ModuleNameEnum.FORUM, thread.ecompanyecompanyid))
+                .then(gradeIds => settingService.isUserHaveFunctions(['P'], gradeIds, ModuleNameEnum.FORUM, threadDTO.ecompanyecompanyid))
 
             if (!isAllowed) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
         }

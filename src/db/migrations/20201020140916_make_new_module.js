@@ -122,17 +122,17 @@ function newFunctions(modules) {
             emoduleemoduleid: theoryId
         },
         {
-            efunctioncode: 'R' + teamId,
+            efunctioncode: 'R' + theoryId,
             efunctionname: 'Read Theory',
             emoduleemoduleid: theoryId
         },
         {
-            efunctioncode: 'U' + teamId,
+            efunctioncode: 'U' + theoryId,
             efunctionname: 'Update Theory',
             emoduleemoduleid: theoryId
         },
         {
-            efunctioncode: 'D' + teamId,
+            efunctioncode: 'D' + theoryId,
             efunctionname: 'Delete Theory',
             emoduleemoduleid: theoryId
         }
