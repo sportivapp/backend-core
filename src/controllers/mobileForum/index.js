@@ -131,4 +131,19 @@ controller.deleteThreadById = async (req, res, next) => {
     }
 }
 
+controller.isThreadModerator = async (req, res, next) => {
+
+    const { threadId } = req.params;
+
+    try {
+
+        const result = await mobileForumService.isModerator(parseInt(threadId), req.user.sub);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+        
+    } catch (e) {
+        next(e)
+    }
+
+}
+
 module.exports = controller

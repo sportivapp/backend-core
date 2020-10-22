@@ -106,9 +106,13 @@ mobileCommentService.updateComment = async (commentId, commentDTO, user) => {
 mobileCommentService.getAllComments = async (page, size, threadId) => {
 
     return ThreadPost.query()
-    .where('ethreadethreadid', threadId)
-    .page(page, size)
-    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+        .modify('baseAttributes')
+        .select(ThreadPost.relatedQuery('replies').count().as('replyCount'))
+        .where('ethreadethreadid', threadId)
+        .withGraphFetched('user(idAndName)')
+        .withGraphFetched('threadPostPicture(baseAttributes)')
+        .page(page, size)
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
 }
 

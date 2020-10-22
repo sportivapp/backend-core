@@ -8,7 +8,8 @@ const ErrorEnum = {
     EMAIL_INVALID: 'EMAIL_INVALID',
     EMAIL_USED: 'EMAIL_USED',
     OTP_PENDING: 'OTP_PENDING',
-    OTP_CONFIRMED: 'OTP_CONFIRMED'
+    OTP_CONFIRMED: 'OTP_CONFIRMED',
+    OTP_EXPIRED: 'OTP_EXPIRED'
 }
 
 const OtpService = {};
@@ -43,6 +44,10 @@ OtpService.createOtp = async (email) => {
         // If already confirmed
         if (promised[0].otpcodeconfirmed)
             throw new UnsupportedOperationError(ErrorEnum.OTP_CONFIRMED);
+
+        const fifteenMinutes = 15 * 60 * 1000;
+        if ((Date.now() - promised[0].eotpchangetime) < fifteenMinutes)
+            throw new UnsupportedOperationError(ErrorEnum.OTP_EXPIRED);
 
         // resend Otp
         returnedOtp = await promised[0].$query().updateByUserId({ eotpcode: otpCode }, 0).returning('*');

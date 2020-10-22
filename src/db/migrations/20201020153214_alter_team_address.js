@@ -1,5 +1,5 @@
 exports.up = (knex, Promise) => knex.schema.alterTable('eteam', t => {
-    t.integer('eaddresseaddressid').notNullable().references('eaddress.eaddressid').onDelete('CASCADE');
+    t.integer('eaddresseaddressid').references('eaddress.eaddressid').onDelete('CASCADE');
 });
 
 exports.down = (knex, Promise) => knex.schema.alterTable('eteam', t => {

@@ -11,6 +11,8 @@ const mobileTeamService = require('./mobileTeamService')
 const teamUserService = require('./mobileTeamUserService')
 const fileService = require('./fileService')
 const ModuleNameEnum = require('../models/enum/ModuleNameEnum')
+const { raw } = require('objection')
+const { UniqueViolationError } = require('objection');
 
 const mobileForumService = {}
 
@@ -24,6 +26,14 @@ const ErrorEnum = {
     TITLE_EXISTED: 'TITLE_EXISTED',
     PRIVATE_NOT_AVAILABLE: 'PRIVATE_NOT_AVAILABLE',
     FILE_NOT_EXIST: 'FILE_NOT_EXIST'
+}
+
+function isNameUniqueValidationError(e) {
+
+    if (!e.nativeError)
+        return false;
+
+    return e.nativeError.detail.includes('ethreadtitle') && e instanceof UniqueViolationError
 }
 
 mobileForumService.isModerator = async (threadId, userId) => {
@@ -72,22 +82,7 @@ mobileForumService.normalizeFilter = async (filterData) => {
 
 }
 
-mobileForumService.checkTitleExist = async (title) => {
-
-    return Thread.query()
-        .whereRaw(`LOWER("ethreadtitle") = LOWER('${title}')`)
-        .first()
-        .then(thread => {
-            if (thread)
-                throw new UnsupportedOperationError(ErrorEnum.TITLE_EXISTED);
-            return false;
-        });
-
-}
-
 mobileForumService.createThread = async (threadDTO, user) => {
-
-    await mobileForumService.checkTitleExist(threadDTO.ethreadtitle);
 
     if( threadDTO.ecompanyecompanyid && threadDTO.eteameteamid )
         throw new UnsupportedOperationError(ErrorEnum.INVALID_TYPE)
@@ -105,9 +100,9 @@ mobileForumService.createThread = async (threadDTO, user) => {
 
         if (threadDTO.ethreadispublic) {
 
-            const isAllowed = await gradeService.getAllGradesByUserIdAndCompanyId(thread.ecompanyecompanyid, user.sub)
+            const isAllowed = await gradeService.getAllGradesByUserIdAndCompanyId(threadDTO.ecompanyecompanyid, user.sub)
                 .then(grades => grades.map(grade => grade.egradeid))
-                .then(gradeIds => settingService.isUserHaveFunctions(['P'], gradeIds, ModuleNameEnum.FORUM, thread.ecompanyecompanyid))
+                .then(gradeIds => settingService.isUserHaveFunctions(['P'], gradeIds, ModuleNameEnum.FORUM, threadDTO.ecompanyecompanyid))
 
             if (!isAllowed) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
         }
@@ -129,13 +124,14 @@ mobileForumService.createThread = async (threadDTO, user) => {
 
             return Promise.resolve({ thread, moderator });
 
+    }).catch(e => {
+        if (isNameUniqueValidationError(e)) throw new UnsupportedOperationError(ErrorEnum.TITLE_EXISTED)
+        throw e
     })
     
 }
 
 mobileForumService.updateThreadById = async (threadId, threadDTO, user) => {
-
-    await mobileForumService.checkTitleExist(threadDTO.ethreadtitle);
     
     const thread = await mobileForumService.getThreadById(threadId);
 
@@ -175,6 +171,10 @@ mobileForumService.updateThreadById = async (threadId, threadDTO, user) => {
         .$query()
         .updateByUserId(threadDTO, user.sub)
         .returning('*')
+        .catch(e => {
+            if (isNameUniqueValidationError(e)) throw new UnsupportedOperationError(ErrorEnum.TITLE_EXISTED)
+            throw e
+        })
     
 }
 
@@ -216,6 +216,7 @@ mobileForumService.getThreadDetailById = async (threadId) => {
     .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
     .modify('baseAttributes')
     .select('ethreadcreatetime', Thread.relatedQuery('comments').count().as('commentsCount'))
+    .withGraphFetched('threadPicture(baseAttributes)')
     .withGraphFetched('threadCreator(name).file(baseAttributes)')
     .withGraphFetched('company(baseAttributes)')
     .withGraphFetched('team(baseAttributes)')
