@@ -34,6 +34,7 @@ class Team extends Model {
 
         const File = require('./File')
         const User = require('./User')
+        const Address = require('./Address')
 
         return {
             position: {
@@ -78,6 +79,14 @@ class Team extends Model {
                 join: {
                     from: 'eteam.efileefileid',
                     to: 'efile.efileid'
+                }
+            },
+            teamAddress: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Address,
+                join: {
+                    from: 'eteam.eaddresseaddressid',
+                    to: 'eaddress.eaddressid'
                 }
             }
         }
