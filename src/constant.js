@@ -8,7 +8,7 @@ module.exports = {
             id: '/company/:companyId',
             users: '/company/:companyId/users',
             exit: '/company-exit',
-            cancelJoin: '/company-cancel-join/:companyId',
+            cancelJoin: '/company-cancel-join',
             processInvitation: '/company-process-invitation'
         },
         user: {
@@ -154,7 +154,11 @@ module.exports = {
         },
         companyLog: {
             list: '/company/:companyId/log',
-            id: '/company/:companyId/log/:companyLogId'
+            id: '/company/:companyId/log/:companyLogId',
+            listPending: '/company-user-pending',
+            cancelInvite: '/company-cancel-invite',
+            processRequest: '/company-process-request'
+
         },
         app: {
             version: '/app/version'

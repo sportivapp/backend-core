@@ -19,6 +19,14 @@ class CompanyLog extends Model {
             }
         };
     }
+
+    static get modifiers() {
+        return {
+            baseAttributes(builder) {
+                builder.select('ecompanylogid', 'ecompanyecompanyid', 'eusereuserid', 'ecompanylogtype', 'ecompanylogstatus')
+            }
+        }
+    }
     
     static get relationMappings() {
 

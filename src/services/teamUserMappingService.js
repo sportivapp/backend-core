@@ -3,6 +3,7 @@ const TeamLog = require('../models/TeamLog')
 const { NotFoundError } = require('../models/errors')
 const ServiceHelper = require('../helper/ServiceHelper')
 const teamLogService = require('./teamLogService')
+const { raw } = require('objection')
 
 const teamUserMappingService = {}
 
@@ -120,11 +121,13 @@ teamUserMappingService.getTeamIdsByUser = async (user) => {
 
 }
 
-teamUserMappingService.getTeamMemberListByTeamId = async (page, size, teamId) => {
+teamUserMappingService.getTeamMemberListByTeamId = async (page, size, teamId, keyword) => {
 
     return TeamUserMapping.query()
     .modify('baseAttributes')
+    .joinRelated('user')
     .where('eteameteamid', teamId)
+    .whereRaw(`LOWER("eusername") LIKE '%${keyword}%'`)
     .withGraphFetched('teamSportTypeRoles(baseAttributes)')
     .withGraphFetched('user(baseAttributes).file(baseAttributes)')
     .page(page, size)

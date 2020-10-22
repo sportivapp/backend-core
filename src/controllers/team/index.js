@@ -118,12 +118,12 @@ controller.getTeamDetail = async (req, res, next) => {
 
 controller.getTeamMemberList = async (req, res, next) => {
 
-    const { page = '0', size = '10' } = req.query;
+    const { page = '0', size = '10', keyword = '' } = req.query;
     const { teamId } = req.params;
     
     try {
 
-        const pageObj = await teamService.getTeamMemberList(parseInt(teamId), req.user, parseInt(page), parseInt(size));
+        const pageObj = await teamService.getTeamMemberList(parseInt(teamId), req.user, parseInt(page), parseInt(size), keyword.toLowerCase());
 
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
 

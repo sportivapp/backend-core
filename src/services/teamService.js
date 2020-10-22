@@ -8,6 +8,7 @@ const { raw, UniqueViolationError } = require('objection');
 const teamLogService = require('./teamLogService');
 const teamUserMappingService = require('./teamUserMappingService')
 const teamSportTypeRoleService = require('./teamSportTypeRoleService')
+const fileService = require('./fileService')
 const AddressService = require('./addressService')
 
 const teamService = {}
@@ -31,7 +32,8 @@ const UnsupportedOperationErrorEnum = {
     INDUSTRY_NOT_FILLED: 'INDUSTRY_NOT_FILLED',
     TEAM_NOT_FOUND: 'TEAM_NOT_FOUND',
     FAILED_TO_REQUEST_JOIN: 'FAILED_TO_REQUEST_JOIN',
-    NAME_ALREADY_TAKEN: 'NAME_ALREADY_TAKEN'
+    NAME_ALREADY_TAKEN: 'NAME_ALREADY_TAKEN',
+    FILE_NOT_FOUND: 'FILE_NOT_FOUND'
 
 }
 
@@ -74,6 +76,15 @@ function isTeamNameUniqueErr(e) {
 
 teamService.createTeam = async (teamDTO, addressDTO, user) => {
 
+    if(teamDTO.efileefileid) {
+
+        await fileService.getFileByIdAndCreateBy(teamDTO.efileefileid, user.sub)
+        .then(file => {
+            if(!file) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FILE_NOT_FOUND)
+        })
+
+    }
+
     return Team.transaction(async trx => {
 
         const address = AddressService.createAddress(addressDTO, user, trx);
@@ -100,6 +111,15 @@ teamService.createTeam = async (teamDTO, addressDTO, user) => {
 }
 
 teamService.updateTeam = async (teamId, teamDTO, addressDTO, user) => {
+
+    if(teamDTO.efileefileid) {
+
+        await fileService.getFileByIdAndCreateBy(teamDTO.efileefileid, user.sub)
+        .then(file => {
+            if(!file) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FILE_NOT_FOUND)
+        })
+
+    }
 
     const teamFromDB = await teamService.getTeamDetail(teamId, user)
     .catch( () => null)
@@ -195,7 +215,7 @@ teamService.getTeamDetail = async (teamId, user) => {
 
 }
 
-teamService.getTeamMemberList = async (teamId, user, page, size) => {
+teamService.getTeamMemberList = async (teamId, user, page, size, keyword) => {
 
     // check if team exist
     await Team.query()
@@ -210,7 +230,7 @@ teamService.getTeamMemberList = async (teamId, user, page, size) => {
     
     if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
 
-    return teamUserMappingService.getTeamMemberListByTeamId(page, size, teamId)
+    return teamUserMappingService.getTeamMemberListByTeamId(page, size, teamId, keyword)
 
 }
 
