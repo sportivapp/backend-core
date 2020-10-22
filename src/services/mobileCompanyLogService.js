@@ -45,9 +45,6 @@ mobileCompanyLogService.getPendingLogByCompanyLogIdsAndTypeOptinalUserId = async
         companyLogsPromise.andWhere('eusereuserid', userId);
 
     return companyLogsPromise
-        .then(companyLogs => {
-            return companyLogs
-        })
 
 }
 
