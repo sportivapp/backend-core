@@ -49,15 +49,19 @@ teamService.getTeamById = async (teamId) => {
 
 }
 
-teamService.getTeams = async (page, size, keyword) => {
+teamService.getTeams = async (page, size, keyword, filter) => {
 
-    const teamsPage = await Team.query()
+    const teamsPagePromise = Team.query()
     .modify('baseAttributes')
     .withGraphFetched('company(baseAttributes)')
     .whereRaw(`LOWER("eteamname") LIKE LOWER('%${keyword}%')`)
-    .page(page, size);
 
-    return ServiceHelper.toPageObj(page, size, teamsPage)
+    if (filter.companyId)
+        teamsPagePromise.where('ecompanyecompanyid', filter.companyId)
+
+    return teamsPagePromise
+        .page(page, size)
+        .then(teamsPage => ServiceHelper.toPageObj(page, size, teamsPage));
 
 }
 
@@ -68,6 +72,7 @@ teamService.getTeam = async (teamId, user) => {
     .modify('baseAttributes')
     .withGraphFetched('company(baseAttributes)')
     .withGraphFetched('teamIndustry(baseAttributes)')
+    .withGraphFetched('teamAddress(baseAttributes)')
 
     if (!team)
         throw new NotFoundError()

@@ -5,11 +5,15 @@ const controller = {};
 
 controller.getTeams = async (req, res, next) => {
 
-    const { page = '0', size = '10', keyword = '' } = req.query;
+    const { page = '0', size = '10', keyword = '', companyId } = req.query;
     
+    const filter = {
+        companyId: parseInt(companyId)
+    }
+
     try {
 
-        const pageObj = await teamService.getTeams(parseInt(page), parseInt(size), keyword.toLowerCase());
+        const pageObj = await teamService.getTeams(parseInt(page), parseInt(size), keyword.toLowerCase(), filter);
 
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
 
