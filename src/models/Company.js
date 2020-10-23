@@ -26,6 +26,14 @@ class Company extends Model {
       },
       idAndName(builder) {
         builder.select('ecompanyid as companyId', 'ecompanyname as companyName')
+      },
+      about(builder) {
+        builder.select('ecompanyphonenumber', 'ecompanyemailaddress', 'ecompanyabout')
+          .withGraphFetched('logo(baseAttributes)')
+          .withGraphFetched('carousel(baseAttributes)')
+          .withGraphFetched('address(baseAttributes)')
+          .withGraphFetched('industries(baseAttributes)')
+          .withGraphFetched('news')
       }
     }
   }

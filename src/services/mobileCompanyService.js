@@ -49,7 +49,7 @@ companyService.getHighestPosition = async (companyId) => {
 companyService.getCompany = async (companyId, user) => {
 
     const companyDetailPromise = Company.query()
-    .withGraphFetched('[carousel, address, industries, news]')
+    .modify('about')
     .where('ecompanyid', companyId)
     .first();
     
