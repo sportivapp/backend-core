@@ -208,6 +208,7 @@ teamService.getTeamDetail = async (teamId, user) => {
     .findById(teamId)
     .where('ecompanyecompanyid', user.companyId)
     .withGraphFetched('teamIndustry(baseAttributes)')
+    .withGraphFetched('teamAddress(baseAttributes)')
     .then(team => {
         if (!team) throw new NotFoundError()
         return team
