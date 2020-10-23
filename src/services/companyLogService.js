@@ -149,7 +149,7 @@ companyLogService.inviteMember = async (companyId, email, loggedInUser) => {
 
     else if (companyLog.ecompanylogtype === CompanyLogTypeEnum.APPLY && companyLog.ecompanylogstatus === CompanyLogStatusEnum.PENDING)
 
-        return companyLogService.processRequest(companyLog.ecompanylogid, CompanyLogStatusEnum.ACCEPTED, loggedInUser)
+        return companyLogService.processRequests(companyLog.ecompanylogid, CompanyLogStatusEnum.ACCEPTED, loggedInUser)
 
     else if (companyLog.ecompanylogstatus === CompanyLogStatusEnum.REJECTED)
 

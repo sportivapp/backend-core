@@ -64,13 +64,6 @@ controller.getOtherUserById = async (req, res, next) => {
 }
 
 controller.getSelf = async (req, res, next) => {
-    
-    // const login = await axios.post('http://103.253.113.217:7000/api/v1/user-login', { 
-    //     "email": "nawakarapm@nawakara.com",
-    //     "password": "emtivnawakarapm"
-    // });
-    // console.log(login.data);
-    // console.log(login.status);
 
     try {
         const result = await mobileUserService.getUserById(req.user.sub);

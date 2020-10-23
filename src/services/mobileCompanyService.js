@@ -38,11 +38,18 @@ const companyService = {}
 // TODO: might be change to new getHighestPositionByCompanyId later
 companyService.getHighestPosition = async (companyId) => {
 
-    const users = await Grade.relatedQuery('users')
-    .for(Grade.query().where('ecompanyecompanyid', companyId).andWhere('egradesuperiorid', null))
-    .distinct('euserid')
+    const adminGradeId = await CompanyDefaultPosition.query()
+        .where('ecompanyecompanyid', companyId)
+        .first()
+        .then(defaultPosition => {
+            return defaultPosition.eadmingradeid;
+        });
 
-    return users.map(user => user.euserid)
+    const users = await Grade.relatedQuery('users')
+        .for(Grade.query().where('egradeid', adminGradeId))
+        .distinct('euserid');
+
+    return users.map(user => user.euserid);
 
 }
 

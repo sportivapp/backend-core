@@ -45,7 +45,6 @@ reportThreadService.report = async (message, threadId, commentId, replyId, user)
 
     const callback = (error, _) => {
         if (error) {
-            console.log(error)
             report = ReportThread.query()
                 .findById(report.ereportthreadid)
                 .updateByUserId({ ereportthreadsent: false })
