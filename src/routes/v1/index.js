@@ -100,7 +100,7 @@ const mobileTeamUserRoutes = require('./mobileTeamUser');
 const mobileTeamLogRoutes = require('./mobileTeamLog');
 const mobileCompanyLogRoutes = require('./mobileCompanyLog')
 
-router.use('/api/v1/mobile', [
+router.use('/api/v1', [
     mobileUserRoutes,
     mobileLicenseRoutes,
     mobileCompanyRoutes,

@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router();
+const router = require('../mobileRouter');
 const controller = require('../../controllers/mobileUser');
 const auth = require('../../middlewares/authentication');
 const { routes } = require('../../constant');
@@ -17,4 +16,4 @@ router.get( routes.user.industry, auth.authenticateToken, controller.getIndustry
 router.put( routes.user.industry, auth.authenticateToken, controller.changeIndustryByUserId);
 router.post('/user-change-password', auth.authenticateToken, controller.changePassword);
 
-module.exports = router;
+module.exports = router.expressRouter;

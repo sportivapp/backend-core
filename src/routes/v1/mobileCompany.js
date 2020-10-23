@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router();
+const router = require('../mobileRouter');
 const controller = require('../../controllers/mobileCompany')
 const auth = require('../../middlewares/authentication');
 const { routes } = require('../../constant')
@@ -15,4 +14,4 @@ router.post( routes.company.processInvitation, auth.authenticateToken, controlle
 router.delete( routes.company.cancelJoin, auth.authenticateToken, controller.userCancelJoins);
 // user request join
 
-module.exports = router;
+module.exports = router.expressRouter;
