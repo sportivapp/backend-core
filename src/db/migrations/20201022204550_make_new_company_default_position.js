@@ -2,8 +2,7 @@ exports.up = (knex, _) => knex.transaction(trx => {
     knex('ecompany')
         .then(companies => {
             const mappings = []
-            companies.forEach(company => {
-            
+            companies.forEach(company => {            
                 const adminGrade = {
                     egradename: 'Administrator',
                     egradedescription: 'Administrator of Company',
@@ -23,13 +22,12 @@ exports.up = (knex, _) => knex.transaction(trx => {
                 mappings.push(adminGrade)
                 mappings.push(memberGrade)
 
-            })
-
-            const addGrades = knex('egrade')
+            }) 
+            
+            return knex('egrade')
             .insert(mappings)
             .transacting(trx)
-
-            return Promise.all(addGrades)
+            .returning('*')
             .then(grades => {
 
                 let defaultPositions = []
@@ -41,17 +39,17 @@ exports.up = (knex, _) => knex.transaction(trx => {
 
                     const defaultPositionDTO = {
                         ecompanyecompanyid: company.ecompanyid,
-                        eadmingradeid: adminGrade.egradeid,
-                        emembergradeid: memberGrade.egradeid
+                        eadmingradeid: adminGrade[0].egradeid,
+                        emembergradeid: memberGrade[0].egradeid,
+                        ecompanydefaultpositioncreateby: company.ecompanycreateby,
+                        ecompanydefaultpositioncreatetime: Date.now()
                     }
 
                     defaultPositions.push(defaultPositionDTO)
 
                 })
 
-                const defaultPositionPromise = knex('ecompanydefaultposition').insert(defaultPositions).transacting(trx)
-
-                return Promise.all(defaultPositionPromise)
+                return knex('ecompanydefaultposition').insert(defaultPositions).transacting(trx)
             })
         })
         .then(trx.commit)
@@ -60,7 +58,7 @@ exports.up = (knex, _) => knex.transaction(trx => {
 
 exports.down = function(knex) {
     const companyDefaultPositionPromise = knex('ecompanydefaultposition').delete()
-    const gradeAdminMemberPromise = knex('egrade').whereIn('egradename', ['Administrator', 'Member'])
+    const gradeAdminMemberPromise = knex('egrade').whereIn('egradename', ['Administrator', 'Member']).delete()
     
     return Promise.all([companyDefaultPositionPromise, gradeAdminMemberPromise])
 };
