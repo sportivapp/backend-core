@@ -18,8 +18,6 @@ exports.up = (knex, _) => knex.transaction(trx => {
                         const memberGrade = newGrades.filter(newGrade => newGrade.egradename === 'Member')
                         const membersListInCompany = companyUsers.filter(companyUser => companyUser.ecompanyecompanyid === company.ecompanyid && companyUser.eusereuserid !== company.ecompanycreateby)
     
-                        // console.log(membersListInCompany)
-    
                         const adminUsersPositionDTO = {
                             eusereuserid: company.ecompanycreateby,
                             egradeegradeid: adminGrade[0].egradeid,
