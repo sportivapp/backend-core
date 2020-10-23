@@ -99,21 +99,18 @@ AuthenticationService.loginCompany = async(companyId, user) => {
 
 AuthenticationService.autoLogin = async(token) => {
 
-    let userId = null;
-    let companyId = null;
-
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async function(err, data) {
+    return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async function(err, data) {
         if (err) { 
             return res.status(401).json("You need to log in first.");
         }
 
-        userId = data.uid;
-        companyId = data.cid;
+        const userId = data.uid;
+        const companyId = data.cid;
+
+        const singleUser = await AuthenticationService.checkInCompanyAndGetSingleUser(companyId, userId);
+
+        return AuthenticationService.generateCompanyJWTToken(singleUser, companyId);
     });
-
-    const singleUser = await AuthenticationService.checkInCompanyAndGetSingleUser(companyId, userId);
-
-    return AuthenticationService.generateCompanyJWTToken(singleUser, companyId);
 
 }
 
