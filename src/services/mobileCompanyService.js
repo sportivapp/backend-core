@@ -49,7 +49,7 @@ companyService.getHighestPosition = async (companyId) => {
 companyService.getCompany = async (companyId, user) => {
 
     const companyDetailPromise = Company.query()
-    .withGraphFetched('[carousel, address, industry, news]')
+    .withGraphFetched('[carousel, address, industries, news]')
     .where('ecompanyid', companyId)
     .first();
     
@@ -76,13 +76,12 @@ companyService.getCompany = async (companyId, user) => {
 companyService.getCompanies = async (page, size, keyword, companyIds) => {
 
     const companyPromise = Company.query()
-        .select('ecompanyid', 'ecompanyname', 'eindustryname', 'eaddressstreet', 'efileefileid')
+        .select('ecompanyid', 'ecompanyname', 'eaddressstreet', 'efileefileid')
         .joinRelated('address')
-        .joinRelated('industry')
         .where('ecompanyolderid', null)
         .andWhere('ecompanyparentid', null)
         .andWhere(raw('lower("ecompanyname")'), 'like', `%${keyword.toLowerCase()}%`)
-        .withGraphFetched('industry(baseAttributes)')
+        .withGraphFetched('industries(baseAttributes)')
 
     // If all companies, companyIds will be undefined
     if (companyIds) {

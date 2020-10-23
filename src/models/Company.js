@@ -108,6 +108,18 @@ class Company extends Model {
           to: 'eindustry.eindustryid'
         }
       },
+      industries: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Industry,
+        join: {
+          from: 'ecompany.ecompanyid',
+          through: {
+            from: 'ecompanyindustrymapping.ecompanyecompanyid',
+            to: 'ecompanyindustrymapping.eindustryeindustryid'
+          },
+          to: 'eindustry.eindustryid'
+        }
+      },
       logo: {
         relation: Model.BelongsToOneRelation,
         modelClass: File,
