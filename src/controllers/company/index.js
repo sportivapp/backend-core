@@ -69,7 +69,6 @@ companyController.createCompany = async (req, res, next) => {
             estateestateid: stateId
         }
 
-        console.log(companyParentId);
         if (companyParentId) {
             if (user.functions.indexOf('C1') === -1)
                 return res.status(403).json(ResponseHelper.toErrorResponse(403))
