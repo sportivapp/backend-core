@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
-const { UnsupportedOperationError } = require('../models/errors');
+const { UnsupportedOperationError, UnauthorizedError } = require('../models/errors');
 const companyService = require('./companyService');
 const userService = require('./userService');
 
@@ -100,8 +100,8 @@ AuthenticationService.loginCompany = async(companyId, user) => {
 AuthenticationService.autoLogin = async(token) => {
 
     return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async function(err, data) {
-        if (err) { 
-            return res.status(401).json("You need to log in first.");
+        if (err) {
+            throw new UnauthorizedError()
         }
 
         const userId = data.uid;

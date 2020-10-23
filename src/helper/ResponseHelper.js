@@ -23,6 +23,9 @@ function toErrorResponse(code, error, type = ErrorTypeEnum.SERVER) {
         case 400:
             status = "BAD_REQUEST"
             break
+        case 401:
+            status = "UNAUTHORIZED"
+            break
         case 403:
             status = "FORBIDDEN"
             break

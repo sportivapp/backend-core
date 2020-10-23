@@ -58,11 +58,11 @@ controller.loginCompany = async (req, res, next) => {
 
 controller.autoLogin = async (req, res, next) => {
 
-    const { token, companyId } = req.body;
+    const { token } = req.body;
 
     try {
 
-        const result = await authenticationService.autoLogin(token, companyId);
+        const result = await authenticationService.autoLogin(token);
 
         return res.cookie('tok', result, {
             secure: true,
