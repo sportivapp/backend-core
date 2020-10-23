@@ -61,8 +61,8 @@ AuthenticationService.generateCompanyJWTToken = async (user, companyId) => {
 AuthenticationService.generateCustomJWTToken = async (user, companyId) => {
 
     const config = {
-        u: user.euserid,
-        c: companyId
+        uid: user.euserid,
+        cid: companyId
     }
     const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10s' });
 
@@ -86,7 +86,7 @@ AuthenticationService.checkInCompanyAndGetSingleUser = async (companyId, userId)
 
 AuthenticationService.loginCompany = async(companyId, user) => {
 
-    const singleUser = AuthenticationService.checkInCompanyAndGetSingleUser(companyId, user.sub);
+    const singleUser = await AuthenticationService.checkInCompanyAndGetSingleUser(companyId, user.sub);
 
     const token = await AuthenticationService.generateCustomJWTToken(singleUser, companyId);
 
@@ -107,11 +107,11 @@ AuthenticationService.autoLogin = async(token) => {
             return res.status(401).json("You need to log in first.");
         }
 
-        userId = data.u;
-        companyId = data.c;
+        userId = data.uid;
+        companyId = data.cid;
     });
 
-    const singleUser = AuthenticationService.checkInCompanyAndGetSingleUser(companyId, userId);
+    const singleUser = await AuthenticationService.checkInCompanyAndGetSingleUser(companyId, userId);
 
     return AuthenticationService.generateCompanyJWTToken(singleUser, companyId);
 
