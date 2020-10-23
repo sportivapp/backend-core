@@ -7,7 +7,7 @@ threadPostController.getAllPostByThreadId = async (req, res, next) => {
 
     const { threadId } = req.params
 
-    const { page = '0', size = '10' } = req.params
+    const { page = '0', size = '10' } = req.query
 
     try {
         const result = await threadPostService.getAllPostByThreadId(threadId, parseInt(page), parseInt(size))
