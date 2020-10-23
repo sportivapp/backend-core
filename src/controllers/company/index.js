@@ -59,7 +59,8 @@ companyController.createCompany = async (req, res, next) => {
             ecompanyname: companyName,
             ecompanyemailaddress: companyEmail,
             ecompanyphonenumber: companyPhoneNumber,
-            ecompanyautonik: isAutoNik
+            ecompanyautonik: isAutoNik,
+            ecompanyparentid: companyParentId
         }
 
         const addressDTO = {
@@ -68,6 +69,7 @@ companyController.createCompany = async (req, res, next) => {
             estateestateid: stateId
         }
 
+        console.log(companyParentId);
         if (companyParentId) {
             if (user.functions.indexOf('C1') === -1)
                 return res.status(403).json(ResponseHelper.toErrorResponse(403))
