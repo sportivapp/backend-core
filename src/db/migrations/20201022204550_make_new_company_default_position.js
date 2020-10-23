@@ -56,9 +56,11 @@ exports.up = (knex, _) => knex.transaction(trx => {
         .catch(trx.rollback)
 })
 
-exports.down = function(knex) {
-    const companyDefaultPositionPromise = knex('ecompanydefaultposition').delete()
-    const gradeAdminMemberPromise = knex('egrade').whereIn('egradename', ['Administrator', 'Member']).delete()
+exports.down = (knex) => knex.transaction(trx => {
+    const companyDefaultPositionPromise = knex('ecompanydefaultposition').delete().transacting(trx)
+    const gradeAdminMemberPromise = knex('egrade').whereIn('egradename', ['Administrator', 'Member']).delete().transacting(trx)
     
     return Promise.all([companyDefaultPositionPromise, gradeAdminMemberPromise])
-};
+    .then(trx.commit)
+    .catch(trx.rollback)
+})
