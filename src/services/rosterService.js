@@ -203,7 +203,6 @@ RosterService.updateUsersOfRosters = async (projectId, rosterDTOs, loggedInUser)
 }
 
 function GetShiftRosterUserMapping(dto) {
-    console.log(dto)
     return ShiftRosterUserMapping.query()
         .where('erostererosterid', dto.erostererosterid)
         .where('erosterusermappingname', dto.erosterusermappingname)
