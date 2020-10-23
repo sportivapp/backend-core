@@ -252,10 +252,8 @@ CompanyService.createCompany = async(companyDTO, addressDTO, industryIds, user) 
             .then(gradeId => settingService.mapFunctionsToGrade(gradeId, codes, trx))
 
         const insertMemberGradeAndFunction = Grades.query(trx).insertToTable(memberDTO, user.sub)
-            .then(grade => ({ egradeegradeid: grade.egradeid, eusereuserid: user.sub }))
-            .then(userPositionMappingDTO => UserPositionMapping.query(trx).insertToTable(userPositionMappingDTO, user.sub))
-            .then(mapping => {
-                memberGradeId = mapping.egradeegradeid
+            .then(grade => {
+                memberGradeId = grade.egradeid
                 return memberGradeId
             })
             .then(gradeId => settingService.mapFunctionsToGrade(gradeId, memberCode, trx))
