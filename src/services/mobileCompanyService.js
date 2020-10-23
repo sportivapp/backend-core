@@ -51,12 +51,6 @@ companyService.getHighestPosition = async (companyId) => {
 
     return users.map(user => user.euserid);
 
-    // const users = await Grade.relatedQuery('users')
-    // .for(Grade.query().where('ecompanyecompanyid', companyId).andWhere('egradesuperiorid', null))
-    // .distinct('euserid')
-
-    // return users.map(user => user.euserid)
-
 }
 
 companyService.getCompany = async (companyId, user) => {
