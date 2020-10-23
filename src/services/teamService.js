@@ -87,7 +87,7 @@ teamService.createTeam = async (teamDTO, addressDTO, user) => {
 
     return Team.transaction(async trx => {
 
-        const address = AddressService.createAddress(addressDTO, user, trx);
+        const address = await AddressService.createAddress(addressDTO, user, trx);
 
         teamDTO.eaddresseaddressid = address.eaddressid;
 
@@ -208,6 +208,7 @@ teamService.getTeamDetail = async (teamId, user) => {
     .findById(teamId)
     .where('ecompanyecompanyid', user.companyId)
     .withGraphFetched('teamIndustry(baseAttributes)')
+    .withGraphFetched('teamAddress(baseAttributes)')
     .then(team => {
         if (!team) throw new NotFoundError()
         return team
