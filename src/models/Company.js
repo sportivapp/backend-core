@@ -28,7 +28,7 @@ class Company extends Model {
         builder.select('ecompanyid as companyId', 'ecompanyname as companyName')
       },
       about(builder) {
-        builder.select('ecompanyphonenumber', 'ecompanyemailaddress', 'ecompanyabout')
+        builder.select('ecompanyid', 'ecompanyname', 'ecompanyphonenumber', 'ecompanyemailaddress', 'ecompanyabout')
           .withGraphFetched('logo(baseAttributes)')
           .withGraphFetched('carousel(baseAttributes)')
           .withGraphFetched('address(baseAttributes)')
