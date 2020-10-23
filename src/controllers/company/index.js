@@ -59,7 +59,8 @@ companyController.createCompany = async (req, res, next) => {
             ecompanyname: companyName,
             ecompanyemailaddress: companyEmail,
             ecompanyphonenumber: companyPhoneNumber,
-            ecompanyautonik: isAutoNik
+            ecompanyautonik: isAutoNik,
+            ecompanyparentid: companyParentId
         }
 
         const addressDTO = {
