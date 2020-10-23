@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router();
+const router = require('../mobileRouter');
 const controller = require('../../controllers/mobileTeamLog')
 const auth = require('../../middlewares/authentication');
 
@@ -14,4 +13,4 @@ router.post('/team/:teamId/invite', auth.authenticateToken, controller.invite);
 router.delete('/team-log/cancel-invite', auth.authenticateToken, controller.cancelInvites);
 router.put('/team-log/user-process', auth.authenticateToken, controller.processInvitations);
 
-module.exports = router;
+module.exports = router.expressRouter;

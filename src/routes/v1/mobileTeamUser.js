@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router();
+const router = require('../mobileRouter');
 const controller = require('../../controllers/mobileTeamUser')
 const auth = require('../../middlewares/authentication');
 
@@ -10,4 +9,4 @@ router.put('/team/:teamId/position/:position', auth.authenticateToken, controlle
 router.delete('/team/:teamId/kick', auth.authenticateToken, controller.kickMember);
 router.get('/team/:teamId/admin', auth.authenticateToken, controller.isAdmin);
 
-module.exports = router;
+module.exports = router.expressRouter;

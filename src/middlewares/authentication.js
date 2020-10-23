@@ -10,11 +10,11 @@ exports.authenticateToken = async (req, res, next) => {
 
     if (!token) token = req.cookies.tok;
 
-    if (!token) throw new UnauthorizedError()
+    if (!token) next(new UnauthorizedError())
 
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, { ignoreExpiration: true }, async function(err, user) {
-        if (err) { 
-            throw new UnauthorizedError()
+        if (err) {
+            next(new UnauthorizedError())
         }
         req.user = user;
         if (!req.user.companyId) req.user.functions = ['R1']
