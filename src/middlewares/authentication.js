@@ -10,7 +10,7 @@ exports.authenticateToken = async (req, res, next) => {
 
     if (!token) token = req.cookies.tok;
 
-    if (!token) return res.status(401).json("You need to log in first.");
+    if (!token) throw new UnauthorizedError()
 
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, { ignoreExpiration: true }, async function(err, user) {
         if (err) { 
