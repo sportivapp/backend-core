@@ -247,7 +247,7 @@ mobileForumService.deleteThreadById = async (threadId, user) => {
 
     return mobileForumService.getThreadById(threadId)
         .then(thread => {
-            thread.$query()
+            return thread.$query()
                 .del()
                 .then(rowsAffected => rowsAffected === 1);
         });
