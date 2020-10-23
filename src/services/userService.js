@@ -17,7 +17,8 @@ const ErrorEnum = {
     USER_ALREADY_EXIST: 'USER_ALREADY_EXIST',
     OTP_NOT_FOUND: 'OTP_NOT_FOUND',
     OTP_CODE_NOT_MATCH: 'OTP_CODE_NOT_MATCH',
-    USER_NOT_FOUND: 'USER_NOT_FOUND'
+    USER_NOT_FOUND: 'USER_NOT_FOUND',
+    UNSUCCESSFUL_LOGIN: 'UNSUCCESSFUL_LOGIN'
 }
 
 const UserService = {};
@@ -157,6 +158,8 @@ UserService.login = async (loginDTO) => {
     const success = await bcrypt.compare(loginDTO.euserpassword, user.euserpassword);
 
     let token = null;
+
+    if (!success) throw new UnsupportedOperationError(ErrorEnum.UNSUCCESSFUL_LOGIN)
 
     if (success === true) {
 
