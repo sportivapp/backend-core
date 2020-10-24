@@ -12,7 +12,7 @@ const ErrorEnum = {
     FORBIDDEN_ACTION: 'FORBIDDEN_ACTION'
 }
 
-threadPostReplyService.getAllByThreadPostId = async (threadPostId) => {
+threadPostReplyService.getAllByThreadPostId = async (threadPostId, user) => {
 
     const post = await threadPostService.getPostById(threadPostId).catch(() => null)
 
@@ -38,7 +38,8 @@ threadPostReplyService.getAllByThreadPostId = async (threadPostId) => {
         ethreadpostreplycreatetime: reply.ethreadpostreplycreatetime,
         threadPostReplyPicture: reply.threadPostReplyPicture,
         user: reply.user,
-        isModerator: !!reply.moderator
+        isModerator: !!reply.moderator,
+        isModifiable: reply.user.euserid === user.sub
     }))
 }
 

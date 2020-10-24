@@ -52,7 +52,7 @@ controller.getAllComments = async (req, res, next) => {
 
     try {
         
-        const pageObj = await mobileCommentService.getAllComments(parseInt(page), parseInt(size), parseInt(threadId))
+        const pageObj = await mobileCommentService.getAllComments(parseInt(page), parseInt(size), parseInt(threadId), req.user)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
 
     } catch (e) {
