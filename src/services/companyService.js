@@ -292,8 +292,10 @@ CompanyService.createCompany = async(companyDTO, addressDTO, industryIds, user) 
 CompanyService.getMyCompanyList = async (page, size, companyName, user) => {
 
     return CompanyUserMapping.relatedQuery('company')
-        .for(user.companyId)
+        .for(CompanyUserMapping.query().where('eusereuserid', user.sub))
         .modify('baseAttributes')
+        .where('ecompanyparentid', null)
+        .where('ecompanyolderid', null)
         .whereRaw(`LOWER("ecompanyname") LIKE LOWER('%${companyName}%')`)
         .page(page, size)
         .then(companyList => ServiceHelper.toPageObj(page, size, companyList));
