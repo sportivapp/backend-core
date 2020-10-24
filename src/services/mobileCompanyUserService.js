@@ -9,10 +9,24 @@ const UnsupportedOperationErrorEnum = {
     USER_NOT_INVITED: 'USER_NOT_INVITED',
     USER_NOT_APPLIED: 'USER_NOT_APPLIED',
     TYPE_UNACCEPTED: 'TYPE_UNACCEPTED',
-    COMPANY_NOT_EXIST: 'COMPANY_NOT_EXIST'
+    COMPANY_NOT_EXIST: 'COMPANY_NOT_EXIST',
+    USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY'
 }
 
 const mobileCompanyUserService = {}
+
+mobileCompanyUserService.checkUserInCompany = async (userId, companyId) => {
+
+    return CompanyUserMapping.query()
+        .where('eusereuserid', userId)
+        .where('ecompanyecompanyid', companyId)
+        .first()
+        .then(user => {
+            if(!user) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
+            return true
+        });
+
+}
 
 mobileCompanyUserService.insertUserToCompanyByCompanyLogsWithTransaction = async (companyLogs, trx, user) => {
 
