@@ -279,7 +279,7 @@ teamLogService.invite = async (teamId, user, email) => {
 
     const invitedUser = await User.query()
     .where('euseremail', email)
-    .first()
+    .first();
 
     //to check is user in company
     await Team.query()
