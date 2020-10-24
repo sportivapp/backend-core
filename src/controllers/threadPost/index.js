@@ -44,7 +44,7 @@ threadPostController.updatePost = async (req, res, next) => {
 
     const threadPostDTO = {
         ethreadpostcomment: comment,
-        efileefileid: parseInt(fileId)
+        efileefileid: fileId
     }
 
     try {

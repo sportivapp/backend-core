@@ -109,4 +109,12 @@ threadPostReplyService.deleteReplyById = async (replyId, user) => {
 
 }
 
+threadPostReplyService.getThreadPostIdsByUserId = async (userId) => {{
+
+    return ThreadPostReply.query()
+        .where('ethreadpostreplycreateby', userId)
+        .then(threadPostReplies => threadPostReplies.map(threadPostReply => threadPostReply.ethreadpostethreadpostid))
+
+}}
+
 module.exports = threadPostReplyService

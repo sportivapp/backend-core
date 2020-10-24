@@ -19,12 +19,14 @@ class ReportThread extends Model {
                     .withGraphFetched('comment(baseAttributes)')
                     .withGraphFetched('reply(baseAttributes)')
                     .withGraphFetched('reporter(baseAttributes)')
+                    .withGraphFetched('type(baseAttributes)')
             }
         }
     }
 
     static get relationMappings() {
 
+        const ReportThreadType = require('./ReportThreadType')
         const Thread = require('./Thread')
         const ThreadPost = require('./ThreadPost')
         const ThreadPostReply = require('./ThreadPostReply')
@@ -61,6 +63,14 @@ class ReportThread extends Model {
                 join: {
                     from: 'ereportthread.ereportthreadcreateby',
                     to: 'euser.euserid'
+                }
+            },
+            type: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: ReportThreadType,
+                join: {
+                    from: 'ereportthread.ereportthreadtypeereportthreadtypeid',
+                    to: 'ereportthreadtype.ereportthreadtypeid'
                 }
             }
         }
