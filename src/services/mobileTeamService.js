@@ -8,6 +8,7 @@ const teamLogService = require('./mobileTeamLogService');
 const teamUserService = require('./mobileTeamUserService');
 const mobileTeamSportTypeRoleService = require('./mobileTeamSportTypeRoleService');
 const AddressService = require('./addressService');
+const companyUserMappingService = require('./companyUserMappingService');
 
 const ErrorEnum = {
     USER_IN_TEAM: 'USER_IN_TEAM',
@@ -77,6 +78,11 @@ teamService.getTeam = async (teamId, user) => {
     if (!team)
         throw new NotFoundError()
 
+    let isInCompany = false;
+
+    if (team.ecompanyecompanyid)
+        isInCompany = await companyUserMappingService.checkCompanyUserByCompanyIdAndUserId(team.ecompanyecompanyid, user.sub)
+        
     // return null instead not found, because it
     const isInTeam = teamUserService.getTeamUserByTeamIdAndUserId(teamId, user.sub)
         .catch(() => null);
@@ -85,6 +91,7 @@ teamService.getTeam = async (teamId, user) => {
 
     return Promise.all([isInTeam, teamLog]).then(result => ({
         ...team,
+        isInCompany: !!isInCompany,
         isInTeam: !!result[0],
         teamLog: !result[1] ? null : result[1]
     }));
