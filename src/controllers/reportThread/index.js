@@ -18,4 +18,14 @@ reportThreadController.createReportThread = async (req, res, next) => {
 
 }
 
+reportThreadController.getReportTypes = async (req, res, next) => {
+
+    try {
+        const list = await reportThreadService.getReportTypes();
+        return res.status(200).json(ResponseHelper.toBaseResponse(list))
+    } catch (e) {
+        next(e)
+    }
+}
+
 module.exports = reportThreadController;
