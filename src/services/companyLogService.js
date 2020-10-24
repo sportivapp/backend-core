@@ -26,6 +26,16 @@ companyLogService.createCompanyLog = async (companyId, user, userId, type) => {
 
 }
 
+companyLogService.createCompanyLogWithTransaction = async (companyId, user, userId, type, trx) => {
+
+    return CompanyLog.query(trx).insertToTable({
+        ecompanyecompanyid: companyId,
+        eusereuserid: userId,
+        ecompanylogtype: type
+    }, user.sub)
+
+}
+
 companyLogService.getPendingLog = async (companyId, userId, types) => {
 
     return CompanyLog.query()
@@ -63,26 +73,6 @@ companyLogService.removeCompanyLog = async (userId, companyId, removeType ) => {
 
     if( removeType === CompanyLogRemoveEnum.EXIT_COMPANY )
         return CompanyLog.query()
-        .where('eusereuserid', userId)
-        .where('ecompanyecompanyid', companyId)
-        .delete()
-
-}
-
-companyLogService.removeCompanyLogWithTransaction = async (userId, companyId, removeType, trx ) => {
-
-    if( removeType === CompanyLogRemoveEnum.USER_CANCEL_JOIN )
-        return CompanyLog.query(trx)
-        .delete()
-        .where('eusereuserid', userId)
-        .where('ecompanyecompanyid', companyId)
-        .where('ecompanylogtype', CompanyLogTypeEnum.APPLY)
-        .where('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
-        .first()
-        .then(rowsAffected => rowsAffected === 1)
-
-    if( removeType === CompanyLogRemoveEnum.EXIT_COMPANY )
-        return CompanyLog.query(trx)
         .where('eusereuserid', userId)
         .where('ecompanyecompanyid', companyId)
         .delete()
