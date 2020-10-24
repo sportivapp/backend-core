@@ -2,8 +2,10 @@ const ServiceHelper = require('../helper/ServiceHelper');
 const UnsupportedOperationError = require('../models/errors/UnsupportedOperationError');
 const TeamLog = require('../models/TeamLog');
 const teamUserService = require('./mobileTeamUserService');
+const mobileCompanyUserService = require('./mobileCompanyUserService')
 const { NotFoundError } = require('../models/errors');
 const User = require('../models/User');
+const Team = require('../models/Team')
 
 const TeamLogTypeEnum = {
     APPLY: 'APPLY',
@@ -277,7 +279,14 @@ teamLogService.invite = async (teamId, user, email) => {
 
     const invitedUser = await User.query()
     .where('euseremail', email)
-    .first();
+    .first()
+
+    //to check is user in company
+    await Team.query()
+    .findById(teamId)
+    .then(team => {
+        return mobileCompanyUserService.checkUserInCompany(invitedUser.euserid, team.ecompanyecompanyid)
+    })
 
     if (!invitedUser)
         throw new UnsupportedOperationError(ErrorEnum.USER_NOT_EXIST)
