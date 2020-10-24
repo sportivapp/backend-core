@@ -46,4 +46,12 @@ mobileCompanyUserService.insertUserToCompanyByCompanyLogsWithTransaction = async
 
 }
 
+mobileCompanyUserService.getCompanyIdsByUserId = async (userId) => {
+
+    return CompanyUserMapping.query()
+        .where('eusereuserid', userId)
+        .then(companyUserMappings => companyUserMappings.map(companyUserMapping => companyUserMapping.ecompanyecompanyid));
+
+}
+
 module.exports = mobileCompanyUserService

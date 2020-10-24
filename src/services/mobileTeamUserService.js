@@ -255,13 +255,11 @@ teamUserService.joinTeamByTeamLogs = async (teamLogs, user, position = TeamUserM
 
 }
 
-teamUserService.getTeamIdsByUser = async (user) => {
+teamUserService.getTeamIdsByUserId = async (userId) => {
 
     return TeamUserMapping.query()
-        .where('eusereuserid', user.sub)
-        .then(teamUserMappings => {
-            return teamUserMappings.map(teamUserMapping => teamUserMapping.eteameteamid)
-        });
+        .where('eusereuserid', userId)
+        .then(teamUserMappings => teamUserMappings.map(teamUserMapping => teamUserMapping.eteameteamid))
 
 }
 

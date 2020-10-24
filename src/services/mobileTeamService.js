@@ -196,7 +196,7 @@ teamService.applyTeam = async (teamId, user) => {
 
 teamService.getMyTeams = async (page, size, keyword, user) => {
 
-    const teamIds = await teamUserService.getTeamIdsByUser(user);
+    const teamIds = await teamUserService.getTeamIdsByUserId(user.sub);
 
     return Team.query()
         .modify('baseAttributes')
