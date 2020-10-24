@@ -187,7 +187,7 @@ mobileForumService.getThreadList = async (page, size, filter, isPublic, keyword)
 
     let threadPromise = Thread.query()
     .modify('baseAttributes')
-    .select('ethreadcreatetime', Thread.relatedQuery('comments').count().as('commentsCount'))
+    .select(Thread.relatedQuery('comments').count().as('commentsCount'))
     .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
 
     if(getFilter.companyId !== null) {
@@ -218,7 +218,7 @@ mobileForumService.getThreadDetailById = async (threadId) => {
     .findById(threadId)
     .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
     .modify('baseAttributes')
-    .select('ethreadcreatetime', Thread.relatedQuery('comments').count().as('commentsCount'))
+    .select(Thread.relatedQuery('comments').count().as('commentsCount'))
     .withGraphFetched('threadPicture(baseAttributes)')
     .withGraphFetched('threadCreator(name).file(baseAttributes)')
     .withGraphFetched('company(baseAttributes)')
@@ -326,6 +326,12 @@ mobileForumService.getMyThreadList = async (page, size, keyword, user) => {
         .then(result => {
             return Thread.query()
             .modify('baseAttributes')
+            .select(Thread.relatedQuery('comments').count().as('commentsCount'))
+            .withGraphFetched('threadCreator(name)')
+            .withGraphFetched('company(baseAttributes)')
+            .withGraphFetched('team(baseAttributes)')
+            .orderBy('ethreadcreatetime', 'DESC')
+            .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
             .whereRaw(`LOWER("ethreadtitle") LIKE LOWER('%${keyword}%')`)
             .where('ethreadcreateby', user.sub)
             .orWhereIn('ethreadid', result[0])
