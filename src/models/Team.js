@@ -25,7 +25,7 @@ class Team extends Model {
     static get modifiers() {
         return {
           baseAttributes(builder) {
-            builder.select('eteamid', 'eteamname', 'eteamdescription', 'eteamispublic').withGraphFetched('teamPicture(baseAttributes)')
+            builder.select('eteamid', 'eteamname', 'eteamdescription', 'eteamispublic', 'ecompanyecompanyid').withGraphFetched('teamPicture(baseAttributes)')
           }
         }
       }
