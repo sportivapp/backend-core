@@ -103,7 +103,7 @@ mobileCommentService.updateComment = async (commentId, commentDTO, user) => {
 
 }
 
-mobileCommentService.getAllComments = async (page, size, threadId) => {
+mobileCommentService.getAllComments = async (page, size, threadId, user) => {
 
     const threadPostPage = await ThreadPost.query()
         .modify('baseAttributes')
@@ -128,7 +128,8 @@ mobileCommentService.getAllComments = async (page, size, threadId) => {
         replyCount: parseInt(threadPost.replyCount),
         threadPostPicture: threadPost.threadPostPicture,
         user: threadPost.user,
-        isModerator: !!threadPost.moderator
+        isModerator: !!threadPost.moderator,
+        isModifiable: threadPost.user.euserid === user.sub
     }))
 
     return ServiceHelper.toPageObj(page, size, threadPostPage)
