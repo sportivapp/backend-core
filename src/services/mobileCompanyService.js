@@ -205,10 +205,6 @@ companyService.joinCompany = async (companyId, user) => {
     // Check if this user already invited / applied
     const pendingInviteApply = await mobileCompanyLogService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.INVITE, CompanyLogTypeEnum.APPLY]);
 
-    // If apply pending exist, return
-    if (pendingInviteApply.ecompanylogtype === CompanyLogTypeEnum.APPLY && pendingInviteApply.ecompanylogstatus === CompanyLogStatusEnum.PENDING)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_APPLIED)
-
     const getAdminsInCompany = await CompanyDefaultPosition.query()
     .where('ecompanyecompanyid', companyId)
     .first()
@@ -252,6 +248,11 @@ companyService.joinCompany = async (companyId, user) => {
                 return companyLog
             })
         }
+
+        // If apply pending exist, return
+        if (pendingInviteApply.ecompanylogtype === CompanyLogTypeEnum.APPLY && pendingInviteApply.ecompanylogstatus === CompanyLogStatusEnum.PENDING)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_APPLIED)
+
 
         // If invited, then auto join
         if (pendingInviteApply.ecompanylogtype === CompanyLogTypeEnum.INVITE && pendingInviteApply.ecompanylogstatus === CompanyLogStatusEnum.PENDING)
