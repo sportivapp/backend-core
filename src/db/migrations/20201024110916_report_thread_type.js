@@ -10,7 +10,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('ereportthreadtype', t =
 function reportTypes() {
     return [
         {
-            ereportthreadtypename: `I'm not interested (later)`,
+            ereportthreadtypename: `I'm not interested`,
             ereportthreadtypecreateby: 0,
             ereportthreadtypecreatetime: Date.now(),
         },
