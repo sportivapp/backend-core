@@ -209,7 +209,8 @@ module.exports = {
             id: '/comments/:commentId/replies/:replyId'
         },
         report: {
-            thread: '/report/thread'
+            thread: '/report/thread',
+            threadType: '/report/thread/type'
         },
     }
 }
