@@ -11,6 +11,5 @@ router.delete( '/thread/:threadId', auth.authenticateToken, controller.deleteThr
 router.get('/thread-companies', auth.authenticateToken, controller.getMyOrganizationListWithAccess)
 router.get('/thread-teams', auth.authenticateToken, controller.getMyTeamListWithAccess)
 router.get('/thread/:threadId/moderator-status', auth.authenticateToken, controller.isThreadModerator);
-router.get('/my-thread', auth.authenticateToken, controller.getMyThreadList);
 
 module.exports = router.expressRouter;
