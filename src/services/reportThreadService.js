@@ -1,4 +1,5 @@
 const ReportThread = require('../models/ReportThread')
+const ReportThreadType = require('../models/ReportThreadType')
 const threadService = require('./threadService')
 const threadPostService = require('./threadPostService')
 const threadPostReplyService = require('./threadPostReplyService')
@@ -10,10 +11,11 @@ const reportThreadService = {}
 const ErrorEnum = {
     THREAD_NOT_FOUND: 'THREAD_NOT_FOUND',
     COMMENT_NOT_FOUND: 'COMMENT_NOT_FOUND',
-    REPLY_NOT_FOUND: 'REPLY_NOT_FOUND'
+    REPLY_NOT_FOUND: 'REPLY_NOT_FOUND',
+    TYPE_NOT_FOUND: 'TYPE_NOT_FOUND'
 }
 
-reportThreadService.report = async (message, threadId, commentId, replyId, user) => {
+reportThreadService.report = async (message, threadId, commentId, replyId, typeId, user) => {
 
     if (threadId) {
         const thread = await threadService.getThreadDetailById(threadId)
@@ -30,11 +32,15 @@ reportThreadService.report = async (message, threadId, commentId, replyId, user)
         if (!reply) throw new UnsupportedOperationError(ErrorEnum.REPLY_NOT_FOUND)
     }
 
+    const type = await reportThreadService.getReportTypeById(typeId)
+    if (!type) throw new UnsupportedOperationError(ErrorEnum.TYPE_NOT_FOUND)
+
     const dto = {
         ereportthreadmessage: message,
         ethreadethreadid: threadId,
         ethreadpostethreadpostid: commentId,
-        ethreadpostreplyethreadpostreplyid: replyId
+        ethreadpostreplyethreadpostreplyid: replyId,
+        ereportthreadtypeereportthreadtypeid: typeId
     }
 
     let report = await ReportThread.query()
@@ -55,6 +61,18 @@ reportThreadService.report = async (message, threadId, commentId, replyId, user)
 
     return report
 
+}
+
+reportThreadService.getReportTypeById = async (reportTypeId) => {
+
+    return ReportThreadType.query()
+        .findById(reportTypeId)
+}
+
+reportThreadService.getReportTypes = async () => {
+
+    return ReportThreadType.query()
+        .modify('baseAttributes')
 }
 
 module.exports = reportThreadService
