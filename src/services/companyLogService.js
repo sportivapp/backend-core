@@ -69,6 +69,26 @@ companyLogService.removeCompanyLog = async (userId, companyId, removeType ) => {
 
 }
 
+companyLogService.removeCompanyLogWithTransaction = async (userId, companyId, removeType, trx ) => {
+
+    if( removeType === CompanyLogRemoveEnum.USER_CANCEL_JOIN )
+        return CompanyLog.query(trx)
+        .delete()
+        .where('eusereuserid', userId)
+        .where('ecompanyecompanyid', companyId)
+        .where('ecompanylogtype', CompanyLogTypeEnum.APPLY)
+        .where('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
+        .first()
+        .then(rowsAffected => rowsAffected === 1)
+
+    if( removeType === CompanyLogRemoveEnum.EXIT_COMPANY )
+        return CompanyLog.query(trx)
+        .where('eusereuserid', userId)
+        .where('ecompanyecompanyid', companyId)
+        .delete()
+
+}
+
 companyLogService.processRequests = async (companyLogIds, status, user) => {
 
     if (status !== CompanyLogStatusEnum.ACCEPTED && status !== CompanyLogStatusEnum.REJECTED)
