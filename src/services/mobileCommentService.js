@@ -141,4 +141,13 @@ mobileCommentService.deleteComment = async (commentId, user) => {
 
 }
 
+mobileCommentService.getThreadIdsByUserIdAndThreadPostIds = async (userId, threadPostIds) => {{
+
+    return ThreadPost.query()
+        .where('ethreadpostcreateby', userId)
+        .orWhereIn('ethreadpostid', threadPostIds)
+        .then(threadPosts => threadPosts.map(threadPost => threadPost.ethreadethreadid))
+
+}}
+
 module.exports = mobileCommentService

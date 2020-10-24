@@ -13,6 +13,9 @@ const fileService = require('./fileService')
 const ModuleNameEnum = require('../models/enum/ModuleNameEnum')
 const { raw } = require('objection')
 const { UniqueViolationError } = require('objection');
+const threadPostReplyService = require('./threadPostReplyService')
+const mobileCommentService = require('./mobileCommentService')
+const mobileCompanyUserService = require('./mobileCompanyUserService')
 
 const mobileForumService = {}
 
@@ -307,6 +310,31 @@ mobileForumService.getUserTeamListWithAdminStatus = async (page, size, keyword, 
     }
 
     return mobileTeamService.getMyTeams(page, size, keyword, user)
+}
+
+mobileForumService.getMyThreadList = async (page, size, keyword, user) => {
+
+    const threadPostIds = await threadPostReplyService.getThreadPostIdsByUserId(user.sub);
+
+    const threadIds = mobileCommentService.getThreadIdsByUserIdAndThreadPostIds(user.sub, threadPostIds)
+
+    const teamIds = mobileTeamUserService.getTeamIdsByUserId(user.sub);
+
+    const companyIds = mobileCompanyUserService.getCompanyIdsByUserId(user.sub);
+
+    return Promise.all([threadIds, teamIds, companyIds])
+        .then(result => {
+            return Thread.query()
+            .modify('baseAttributes')
+            .whereRaw(`LOWER("ethreadtitle") LIKE LOWER('%${keyword}%')`)
+            .where('ethreadcreateby', user.sub)
+            .orWhereIn('ethreadid', result[0])
+            .orWhereIn('eteameteamid', result[1])
+            .orWhereIn('ecompanyecompanyid', result[2])
+            .page(page, size)
+            .then(threads => ServiceHelper.toPageObj(page, size, threads));
+        })
+
 }
 
 module.exports = mobileForumService
