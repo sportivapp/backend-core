@@ -26,6 +26,9 @@ class ThreadPostReply extends Model {
                 builder.select('ethreadpostreplyid', 'ethreadpostreplycomment', 'ethreadpostreplycreatetime', 'ethreadpostreplycreateby')
                     .withGraphFetched('user(baseAttributes).file(baseAttributes)')
                     .where('ethreadpostreplydeletestatus', false)
+            },
+            notDeleted(builder) {
+                builder.where('ethreadpostreplydeletestatus', false)
             }
         }
     }
