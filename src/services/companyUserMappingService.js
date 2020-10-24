@@ -3,6 +3,10 @@ const CompanyDefaultPosition = require('../models/CompanyDefaultPosition')
 const UserPositionMapping = require('../models/UserPositionMapping')
 const companyUserMappingService = {}
 
+const ErrorEnum = {
+    USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY'
+}
+
 companyUserMappingService.insertUserToCompanyByCompanyLogsWithTransaction = async (companyLogs, trx, user) => {
 
     const defaultPosition = await CompanyDefaultPosition.query(trx)
@@ -27,6 +31,20 @@ companyUserMappingService.insertUserToCompanyByCompanyLogsWithTransaction = asyn
     .insertToTable(userPositionMapping, user.sub)
 
     return Promise.all([insertedUsersPromise, insertedUserPositionPromise])
+
+}
+
+companyUserMappingService.checkCompanyUserByCompanyIdAndUserId = async (companyId, userId) => {
+
+    return CompanyUserMapping.query()
+        .where('ecompanyecompanyid', companyId)
+        .where('eusereuserid', userId)
+        .first()
+        .then(member => {
+            if (!member)
+                return false;
+            return true;
+        });
 
 }
 
