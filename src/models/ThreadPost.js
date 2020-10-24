@@ -22,8 +22,9 @@ class ThreadPost extends Model {
   static get modifiers() {
     return {
       baseAttributes(builder) {
-        builder.select('ethreadpostid', 'ethreadpostcomment', 'ethreadpostcreatetime')
+        builder.select('ethreadpostid', 'ethreadpostcomment', 'ethreadpostcreatetime', 'ethreadpostcreateby')
             .withGraphFetched('user(baseAttributes).file(baseAttributes)')
+            .where('ethreadpostdeletestatus', false)
       }
     }
   }
