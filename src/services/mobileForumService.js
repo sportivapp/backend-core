@@ -13,11 +13,9 @@ const fileService = require('./fileService')
 const ModuleNameEnum = require('../models/enum/ModuleNameEnum')
 const { raw } = require('objection')
 const { UniqueViolationError } = require('objection');
-const Team = require('../models/Team')
-const TeamUserMapping = require('../models/TeamUserMapping')
-const CompanyUserMapping = require('../models/CompanyUserMapping')
-const ThreadPostReply = require('../models/ThreadPostReply')
-const ThreadPost = require('../models/ThreadPost')
+const threadPostReplyService = require('./threadPostReplyService')
+const mobileCommentService = require('./mobileCommentService')
+const mobileCompanyUserService = require('./mobileCompanyUserService')
 
 const mobileForumService = {}
 
@@ -316,32 +314,26 @@ mobileForumService.getUserTeamListWithAdminStatus = async (page, size, keyword, 
 
 mobileForumService.getMyThreadList = async (page, size, keyword, user) => {
 
-    const commentIds = await ThreadPostReply.query()
-        .where('ethreadpostreplycreateby', user.sub)
-        .then(replies => replies.filter(reply => reply.ecommentecommentid).map(reply => reply.ecommentecommentid));
+    const threadPostIds = await threadPostReplyService.getThreadPostIdsByUserId(user.sub);
 
-    const threadIds = await ThreadPost.query()
-        .where('ethreadpostcreateby', user.sub)
-        .orWhereIn('ethreadpostid', commentIds)
-        .then(comments => comments.filter(comment => comment.ethreadethreadid).map(comment => comment.ethreadethreadid));
+    const threadIds = mobileCommentService.getThreadIdsByUserIdAndThreadPostIds(user.sub, threadPostIds)
 
-    const teamIds = await TeamUserMapping.query()
-        .where('eusereuserid', user.sub)
-        .then(teams => teams.filter(team => team.eteamid).map(team => team.eteamid));
+    const teamIds = mobileTeamUserService.getTeamIdsByUserId(user.sub);
 
-    const companyIds = await CompanyUserMapping.query()
-        .where('eusereuserid', user.sub)
-        .then(companies => companies.filter(company => company.ecompanyid).map(company => company.ecompanyid));
+    const companyIds = mobileCompanyUserService.getCompanyIdsByUserId(user.sub);
 
-    return Thread.query()
-        .modify('baseAttributes')
-        .whereRaw(`LOWER("ethreadtitle") LIKE LOWER('%${keyword}%')`)
-        .where('ethreadcreateby', user.sub)
-        .orWhereIn('eteameteamid', teamIds)
-        .orWhereIn('ecompanyecompanyid', companyIds)
-        .orWhereIn('ethreadid', threadIds)
-        .page(page, size)
-        .then(threads => ServiceHelper.toPageObj(page, size, threads));
+    return Promise.all([threadIds, teamIds, companyIds])
+        .then(result => {
+            return Thread.query()
+            .modify('baseAttributes')
+            .whereRaw(`LOWER("ethreadtitle") LIKE LOWER('%${keyword}%')`)
+            .where('ethreadcreateby', user.sub)
+            .orWhereIn('ethreadid', result[0])
+            .orWhereIn('eteameteamid', result[1])
+            .orWhereIn('ecompanyecompanyid', result[2])
+            .page(page, size)
+            .then(threads => ServiceHelper.toPageObj(page, size, threads));
+        })
 
 }
 
