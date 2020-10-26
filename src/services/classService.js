@@ -83,6 +83,7 @@ classService.getAllClassByCompanyId = async (companyId, page, size, keyword,user
     }
 
     return Class.query()
+        .where('ecompanyecompanyid', companyId)
         .where(raw('lower("eclassname")'), 'like', `%${keyword.toLowerCase()}%`)
         .modify('baseAttributes')
         .select('industry.eindustryname')
