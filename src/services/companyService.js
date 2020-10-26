@@ -10,7 +10,7 @@ const CompanyModuleMapping = require('../models/CompanyModuleMapping')
 const CompanySequence = require('../models/CompanySequence')
 const CompanyIndustryMapping = require('../models/CompanyIndustryMapping')
 const CompanyDefaultPosition = require('../models/CompanyDefaultPosition')
-const { raw } = require('objection')
+const { raw, UniqueViolationError } = require('objection')
 const ServiceHelper = require('../helper/ServiceHelper')
 const settingService = require('./settingService')
 const fileService = require('./fileService');
@@ -27,7 +27,16 @@ const ErrorEnum = {
     NIK_EMPTY: 'NIK_EMPTY',
     FILE_NOT_FOUND: 'FILE_NOT_FOUND',
     INVALID_TYPE: 'INVALID_TYPE',
-    INDUSTRY_NOT_PROVIDED: 'INDUSTRY_NOT_PROVIDED'
+    INDUSTRY_NOT_PROVIDED: 'INDUSTRY_NOT_PROVIDED',
+    NAME_EXISTED: 'NAME_EXISTED'
+}
+
+function isNameUniqueValidationError(e) {
+
+    if (!e.nativeError)
+        return false;
+
+    return e.nativeError.detail.includes('ecompanyname') && e instanceof UniqueViolationError
 }
 
 CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
@@ -286,6 +295,9 @@ CompanyService.createCompany = async(companyDTO, addressDTO, industryIds, user) 
                 childrenCount: 0
             }))
 
+        }).catch(e => {
+            if (isNameUniqueValidationError(e)) throw new UnsupportedOperationError(ErrorEnum.NAME_EXISTED)
+            throw e
         })
 }
 
@@ -484,6 +496,9 @@ CompanyService.editCompany = async (companyId, companyDTO, addressDTO, industryI
                 childrenCount: parseInt(resultArr[3][0].count)
             }))
 
+    }).catch(e => {
+        if (isNameUniqueValidationError(e)) throw new UnsupportedOperationError(ErrorEnum.NAME_EXISTED)
+        throw e
     })
 }
 
