@@ -165,8 +165,8 @@ UserService.login = async (loginDTO) => {
         .first();
         token = await UserService.generateJWTToken(user, result.ecompanyecompanyid);
 
-        firebaseService.pushNotification(user.euserid, 'Login Successful',
-            `Login Successful for email ${user.euseremail}`)
+        // firebaseService.pushNotification(user.euserid, 'Login Successful',
+        //     `Login Successful for email ${user.euseremail}`)
     }
 
     return token;
