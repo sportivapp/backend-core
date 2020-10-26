@@ -3,14 +3,14 @@ const ResponseHelper = require('../../helper/ResponseHelper')
 
 const companyLogController = {}
 
-companyLogController.processRequest = async (req, res, next) => {
+companyLogController.processRequests = async (req, res, next) => {
 
-    const { status } = req.body
+    const { companyLogIds } = req.body
 
-    const { companyLogId } = req.params
+    const { status } = req.query
 
     try {
-        const result = await companyLogService.processRequest(companyLogId, status, req.user)
+        const result = await companyLogService.processRequests(companyLogIds, status.toUpperCase(), req.user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)
@@ -46,16 +46,32 @@ companyLogController.inviteMember = async (req, res, next) => {
 
 }
 
-companyLogController.cancelInvite = async (req, res, next) => {
+companyLogController.cancelInvites = async (req, res, next) => {
 
-    const { companyLogId } = req.params
+    const { companyLogIds } = req.body
 
     try {
-        const result = await companyLogService.cancelInvite(companyLogId)
+        const result = await companyLogService.cancelInvites(companyLogIds, req.user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)
     }
+}
+
+companyLogController.getUserCompanyPendingListByLogType = async (req, res, next) => {
+
+    const { page = '0', size = '10', type = 'APPLY' } = req.query
+
+    try {
+
+        const pageObj = await companyLogService.getUserCompanyPendingListByLogType(parseInt(page), parseInt(size), type.toUpperCase(), req.user)
+
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+        
+    } catch (e) {
+        next(e)
+    }
+
 }
 
 module.exports = companyLogController

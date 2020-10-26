@@ -1,11 +1,16 @@
 const ClassUserMapping = require('../models/ClassUserMapping')
 const Class = require('../models/Class')
 const mobileClassService = require('./mobileClassService')
+const CompanyDefaultPosition = require('../models/CompanyDefaultPosition')
 const CompanyUserMapping = require('../models/CompanyUserMapping')
 const ClassTypeEnum = require('../models/enum/ClassTypeEnum')
 const ClassUserStatusEnum = require('../models/enum/ClassUserStatusEnum')
 const ServiceHelper = require('../helper/ServiceHelper')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
+const NotificationEnum = require('../models/enum/NotificationEnum')
+const notificationService = require('./notificationService')
+const Grade = require('../models/Grades')
+
 
 const mobileClassUserService = {}
 
@@ -17,11 +22,38 @@ const ErrorEnum = {
 
 }
 
+mobileClassUserService.getHighestPosition = async (classId) => {
+
+    const foundCompany = await Class.query()
+    .select('ecompanyecompanyid')
+    .findById(classId)
+
+    if(!foundCompany) throw new NotFoundError()    
+
+    const adminGradeId = await CompanyDefaultPosition.query()
+    .where('ecompanyecompanyid', foundCompany.ecompanyecompanyid)
+    .first()
+    .then(defaultPosition => {
+        return defaultPosition.eadmingradeid;
+    });
+
+    const users = await Grade.relatedQuery('users')
+        .for(Grade.query().where('egradeid', adminGradeId))
+        .distinct('euserid');
+
+    return users;
+
+}
+
+
 mobileClassUserService.registerByClassId = async (classId, user) => {
+
+    const getHighestPosition = await mobileClassUserService.getHighestPosition(classId)
 
     if (!classId) throw new UnsupportedOperationError(ErrorEnum.CLASS_ID_REQUIRED)
 
     const foundClass = await Class.query().findById(classId)
+
     if (!foundClass) throw new UnsupportedOperationError(ErrorEnum.CLASS_NOT_FOUND)
 
     if (foundClass.eclasstype === ClassTypeEnum.PRIVATE) {
@@ -41,15 +73,37 @@ mobileClassUserService.registerByClassId = async (classId, user) => {
         .andWhereNot('eclassusermappingstatus', ClassUserStatusEnum.CANCELED)
         .orderBy('eclassusermappingcreatetime', 'DESC')
         .first()
-    
-    if (!classUserMapping)
 
-        return ClassUserMapping.query()
+    if (!classUserMapping)
+    return ClassUserMapping.transaction(trx => {
+
+        return ClassUserMapping.query(trx)
             .insertToTable({
                 eclasseclassid: classId,
                 eusereuserid: user.sub
             }, user.sub)
-            .then(mapping => mobileClassService.getClassById(mapping.eclasseclassid, user))
+            .then(mapping => mobileClassService.getClassById(mapping.eclasseclassid, user)
+            .then(async classLog => {
+
+            if(getHighestPosition.length > 0) {
+                const notificationObj = {
+                    enotificationbodyentityid: classId,
+                    enotificationbodyentitytype: NotificationEnum.class.type,
+                    enotificationbodyaction: NotificationEnum.class.actions.register.code,
+                    enotificationbodytitle: NotificationEnum.class.actions.register.title,
+                    enotificationbodymessage: NotificationEnum.class.actions.register.message
+                }
+
+                await notificationService.saveNotificationWithTransaction(
+                    notificationObj,
+                    user,
+                    getHighestPosition,
+                    trx
+                )
+            }
+                return classLog
+        }))
+    })
 
     else return mobileClassService.getClassById(classUserMapping.eclasseclassid, user)
 }
@@ -60,40 +114,36 @@ mobileClassUserService.cancelRegistrationByClassUserId = async (classUserId, use
 
     if (classUser.eclassusermappingstatus === ClassUserStatusEnum.APPROVED) return false
 
-    return classUser.$query()
+    return ClassUserMapping.transaction(trx => {
+        
+        return classUser.$query(trx)
         .updateByUserId({ eclassusermappingstatus: ClassUserStatusEnum.CANCELED }, user.sub)
         .then(rowsAffected => rowsAffected === 1)
-}
+        .then(async classLog => { 
 
-mobileClassUserService.processRegistration = async (classUserId, status, user) => {
+            const getHighestPosition = await mobileClassUserService.getHighestPosition(classUser.eclasseclassid)
+ 
+                if(getHighestPosition.length > 0) {
+                    const notificationObj = {
+                        enotificationbodyentityid: classUser.eclasseclassid,
+                        enotificationbodyentitytype: NotificationEnum.class.type,
+                        enotificationbodyaction: NotificationEnum.class.actions.canceled.code,
+                        enotificationbodytitle: NotificationEnum.class.actions.canceled.title,
+                        enotificationbodymessage: NotificationEnum.class.actions.canceled.message
+                    }
 
-    if (ClassUserStatusEnum.APPROVED !== status.toUpperCase() && ClassUserStatusEnum.REJECTED !== status.toUpperCase())
-        throw new UnsupportedOperationError(ErrorEnum.STATUS_INVALID)
+                    await notificationService.saveNotificationWithTransaction(
+                        notificationObj,
+                        user,
+                        getHighestPosition,
+                        trx
+                    )
+                }
 
-    const classUser = await ClassUserMapping.query()
-        .where('eclasseclassid', classId)
-        .where('eusereuserid', user.sub)
-        .orderBy('eclassusermappingcreatetime', 'DESC')
-        .withGraphFetched('class(baseAttributes)')
-        .first()
-
-    if (!classUser || !classUser.class) throw new UnsupportedOperationError(ErrorEnum.CLASS_NOT_FOUND)
-
-    const loggedInUserCompanies = await CompanyUserMapping.query()
-        .where('eusereuserid', user.sub)
-        .then(list => list.map(company => company.ecompanyid))
-
-    if (loggedInUserCompanies.indexOf(classUser.class.ecompanyecompanyid) === -1)
-        throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_ORGANIZATION)
-
-    if (classUser.eclassusermappingstatus === ClassUserStatusEnum.PENDING)
-
-        return classUser.$query()
-            .updateByUserId({ eclassusermappingstatus: status }, user.sub)
-            .returning('*')
-            .withGraphFetched('class(baseAttributes)')
-
-    else return classUser
+            return classLog
+        })
+    })
+    
 }
 
 mobileClassUserService.getMyClasses = async (companyId, page, size, user) => {

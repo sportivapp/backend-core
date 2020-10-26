@@ -4,7 +4,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('eteamlog', t => {
     t.integer('eteameteamid').notNullable().references('eteam.eteamid').onDelete('CASCADE');
     t.string('eteamlogmessage');
     t.enum('eteamlogtype', ['APPLY', 'INVITE']).notNullable();
-    t.enum('eteamlogstatus', ['ACCEPTED', 'REJECTED', 'PENDING']).defaultTo('PENDING');
+    t.enum('eteamlogstatus', ['ACCEPTED', 'REJECTED', 'PENDING', 'KICKED']).defaultTo('PENDING');
     t.bigInteger('eteamlogcreatetime').notNullable();
     t.integer('eteamlogcreateby').notNullable();
     t.bigInteger('eteamlogchangetime');

@@ -27,6 +27,20 @@ const teamRoutes = require('./team');
 const fileRoutes = require('./file');
 const companyLogRoutes = require('./companyLog');
 const theoryRoutes = require('./theory');
+const notificationRoutes = require('./notification');
+const forgetRoutes = require('./forget');
+const experienceRoutes = require('./experience');
+const licenseRoutes = require('./license');
+const classRoutes = require('./class')
+const classUserRoutes = require('./classUser');
+const newsRoutes = require('./news')
+const threadRoutes = require('./thread')
+const threadPostRoutes = require('./threadPost');
+const authenticationRoutes = require('./authentication');
+const sportTypeRoleRoutes = require('./sportTypeRole')
+const threadPostReplyRoutes = require('./threadPostReply')
+const teamUserMappingRoutes = require('./teamUserMapping')
+const reportThreadRoutes = require('./reportThread')
 
 router.use('/api/v1', [
     userRoutes,
@@ -53,7 +67,21 @@ router.use('/api/v1', [
     teamRoutes,
     fileRoutes,
     companyLogRoutes,
-    theoryRoutes
+    theoryRoutes,
+    notificationRoutes,
+    forgetRoutes,
+    experienceRoutes,
+    licenseRoutes,
+    classRoutes,
+    classUserRoutes,
+    newsRoutes,
+    threadRoutes,
+    threadPostRoutes,
+    authenticationRoutes,
+    sportTypeRoleRoutes,
+    threadPostReplyRoutes,
+    teamUserMappingRoutes,
+    reportThreadRoutes
 ]);
 
 const mobileUserRoutes = require('./mobileUser');
@@ -65,8 +93,15 @@ const mobileExperienceRoutes = require('./mobileExperience');
 const mobileClassRoutes = require('./mobileClass');
 const mobileClassUserRoutes = require('./mobileClassUser');
 const mobileAppVersionRoutes = require('./mobileAppVersion');
+const mobileNewsRoutes = require('./mobileNews');
+const mobileForumRoutes = require('./mobileForum');
+const mobileCommentRoutes = require('./mobileComment');
+const mobileTeamUserRoutes = require('./mobileTeamUser');
+const mobileTeamLogRoutes = require('./mobileTeamLog');
+const mobileCompanyLogRoutes = require('./mobileCompanyLog')
+const myMobileForumRoutes = require('./myMobileForum')
 
-router.use('/api/v1/mobile', [
+router.use('/api/v1', [
     mobileUserRoutes,
     mobileLicenseRoutes,
     mobileCompanyRoutes,
@@ -75,7 +110,15 @@ router.use('/api/v1/mobile', [
     mobileExperienceRoutes,
     mobileClassRoutes,
     mobileClassUserRoutes,
-    mobileAppVersionRoutes
+    mobileAppVersionRoutes,
+    mobileNewsRoutes,
+    mobileForumRoutes,
+    mobileCommentRoutes,
+    mobileTeamUserRoutes,
+    mobileTeamLogRoutes,
+    threadPostReplyRoutes,
+    mobileCompanyLogRoutes,
+    myMobileForumRoutes
 ]);
 
 module.exports = router;

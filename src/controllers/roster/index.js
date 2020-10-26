@@ -8,6 +8,9 @@ rosterController.createRoster = async (req, res, next) => {
     const { rosterName, rosterDescription, projectId, supervisorId, headUserId , userIds} = req.body;
     const user = req.user;
 
+    if (user.functions.indexOf('C9') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     try {
 
         const rosterDTO = { 
@@ -36,39 +39,16 @@ rosterController.deleteRosterById = async (req, res, next) => {
     const { rosterId } = req.params;
     const user = req.user;
 
+    if (user.functions.indexOf('D9') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     try {
 
-        const result = await rosterService.deleteRosterById(rosterId, user);
+        const result = await rosterService.deleteRosterById(rosterId);
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
-
-    } catch(e) {
-        next(e);
-    }
-
-}
-
-rosterController.generateRosterShiftForDate = async (req, res, next) => {
-
-    try {
-
-        const user = req.user;
-
-        if (user.permission !== 8) {
-            return res.status(401).json({
-                data: 'You cannot generate roster shifts'
-            })
-        }
-
-        const { hourType, formation, rosterId, date } = req.body;
-
-        const roster = await rosterService.generateRosterShiftForDate(hourType, formation, rosterId, date);
-
-        return res.status(200).json({
-            data: roster
-        });
 
     } catch(e) {
         next(e);
@@ -81,9 +61,12 @@ rosterController.getAllRostersByTimesheetId = async (req, res, next) => {
     const { timesheetId } = req.params
     const user = req.user;
 
+    if (user.functions.indexOf('R9') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     try {
 
-        const rosterList = await rosterService.getAllRosters(timesheetId, user);
+        const rosterList = await rosterService.getAllRosters(timesheetId);
 
         if(!rosterList)
             return res.status(403).json(ResponseHelper.toErrorResponse(403))
@@ -100,9 +83,12 @@ rosterController.getAllMemberById = async (req, res, next) => {
     const { rosterId } = req.params;
     const user = req.user;
 
+    if (user.functions.indexOf('R9') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     try {
 
-        const pageObj = await rosterService.getAllMemberById(parseInt(page), parseInt(size), rosterId, user);
+        const pageObj = await rosterService.getAllMemberById(parseInt(page), parseInt(size), rosterId);
 
         if(!pageObj)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
@@ -118,6 +104,9 @@ rosterController.updateRosterById = async (req, res, next) => {
     const { rosterId } = req.params
     const user = req.user;
     const { name, description, departmentId } = req.body;
+
+    if (user.functions.indexOf('U9') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
 
@@ -143,9 +132,12 @@ rosterController.viewRosterById = async (req, res, next) => {
     const { rosterId } = req.params;
     const user = req.user;
 
+    if (user.functions.indexOf('R9') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     try {
 
-        const result = await rosterService.viewRosterById(rosterId, user);
+        const result = await rosterService.viewRosterById(rosterId);
 
         if (!result)
             return res.status(400).json(ResponseHelper.toErrorResponse(400))
@@ -161,6 +153,9 @@ rosterController.updateUsersOfRosters = async (req, res, next) => {
 
     const { rosters, projectId } = req.body
 
+    if (req.user.functions.indexOf('U9') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     try {
         const result = await rosterService.updateUsersOfRosters(projectId, rosters, req.user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
@@ -174,6 +169,9 @@ rosterController.assignRosterToShiftTimeByTimesheetId = async (req, res, next) =
     const { timesheetId } =req.params
 
     const { mappings } = req.body
+
+    if (req.user.functions.indexOf('C9') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
         const result = await rosterService.assignRosterToShiftTime(timesheetId, mappings, req.user)

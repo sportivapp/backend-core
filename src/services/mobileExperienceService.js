@@ -52,7 +52,6 @@ experienceService.getExperienceList = async (page = 0, size = 10, loggedInUser, 
     .where(raw('lower("eexperiencename")'), 'like', `%${newKeyword}%`)
     .page(page, size)
 
-
     return ServiceHelper.toPageObj(page, size, pageObj)
 }
 
@@ -60,10 +59,15 @@ experienceService.getExperienceById = async (experienceId) => {
 
     return Experience.query()
     .select('eexperienceid','eexperiencename', 'eexperiencestartdate', 'eexperienceenddate', 'eexperiencelocation', 
-    'eexperienceposition', 'eexperiencedescription', 'eindustryname', 'efileid', 'efilename')
-    .leftJoinRelated('[industries, files]')
+    'eexperienceposition', 'eexperiencedescription', 'eindustryname', 'efileid', 'efilename', 'efiletype')
+    .leftJoinRelated('[industry, files]')
     .where('eexperienceid', experienceId)
     .first()
+    .then(experience => {
+        if(experience === undefined)
+            throw new NotFoundError()
+        return experience
+    })
 
 }
 

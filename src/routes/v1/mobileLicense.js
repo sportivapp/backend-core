@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router();
+const router = require('../mobileRouter');
 const controller = require('../../controllers/mobileLicense')
 const auth = require('../../middlewares/authentication');
 
@@ -9,4 +8,4 @@ router.post('/license', auth.authenticateToken, controller.createLicense);
 router.put('/license/:licenseId', auth.authenticateToken, controller.updateLicense);
 router.delete('/license', auth.authenticateToken, controller.deleteLicenses);
 
-module.exports = router;
+module.exports = router.expressRouter;

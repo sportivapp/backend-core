@@ -11,8 +11,20 @@ controller.getIndustryList = async (req, res, next) => {
         const result = await industryService.getIndustryList(keyword)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
-        console.log(e)
-        next(e)
+        next(e);
+    }
+
+}
+
+controller.getIndustryListWithLicenseLevel = async (req, res, next) => {
+
+    try {
+
+        const result = await industryService.getIndustryListWithLicenseLevel();
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+
+    } catch(e) {
+        next(e);
     }
 
 }

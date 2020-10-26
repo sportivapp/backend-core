@@ -3,11 +3,12 @@ module.exports = {
         base: '/api/v1',
         company: {
             list: '/company',
+            myList: '/my-company',
             register: '/company-register',
             id: '/company/:companyId',
             users: '/company/:companyId/users',
             exit: '/company-exit',
-            cancelJoin: '/company-cancel-join/:companyId',
+            cancelJoin: '/company-cancel-join',
             processInvitation: '/company-process-invitation'
         },
         user: {
@@ -23,12 +24,15 @@ module.exports = {
             removeCoach: '/user/coach-remove',
             industry: '/user/industry',
             pending: '/user-pending-log',
+            profile: '/user-profile'
         },
         profile: {
             changeCompany: '/change-company',
             currentCompany: '/current-company',
             changePassword: '/change-password',
-            profile: '/profile'
+            profile: '/profile',
+            modules: '/profile/modules',
+            functions: '/profile/functions'
         },
         grade: {
             list: '/grades',
@@ -43,6 +47,7 @@ module.exports = {
         },
         announcement: {
             create: '/announcement',
+            publish: '/publish-announcement/:announcementId',
             id: '/announcement/:announcementId',
             list: '/announcement-list'
         },
@@ -94,7 +99,8 @@ module.exports = {
             id: '/shift/:shiftId/pattern/:patternId'
         },
         industry: {
-            list: '/industry'
+            list: '/industry',
+            licenseLevel: '/industry-license-level'
         },
         state: {
             list: '/state'
@@ -109,20 +115,28 @@ module.exports = {
         team: {
             list: '/team',
             id: '/team/:teamId',
-            member: '/team-member',
+            members: '/team/:teamId/members',
+            teamLog: '/team/:teamId/log',
             kick: '/team-kick',
             invite: '/team-invite',
             processInvitation: '/team-process-invitation',
             processRequest: '/team-process-request',
             join: '/team-join',
             position: '/team-member-position',
+            roles: '/team-member-roles',
             cancelInvitation: '/team-cancel-invite',
             cancelRequest: '/team-cancel-request',
             exit: '/team-exit',
+            myTeam: '/team-user',
+            isAdmin: '/team/:teamId/admin',
+            userPendingLog: '/team-user-pending'
         },
         class: {
             list: '/class',
-            id: '/class/:classId'
+            id: '/class/:classId',
+            classUser: '/class/:classId/users',
+            pendingUser: '/class/:classId/pending-users',
+            processRegistration: '/class/process-registration'
         },
         classUser: {
             registration: '/user-class/registration',
@@ -140,10 +154,63 @@ module.exports = {
         },
         companyLog: {
             list: '/company/:companyId/log',
-            id: '/company/:companyId/log/:companyLogId'
+            id: '/company/:companyId/log/:companyLogId',
+            listPending: '/company-user-pending',
+            cancelInvite: '/company-cancel-invite',
+            processRequest: '/company-process-request'
+
         },
         app: {
             version: '/app/version'
-        }
+        },
+        news: {
+            list: '/news',
+            id: '/news/:newsId',
+            publish: '/news/:newsId/publish',
+            count: '/news/:newsId/user',
+            generate: '/news/:newsId/link'
+        },
+        notification: {
+            list: '/notification'
+        },
+        license: {
+            id : '/license/:licenseId'
+        },
+        file: {
+            download: '/file-download/:fileId'
+        },
+        theory: {
+            list: '/theory',
+            download: '/theory/:theoryId/download',
+            preview: '/theory/:theoryId/preview',
+            remove: '/theory/:theoryId/delete'
+        },
+        comment: {
+            threadComments: '/thread/:threadId/comments',
+            list: '/comment',
+            id: '/comment/:commentId',
+            threadPostId: '/thread/:threadId/comments/:commentId'
+        },
+        thread: {
+            list: '/thread',
+            id: '/thread/:threadId',
+            moderator: '/thread/:threadId/moderator-status'
+        },
+        authentication: {
+            login: '/login',
+            loginCompany: '/login-company',
+            loginAuto: '/login-auto'
+        },
+        sportTypeRole: {
+            industry: '/sport-type-role/industry/:industryId'
+        },
+        commentReply: {
+            list: '/comments/:commentId/replies',
+            id: '/comments/:commentId/replies/:replyId'
+        },
+        report: {
+            thread: '/report/thread',
+            threadType: '/report/thread/type'
+        },
     }
 }

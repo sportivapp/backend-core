@@ -1,4 +1,4 @@
-const router = require('../router')
+const router = require('../mobileRouter');
 const experienceController = require('../../controllers/mobileExperience');
 const auth = require('../../middlewares/authentication');
 const { routes } = require('../../constant')

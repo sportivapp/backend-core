@@ -1,10 +1,12 @@
-const   express     = require('express'),
-        cors        = require('cors'),
-        morgan      = require('morgan'),
-        fs          = require('fs'),
-        https       = require('https'),
-        path        = require('path')
+const   express         = require('express'),
+        cors            = require('cors'),
+        morgan          = require('morgan'),
+        cookieParser    = require('cookie-parser'),
+        fs              = require('fs'),
+        https           = require('https'),
+        path            = require('path')
 
+require('dotenv').config();
 const app = express();
 const routes = require('./routes/v1');
 const firebaseAdmin = require('firebase-admin');
@@ -22,13 +24,15 @@ app.use((_, res, next) => {
       'Access-Control-Allow-Headers',
       'Origin, X-Requested-With, Content-Type, Accept'  
     );
+    res.header('Access-Control-Allow-Credentials', true);
     return next();
 });
 
+app.use(cookieParser());
 app.use(express.json({limit: '1000mb'}));
 app.use(express.urlencoded({limit: '1000mb', extended: true }));
 app.use(morgan('dev'));
-app.use(express.static(path.resolve(__dirname + '/../temp')));
+app.use(express.static(process.env.TEMP_DIRECTORY));
 
 app.use(routes)
 
@@ -48,13 +52,13 @@ app.use((_, __, next) => {
 //             message: error.message || 'Internal Server Error',
 //         },
 //     });
-//
+
 //     errorMsg = {
 //         status: status,
 //         message: error.message || 'Internal Server Error',
 //         errStack: error.stack
 //     }
-//
+
 //     slackLoggingService.sendSlackMessage(webHookURL, slackLoggingService.setLogMessage(errorMsg));
 // });
 
@@ -67,14 +71,13 @@ firebaseAdmin.initializeApp({
     databaseURL: databaseUrl
 });
 
-require('dotenv').config();
 const httpPORT = process.env.PORT || 5100;
 const httpServer = app.listen(httpPORT, function() {
     console.log(`HTTP Server started on port ${httpPORT}`);
 })
 
 // configuration for https
- const options = {
+const options = {
     key: fs.readFileSync('../../../etc/ssl/private/quickplay.key', 'utf8'),
     cert: fs.readFileSync('../../../etc/ssl/certs/quickplay.crt', 'utf8')
 };

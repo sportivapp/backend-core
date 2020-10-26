@@ -19,7 +19,17 @@ class Experience extends Model {
         eexperiencestartdate: { type: 'integer'},
         eexperiencelocation: { type: 'string', minLength: 1, maxLength: 65 },
         eexperienceposition: { type: 'string', minLength: 1, maxLength: 65 },
-        eexperiencedescription: { type: 'string', minLength: 1, maxLength: 1025 },
+        eexperiencedescription: { type: 'string', maxLength: 1025 },
+      }
+    }
+  }
+
+  static get modifiers() {
+    return {
+      baseAttributes(builder) {
+        builder.select('eexperienceid', 'eexperiencename', 'eexperiencestartdate', 'eexperienceenddate', 'eexperiencelocation',
+        'eexperienceposition', 'eexperiencedescription')
+        .withGraphFetched('industry(baseAttributes)')
       }
     }
   }
@@ -30,7 +40,7 @@ class Experience extends Model {
     const File = require('./File')
 
     return {
-      industries: {
+      industry: {
         relation: Model.BelongsToOneRelation,
         modelClass: Industry,
         join: {
@@ -39,7 +49,7 @@ class Experience extends Model {
         }
       },
       files: {
-        relation: ManyToManyRelation,
+        relation: Model.ManyToManyRelation,
         modelClass: File,
         join: {
           from: 'eexperience.eexperienceid',

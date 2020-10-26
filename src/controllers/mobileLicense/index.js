@@ -11,8 +11,6 @@ controller.getLicense = async (req, res, next) => {
 
         const result = await licenseService.getLicense(parseInt(licenseId));
 
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404));
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
@@ -23,12 +21,12 @@ controller.getLicense = async (req, res, next) => {
 
 controller.getLicenses = async (req, res, next) => {
 
-    try {
-        const result = await licenseService.getLicenses(req.user);
+    const { page = '0', size = '10', keyword = '' } = req.query;
 
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404));
-        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+    try {
+        const pageObj = await licenseService.getLicenses(req.user, parseInt(page), parseInt(size), keyword);
+
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
     } catch(e) {
         next(e);
     }
@@ -37,22 +35,20 @@ controller.getLicenses = async (req, res, next) => {
 
 controller.createLicense = async (req, res, next) => {
 
-    const { academicName, graduationDate, industryId, level, additionalInformation, fileId } = req.body;
+    const { academicName, graduationDate, industryId, licenseLevelId, additionalInformation, fileId } = req.body;
 
     const licenseDTO = {
         elicenseacademicname: academicName,
         elicensegraduationdate: graduationDate,
         eindustryeindustryid: industryId,
-        elicenselevel: level,
+        elicenselevelelicenselevelid: licenseLevelId,
         elicenseadditionalinformation: additionalInformation,
         efileefileid: fileId
     }
 
     try {
         const result = await licenseService.createLicense(licenseDTO, req.user);
-
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400));
+        
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
     } catch(e) {
         next(e);
@@ -62,14 +58,14 @@ controller.createLicense = async (req, res, next) => {
 
 controller.updateLicense = async (req, res, next) => {
 
-    const { academicName, graduationDate, industryId, level, additionalInformation, fileId } = req.body;
+    const { academicName, graduationDate, industryId, licenseLevelId, additionalInformation, fileId } = req.body;
     const { licenseId } = req.params;
 
     const licenseDTO = {
         elicenseacademicname: academicName,
         elicensegraduationdate: graduationDate,
         eindustryeindustryid: industryId,
-        elicenselevel: level,
+        elicenselevelelicenselevelid: licenseLevelId,
         elicenseadditionalinformation: additionalInformation,
         efileefileid: fileId
     }
@@ -78,8 +74,6 @@ controller.updateLicense = async (req, res, next) => {
 
         const result = await licenseService.updateLicense(licenseDTO, parseInt(licenseId), req.user);
 
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400));
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
     } catch(e) {
         next(e);
@@ -95,8 +89,6 @@ controller.deleteLicenses = async (req, res, next) => {
 
         const result = await licenseService.deleteLicenses(licenseIds, req.user);
 
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400));
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
     } catch(e) {
         next(e);

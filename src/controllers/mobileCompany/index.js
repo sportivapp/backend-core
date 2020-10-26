@@ -21,20 +21,48 @@ controller.getCompany = async (req, res, next) => {
 
 }
 
-controller.getCompanies = async (req, res, next) => {
+controller.getAllCompanies = async (req, res, next) => {
 
-    const { page, size, keyword } = req.query
+    const { page = '0', size = '10', keyword = ''} = req.query
 
     try {
-        const pageObj = await companyService.getCompanies(parseInt(page), parseInt(size), keyword);
+        const pageObj = await companyService.getAllCompanies(parseInt(page), parseInt(size), keyword);
 
-        if (!pageObj)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404));
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
+
     } catch(e) {
         next(e);
     }
 
+}
+
+controller.getMyCompanies = async (req, res, next) => {
+
+    const { page = '0', size = '10', keyword = ''} = req.query
+
+    try {
+        const pageObj = await companyService.getMyCompanies(parseInt(page), parseInt(size), keyword, req.user);
+
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.getUsersByCompanyId = async (req, res, next) => {
+
+    const { page = '0', size = '10', keyword = '' } = req.query
+    
+    const { companyId } = req.params
+
+    try {
+        const pageObj = await companyService.getUsersByCompanyId(companyId, parseInt(page), parseInt(size), keyword)
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+    } catch (e) {
+        next(e)
+    }
 }
 
 controller.getVirtualMemberCard = async (req, res, next) => {
@@ -44,9 +72,6 @@ controller.getVirtualMemberCard = async (req, res, next) => {
     try {
 
         const result = await companyService.getVirtualMemberCard(parseInt(companyId), req.user);
-
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404));
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
@@ -71,13 +96,13 @@ controller.joinCompany = async (req, res, next) => {
 
 }
 
-controller.userCancelJoin = async (req, res, next) => {
+controller.userCancelJoins = async (req, res, next) => {
 
-    const { companyId } = req.params
+    const { companyLogIds } = req.body
 
     try {
 
-        const result = await companyService.userCancelJoin(parseInt(companyId), req.user.sub);
+        const result = await companyService.userCancelJoins(companyLogIds, req.user);
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
@@ -105,12 +130,12 @@ controller.exitCompany = async (req, res, next) => {
 
 controller.processInvitation = async (req, res, next) => {
 
-    const { companyId } = req.body;
+    const { companyLogIds } = req.body;
     const { status } = req.query;
 
     try {
 
-        const result = await companyService.processInvitation(companyId, req.user, status.toUpperCase());
+        const result = await companyService.processInvitation(companyLogIds, req.user, status.toUpperCase());
 
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 

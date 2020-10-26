@@ -3,10 +3,10 @@ const router = express.Router();
 const controller = require('../../controllers/setting');
 const auth = require('../../middlewares/authentication');
 
-router.get('/setting/company-module/:companyId', controller.getModulesByCompanyId);
-router.put('/setting/company-module/:companyId', auth.authenticateToken, controller.updateModulesNameByCompanyId);
+router.get('/setting/module', auth.authenticateToken, controller.getModulesByCompanyId);
+router.put('/setting/module/:moduleId', auth.authenticateToken, controller.updateModulesNameByCompanyId);
 
-router.get('/setting/function-module/:gradeId', auth.authenticateToken, controller.getAllFunctionByGradeId);
-router.put('/setting/function-module/:gradeId', auth.authenticateToken, controller.saveFuncionsByGradeId)
+router.get('/setting/function/:gradeId', auth.authenticateToken, controller.getAllFunctionByGradeId);
+router.post('/setting/function/:gradeId', auth.authenticateToken, controller.saveFunctionsByGradeId)
 
 module.exports = router;

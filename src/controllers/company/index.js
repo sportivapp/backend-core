@@ -3,10 +3,6 @@ const ResponseHelper = require('../../helper/ResponseHelper')
 
 const companyController = {}
 
-function isUserNotValid(user) {
-    return user.permission !== 10
-}
-
 companyController.registerCompany = async (req, res, next) => {
 
     const { nik, name, password, mobileNumber, companyName, companyEmail, street, postalCode, industryId, countryId, stateId } = req.body;
@@ -34,9 +30,6 @@ companyController.registerCompany = async (req, res, next) => {
         }
 
         const data = await companyService.registerCompany(userDTO, companyDTO, addressDTO);
-
-        if (!data) return res.status(400).json(ResponseHelper.toErrorResponse(400))
-
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
 
     } catch(e) {
@@ -46,8 +39,6 @@ companyController.registerCompany = async (req, res, next) => {
 
 companyController.createCompany = async (req, res, next) => {
 
-    if (isUserNotValid(req.user))
-        return res.status(403).json(ResponseHelper.toErrorResponse(403))
     const user = req.user
 
     try {
@@ -55,43 +46,35 @@ companyController.createCompany = async (req, res, next) => {
         const {
             companyName,
             companyEmail,
-            street,
-            postalCode,
             companyParentId,
-            companyOlderId,
-            industryId,
+            industryIds,
             companyPhoneNumber,
-            supervisorId,
             countryId,
             stateId,
-            isAutoNik,
-            companyNik,
-            fileId
+            street,
+            isAutoNik = true
         } = req.body;
 
         const companyDTO = {
             ecompanyname: companyName,
             ecompanyemailaddress: companyEmail,
-            ecompanyparentid: companyParentId,
-            ecompanyolderid: companyOlderId,
-            eindustryeindustryid: industryId,
             ecompanyphonenumber: companyPhoneNumber,
             ecompanyautonik: isAutoNik,
-            ecompanynik: companyNik,
-            efileefileid: fileId
+            ecompanyparentid: companyParentId
         }
 
         const addressDTO = {
             eaddressstreet: street,
-            eaddresspostalcode: postalCode,
             ecountryecountryid: countryId,
             estateestateid: stateId
         }
 
-        const data = await companyService.createCompany(supervisorId , companyDTO, addressDTO, user);
+        if (companyParentId) {
+            if (user.functions.indexOf('C1') === -1)
+                return res.status(403).json(ResponseHelper.toErrorResponse(403))
+        }
 
-        if (!data) return res.status(400).json(ResponseHelper.toErrorResponse(400))
-
+        const data = await companyService.createCompany(companyDTO, addressDTO, industryIds, user);
         return res.status(200).json(ResponseHelper.toBaseResponse(data));
 
     } catch(e) {
@@ -99,20 +82,29 @@ companyController.createCompany = async (req, res, next) => {
     }
 }
 
-companyController.getCompanyList = async (req, res, next) => {
+companyController.getAllCompanyList = async (req, res, next) => {
 
     const user = req.user
 
-    if (isUserNotValid(user))
-        return res.status(403).json(ResponseHelper.toErrorResponse(403))
-
     // type = company or type = branch
-    const { page, size, type, keyword, companyId } = req.query
+    const { page = '0', size = '10', type, keyword = '', companyId } = req.query
 
     try {
-        const pageObj = await companyService.getCompanyList(parseInt(page), parseInt(size), type, keyword, companyId, user)
-        if (!pageObj)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        const pageObj = await companyService.getAllCompanyList(parseInt(page), parseInt(size), type, keyword.toLowerCase(),
+            parseInt(companyId), user)
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+    } catch (e) {
+        next(e)
+    }
+
+}
+
+companyController.getMyCompanyList = async (req, res, next) => {
+
+    const { page = '0', size = '10', keyword = '' } = req.query
+
+    try {
+        const pageObj = await companyService.getMyCompanyList(parseInt(page), parseInt(size), keyword.toLowerCase(), req.user)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
     } catch (e) {
         next(e)
@@ -124,15 +116,13 @@ companyController.getCompanyById = async (req, res, next) => {
 
     const user = req.user
 
-    if (isUserNotValid(user))
+    if (user.functions.indexOf('R1') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { companyId } = req.params
 
     try {
-        const result = await companyService.getCompanyById(companyId)
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        const result = await companyService.getCompleteCompanyById(companyId)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)
@@ -142,12 +132,15 @@ companyController.getCompanyById = async (req, res, next) => {
 
 companyController.getUsersByCompanyId = async (req, res, next) => {
 
-    const { page, size } = req.query
+    if (req.user.functions.indexOf('R5') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
+    const { page = '0', size = '10', keyword = '' } = req.query
 
     const { companyId } = req.params
 
     try {
-        const pageObj = await companyService.getUsersByCompanyId(companyId, parseInt(page), parseInt(size))
+        const pageObj = await companyService.getUsersByCompanyId(companyId, parseInt(page), parseInt(size), keyword)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
     } catch (e) {
         next(e)
@@ -158,22 +151,19 @@ companyController.editCompany = async (req, res, next) => {
 
     const user = req.user
 
-    if (isUserNotValid(user))
+    if (req.user.functions.indexOf('U1') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { companyId } = req.params
 
     const { companyName,
         companyEmail,
-        street,
-        postalCode,
         companyParentId,
-        companyOlderId,
-        industryId,
-        supervisorId,
+        industryIds,
         companyPhoneNumber,
         countryId,
         stateId,
+        street,
         fileId
     } = req.body
 
@@ -183,22 +173,17 @@ companyController.editCompany = async (req, res, next) => {
             ecompanyname: companyName,
             ecompanyemailaddress: companyEmail,
             ecompanyparentid: companyParentId,
-            ecompanyolderid: companyOlderId,
-            eindustryeindustryid: industryId,
             ecompanyphonenumber: companyPhoneNumber,
             efileefileid: fileId
         }
 
         const addressDTO = {
             eaddressstreet: street,
-            eaddresspostalcode: postalCode,
             ecountryecountryid: countryId,
             estateestateid: stateId
         }
 
-        const result = await companyService.editCompany(parseInt(companyId), supervisorId, companyDTO, addressDTO, user)
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        const result = await companyService.editCompany(parseInt(companyId), companyDTO, addressDTO, industryIds, user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch (e) {
@@ -210,7 +195,7 @@ companyController.deleteCompany = async (req, res, next) => {
 
     const user = req.user
 
-    if (isUserNotValid(user))
+    if (user.functions.indexOf('D1') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const { companyId } = req.params
@@ -218,8 +203,6 @@ companyController.deleteCompany = async (req, res, next) => {
     try {
 
         const result = await companyService.deleteCompany(companyId)
-        if (!result)
-            return res.status(404).json(ResponseHelper.toErrorResponse(404))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch (e) {
@@ -231,20 +214,15 @@ companyController.saveUsersToCompany = async (req, res, next) => {
 
     const user = req.user
 
-    if (isUserNotValid(user))
+    if (user.functions.indexOf('C1') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
-    const users = req.body.users
-
-    users.forEach(user => {
-        if (!user.id || user.deleted === undefined) return res.status(400).json(ResponseHelper.toErrorResponse(400))
-    })
+    const { users } = req.body
 
     const { companyId } = req.params
 
     try {
-        const result = await companyService.saveUsersToCompany(companyId, users, user)
-        if (!result) return res.status(404).json(ResponseHelper.toErrorResponse(404))
+        const result = await companyService.saveUsersToCompany(parseInt(companyId), users, user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)

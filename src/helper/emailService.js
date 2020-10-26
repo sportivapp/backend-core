@@ -20,7 +20,7 @@ const smtpConfig = {
         pass: process.env.MAIL_SMTPPASSWORD
     },
     tls: {
-        maxVersion: 'TLSv1.3',
+        maxVersion: 'TLSv1.2',
         minVersion: 'TLSv1.2'
     }
 }
@@ -43,7 +43,7 @@ exports.sendEmailOTP = async (email, otpCode) => {
     const info = await transporter.sendMail({
         from: process.env.MAIL_SMTPNAME, // sender address
         to: email, // list of receivers
-        subject: "OTP Code - Sportiv", // Subject line
+        subject: "Kode OTP - Sportiv", // Subject line
         text: "", // plain text body
         html: html
     });
@@ -57,6 +57,26 @@ exports.sendEmailOTP = async (email, otpCode) => {
 
 }
 
+exports.sendForgetEmail = async (email, link) => {
+
+    const info = await transporter.sendMail({
+        from: process.env.MAIL_SMTPNAME, // sender address
+        to: email, // list of receivers
+        subject: 'Tautan Lupa Kata Sandi - Sportiv', // Subject line
+        text: 'Tautan untuk mengganti kata sandi: ' + link, // plain text body
+        // html: html
+    });
+
+    transporter.sendMail(info, (err, data) => {
+        if (err) {
+            console.log(err);
+        }
+        console.log("Email sent!");
+    });
+
+    return true;
+}
+
 exports.sendForgotPasswordLink = async ( userId, email ) => {
     const newPassword = await shortid.generate();
     const encryptedPassword = await bcrypt.hash(newPassword);
@@ -68,7 +88,7 @@ exports.sendForgotPasswordLink = async ( userId, email ) => {
     const info = await transporter.sendMail({
         from: process.env.MAIL_SMTPNAME, // sender address
         to: email, // list of receivers
-        subject: 'Forgot Password Code - Nawakara', // Subject line
+        subject: 'Forgot Password Code - Sportiv', // Subject line
         text: 'Berikut adalah password baru kamu: ' + newPassword, // plain text body
         // html: html
     });
@@ -81,4 +101,49 @@ exports.sendForgotPasswordLink = async ( userId, email ) => {
     });
 
     return true;
+}
+
+exports.sendReportThread = async (report, callback) => {
+
+    let html
+    let type
+
+    if (report.reply) {
+        type = 'COMMENT REPLY'
+        html = `Report - ${type} <br/>
+                Report Type: ${report.type.ereportthreadtypename}</br></br>
+                Thread Id: ${report.thread.ethreadid}<br/>
+                Thread Title: ${report.thread.ethreadtitle}<br/><br/>
+                Comment Id: ${report.comment.ethreadpostid}<br/>
+                Comment Text: ${report.comment.ethreadpostcomment}<br/>
+                Comment Type: ${report.comment.efileefileid ? 'FILE' : 'TEXT'}<br/><br/>
+                Comment Reply Id: ${report.reply.ethreadpostreplyid}<br/>
+                Comment Reply Text: ${report.reply.ethreadpostreplycomment}<br/>
+                Comment Reply Type: ${report.reply.efileefileid ? 'FILE': 'TEXT'}`
+    } else if (report.comment) {
+        type = 'REPLY THREAD'
+        html = `Report - ${type} <br/>
+                Report Type: ${report.type.ereportthreadtypename}</br></br>
+                Thread Id: ${report.thread.ethreadid}<br/>
+                Thread Title: ${report.thread.ethreadtitle}<br/><br/>
+                Comment Id: ${report.comment.ethreadpostid}<br/>
+                Comment Text: ${report.comment.ethreadpostcomment}<br/><br/>
+                Comment Type: ${report.comment.efileefileid ? 'FILE' : 'TEXT'}`
+    } else {
+        type = 'THREAD'
+        html = `Report - ${type} <br/>
+                Report Type: ${report.type.ereportthreadtypename}</br></br>
+                Thread Id: ${report.thread.ethreadid}<br/>
+                Thread Title: ${report.thread.ethreadtitle}<br/><br/>`
+    }
+
+    const info = await transporter.sendMail({
+        from: report.reporter.euseremail, // sender address
+        to: 'noreply@sportiv.app', // list of receivers
+        subject: `REPORT - ${type}`, // Subject line
+        text: "", // plain text body
+        html: html
+    });
+
+    transporter.sendMail(info, callback);
 }

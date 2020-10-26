@@ -1,26 +1,37 @@
 const License = require('../models/License');
 const fileService = require('./fileService');
+const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
+const { raw } = require('objection')
+const ServiceHelper = require('../helper/ServiceHelper')
 
 const LicenseService = {};
+
+const UnsupportedLicenseErrorEnum = {
+    FILE_LICENSE_NOT_EXIST : 'FILE_LICENSE_NOT_EXIST',
+}
 
 LicenseService.getLicense = async (licenseId) => {
 
     return License.query()
-    .select('elicenseid', 'elicenseacademicname', 'efileid', 'efilename', 'elicensegraduationdate', 'eindustryname', 'elicenselevel', 
-    'elicenseadditionalinformation')
-    .leftJoinRelated('industry')
-    .joinRelated('file')
-    .where('elicenseid', licenseId)
-    .first();
+        .findById(licenseId)
+        .modify('baseAttributes')
+        .withGraphFetched('file(baseAttributes)')
+        .withGraphFetched('licenseLevel(baseAttributesWithIndustry)')
 
 }
 
-LicenseService.getLicenses = async (user) => {
+LicenseService.getLicenses = async (user, page, size, keyword) => {
 
-    return License.query()
-    .select('elicenseid', 'elicenseacademicname', 'elicensegraduationdate', 'elicenselevel', 'eindustryname')
-    .joinRelated('industry')
+    const pageQuery = License.query()
+    .modify('baseAttributes')
+    .withGraphFetched('licenseLevel(baseAttributesWithIndustry)')
     .where('elicensecreateby', user.sub);
+
+    return pageQuery
+        .where(raw('lower("elicenseacademicname")'), 'like', `%${keyword.toLowerCase()}%`)
+        .modify('baseAttributes')
+        .page(page, size)
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
 }
 
@@ -30,9 +41,7 @@ LicenseService.createLicense = async (licenseDTO, user) => {
 
     // License must have a file attached
     if (!file)
-        return
-
-    licenseDTO.elicensegraduationdate = new Date(licenseDTO.elicensegraduationdate).getTime();
+        throw new UnsupportedOperationError(UnsupportedLicenseErrorEnum.FILE_LICENSE_NOT_EXIST)
 
     const license = await License.query().insertToTable(licenseDTO, user.sub);
 
@@ -52,15 +61,15 @@ LicenseService.updateLicense = async (licenseDTO, licenseId, user) => {
 
     // License must have a file attached
     if (!file)
-        return
+         throw new UnsupportedOperationError(UnsupportedLicenseErrorEnum.FILE_LICENSE_NOT_EXIST)
+
 
     const licenses = await LicenseService.getLicensesByIdsAndCreateBy([licenseId], user.sub);
     const license = licenses[0];
 
     if (!license)
-        return
+        throw new NotFoundError()
 
-    licenseDTO.elicensegraduationdate = new Date(licenseDTO.elicensegraduationdate).getTime();
     return license.$query().updateByUserId(licenseDTO, user.sub).returning('*');
 
 }
@@ -70,7 +79,7 @@ LicenseService.deleteLicenses = async (licenseIds, user) => {
     const licenses = await LicenseService.getLicensesByIdsAndCreateBy(licenseIds, user.sub);
 
     if (licenses.length === 0 || licenses.length !== licenseIds.length)
-        return
+        throw new NotFoundError()
 
     return License.query().whereIn('elicenseid', licenseIds).del()
     .then(rowsAffected => rowsAffected === licenseIds.length);
