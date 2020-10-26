@@ -136,12 +136,16 @@ mobileForumService.updateThreadById = async (threadId, threadDTO, user) => {
     const thread = await mobileForumService.getThreadById(threadId);
 
     const moderator = await mobileForumService.isModerator(thread.ethreadid, user.sub)
-    
+
     if(!moderator) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION);
 
     // If user made the thread, cannot be private
     if(!thread.eteameteamid && !thread.ecompanyecompanyid && !threadDTO.ethreadispublic)
         throw new UnsupportedOperationError(ErrorEnum.PRIVATE_NOT_AVAILABLE);
+
+    // If team thread AND it is public, check whether it's made by an Admin
+    // if(thread.eteameteamid && thread.ethreadispublic)
+    //     await teamUserService.getTeamUserCheckAdmin(thread.eteameteamid, user.sub);
 
     // if(thread.ecompanyecompanyid && thread.ethreadispublic) {
 
@@ -159,7 +163,7 @@ mobileForumService.updateThreadById = async (threadId, threadDTO, user) => {
     // }
 
     if (threadDTO.efileefileid) {
-        const file = await fileService.getFileByIdAndCreateBy(threadDTO.efileefileid, user.sub)
+        const file = await fileService.getFileById(threadDTO.efileefileid)
         if (!file) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_EXIST)
     }
 

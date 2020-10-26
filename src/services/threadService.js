@@ -153,6 +153,13 @@ threadService.updateThread = async (threadId, threadDTO, user) => {
 
     if (!isModerator) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
 
+    // if (thread.eteameteamid && thread.ethreadispublic) {
+
+    //     const isTeamAdmin = await teamUserMappingService.isAdmin(thread.eteameteamid, user.sub)
+
+    //     if (!isTeamAdmin) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
+    // }
+
     // if (thread.ecompanyecompanyid && thread.ethreadispublic) {
 
     //     const isAllowed = await gradeService.getAllGradesByUserIdAndCompanyId(thread.ecompanyecompanyid, user.sub)
