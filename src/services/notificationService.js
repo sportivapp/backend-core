@@ -1,6 +1,7 @@
 const Notification = require('../models/Notification')
 const NotificationBody = require('../models/NotificationBody')
 const User = require('../models/User')
+const firebaseService = require('../helper/firebaseService')
 const ServiceHelper = require('../helper/ServiceHelper');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
@@ -63,6 +64,9 @@ notificationService.saveNotification = async (notificationObj, loggedInUser, tar
 
         return Notification.query()
         .insertToTable(notificationDTO, loggedInUser.sub)
+        .then(resultArr => resultArr.map(notification => firebaseService
+            .pushNotification(notification.eusereuserid, notificationBody.enotificationbodytitle, notificationBody.enotificationbodymessage)))
+        .then(pushNotificationPromises => Promise.all(pushNotificationPromises))
     })
 
 }
@@ -89,6 +93,9 @@ notificationService.saveNotificationWithTransaction = async (notificationObj, lo
 
         return Notification.query(trx)
         .insertToTable(notificationDTO, loggedInUser.sub)
+        .then(resultArr => resultArr.map(notification => firebaseService
+            .pushNotification(notification.eusereuserid, notificationBody.enotificationbodytitle, notificationBody.enotificationbodymessage)))
+        .then(pushNotificationPromises => Promise.all(pushNotificationPromises))
     })
 
 }
