@@ -285,7 +285,8 @@ teamLogService.invite = async (teamId, user, email) => {
     await Team.query()
     .findById(teamId)
     .then(team => {
-        return mobileCompanyUserService.checkUserInCompany(invitedUser.euserid, team.ecompanyecompanyid)
+        if (team.ecompanyecompanyid)
+            return mobileCompanyUserService.checkUserInCompany(invitedUser.euserid, team.ecompanyecompanyid)
     })
 
     if (!invitedUser)
