@@ -10,12 +10,9 @@ require('dotenv').config();
 const app = express();
 const routes = require('./routes/v1');
 const firebaseAdmin = require('firebase-admin');
-const slackLoggingService = require('./helper/slackLoggingService');
 const errorHandler = require('./middlewares/errorHandler');
 
-const webHookURL = 'https://hooks.slack.com/services/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';
 const databaseUrl = process.env.FIREBASE_URL || 'https://notification-sportiv.firebaseio.com'
-let errorMsg = {};
 
 app.use(cors());
 app.use((_, res, next) => {
@@ -64,7 +61,7 @@ app.use((_, __, next) => {
 
 app.use(errorHandler)
 
-const serviceAccount = require('../notification-sportiv-firebase-adminsdk-sg72b-99ab3769af.json')
+const serviceAccount = require(process.env.FIREBASE_KEY_DIRECTORY);
 
 firebaseAdmin.initializeApp({
     credential: firebaseAdmin.credential.cert(serviceAccount),

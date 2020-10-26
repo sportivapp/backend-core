@@ -1,12 +1,9 @@
 const User = require('../models/User');
 const CompanyUserMapping = require('../models/CompanyUserMapping')
 const Company = require('../models/Company')
-const CompanySequence = require('../models/CompanySequence')
-const Grade = require('../models/Grades');
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const readXlsxFile = require("read-excel-file/node");
 const emailService = require('../helper/emailService');
 const ServiceHelper = require('../helper/ServiceHelper')
 const firebaseService = require('../helper/firebaseService')
