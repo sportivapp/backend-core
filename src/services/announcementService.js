@@ -1,100 +1,120 @@
 const Announcement = require('../models/Announcement');
 const AnnouncementUserMapping = require('../models/AnnouncementUserMapping');
 const ServiceHelper = require('../helper/ServiceHelper')
+const fileService = require('./fileService');
+const {NotFoundError, UnsupportedOperationError} = require('../models/errors');
+const companyService = require('./companyService');
+const NotificationEnum = require('../models/enum/NotificationEnum');
+const notificationService = require('./notificationService');
+const Grade = require('../models/Grades')
 
 const AnnouncementService = {};
 
-AnnouncementService.getAllAnnouncement = async (page, size, type = 'IN', user) => {
+const ErrorEnum = {
+    COMPANY_NOT_FOUND: 'COMPANY_NOT_FOUND',
+    FILE_NOT_FOUND: 'FILE_NOT_FOUND',
+    ANNOUNCEMENT_NOT_FOUND: 'ANNOUNCEMENT_NOT_FOUND',
+    USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY'
+}
 
-    if (type === 'IN')
+AnnouncementService.getAllAnnouncement = async (page, size, user) => {
 
-        return AnnouncementUserMapping.relatedQuery('announcement')
-            .for(AnnouncementUserMapping.query().where('eusereuserid', user.sub))
-            .withGraphFetched('users(baseAttributes)')
-            .page(page, size)
-            .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj));
-
-    else
-
-        return Announcement.query()
-            .where('eannouncementcreateby', user.sub)
-            .withGraphFetched('users(baseAttributes)')
-            .page(page, size)
-            .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj));
+    return Announcement.query()
+        .where('ecompanyecompanyid', user.companyId)
+        .withGraphFetched('users(baseAttributes)')
+        .page(page, size)
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj));
 }
 
 AnnouncementService.getAnnouncementById = async (announcementId, user) => {
 
-    const announcement = await Announcement.query()
+    return Announcement.query()
         .where('eannouncementid', announcementId)
-        .andWhere('eannouncementcreateby', user.sub)
+        .andWhere('ecompanyecompanyid', user.companyId)
         .withGraphFetched('users(baseAttributes)')
-        .first()
-
-    if (!announcement)
-
-        return AnnouncementUserMapping.relatedQuery('announcement')
-            .for(AnnouncementUserMapping.query()
-                .where('eannouncementeannouncementid', announcementId)
-                .andWhere('eusereuserid', user.sub)
-                .first())
-            .withGraphFetched('users(baseAttributes)')
-
-    return announcement
+        .then(announcement => {
+            if (!announcement) throw new NotFoundError()
+            return announcement
+        })
 }
 
-AnnouncementService.addUser = async (announcementId, userIds, loggedInUser) => {
+AnnouncementService.addUser = async (announcementId, userIds, loggedInUser, db) => {
 
     const users = userIds.map(user => ({
-        eannouncementeannouncementid: announcementId, 
+        eannouncementeannouncementid: announcementId,
         eusereuserid: user
     }));
 
-    return AnnouncementUserMapping.query().insertToTable(users, loggedInUser.sub);
+    return AnnouncementUserMapping.query(db).insertToTable(users, loggedInUser.sub)
+        .then(announcementLog => {
+
+            if (users.length > 0) {
+                const notificationObj = {
+                    enotificationbodyentityid: announcementId,
+                    enotificationbodyentitytype: NotificationEnum.announcement.type,
+                    enotificationbodyaction: NotificationEnum.announcement.actions.publish.code,
+                    enotificationbodytitle: NotificationEnum.announcement.actions.publish.title,
+                    enotificationbodymessage: NotificationEnum.announcement.actions.publish.message
+                }
+
+
+                notificationService.saveNotification(
+                    notificationObj,
+                    loggedInUser,
+                    userIds
+                )
+            }
+
+            return announcementLog
+        })
 }
 
-AnnouncementService.createAnnouncement = async ( announcementDTO, userIds, user ) => {
+AnnouncementService.publishAnnouncement = async (announcementId, userIds, user) => {
+
+    const announcement = await AnnouncementService.getAnnouncementById(announcementId, user)
+        .catch(() => new UnsupportedOperationError(ErrorEnum.ANNOUNCEMENT_NOT_FOUND))
+
+    return AnnouncementService.addUser(announcement.eannouncementid, userIds, user, Announcement.knex());
+}
+
+AnnouncementService.createAnnouncement = async (announcementDTO, user) => {
+
+    const company = await companyService.getCompanyById(announcementDTO.ecompanyecompanyid)
+
+    const file = await fileService.getFileById(announcementDTO.efileefileid)
+
+    if (!company) throw new UnsupportedOperationError(ErrorEnum.COMPANY_NOT_FOUND)
+
+    if (!file) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_FOUND)
 
     const announcement = await Announcement.query().insertToTable(announcementDTO, user.sub)
 
-    await AnnouncementService.addUser(announcement.eannouncementid, userIds, user);
+    return announcement
 
-    return announcement;
 }
-
 
 AnnouncementService.updateAnnouncement = async (announcementId, announcementDTO, userIds, user) => {
 
-    const announcement = await Announcement.query()
-        .where('eannouncementid', announcementId)
-        .andWhere('eannouncementcreateby', user.sub)
-        .first()
+    const announcement = await AnnouncementService.getAnnouncementById(announcementId, user)
+        .catch(() => new UnsupportedOperationError(ErrorEnum.ANNOUNCEMENT_NOT_FOUND))
 
-    if (!announcement) return
+    return Announcement.transaction(async trx => {
 
-    // remove user that has the announcement
-    await AnnouncementUserMapping.query().delete().where('eannouncementeannouncementid', announcementId);
+        await AnnouncementUserMapping.query(trx).delete().where('eannouncementeannouncementid', announcementId);
 
-    const result = announcement.$query()
-        .updateByUserId(announcementDTO, user.sub)
-        .returning('*');
+        await AnnouncementService.addUser(parseInt(announcementId, 10), userIds, user, trx)
 
-    // Insert user that get the announcement
-    await AnnouncementService.addUser(parseInt(announcementId, 10) , userIds, user);
+        return announcement.$query(trx).updateByUserId(announcementDTO, user.sub)
+            .returning('*')
 
-    return result;
+    })
 }
 
 AnnouncementService.deleteAnnouncement = async (announcementId, user) => {
 
-    const announcement = await Announcement.query()
-        .where('eannouncementid', announcementId)
-        .andWhere('eannouncementcreateby', user.sub)
-        .first()
-
-    if (!announcement) return false
-
-    return announcement.$query().delete().then(rowsAffected => rowsAffected === 1);
+    return AnnouncementService.getAnnouncementById(announcementId, user)
+        .then(announcement => announcement.$query().delete().then(rowsAffected => rowsAffected === 1))
+        .catch(() => false)
 }
 
 module.exports = AnnouncementService;

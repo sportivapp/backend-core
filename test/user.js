@@ -201,8 +201,6 @@ module.exports = (chai, httpServer, expect) => {
           .set('authorization', login.body.data)
           .send();
 
-      console.log(res.body.data)
-
       expect(res.status).to.equal(200);
       expect(res.body.data).to.not.be.undefined;
     });

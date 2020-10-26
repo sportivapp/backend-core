@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router();
+const router = require('../mobileRouter');
 const controller = require('../../controllers/mobileClassUser')
 const auth = require('../../middlewares/authentication');
 const { routes } = require('../../constant')
@@ -10,4 +9,4 @@ router.delete(routes.classUser.id, auth.authenticateToken, controller.cancelRegi
 router.get(routes.classUser.history, auth.authenticateToken, controller.getHistoryClasses);
 router.get(routes.classUser.historyId, auth.authenticateToken, controller.getHistoryClassById);
 
-module.exports = router;
+module.exports = router.expressRouter;

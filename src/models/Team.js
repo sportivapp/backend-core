@@ -25,7 +25,7 @@ class Team extends Model {
     static get modifiers() {
         return {
           baseAttributes(builder) {
-            builder.select('eteamid', 'eteamname').withGraphFetched('teamPicture(baseAttributes)')
+            builder.select('eteamid', 'eteamname', 'eteamdescription', 'eteamispublic', 'ecompanyecompanyid').withGraphFetched('teamPicture(baseAttributes)')
           }
         }
       }
@@ -34,6 +34,7 @@ class Team extends Model {
 
         const File = require('./File')
         const User = require('./User')
+        const Address = require('./Address')
 
         return {
             position: {
@@ -64,15 +65,11 @@ class Team extends Model {
                     to: 'ecompany.ecompanyid'
                 }
             },
-            industries: {
-                relation: Model.ManyToManyRelation,
+            teamIndustry: {
+                relation: Model.BelongsToOneRelation,
                 modelClass: Industry,
                 join: {
-                    from: 'eteam.eteamid',
-                    through: {
-                        from: 'eteamindustrymapping.eteameteamid',
-                        to: 'eteamindustrymapping.eindustryeindustryid'
-                    },
+                    from: 'eteam.eindustryeindustryid',
                     to: 'eindustry.eindustryid'
                 }
             },
@@ -82,6 +79,14 @@ class Team extends Model {
                 join: {
                     from: 'eteam.efileefileid',
                     to: 'efile.efileid'
+                }
+            },
+            teamAddress: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Address,
+                join: {
+                    from: 'eteam.eaddresseaddressid',
+                    to: 'eaddress.eaddressid'
                 }
             }
         }

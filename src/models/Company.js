@@ -23,6 +23,17 @@ class Company extends Model {
     return {
       baseAttributes(builder) {
         builder.select('ecompanyid', 'ecompanyname').withGraphFetched('logo(baseAttributes)')
+      },
+      idAndName(builder) {
+        builder.select('ecompanyid as companyId', 'ecompanyname as companyName')
+      },
+      about(builder) {
+        builder.select('ecompanyid', 'ecompanyname', 'ecompanyphonenumber', 'ecompanyemailaddress', 'ecompanyabout')
+          .withGraphFetched('logo(baseAttributes)')
+          .withGraphFetched('carousel(baseAttributes)')
+          .withGraphFetched('address(baseAttributes)')
+          .withGraphFetched('industries(baseAttributes)')
+          .withGraphFetched('news')
       }
     }
   }
@@ -102,6 +113,18 @@ class Company extends Model {
         modelClass: Industry,
         join: {
           from: 'ecompany.eindustryeindustryid',
+          to: 'eindustry.eindustryid'
+        }
+      },
+      industries: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Industry,
+        join: {
+          from: 'ecompany.ecompanyid',
+          through: {
+            from: 'ecompanyindustrymapping.ecompanyecompanyid',
+            to: 'ecompanyindustrymapping.eindustryeindustryid'
+          },
           to: 'eindustry.eindustryid'
         }
       },

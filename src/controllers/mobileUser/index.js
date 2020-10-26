@@ -64,13 +64,6 @@ controller.getOtherUserById = async (req, res, next) => {
 }
 
 controller.getSelf = async (req, res, next) => {
-    
-    // const login = await axios.post('http://103.253.113.217:7000/api/v1/user-login', { 
-    //     "email": "nawakarapm@nawakara.com",
-    //     "password": "emtivnawakarapm"
-    // });
-    // console.log(login.data);
-    // console.log(login.status);
 
     try {
         const result = await mobileUserService.getUserById(req.user.sub);
@@ -200,11 +193,11 @@ controller.changeIndustryByUserId = async (req, res, next) => {
 
 controller.getListPendingByUserId = async (req, res, next) => {
 
-    const {page = '0', size = '10', type = 'INVITE'} = req.query
+    const {page = '0', size = '10', type = 'INVITE', sortType = 'DESC'} = req.query
 
     try {
 
-        const pageObj = await mobileUserService.getListPendingByUserId(parseInt(page), parseInt(size), req.user.sub, type.toUpperCase());
+        const pageObj = await mobileUserService.getListPendingByUserId(parseInt(page), parseInt(size), req.user.sub, type.toUpperCase(), sortType.toUpperCase());
 
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
 

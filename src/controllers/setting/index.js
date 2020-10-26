@@ -5,12 +5,8 @@ const Controller = {}
 
 Controller.getModulesByCompanyId = async (req, res, next) => {
 
-    const { companyId } = req.params
-
     try {
-        const result = await SettingService.getModulesByCompanyId(companyId);
-        if (!result)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400))
+        const result = await SettingService.getModulesByCompanyId(req.user.companyId);
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)
@@ -19,18 +15,20 @@ Controller.getModulesByCompanyId = async (req, res, next) => {
 }
 
 Controller.updateModulesNameByCompanyId = async (req, res, next) => {
+    const { moduleId } = req.params
+    const { name } = req.body;
 
-    const { companyId } = req.params;
-    const { moduleId, moduleName } = req.body;
+    if (req.user.functions.indexOf('U13') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     const moduleDTO = {
-        emoduleemoduleid: moduleId,
-        ecompanymodulemappingname: moduleName
+        id: moduleId,
+        name: name
     }
 
     try {
 
-        const result = await SettingService.updateModulesByCompanyId(companyId, moduleDTO, req.user);
+        const result = await SettingService.updateModuleByCompanyId(req.user.companyId, moduleDTO, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
 
     } catch(e) {
@@ -43,6 +41,9 @@ Controller.getAllFunctionByGradeId = async (req, res, next) => {
 
     const { gradeId } = req.params;
 
+    if (req.user.functions.indexOf('R13') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
+
     try {
 
         const result = await SettingService.getAllFunctionByGradeId(gradeId);
@@ -54,27 +55,18 @@ Controller.getAllFunctionByGradeId = async (req, res, next) => {
 
 }
 
-Controller.saveFuncionsByGradeId = async (req, res, next) => {
+Controller.saveFunctionsByGradeId = async (req, res, next) => {
 
     const { gradeId } = req.params;
 
-    // [   
-    //     {
-    //         "code": "C1",
-    //         "name": "Create Company",
-    //         "status": true
-    //     },
-    //     {
-    //         "code": "C2",
-    //         "name": "Create Branch",
-    //         "status": true
-    //     }
-    // ]
-    const functionDTO = req.body;
+    const { functions } = req.body;
+
+    if (req.user.functions.indexOf('C13') === -1)
+        return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
     try {
 
-        const result = await SettingService.saveFuncionsByGradeId(gradeId, functionDTO);
+        const result = await SettingService.saveFunctionsByGradeId(gradeId, functions);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {

@@ -10,106 +10,61 @@ const readXlsxFile = require("read-excel-file/node");
 const emailService = require('../helper/emailService');
 const ServiceHelper = require('../helper/ServiceHelper')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
-
-const UsersService = {};
+const Otp = require('../models/Otp')
 
 const ErrorEnum = {
-    PASSWORD_INVALID: 'PASSWORD_INVALID',
+    EMAIL_INVALID: 'EMAIL_INVALID',
+    USER_ALREADY_EXIST: 'USER_ALREADY_EXIST',
+    OTP_NOT_FOUND: 'OTP_NOT_FOUND',
+    OTP_CODE_NOT_MATCH: 'OTP_CODE_NOT_MATCH',
+    USER_NOT_FOUND: 'USER_NOT_FOUND',
+    UNSUCCESSFUL_LOGIN: 'UNSUCCESSFUL_LOGIN'
 }
 
-UsersService.registerEmployees = async (user, path) => {
+const UserService = {};
 
-    if (user.permission < 9) return
+UserService.register = async (userDTO, otpCode) => {
 
-    let positions = [];
-    const values = await readXlsxFile(path).then((rows) => {
-        // skip header
-        rows.shift();
+    const isEmail = emailService.validateEmail(userDTO.euseremail);
 
-        let values = [];
+    if (!isEmail)
+        throw new UnsupportedOperationError(ErrorUserEnum.EMAIL_INVALID)
 
-        for (const row of rows) {
+    const user = await User.query().where('euseremail', userDTO.euseremail).first();
 
-            values.push({
-                eusernik: row[0],
-                eusername: row[1],
-                euseremail: row[2],
-                eusermobilenumber: row[3].toString(),
-                euserpassword: 'emtiv' + row[1],
-                ecompanyecompanyid: user.companyId
-            });
-            positions.push(row[4].replace(/\w+/g, 
-                    function(w){
-                        return w[0].toUpperCase() + w.slice(1).toLowerCase();
-                    }
-                ));
-        }
+    if (user)
+        throw new UnsupportedOperationError(ErrorUserEnum.USER_ALREADY_EXIST)
 
-        return values;
-    });
-    
-    const encryptedPasswordValues = values;
+    const otp = await Otp.query().where('euseremail', userDTO.euseremail).first();
 
-    for (const v of encryptedPasswordValues) {
-        v.euserpassword = await bcrypt.hash(v.euserpassword);
-    }
+    if (!otp)
+        throw new UnsupportedOperationError(ErrorUserEnum.OTP_NOT_FOUND)
 
-    const distinctGrade = (value, index, self) => {
-        return self.indexOf(value) === index
-    }
+    if (otp.eotpcode !== otpCode)
+        throw new UnsupportedOperationError(ErrorUserEnum.OTP_CODE_NOT_MATCH)
 
-    const newPositions = positions.filter(distinctGrade);
+    // confirm OTP
+    await otp.$query().updateByUserId({ eotpconfirmed: true }, 0);
 
-    const positionList = newPositions.map(newPosition => 
-        ({ 
-            egradename: newPosition,
-            egradecreateby: user.sub,
-            ecompanyecompanyid: user.companyId 
-        }));  
-
-    await User.query().insert(encryptedPasswordValues);
-    await Grade.query().insert(positionList);
-
-    return values;
+    userDTO.eusername = userDTO.euseremail.split('@')[0];
+    userDTO.euserpassword = await bcrypt.hash(userDTO.euserpassword);
+    return User.query().insertToTable(userDTO, 0);
 
 }
 
-UsersService.createUser = async (userDTO, permission, user) => {
+UserService.getSingleUserById = async (userId) => {
 
-    const getUserByEmail = await User.query().where('euseremail', userDTO.euseremail).first();
+    return User.query()
+        .modify('baseAttributes')
+        .findById(userId)
+        .then(user => {
+            if (!user) throw UnsupportedOperationError(ErrorEnum.USER_NOT_FOUND);
+            return user;
+        });
 
-    if (getUserByEmail)
-        return
-
-    const trimmedName = userDTO.eusername.replace(/\s+/g, '')
-
-    userDTO.euserpassword = await bcrypt.hash('sportiv'.concat(trimmedName.toLowerCase()));
-
-    const company = await Company.query().findById(user.companyId)
-
-    if (company.ecompanyautonik) {
-        const nikNumber = await CompanySequence.getNextVal(company.ecompanyid)
-        userDTO.eusernik = company.ecompanynik.concat(nikNumber)
-    }
-
-    const createdUser = await User.query().insertToTable(userDTO, user.sub)
-
-    let realPermission
-
-    if (!permission) realPermission = 1
-    else realPermission = permission
-
-    await CompanyUserMapping.query()
-        .insertToTable({
-            ecompanyecompanyid: user.companyId,
-            eusereuserid: createdUser.euserid,
-            ecompanyusermappingpermission: realPermission
-        }, user.sub)
-
-    return createdUser
 }
 
-UsersService.getUserById = async ( userId, user ) => {
+UserService.getUserById = async ( userId, user ) => {
 
     const result = await User.query()
         .withGraphFetched('file')
@@ -127,7 +82,15 @@ UsersService.getUserById = async ( userId, user ) => {
 
 }
 
-UsersService.getOtherUserById = async (userId, type) => {
+UserService.getOtherUserById = async (userId, type, companyId) => {
+
+    const userInCompany = await CompanyUserMapping.
+    query()
+    .where('ecompanyecompanyid', companyId)
+    .where('eusereuserid', userId)
+    .first()
+
+    if(!userInCompany) throw new NotFoundError()
 
     if (type !== 'USER' && type !== 'COACH')
         return
@@ -150,97 +113,14 @@ UsersService.getOtherUserById = async (userId, type) => {
 
 }
 
-UsersService.getProfile = async ( user ) => {
+UserService.updateUserById = async (userId, userDTO, user) => {
 
-    return User.query()
-        .findById(user.sub);
-
-}
-
-UsersService.getUserCurrentCompany = async ( user ) => {
-
-    const companyData = await Company.query()
-        .select()
-        .where('ecompanyid', user.companyId)
-        .withGraphFetched('[older]')
-        .first()
-
-    let result
-
-    if( companyData.older === null || companyData.older === undefined){
-        result = {
-            companyId: companyData.ecompanyid,
-            companyName: companyData.ecompanyname,
-            parent: null
-        }
-    } else if( companyData.older.older === null  || companyData.older.older === undefined) {
-        result = {
-            companyId: companyData.ecompanyid,
-            companyName: companyData.ecompanyname,
-            parent: {
-                companyId: companyData.older.ecompanyid,
-                companyName: companyData.older.ecompanyname,
-                parent: null
-            }
-        }
-    } else if( companyData.older.older !== null || companyData.older.older !== undefined) {
-        result = {
-            companyId: companyData.ecompanyid,
-            companyName: companyData.ecompanyname,
-            parent: {
-                companyId: companyData.older.ecompanyid,
-                companyName: companyData.older.ecompanyname,
-                parent: {
-                    companyId: companyData.older.older.ecompanyid,
-                    companyName: companyData.older.older.ecompanyname
-                }
-            }
-        }
-    }
-
-    return result
-
-}
-
-// UsersService.updateUserById = async (userId, userDTO, permission, user) => {
-UsersService.updateUserById = async (userId, userDTO, user) => {
-
-    if (user.permission != 9 && user.permission != 10) {
-        // if (userId != user.sub) 
-            return
-    }
-
-    // const userMapping = await CompanyUserMapping.query()
-    //     .where('ecompanyecompanyid', user.companyId)
-    //     .where('eusereuserid', userId)
-    //     .first()
-
-    const updateUserQuery = User.query().findById(userId)
+    return User.query().findById(userId)
         .updateByUserId(userDTO, user.sub)
         .returning('*')
-
-    // let realPermission
-
-    // if (!permission) realPermission = 1
-    // else realPermission = permission
-
-    // let additionalQuery
-
-    // if (userMapping.ecompanyusermappingpermission != realPermission) {
-    //     additionalQuery = CompanyUserMapping.query()
-    //         .where('ecompanyecompanyid', user.companyId)
-    //         .where('eusereuserid', userId)
-    //         .updateByUserId({ ecompanyusermappingpermission: realPermission }, user.sub)
-    // }
-
-    // if (additionalQuery)
-    //     return Promise.all([additionalQuery, updateUserQuery])
-    //         .then(resultArr => resultArr[1])
-    // else
-        return updateUserQuery
 }
 
-async function generateJWTToken(user, companyId, permission) {
+UserService.generateJWTToken = async (user, companyId) => {
 
     const config = {
         sub: user.euserid,
@@ -248,7 +128,6 @@ async function generateJWTToken(user, companyId, permission) {
         email: user.euseremail,
         name: user.eusername,
         mobileNumber: user.eusermobilenumber,
-        permission: permission,
         companyId: companyId
     }
     const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' });
@@ -257,66 +136,40 @@ async function generateJWTToken(user, companyId, permission) {
 
 }
 
-UsersService.getAllUserByCompanyId = async ( page, size, companyId ) => {
-
-    // const userPage = await CompanyUserMapping.relatedQuery('users')
-    // .for(CompanyUserMapping.query().where('ecompanyecompanyid', companyId))
-    // .select('euserid', 'eusername', 'euseremail', 'eusernik', 'eusermobilenumber')
-    // .page(page, size);
+UserService.getAllUserByCompanyId = async ( page, size, companyId ) => {
 
     const userPage = Company.relatedQuery('users')
         .for(companyId)
         .modify('baseAttributes')
         .withGraphFetched('grades(baseAttributes).department(baseAttributes)')
         .page(page, size)
-
-    // const userIds = userPage.results.map(user => user.euserid);
-    //
-    // const grades = await Grade.query()
-    // .select('eusereuserid', 'egradename')
-    // .joinRelated('users')
-    // .whereIn('eusereuserid', userIds)
-    //
-    // userPage.results.map((user) => {
-    //
-    //     const userGrades = grades.filter((grade) => {
-    //         return user.euserid === grade.eusereuserid
-    //     })
-    //     .map((grade) => {
-    //         return grade.egradename;
-    //     });
-    //
-    //     user.grades = userGrades;
-    //
-    // })
  
     return ServiceHelper.toPageObj(page, size, userPage)
 
 }
 
-UsersService.login = async (loginDTO) => {
+UserService.login = async (loginDTO) => {
 
     const user = await User.query().select().where('euseremail', loginDTO.euseremail).first();
 
     if (!user)
-        return
+        throw new NotFoundError()
 
     const success = await bcrypt.compare(loginDTO.euserpassword, user.euserpassword);
 
     let token = null;
 
+    if (!success) throw new UnsupportedOperationError(ErrorEnum.UNSUCCESSFUL_LOGIN)
+
     if (success === true) {
 
         const result = await User.query()
-        .select('ecompanyecompanyid', 'ecompanyusermappingpermission')
+        .select('ecompanyecompanyid')
         .joinRelated('companies')
         .where('eusereuserid', user.euserid)
         .orderBy('ecompanyusermappingcreatetime', 'ASC')
         .first();
-
-        if (!result || !result.ecompanyecompanyid) return
-
-        token = await generateJWTToken(user, result.ecompanyecompanyid, result.ecompanyusermappingpermission);
+        token = await UserService.generateJWTToken(user, result.ecompanyecompanyid);
 
     }
 
@@ -324,12 +177,12 @@ UsersService.login = async (loginDTO) => {
 
 }
 
-UsersService.changeUserPassword = async ( user , oldPassword, newPassword) => {
+UserService.changeUserPassword = async ( user , oldPassword, newPassword) => {
 
     const userFromDB = await User.query().findById(user.sub);
 
     const samePassword = await bcrypt.compare(oldPassword, userFromDB.euserpassword);
-    
+
     if (!samePassword)
         throw new UnsupportedOperationError(ErrorEnum.PASSWORD_INVALID);
 
@@ -339,41 +192,22 @@ UsersService.changeUserPassword = async ( user , oldPassword, newPassword) => {
 
 }
 
-UsersService.changeUserCompany = async (companyId, user) => {
+UserService.deleteUserById = async ( userId, loggedInUser ) => {
 
-    const loggedInUser = await User.query().select().where('euseremail', user.email).first();
-
-    const userCompany = await CompanyUserMapping.query().select()
-    .where('ecompanyecompanyid', companyId)
-    .where('eusereuserid', user.sub)
-    .first()
-
-    if(!userCompany)
-        return
-
-    let token = null;
-    token = await generateJWTToken(loggedInUser, companyId, userCompany.ecompanyusermappingpermission);
-
-    return token;
-}
-
-UsersService.deleteUserById = async ( userId, user ) => {
-    
-    if (user.permission < 9) return
+    const user = await UserService.getUserById(userId, loggedInUser)
 
     const projects = await User.relatedQuery('projects')
-        .for(userId)
+        .for(user.euserid)
 
     if (projects.length > 0) return false
 
-    return User.query()
-        .where('euserid', userId)
+    return user.$query()
         .delete()
         .then(rowsAffected => rowsAffected === 1)
 
 }
 
-UsersService.sendForgotPasswordLink = async ( email ) => {
+UserService.sendForgotPasswordLink = async ( email ) => {
     const isEmailAvailable = await User.query().select().where('euseremail', email).first();
 
     if(isEmailAvailable) {
@@ -384,28 +218,9 @@ UsersService.sendForgotPasswordLink = async ( email ) => {
     return true;
 }
 
-UsersService.addApprovalUsers = async (userId, approverUserIds, user) => {
-    const users = await User.query()
-        .whereIn('euserid', approverUserIds)
-
-    if (users.length !== approvalUserIds.length) return
-
-    const patchDTO = {}
-    approverUserIds.forEach((value, index) => {
-        patchDTO['euserapprovaluserid'.concat(index)] = value
-    })
-
+UserService.getAllUsersByUserIds = async (userIds) => {
     return User.query()
-        .findById(userId)
-        .updateByUserId(patchDTO, user.sub)
-        .returning('*')
+        .whereIn('euserid', userIds)
 }
 
-UsersService.updateProfile = async (userDTO, user) => {
-
-    return User.query().findById(user.sub)
-        .updateByUserId(userDTO, user.sub)
-        .returning('*')
-}
-
-module.exports = UsersService;
+module.exports = UserService;
