@@ -110,4 +110,25 @@ profileService.getModules = async (user) => {
 
 }
 
+profileService.getFunctionsByModuleId = async (moduleId, user) => {
+
+    const gradeIds = await gradeService.getAllGradesByUserIdAndCompanyId(user.companyId, user.sub)
+        .then(grades => grades.map(grade => grade.egradeid))
+
+    const codes = await settingService.getAllFunctionCodesByGradeIds(gradeIds)
+
+    console.log(codes)
+
+    const masterCodes = await settingService.getAllFunctionsByModuleId(moduleId)
+        .then(funcList => funcList.map(func => func.efunctioncode))
+
+    let functions = {}
+
+    masterCodes.forEach(masterCode => {
+        functions[masterCode] = codes.indexOf(masterCode) !== -1
+    })
+
+    return functions
+}
+
 module.exports = profileService

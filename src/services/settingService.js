@@ -247,4 +247,10 @@ SettingService.getAllFunctions = async (codeKeyword = '') => {
         .where(raw('lower("efunctioncode")'), 'like', `%${codeKeyword}%`)
 }
 
+SettingService.getAllFunctionsByModuleId = async (moduleId) => {
+
+    return Function.query()
+        .where('emoduleemoduleid', moduleId)
+}
+
 module.exports = SettingService;
