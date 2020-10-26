@@ -26,6 +26,16 @@ companyLogService.createCompanyLog = async (companyId, user, userId, type) => {
 
 }
 
+companyLogService.createCompanyLogWithTransaction = async (companyId, user, userId, type, trx) => {
+
+    return CompanyLog.query(trx).insertToTable({
+        ecompanyecompanyid: companyId,
+        eusereuserid: userId,
+        ecompanylogtype: type
+    }, user.sub)
+
+}
+
 companyLogService.getPendingLog = async (companyId, userId, types) => {
 
     return CompanyLog.query()

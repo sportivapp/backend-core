@@ -6,7 +6,7 @@ const { UnsupportedOperationError } = require('../models/errors')
 
 const ErrorEnum = {
     EMAIL_INVALID: 'EMAIL_INVALID',
-    EMAIL_USED: 'EMAIL_USED',
+    EMAIL_EXISTED: 'EMAIL_EXISTED',
     OTP_PENDING: 'OTP_PENDING',
     OTP_CONFIRMED: 'OTP_CONFIRMED',
     OTP_EXPIRED: 'OTP_EXPIRED'
@@ -28,7 +28,7 @@ OtpService.createOtp = async (email) => {
 
     // If email exist in user
     if (promised[1])
-        throw new UnsupportedOperationError(ErrorEnum.EMAIL_USED);
+        throw new UnsupportedOperationError(ErrorEnum.EMAIL_EXISTED);
 
     let returnedOtp = {}
     const otpCode = otpCodeGenerator.create4DigitsOTP();

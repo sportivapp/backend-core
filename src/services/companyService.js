@@ -10,7 +10,7 @@ const CompanyModuleMapping = require('../models/CompanyModuleMapping')
 const CompanySequence = require('../models/CompanySequence')
 const CompanyIndustryMapping = require('../models/CompanyIndustryMapping')
 const CompanyDefaultPosition = require('../models/CompanyDefaultPosition')
-const { raw } = require('objection')
+const { raw, UniqueViolationError } = require('objection')
 const ServiceHelper = require('../helper/ServiceHelper')
 const settingService = require('./settingService')
 const fileService = require('./fileService');
@@ -27,7 +27,16 @@ const ErrorEnum = {
     NIK_EMPTY: 'NIK_EMPTY',
     FILE_NOT_FOUND: 'FILE_NOT_FOUND',
     INVALID_TYPE: 'INVALID_TYPE',
-    INDUSTRY_NOT_PROVIDED: 'INDUSTRY_NOT_PROVIDED'
+    INDUSTRY_NOT_PROVIDED: 'INDUSTRY_NOT_PROVIDED',
+    NAME_EXISTED: 'NAME_EXISTED'
+}
+
+function isNameUniqueValidationError(e) {
+
+    if (!e.nativeError)
+        return false;
+
+    return e.nativeError.detail.includes('ecompanyname') && e instanceof UniqueViolationError
 }
 
 CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
@@ -286,6 +295,9 @@ CompanyService.createCompany = async(companyDTO, addressDTO, industryIds, user) 
                 childrenCount: 0
             }))
 
+        }).catch(e => {
+            if (isNameUniqueValidationError(e)) throw new UnsupportedOperationError(ErrorEnum.NAME_EXISTED)
+            throw e
         })
 }
 
@@ -416,7 +428,12 @@ CompanyService.getCompleteCompanyById = async (companyId) => {
         }))
 }
 
-CompanyService.editCompany = async (companyId, supervisorId, companyDTO, addressDTO, user) => {
+CompanyService.editCompany = async (companyId, companyDTO, addressDTO, industryIds, user) => {
+
+    if (industryIds.length === 0) throw new UnsupportedOperationError(ErrorEnum.INDUSTRY_NOT_PROVIDED);
+
+    const industry = await Industry.query().whereIn('eindustryid', industryIds);
+    if (industryIds.length !== industry.length) throw new UnsupportedOperationError(ErrorEnum.INDUSTRY_NOT_FOUND);
 
     const companyIds = await CompanyUserMapping.query()
         .where('eusereuserid', user.sub)
@@ -427,16 +444,7 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, address
         companyDTO.efileefileid = null;
     }
 
-    if (companyDTO.ecompanyolderid && companyDTO.ecompanyparentid)
-        throw new UnsupportedOperationError(ErrorEnum.INVALID_TYPE)
-
-    else if (companyDTO.ecompanyolderid) {
-        const olderSister = await Company.query().findById(companyDTO.ecompanyolderid)
-        if (!olderSister) throw new UnsupportedOperationError(ErrorEnum.SISTER_NOT_FOUND)
-        if (companyIds.indexOf(companyDTO.ecompanyolderid) === -1) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_COMPANY)
-    }
-
-    else if (companyDTO.ecompanyparentid) {
+    if (companyDTO.ecompanyparentid) {
         const parent = await Company.query().findById(companyDTO.ecompanyparentid).withGraphFetched('parent')
         if (!parent) throw new UnsupportedOperationError(ErrorEnum.PARENT_NOT_FOUND)
         else if (companyIds.indexOf(parent.ecompanyid) === -1) {
@@ -445,42 +453,26 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, address
         }
     }
 
-    if (companyDTO.eindustryeindustryid) {
-        const industry = await Industry.query().findById(companyDTO.eindustryeindustryid)
-        if (!industry) throw new UnsupportedOperationError(ErrorEnum.INDUSTRY_NOT_FOUND)
-    }
-
-    let headUser
-
     const company = await Company.query().findById(companyId)
 
     if (!company) throw new UnsupportedOperationError(ErrorEnum.COMPANY_NOT_FOUND)
 
     return Company.transaction(async trx => {
 
-        if (supervisorId) {
+        // remove all industry first
+        await CompanyIndustryMapping.query(trx)
+        .where('ecompanyecompanyid', companyId)
+        .delete()
 
-            const superAdminPosition = await Grades.query().where('ecompanyecompanyid', companyId)
-                .orderBy('egradecreatetime', 'ASC')
-                .first()
+        const companyIndustryMappings = industryIds.map(industryId => {
+            return {
+                ecompanyecompanyid: company.ecompanyid,
+                eindustryeindustryid: industryId
+            }
+        });
 
-            headUser = await UserPositionMapping.query(trx)
-                .where('egradeegradeid', superAdminPosition.egradeid)
-                .first()
-                .updateByUserId({ eusereuserid: supervisorId }, user.sub)
-                .returning('eusereuserid')
-                .then(result => User.query().findById(result.eusereuserid))
-
-        } else {
-            headUser = await Grades.query().where('ecompanyecompanyid', companyId)
-            .orderBy('egradecreatetime', 'ASC')
-            .first()
-            .then(position => position
-                .$relatedQuery('users')
-                .orderBy('eusercreatetime', 'ASC')
-                .first()
-            )
-        }
+        // TODO: Create CompanyIndustryMapping
+        const insertCompanyIndustryMapping = CompanyIndustryMapping.query(trx).insertToTable(companyIndustryMappings, user.sub);
 
         const updateAdress = (addressId) => Address.query(trx)
             .where('eaddressid', addressId)
@@ -496,15 +488,17 @@ CompanyService.editCompany = async (companyId, supervisorId, companyDTO, address
         const getCompanyQuery = Company.query().findById(companyId)
             .withGraphFetched('[industry(baseAttributes), address.[country, state], logo(baseAttributes)]')
 
-        return Promise.all([getCompanyQuery, employeeCount, departmentCount, branchCount])
+        return Promise.all([getCompanyQuery, employeeCount, departmentCount, branchCount, insertCompanyIndustryMapping])
             .then(resultArr => ({
                 ...resultArr[0],
-                user: headUser,
                 employeeCount: parseInt(resultArr[1][0].count),
                 departmentCount: parseInt(resultArr[2][0].count),
                 childrenCount: parseInt(resultArr[3][0].count)
             }))
 
+    }).catch(e => {
+        if (isNameUniqueValidationError(e)) throw new UnsupportedOperationError(ErrorEnum.NAME_EXISTED)
+        throw e
     })
 }
 

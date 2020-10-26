@@ -1,4 +1,5 @@
 const CompanyLog = require('../models/CompanyLog')
+const CompanyLogTypeEnum = require('../models/enum/CompanyLogTypeEnum')
 const CompanyLogStatusEnum = require('../models/enum/CompanyLogStatusEnum')
 const ServiceHelper = require('../helper/ServiceHelper')
 const { UnsupportedOperationError } = require('../models/errors')
@@ -71,6 +72,42 @@ mobileCompanyLogService.updateLogsByCompanyLogsWithTransaction = async (companyL
         ecompanylogchangeby: user.sub
     })
     .returning('*');
+
+}
+
+mobileCompanyLogService.getPendingLog = async (companyId, userId, types) => {
+
+    return CompanyLog.query()
+    .where('eusereuserid', userId)
+    .andWhere('ecompanyecompanyid', companyId)
+    .whereIn('ecompanylogtype', types)
+    .andWhere('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
+    .orderBy('ecompanylogcreatetime', 'DESC')
+    .first();
+
+}
+
+mobileCompanyLogService.updateCompanyLogByCompanyIdAndUserIdAndStatusWithTransaction = async (companyId, user, userId, status, trx) => {
+
+    const log = await mobileCompanyLogService.getPendingLog(companyId, userId, [CompanyLogTypeEnum.INVITE, CompanyLogTypeEnum.APPLY]);
+
+    return log.$query(trx).updateByUserId({
+        ecompanylogstatus: status
+    }, user.sub)
+    .returning('*');
+
+}
+
+mobileCompanyLogService.removeCompanyLogWithTransaction = async (userId, companyId, trx ) => {
+
+    return CompanyLog.query(trx)
+    .delete()
+    .where('eusereuserid', userId)
+    .where('ecompanyecompanyid', companyId)
+    .where('ecompanylogtype', CompanyLogTypeEnum.APPLY)
+    .where('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
+    .first()
+    .then(rowsAffected => rowsAffected === 1)
 
 }
 
