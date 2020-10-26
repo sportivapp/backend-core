@@ -136,7 +136,7 @@ mobileForumService.updateThreadById = async (threadId, threadDTO, user) => {
     const thread = await mobileForumService.getThreadById(threadId);
 
     const moderator = await mobileForumService.isModerator(thread.ethreadid, user.sub)
-
+    
     if(!moderator) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION);
 
     // If user made the thread, cannot be private
@@ -163,7 +163,7 @@ mobileForumService.updateThreadById = async (threadId, threadDTO, user) => {
     }
 
     if (threadDTO.efileefileid) {
-        const file = await fileService.getFileById(threadDTO.efileefileid)
+        const file = await fileService.getFileByIdAndCreateBy(threadDTO.efileefileid, user.sub)
         if (!file) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_EXIST)
     }
 
