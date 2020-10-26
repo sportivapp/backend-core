@@ -117,8 +117,6 @@ profileService.getFunctionsByModuleId = async (moduleId, user) => {
 
     const codes = await settingService.getAllFunctionCodesByGradeIds(gradeIds)
 
-    console.log(codes)
-
     const masterCodes = await settingService.getAllFunctionsByModuleId(moduleId)
         .then(funcList => funcList.map(func => func.efunctioncode))
 
