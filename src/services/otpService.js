@@ -28,7 +28,7 @@ OtpService.createOtp = async (email) => {
 
     // If email exist in user
     if (promised[1])
-        throw new UnsupportedOperationError(ErrorEnum.EMAIL_EXISTED);
+        throw new UnsupportedOperationError(ErrorEnum.EMAIL_USED);
 
     let returnedOtp = {}
     const otpCode = otpCodeGenerator.create4DigitsOTP();
