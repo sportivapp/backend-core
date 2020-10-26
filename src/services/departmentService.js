@@ -2,7 +2,6 @@ const Department = require('../models/Department')
 const Grade = require('../models/Grades')
 const User = require('../models/User')
 const ServiceHelper = require('../helper/ServiceHelper')
-const companyService = require('./companyService')
 const { NotFoundError } = require('../models/errors')
 
 const departmentService = {}
@@ -52,16 +51,17 @@ departmentService.getDepartmentByDepartmentId = async (departmentId) => {
 
     const department = await Department.query()
     .findById(departmentId)
+    .withGraphFetched('company(baseAttributes)')
 
     if(!department) throw new NotFoundError()
+
+    if (!department.company) throw new NotFoundError()
 
     const subDepartment = await Department.query()
     .where('edepartmentsuperiorid', departmentId)
     .count()
 
-    const company = await companyService.getCompanyById(department.ecompanyecompanyid)
-
-    const headUser = await Grade.query().where('ecompanyecompanyid', company.ecompanyid)
+    const headUser = await Grade.query().where('ecompanyecompanyid', department.ecompanyecompanyid)
         .orderBy('egradecreatetime', 'ASC')
         .first()
         .then(position => {
@@ -83,7 +83,7 @@ departmentService.getDepartmentByDepartmentId = async (departmentId) => {
         edepartmentsuperiorid: department.edepartmentsuperiorid,
         ecompanyecompanyid: department.ecompanyecompanyid,
         childrenCount: parseInt(subDepartment[0].count),
-        ecompanyname: company.ecompanyname,
+        ecompanyname: department.company.ecompanyname,
         eusername: headUser ? headUser.eusername : null,
         userCount: userData.length
     }

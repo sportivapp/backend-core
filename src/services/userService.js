@@ -90,13 +90,13 @@ UserService.getOtherUserById = async (userId, type, companyId) => {
     .where('eusereuserid', userId)
     .first()
 
-    if(!userInCompany) throw new NotFoundError()
+    // if(!userInCompany) throw new NotFoundError()
 
     if (type !== 'USER' && type !== 'COACH')
         return
 
     let relatedIndustry = 'coachIndustries'
-    if (type === 'USER')
+    if (type === 'USER' || !userInCompany)
         relatedIndustry = 'userIndustries'
 
     return User.query()
