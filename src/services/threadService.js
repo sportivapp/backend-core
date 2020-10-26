@@ -153,40 +153,19 @@ threadService.updateThread = async (threadId, threadDTO, user) => {
 
     if (!isModerator) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
 
-    if (thread.eteameteamid && thread.ethreadispublic) {
+    // if (thread.ecompanyecompanyid && thread.ethreadispublic) {
 
-        const isTeamAdmin = await teamUserMappingService.isAdmin(thread.eteameteamid, user.sub)
+    //     const isAllowed = await gradeService.getAllGradesByUserIdAndCompanyId(thread.ecompanyecompanyid, user.sub)
+    //         .then(grades => grades.map(grade => grade.egradeid))
+    //         .then(gradeIds => settingService.isUserHaveFunctions(['P'], gradeIds, ModuleNameEnum.FORUM, thread.ecompanyecompanyid))
 
-        if (!isTeamAdmin) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
-    }
+    //     if (!isAllowed) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
 
-    if (thread.ecompanyecompanyid && thread.ethreadispublic) {
-
-        const isAllowed = await gradeService.getAllGradesByUserIdAndCompanyId(thread.ecompanyecompanyid, user.sub)
-            .then(grades => grades.map(grade => grade.egradeid))
-            .then(gradeIds => settingService.isUserHaveFunctions(['P'], gradeIds, ModuleNameEnum.FORUM, thread.ecompanyecompanyid))
-
-        if (!isAllowed) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
-
-    }
+    // }
 
     if (threadDTO.efileefileid) {
         const file = await fileService.getFileByIdAndCreateBy(threadDTO.efileefileid, user.sub)
         if (!file) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_FOUND)
-    }
-
-    // If team thread AND it is public, check whether it's made by an Admin
-    if(threadDTO.eteameteamid && thread.ethreadispublic)
-        await teamUserService.getTeamUserCheckAdmin(threadDTO.eteameteamid, user.sub);
-
-    if(threadDTO.ecompanyecompanyid) {
-
-        const isUserExistInCompany = await companyService.isUserExistInCompany(threadDTO.ecompanyecompanyid, user.sub)
-
-        if (!isUserExistInCompany) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_COMPANY)
-
-        // TODO: Check whether this user have priviledge to make a thread
-
     }
 
     const moderators = await threadModeratorService.getThreadModerators(threadId)
