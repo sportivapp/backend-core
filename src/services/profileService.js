@@ -123,7 +123,7 @@ profileService.getFunctionsByModuleId = async (moduleId, user) => {
     let functions = {}
 
     masterCodes.forEach(masterCode => {
-        functions[masterCode] = codes.indexOf(masterCode) !== -1
+        functions[masterCode.substring(0, 1)] = codes.indexOf(masterCode) !== -1
     })
 
     return functions
