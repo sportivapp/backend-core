@@ -4,7 +4,7 @@ const schema = Joi.object({
     title: Joi.string().required(),
     description: Joi.string().required(),
     fileId: Joi.number().allow(null),
-    isPublic: Joi.boolean().required(),
+    // isPublic: Joi.boolean().required(),
     lock: Joi.boolean().required(),
     moderatorIds: Joi.array().min(1).items(Joi.number().required())
 })
