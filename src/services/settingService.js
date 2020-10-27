@@ -5,6 +5,7 @@ const Grade = require('../models/Grades');
 const gradeService = require('./gradeService')
 const { raw } = require('objection')
 const Module = require('../models/Module')
+const ModuleNameEnum = require('../models/enum/ModuleNameEnum')
 const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
 
 const SettingService = {};
@@ -61,14 +62,17 @@ SettingService.getModulesByGradeIds = async (companyId, gradeIds) => {
 
     const functionObj = await SettingService.getAllFunctionByGradeIds(gradeIds);
 
+    console.log(functionObj)
+
     const moduleIds = []
 
     let isModuleValid
 
     for (let key in functionObj) {
-        isModuleValid = true
+        isModuleValid = false
         functionObj[key].forEach(func => {
-            if (!func.status) isModuleValid = false
+            if (func.status) isModuleValid = true
+            if (func.name.includes(ModuleNameEnum.FORUM)) isModuleValid = true
         })
         if (isModuleValid) moduleIds.push(key)
     }
@@ -80,9 +84,8 @@ SettingService.getDefaultModuleByCompanyId = async (companyId) => {
     return CompanyModuleMapping.query()
         .where('ecompanyecompanyid', companyId)
         .orderBy('emoduleemoduleid', 'ASC')
-        .first()
         .withGraphFetched('module')
-        .then(mapping => mapping.module)
+        .then(mappings => mappings.map(mapping => mapping.module))
 }
 
 SettingService.updateModuleByCompanyId = async (companyId, moduleDTO, user) => {
