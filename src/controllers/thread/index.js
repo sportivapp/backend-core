@@ -59,7 +59,7 @@ threadController.updateThread = async (req, res, next) => {
 
     const { threadId } = req.params
 
-    const { title, description, lock, isPublic, fileId, moderatorIds } = req.body
+    const { title, description, lock, fileId } = req.body
 
     const threadDTO = {
         ethreadtitle: title,
@@ -68,8 +68,10 @@ threadController.updateThread = async (req, res, next) => {
         efileefileid: fileId
     }
 
+    threadDTO.efileefileid = ( fileId === 0 || fileId === undefined) ? null : fileId
+
     try {
-        const result = await threadService.updateThread(threadId, threadDTO, isPublic, moderatorIds, req.user)
+        const result = await threadService.updateThread(threadId, threadDTO, req.user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)
