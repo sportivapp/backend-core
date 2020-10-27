@@ -1,14 +1,12 @@
 const User = require('../models/User');
 const CompanyUserMapping = require('../models/CompanyUserMapping')
 const Company = require('../models/Company')
-const CompanySequence = require('../models/CompanySequence')
-const Grade = require('../models/Grades');
 const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const readXlsxFile = require("read-excel-file/node");
 const emailService = require('../helper/emailService');
 const ServiceHelper = require('../helper/ServiceHelper')
+const firebaseService = require('../helper/firebaseService')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
 const Otp = require('../models/Otp')
 
@@ -21,25 +19,21 @@ const ErrorEnum = {
     UNSUCCESSFUL_LOGIN: 'UNSUCCESSFUL_LOGIN'
 }
 
+
+
 const UserService = {};
 
 UserService.register = async (userDTO, otpCode) => {
 
     const isEmail = emailService.validateEmail(userDTO.euseremail);
-
     if (!isEmail)
         throw new UnsupportedOperationError(ErrorUserEnum.EMAIL_INVALID)
-
     const user = await User.query().where('euseremail', userDTO.euseremail).first();
-
     if (user)
         throw new UnsupportedOperationError(ErrorUserEnum.USER_ALREADY_EXIST)
-
     const otp = await Otp.query().where('euseremail', userDTO.euseremail).first();
-
     if (!otp)
         throw new UnsupportedOperationError(ErrorUserEnum.OTP_NOT_FOUND)
-
     if (otp.eotpcode !== otpCode)
         throw new UnsupportedOperationError(ErrorUserEnum.OTP_CODE_NOT_MATCH)
 
@@ -171,6 +165,8 @@ UserService.login = async (loginDTO) => {
         .first();
         token = await UserService.generateJWTToken(user, result.ecompanyecompanyid);
 
+        // firebaseService.pushNotification(user.euserid, 'Login Successful',
+        //     `Login Successful for email ${user.euseremail}`)
     }
 
     return token;
