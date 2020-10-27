@@ -140,7 +140,7 @@ mobileForumService.updateThreadById = async (threadId, threadDTO, user) => {
     if(!moderator) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION);
 
     // If user made the thread, cannot be private
-    if(!thread.eteameteamid && !thread.ecompanyecompanyid && !threadDTO.ethreadispublic)
+    if(!thread.eteameteamid && !thread.ecompanyecompanyid && !thread.ethreadispublic)
         throw new UnsupportedOperationError(ErrorEnum.PRIVATE_NOT_AVAILABLE);
 
     // If team thread AND it is public, check whether it's made by an Admin
