@@ -62,8 +62,6 @@ SettingService.getModulesByGradeIds = async (companyId, gradeIds) => {
 
     const functionObj = await SettingService.getAllFunctionByGradeIds(gradeIds);
 
-    console.log(functionObj)
-
     const moduleIds = []
 
     let isModuleValid

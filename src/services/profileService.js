@@ -104,7 +104,6 @@ profileService.getModules = async (user) => {
 
     if (modules.length === 0) {
         const modules = await settingService.getDefaultModuleByCompanyId(user.companyId)
-        console.log(modules)
         return modules.filter(module => module.emodulename === ModuleNameEnum.FORUM)
     }
 
