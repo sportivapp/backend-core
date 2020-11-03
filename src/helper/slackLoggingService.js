@@ -2,6 +2,8 @@ const https = require('https');
 
 Messages = {};
 
+const slackUrl = process.env.SLACK_URL || 'https://hooks.slack.com/services/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'
+
 // const userAccountNotification = {
 //     'username': 'SURYA WIBU', // This will appear as user name who posts the message
 //     'text': 'Ceritanya fail gitu', // text
@@ -61,15 +63,13 @@ Messages.setLogMessage = ( error ) => {
     };
 }
 
-
   /**
  * Handles the actual sending request. 
  * We're turning the https.request into a promise here for convenience
- * @param webhookURL
  * @param messageBody
  * @return {Promise}
  */
-Messages.sendSlackMessage = async (webhookURL, messageBody) => {
+Messages.sendSlackMessage = async (messageBody) => {
     // make sure the incoming message body can be parsed into valid JSON
     try {
       messageBody = JSON.stringify(messageBody);
@@ -88,7 +88,7 @@ Messages.sendSlackMessage = async (webhookURL, messageBody) => {
       };
   
       // actual request
-      const req = https.request(webhookURL, requestOptions, (res) => {
+      const req = https.request(slackUrl, requestOptions, (res) => {
         let response = '';
   
   

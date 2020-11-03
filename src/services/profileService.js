@@ -3,6 +3,7 @@ const companyService = require('./companyService')
 const settingService = require('./settingService')
 const gradeService = require('./gradeService')
 const bcrypt = require('../helper/bcrypt')
+const ModuleNameEnum = require('../models/enum/ModuleNameEnum')
 const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
 
 const profileService = {}
@@ -102,8 +103,8 @@ profileService.getModules = async (user) => {
     const modules = await settingService.getModulesByGradeIds(user.companyId, gradeIds)
 
     if (modules.length === 0) {
-        const module = await settingService.getDefaultModuleByCompanyId(user.companyId)
-        return [module]
+        const modules = await settingService.getDefaultModuleByCompanyId(user.companyId)
+        return modules.filter(module => module.emodulename === ModuleNameEnum.FORUM)
     }
 
     return modules
