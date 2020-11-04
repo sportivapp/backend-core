@@ -8,14 +8,13 @@ controller.createNews = async (req, res, next) => {
     const news = req.body
 
     const newsDTO = {
-        enewsdate: news.date,
         enewstitle: news.title,
         enewscontent: news.content,
         ecompanyecompanyid: req.user.companyId,
-        efileefileid: news.fileId
+        efileefileid: news.fileId,
+        eindustryeindustryid: news.industryId,
+        enewsispublic: news.isPublic
     }
-
-    // insert permission here?
 
     try {
 
@@ -27,29 +26,10 @@ controller.createNews = async (req, res, next) => {
     }
 }
 
-controller.generateNewsLink = async (req, res, next) => {
-
-    const { newsId } = req.params
-
-    // insert permission here?
-
-    try {
-
-        const result = await newsService.generateNewsLink(parseInt(newsId), req.user)
-        return res.status(200).json(ResponseHelper.toBaseResponse(result))
-        
-    } catch (e) {
-        next(e)
-    }
-}
-
 controller.publishNews = async (req, res, next) => {
 
     const { newsId } = req.params
     const { isPublish } = req.body
-
-    // insert permission here?
-
     try {
 
         const result = await newsService.publishNews(isPublish, parseInt(newsId), req.user)
@@ -67,14 +47,12 @@ controller.editNews = async (req, res, next) => {
     const news = req.body
 
     const newsDTO = {
-        enewsdate: news.date,
         enewstitle: news.title,
         enewscontent: news.content,
-        ecompanyecompanyid: req.user.companyId,
-        efileefileid: news.fileId
+        efileefileid: news.fileId,
+        eindustryeindustryid: news.industryId,
+        enewsispublic: news.isPublic
     }
-
-    // insert permission here?
 
     try {
 
@@ -92,7 +70,7 @@ controller.getNews = async (req, res, next) => {
 
     try {
 
-        const pageObj = await newsService.getNews(parseInt(page), parseInt(size), req.user, type.toUpperCase())
+        const pageObj = await newsService.getNews(parseInt(page), parseInt(size), req.user, type.toUpperCase(), req.user.companyId)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
         
     } catch (e) {
@@ -122,7 +100,7 @@ controller.getUserViewCount = async (req, res, next) => {
 
         const result = await newsService.getUserViewCount(parseInt(newsId))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
-        
+
     } catch (e) {
         next(e)
     }
