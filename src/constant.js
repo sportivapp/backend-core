@@ -168,8 +168,16 @@ module.exports = {
             list: '/news',
             id: '/news/:newsId',
             publish: '/news/:newsId/publish',
-            count: '/news/:newsId/user',
-            generate: '/news/:newsId/link'
+            count: '/news/:newsId/count',
+            generate: '/news/:newsId/link',
+            like: '/news/:newsId/like',
+        },
+        newsUser: {
+            list: '/user-news',
+            id: '/user-news/:newsId',
+            like: '/user-news/:newsId/like',
+            count: '/user-news/:newsId/count',
+            generate: '/user-news/:newsId/link'
         },
         notification: {
             list: '/notification'

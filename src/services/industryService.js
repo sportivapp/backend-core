@@ -22,4 +22,10 @@ industryService.getIndustryListWithLicenseLevel = async () => {
 
 }
 
+industryService.getIndustryById = async (industryId) => {
+
+    return Industry.query()
+        .findById(industryId)
+}
+
 module.exports = industryService
