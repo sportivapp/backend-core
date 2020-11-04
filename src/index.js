@@ -29,7 +29,7 @@ app.use(cookieParser());
 app.use(express.json({limit: '1000mb'}));
 app.use(express.urlencoded({limit: '1000mb', extended: true }));
 app.use(morgan('dev'));
-// app.use(express.static(process.env.TEMP_DIRECTORY));
+app.use(express.static(process.env.TEMP_DIRECTORY));
 
 app.use(routes)
 
@@ -61,12 +61,12 @@ app.use((_, __, next) => {
 
 app.use(errorHandler)
 
-// const serviceAccount = require(process.env.FIREBASE_KEY_DIRECTORY);
-//
-// firebaseAdmin.initializeApp({
-//     credential: firebaseAdmin.credential.cert(serviceAccount),
-//     databaseURL: databaseUrl
-// });
+const serviceAccount = require(process.env.FIREBASE_KEY_DIRECTORY);
+
+firebaseAdmin.initializeApp({
+    credential: firebaseAdmin.credential.cert(serviceAccount),
+    databaseURL: databaseUrl
+});
 
 const httpPORT = process.env.PORT || 5100;
 const httpServer = app.listen(httpPORT, function() {

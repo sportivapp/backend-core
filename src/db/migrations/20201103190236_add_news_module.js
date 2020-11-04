@@ -28,8 +28,6 @@ function newModule() {
 
 function mapNewModulesToCompanies(knex, module, functions, companiesWithPositions, trx) {
 
-    console.log(functions)
-
     let moduleMappings = []
     let allFunctionMappings = []
     companiesWithPositions.forEach(company => {

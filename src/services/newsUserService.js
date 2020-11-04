@@ -40,14 +40,19 @@ newsUserService.getNewsDetail = async (newsId, user) => {
 
     }
 
-    return newsFromDB
+    const isLiked = await NewsLike.query()
+        .where('enewsenewsid', newsFromDB.enewsid)
+        .where('eusereuserid', user.sub)
+        .first()
+
+    return { ...newsFromDB, isLiked: !!isLiked }
 }
 
 newsUserService.generateNewsLink = async (newsId, user) => {
 
     await newsService.getNewsDetail(newsId, user)
 
-    return `https://org.sportiv.app/news/${newsId}`
+    return process.env.NEWS_PREFIX_LINK + newsId
 }
 
 newsUserService.getUserViewCount = async (newsId) => {
