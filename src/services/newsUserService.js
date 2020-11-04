@@ -61,7 +61,14 @@ newsUserService.getNewsDetail = async (newsId, user) => {
 
 newsUserService.generateNewsLink = async (newsId, user) => {
 
-    await newsService.getNewsDetail(newsId, user)
+    const newsFromDB = await newsService.getNewsById(newsId)
+
+    if (!newsFromDB.enewsispublished) throw new NotFoundError()
+
+    if (!newsFromDB.enewsispublic) {
+        const isUserInCompany = await companyService.isUserExistInCompany(newsFromDB.ecompanyecompanyid, user.sub)
+        if (!isUserInCompany) throw new NotFoundError
+    }
 
     return process.env.NEWS_PREFIX_LINK + newsId
 }
