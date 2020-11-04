@@ -1,13 +1,8 @@
 const NewsLike = require('../models/NewsLike')
 const NewsView = require('../models/NewsView')
-const {UnsupportedOperationError, NotFoundError} = require('../models/errors')
+const { NotFoundError } = require('../models/errors')
 const companyService = require('./companyService')
 const newsService = require('./newsService')
-
-const UnsupportedOperationErrorEnum = {
-    NEWS_NOT_EXIST: 'NEWS_NOT_EXIST',
-    FORBIDDEN_ACTION: 'FORBIDDEN_ACTION'
-}
 
 const NewsTypeEnum = {
     PUBLISHED: 'PUBLISHED',
@@ -98,6 +93,5 @@ newsUserService.removeLikeNews = async (newsId, user) => {
         .delete()
         .then(rowsAffected => rowsAffected === 1)
 }
-
 
 module.exports = newsUserService
