@@ -3,6 +3,7 @@ const NewsView = require('../models/NewsView')
 const { NotFoundError } = require('../models/errors')
 const companyService = require('./companyService')
 const newsService = require('./newsService')
+const ServiceHelper = require('../helper/ServiceHelper')
 
 const NewsTypeEnum = {
     PUBLISHED: 'PUBLISHED',
@@ -14,14 +15,24 @@ const newsUserService = {}
 
 newsUserService.getNews = async (page, size, user, companyId) => {
 
+    if (companyId) {
+        const isUserExistInCompany = await companyService.isUserExistInCompany(companyId, user.sub)
+        if (!isUserExistInCompany) return ServiceHelper.toEmptyPage(page, size)
+    }
+
     return newsService.getNews(page, size, user, NewsTypeEnum.PUBLISHED, companyId, !companyId)
 }
 
 newsUserService.getNewsDetail = async (newsId, user) => {
 
-    const newsFromDB = await newsService.getNewsById(newsId)
+    const newsFromDB = await newsService.getNewsDetail(newsId, user)
 
     if (!newsFromDB.enewsispublished) throw new NotFoundError()
+
+    if (!newsFromDB.enewsispublic) {
+        const isUserInCompany = await companyService.isUserExistInCompany(newsFromDB.ecompanyecompanyid, user.sub)
+        if (!isUserInCompany) throw new NotFoundError
+    }
 
     const isNewsViewed = await NewsView.query()
         .where('enewsenewsid', newsId)
@@ -50,7 +61,14 @@ newsUserService.getNewsDetail = async (newsId, user) => {
 
 newsUserService.generateNewsLink = async (newsId, user) => {
 
-    await newsService.getNewsDetail(newsId, user)
+    const newsFromDB = await newsService.getNewsById(newsId)
+
+    if (!newsFromDB.enewsispublished) throw new NotFoundError()
+
+    if (!newsFromDB.enewsispublic) {
+        const isUserInCompany = await companyService.isUserExistInCompany(newsFromDB.ecompanyecompanyid, user.sub)
+        if (!isUserInCompany) throw new NotFoundError
+    }
 
     return process.env.NEWS_PREFIX_LINK + newsId
 }
