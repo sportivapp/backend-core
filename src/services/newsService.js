@@ -154,11 +154,41 @@ newsService.getNews = async (page, size, user, type, companyId, isPublic) => {
 
     if (companyId) query = query.where('ecompanyecompanyid', companyId)
 
-    if (isPublic !== undefined) query = query.where('enewsispublic', isPublic)
+    if (isPublic) query = query.where('enewsispublic', isPublic)
 
     return query
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj)) 
+
+}
+
+newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = async (pageRequest, user, filter) => {
+
+    const { companyId, isPublic, categoryId, today } = filter
+
+    const { page, size } = pageRequest
+
+    let query = News.query()
+        .modify('list')
+        .where('enewsispublished', true)
+
+    if (companyId) query = query.where('ecompanyecompanyid', companyId)
+
+    if (isPublic !== undefined) query = query.where('enewsispublic', isPublic)
+
+    if (categoryId) query = query.where('eindustryeindustryid', categoryId)
+
+    if (today) {
+        const date = new Date()
+        date.setHours(0)
+        date.setMinutes(0)
+        date.setSeconds(0)
+        query = query.where('enewsdate', '>=', date.getTime())
+    }
+
+    return query
+        .page(page, size)
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
 }
 

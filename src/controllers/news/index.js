@@ -66,11 +66,11 @@ controller.editNews = async (req, res, next) => {
 
 controller.getNews = async (req, res, next) => {
 
-    const { page = '0', size = '10', type = 'UNPUBLISHED' } = req.query
+    const { page = '0', size = '10', type = 'UNPUBLISHED', isPublic = false } = req.query
 
     try {
 
-        const pageObj = await newsService.getNews(parseInt(page), parseInt(size), req.user, type.toUpperCase(), req.user.companyId)
+        const pageObj = await newsService.getNews(parseInt(page), parseInt(size), req.user, type.toUpperCase(), req.user.companyId, isPublic)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
         
     } catch (e) {
