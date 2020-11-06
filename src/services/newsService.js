@@ -17,7 +17,8 @@ const UnsupportedOperationErrorEnum = {
     FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
     FILE_NOT_EXIST: 'FILE_NOT_EXIST',
     NEWS_ALREADY_PUBLISHED: 'NEWS_ALREADY_PUBLISHED',
-    INVALID_TYPE: 'INVALID_TYPE'
+    INVALID_TYPE: 'INVALID_TYPE',
+    NEWS_NOT_COMPLETED: 'NEWS_NOT_COMPLETED'
 }
 
 const NewsTypeEnum = {
@@ -62,13 +63,21 @@ newsService.createNews = async (newsDTO, user) => {
 
     if (!isAllowed) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION)
 
-    const industry = await industryService.getIndustryById(newsDTO.eindustryeindustryid)
+    if (newsDTO.efileefileid) {
 
-    if (!industry) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INDUSTRY_NOT_FOUND)
+        const file = await fileService.getFileByIdAndCreateBy(newsDTO.efileefileid, user.sub)
 
-    const file = await fileService.getFileByIdAndCreateBy(newsDTO.efileefileid, user.sub)
+        if (!file) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FILE_NOT_EXIST)
 
-    if (!file) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FILE_NOT_EXIST)
+    }
+
+    if (newsDTO.eindustryeindustryid) {
+
+        const industry = await industryService.getIndustryById(newsDTO.eindustryeindustryid)
+
+        if (!industry) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INDUSTRY_NOT_FOUND)
+
+    }
 
     return News.query().insertToTable(newsDTO, user.sub)
 
@@ -86,6 +95,8 @@ newsService.publishNews = async (isPublish, newsId, user) => {
     const userInCompany = await companyService.isUserExistInCompany(news.ecompanyecompanyid, user.sub)
 
     if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
+
+    if (isDraft(news)) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NEWS_NOT_COMPLETED)
 
     if (news.enewsispublished) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NEWS_ALREADY_PUBLISHED)
 
@@ -124,9 +135,13 @@ newsService.editNews = async (newsDTO, newsId, user) => {
 
     if (!isAllowed) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION)
 
-    const industry = await industryService.getIndustryById(newsDTO.eindustryeindustryid)
+    if (newsDTO.eindustryeindustryid) {
 
-    if (!industry) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INDUSTRY_NOT_FOUND)
+        const industry = await industryService.getIndustryById(newsDTO.eindustryeindustryid)
+
+        if (!industry) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INDUSTRY_NOT_FOUND)
+
+    }
 
     if (newsDTO.efileefileid !== news.efileefileid) {
 
@@ -230,5 +245,10 @@ newsService.getNewsById = async (newsId) => {
         })
 }
 
+function isDraft(news) {
+    return (news.enewstitle && news.enewstitle !== '') &&
+        (news.enewscontent && news.enewscontent !== '') &&
+        (news.eindustryeindustryid)
+}
 
 module.exports = newsService
