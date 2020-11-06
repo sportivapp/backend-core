@@ -13,7 +13,7 @@ const NewsTypeEnum = {
 
 const newsUserService = {}
 
-newsUserService.getNews = async (pageRequest, user, companyId, categoryId, today) => {
+newsUserService.getNews = async (pageRequest, user, companyId, categoryId, today, keyword) => {
 
     if (companyId) {
         const isUserExistInCompany = await companyService.isUserExistInCompany(companyId, user.sub)
@@ -22,7 +22,7 @@ newsUserService.getNews = async (pageRequest, user, companyId, categoryId, today
 
     const filter = { companyId, categoryId, today, isPublic: !companyId }
 
-    return newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate(pageRequest, user, filter)
+    return newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate(pageRequest, user, filter, keyword)
 }
 
 newsUserService.getNewsDetail = async (newsId, user) => {

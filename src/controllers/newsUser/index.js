@@ -19,13 +19,13 @@ controller.generateNewsLink = async (req, res, next) => {
 
 controller.getNews = async (req, res, next) => {
 
-    const { page = '0', size = '10', companyId = null, category = null, today = 'false' } = req.query
+    const { page = '0', size = '10', companyId = null, category = null, today = 'false', keyword = '' } = req.query
 
     const pageRequest = { page: parseInt(page), size: parseInt(size) }
 
     try {
 
-        const pageObj = await newsUserService.getNews(pageRequest, req.user, companyId, category, today === 'true')
+        const pageObj = await newsUserService.getNews(pageRequest, req.user, companyId, category, today === 'true', keyword)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
         
     } catch (e) {

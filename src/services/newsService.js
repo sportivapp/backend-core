@@ -9,6 +9,7 @@ const settingService = require('./settingService')
 const gradeService = require('./gradeService')
 const companyService = require('./companyService')
 const fileService = require('./fileService')
+const { raw } = require('objection')
 
 const UnsupportedOperationErrorEnum = {
     USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY',
@@ -143,7 +144,9 @@ newsService.editNews = async (newsDTO, newsId, user) => {
 
 }
 
-newsService.getNews = async (page, size, user, type, companyId, isPublic) => {
+newsService.getNews = async (pageRequest, user, filter, keyword) => {
+
+    const { type, companyId, isPublic } = filter
 
     if (NewsTypeEnum.PUBLISHED !== type && NewsTypeEnum.UNPUBLISHED !== type && NewsTypeEnum.DRAFT !== type)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INVALID_TYPE)
@@ -151,18 +154,20 @@ newsService.getNews = async (page, size, user, type, companyId, isPublic) => {
     let query = News.query()
         .modify('list')
         .where('enewsispublished', NewsTypeEnum.UNPUBLISHED !== type)
+        .where(raw('lower("enewstitle")'), 'like', `%${keyword.toLowerCase()}%`)
 
     if (companyId) query = query.where('ecompanyecompanyid', companyId)
 
     if (isPublic) query = query.where('enewsispublic', isPublic)
 
     return query
-    .page(page, size)
-    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj)) 
+    .orderBy('enewschangetime', 'DESC')
+    .page(pageRequest.page, pageRequest.size)
+    .then(pageObj => ServiceHelper.toPageObj(pageRequest.page, pageRequest.size, pageObj))
 
 }
 
-newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = async (pageRequest, user, filter) => {
+newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = async (pageRequest, user, filter, keyword) => {
 
     const { companyId, isPublic, categoryId, today } = filter
 
@@ -171,6 +176,7 @@ newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = a
     let query = News.query()
         .modify('list')
         .where('enewsispublished', true)
+        .where(raw('lower("enewstitle")'), 'like', `%${keyword.toLowerCase()}%`)
 
     if (companyId) query = query.where('ecompanyecompanyid', companyId)
 
@@ -187,6 +193,7 @@ newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = a
     }
 
     return query
+        .orderBy('enewsdate', 'DESC')
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
