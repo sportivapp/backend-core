@@ -22,14 +22,14 @@ class News extends Model {
     static get modifiers() {
         return {
             baseAttributes(builder) {
-                builder.select('enewsid', 'enewstitle', 'enewscontent', 'enewsdate')
+                builder.select('enewsid', 'enewstitle', 'enewscontent', 'enewsdate', 'enewsispublished', 'enewsispublic')
                     .withGraphFetched('file(baseAttributes)')
                     .withGraphFetched('industry(baseAttributes)')
                     .withGraphFetched('company(baseAttributes)')
                     .withGraphFetched('creator(baseAttributes).file(baseAttributes)')
             },
             list(builder) {
-                builder.select('enewsid', 'enewstitle', 'enewsdate')
+                builder.select('enewsid', 'enewstitle', 'enewsdate', 'enewsispublic')
                     .withGraphFetched('file(baseAttributes)')
                     .withGraphFetched('industry(baseAttributes)')
                     .withGraphFetched('company(baseAttributes)')
