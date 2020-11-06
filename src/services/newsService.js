@@ -96,7 +96,7 @@ newsService.publishNews = async (isPublish, newsId, user) => {
 
     if(!userInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_COMPANY)
 
-    if (isDraft(news)) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NEWS_NOT_COMPLETED)
+    if (!isCompleteNews(news)) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NEWS_NOT_COMPLETED)
 
     if (news.enewsispublished) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NEWS_ALREADY_PUBLISHED)
 
@@ -245,7 +245,7 @@ newsService.getNewsById = async (newsId) => {
         })
 }
 
-function isDraft(news) {
+function isCompleteNews(news) {
     return (news.enewstitle && news.enewstitle !== '') &&
         (news.enewscontent && news.enewscontent !== '') &&
         (news.eindustryeindustryid)
