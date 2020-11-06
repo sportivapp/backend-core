@@ -220,10 +220,9 @@ newsService.deleteNews = async (newsId, user) => {
 
 newsService.getNewsById = async (newsId) => {
 
-    console.log(newsId)
-
     return News.query()
         .findById(newsId)
+        .modify('baseAttributes')
         .then(news => {
             if (!news) throw new NotFoundError()
             return news

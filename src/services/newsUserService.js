@@ -25,7 +25,7 @@ newsUserService.getNews = async (page, size, user, companyId) => {
 
 newsUserService.getNewsDetail = async (newsId, user) => {
 
-    const newsFromDB = await newsService.getNewsDetail(newsId, user)
+    const newsFromDB = await newsService.getNewsById(newsId)
 
     if (!newsFromDB.enewsispublished) throw new NotFoundError()
 
