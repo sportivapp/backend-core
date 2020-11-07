@@ -5,22 +5,18 @@ const companyService = require('./companyService')
 const newsService = require('./newsService')
 const ServiceHelper = require('../helper/ServiceHelper')
 
-const NewsTypeEnum = {
-    PUBLISHED: 'PUBLISHED',
-    UNPUBLISHED: 'UNPUBLISHED',
-    DRAFT: 'DRAFT'
-}
-
 const newsUserService = {}
 
-newsUserService.getNews = async (page, size, user, companyId) => {
+newsUserService.getNews = async (pageRequest, user, companyId, categoryId, today, keyword) => {
 
     if (companyId) {
         const isUserExistInCompany = await companyService.isUserExistInCompany(companyId, user.sub)
-        if (!isUserExistInCompany) return ServiceHelper.toEmptyPage(page, size)
+        if (!isUserExistInCompany) return ServiceHelper.toEmptyPage(pageRequest.page, pageRequest.size)
     }
 
-    return newsService.getNews(page, size, user, NewsTypeEnum.PUBLISHED, companyId, !companyId)
+    const filter = { companyId, categoryId, today, isPublic: !companyId }
+
+    return newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate(pageRequest, user, filter, keyword)
 }
 
 newsUserService.getNewsDetail = async (newsId, user) => {
