@@ -5,12 +5,6 @@ const companyService = require('./companyService')
 const newsService = require('./newsService')
 const ServiceHelper = require('../helper/ServiceHelper')
 
-const NewsTypeEnum = {
-    PUBLISHED: 'PUBLISHED',
-    UNPUBLISHED: 'UNPUBLISHED',
-    DRAFT: 'DRAFT'
-}
-
 const newsUserService = {}
 
 newsUserService.getNews = async (pageRequest, user, companyId, categoryId, today, keyword) => {

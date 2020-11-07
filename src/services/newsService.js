@@ -23,7 +23,7 @@ const UnsupportedOperationErrorEnum = {
 
 const NewsTypeEnum = {
     PUBLISHED: 'PUBLISHED',
-    UNPUBLISHED: 'UNPUBLISHED',
+    SCHEDULED: 'SCHEDULED',
     DRAFT: 'DRAFT'
 }
 
@@ -148,12 +148,12 @@ newsService.getNews = async (pageRequest, user, filter, keyword) => {
 
     const { type, companyId, isPublic } = filter
 
-    if (NewsTypeEnum.PUBLISHED !== type && NewsTypeEnum.UNPUBLISHED !== type && NewsTypeEnum.DRAFT !== type)
+    if (NewsTypeEnum.PUBLISHED !== type && NewsTypeEnum.SCHEDULED !== type && NewsTypeEnum.DRAFT !== type)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INVALID_TYPE)
 
     let query = News.query()
         .modify('list')
-        .where('enewsispublished', NewsTypeEnum.UNPUBLISHED !== type)
+        .where('enewsispublished', NewsTypeEnum.PUBLISHED === type)
         .where(raw('lower("enewstitle")'), 'like', `%${keyword.toLowerCase()}%`)
 
     if (companyId) query = query.where('ecompanyecompanyid', companyId)
