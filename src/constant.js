@@ -83,6 +83,9 @@ module.exports = {
             id: '/todolist/:todoId',
             category: '/todolist/todo/category'
         },
+        tournament: {
+            companies: '/tournament/companies'
+        },
         roster: {
             list: '/timesheet/:timesheetId/roster',
             members: '/timesheet/:timesheetId/roster-member',

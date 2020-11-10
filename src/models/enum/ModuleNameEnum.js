@@ -15,5 +15,6 @@ module.exports = {
     CLASS: 'Class',
     TEAM: 'Team',
     FORUM: 'Forum',
-    NEWS: 'News'
+    NEWS: 'News',
+    TOURNAMENT: 'Tournament'
 }
