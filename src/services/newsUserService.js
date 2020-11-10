@@ -9,6 +9,8 @@ const newsUserService = {}
 
 newsUserService.getNews = async (pageRequest, user, companyId, categoryId, today, keyword) => {
 
+    if (!user) companyId = null
+
     if (companyId) {
         const isUserExistInCompany = await companyService.isUserExistInCompany(companyId, user.sub)
         if (!isUserExistInCompany) return ServiceHelper.toEmptyPage(pageRequest.page, pageRequest.size)
@@ -16,7 +18,7 @@ newsUserService.getNews = async (pageRequest, user, companyId, categoryId, today
 
     const filter = { companyId, categoryId, today, isPublic: !companyId }
 
-    return newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate(pageRequest, user, filter, keyword)
+    return newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate(pageRequest, filter, keyword)
 }
 
 newsUserService.getNewsDetail = async (newsId, user) => {
@@ -26,31 +28,35 @@ newsUserService.getNewsDetail = async (newsId, user) => {
     if (!newsFromDB.enewsispublished) throw new NotFoundError()
 
     if (!newsFromDB.enewsispublic) {
+        if (!user) throw new NotFoundError()
         const isUserInCompany = await companyService.isUserExistInCompany(newsFromDB.ecompanyecompanyid, user.sub)
         if (!isUserInCompany) throw new NotFoundError
     }
 
-    const isNewsViewed = await NewsView.query()
-        .where('enewsenewsid', newsId)
-        .where('eusereuserid', user.sub)
-        .first()
+    if (user) {
 
-    // if user haven't viewed this news
-    if (!isNewsViewed) {
+        const isNewsViewed = await NewsView.query()
+            .where('enewsenewsid', newsId)
+            .where('eusereuserid', user.sub)
+            .first()
 
-        const newsViewDTO = {
-            enewsenewsid: newsId,
-            eusereuserid: user.sub,
+        // if user haven't viewed this news
+        if (!isNewsViewed) {
+
+            const newsViewDTO = {
+                enewsenewsid: newsId,
+                eusereuserid: user.sub,
+            }
+
+            await NewsView.query().insertToTable(newsViewDTO, user.sub)
+
         }
-
-        await NewsView.query().insertToTable(newsViewDTO, user.sub)
-
     }
 
-    const isLiked = await NewsLike.query()
+    const isLiked = user ? await NewsLike.query()
         .where('enewsenewsid', newsFromDB.enewsid)
         .where('eusereuserid', user.sub)
-        .first()
+        .first() : null
 
     return { ...newsFromDB, isLiked: !!isLiked }
 }
@@ -62,6 +68,7 @@ newsUserService.generateNewsLink = async (newsId, user) => {
     if (!newsFromDB.enewsispublished) throw new NotFoundError()
 
     if (!newsFromDB.enewsispublic) {
+        if (!user) throw new NotFoundError()
         const isUserInCompany = await companyService.isUserExistInCompany(newsFromDB.ecompanyecompanyid, user.sub)
         if (!isUserInCompany) throw new NotFoundError
     }
@@ -79,6 +86,8 @@ newsUserService.getUserViewCount = async (newsId) => {
 }
 
 newsUserService.likeNews = async (newsId, user) => {
+
+    if (!user) return false
 
     const news = await newsService.getNewsById(newsId)
         .catch(() => null)
@@ -105,6 +114,8 @@ newsUserService.likeNews = async (newsId, user) => {
 }
 
 newsUserService.removeLikeNews = async (newsId, user) => {
+
+    if (!user) return false
 
     return NewsLike.query()
         .where('enewsenewsid', newsId)

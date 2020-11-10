@@ -182,7 +182,7 @@ newsService.getNews = async (pageRequest, user, filter, keyword) => {
 
 }
 
-newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = async (pageRequest, user, filter, keyword) => {
+newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = async (pageRequest, filter, keyword) => {
 
     const { companyId, isPublic, categoryId, today } = filter
 
