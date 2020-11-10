@@ -143,7 +143,7 @@ SettingService.getAllFunctionByGradeId = async (gradeId) => {
 
 }
 
-SettingService.getAllFunctionByGradeIdAndModuleId = async (gradeId, moduleId) => {
+SettingService.getAllFunctionByGradeIdAndModuleId = async (gradeId, requestedModuleId) => {
 
     const allFunctions = await Function.query();
 
@@ -179,7 +179,7 @@ SettingService.getAllFunctionByGradeIdAndModuleId = async (gradeId, moduleId) =>
         });
     }
 
-    return groupedFunction[moduleId];
+    return groupedFunction[requestedModuleId];
 
 }
 
