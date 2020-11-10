@@ -9,5 +9,6 @@ router.put( routes.news.id, auth.authenticateToken, controller.editNews);
 router.get( routes.news.list, auth.authenticateToken, controller.getNews);
 router.get( routes.news.id, auth.authenticateToken, controller.getNewsDetail);
 router.delete( routes.news.id, auth.authenticateToken, controller.deleteNews);
+router.get( routes.news.count, auth.authenticateToken, controller.getUserViewCount);
 
 module.exports = router.expressRouter;
