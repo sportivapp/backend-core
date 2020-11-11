@@ -9,9 +9,9 @@ controller.getFilesByCompanyId = async (req, res, next) => {
 
     try {
         
-        const result = await theoryService.getFilesByCompanyId(parseInt(page), parseInt(size), keyword, companyId, req.user);
+        const pageObj = await theoryService.getFilesByCompanyId(parseInt(page), parseInt(size), keyword, companyId, req.user);
 
-        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
 
     } catch(e) {
         next(e);
