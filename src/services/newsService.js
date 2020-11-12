@@ -173,10 +173,9 @@ newsService.getNews = async (pageRequest, user, filter, keyword, sort) => {
         .modify('list')
         .where('enewsispublished', NewsTypeEnum.PUBLISHED === type)
         .where(raw('lower("enewstitle")'), 'like', `%${keyword.toLowerCase()}%`)
+        .where('enewsispublic', isPublic)
 
     if (companyId) query = query.where('ecompanyecompanyid', companyId)
-
-    if (isPublic !== undefined) query = query.where('enewsispublic', isPublic)
 
     if (categoryId) query = query.where('eindustryeindustryid', categoryId)
 
@@ -208,10 +207,9 @@ newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = a
         .modify('list')
         .where('enewsispublished', true)
         .where(raw('lower("enewstitle")'), 'like', `%${keyword.toLowerCase()}%`)
+        .where('enewsispublic', isPublic)
 
     if (companyId) query = query.where('ecompanyecompanyid', companyId)
-
-    if (isPublic !== undefined) query = query.where('enewsispublic', isPublic)
 
     if (categoryId) query = query.where('eindustryeindustryid', categoryId)
 
