@@ -160,12 +160,14 @@ newsService.editNews = async (newsDTO, newsId, user) => {
 
 }
 
-newsService.getNews = async (pageRequest, user, filter, keyword) => {
+newsService.getNews = async (pageRequest, user, filter, keyword, sort) => {
 
-    const { type, companyId, isPublic } = filter
+    const { type, companyId, isPublic, categoryId } = filter
 
     if (NewsTypeEnum.PUBLISHED !== type && NewsTypeEnum.SCHEDULED !== type && NewsTypeEnum.DRAFT !== type)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INVALID_TYPE)
+
+    if (!SortEnum.typeOf(sort)) sort = SortEnum.NEWEST
 
     let query = News.query()
         .modify('list')
@@ -174,7 +176,20 @@ newsService.getNews = async (pageRequest, user, filter, keyword) => {
 
     if (companyId) query = query.where('ecompanyecompanyid', companyId)
 
-    if (isPublic) query = query.where('enewsispublic', isPublic)
+    if (isPublic !== undefined) query = query.where('enewsispublic', isPublic)
+
+    if (categoryId) query = query.where('eindustryeindustryid', categoryId)
+
+    if (SortEnum.POPULAR === sort)
+        query = query
+            .select(News.relatedQuery('likes').count().as('likes'))
+            .orderBy('likes', 'DESC')
+
+    else if (SortEnum.OLDEST === sort)
+        query = query.orderBy('enewsdate', 'ASC')
+
+    else
+        query = query.orderBy('enewsdate', 'DESC')
 
     return query
     .orderBy('enewschangetime', 'DESC')
