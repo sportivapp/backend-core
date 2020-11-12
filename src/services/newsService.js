@@ -2,6 +2,7 @@ const News = require('../models/News')
 const NewsView = require('../models/NewsView')
 const CompanyUserMapping = require('../models/CompanyUserMapping')
 const ModuleNameEnum = require('../models/enum/ModuleNameEnum')
+const SortEnum = require('../models/enum/SortEnum')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const ServiceHelper = require('../helper/ServiceHelper')
 const industryService = require('./industryService')
@@ -182,7 +183,7 @@ newsService.getNews = async (pageRequest, user, filter, keyword) => {
 
 }
 
-newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = async (pageRequest, filter, keyword) => {
+newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = async (pageRequest, filter, keyword, sort) => {
 
     const { companyId, isPublic, categoryId, today } = filter
 
@@ -207,8 +208,18 @@ newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = a
         query = query.where('enewsdate', '>=', date.getTime())
     }
 
+    if (SortEnum.POPULAR === sort)
+        query = query
+            .select(News.relatedQuery('likes').count().as('likes'))
+            .orderBy('likes', 'DESC')
+
+    else if (SortEnum.OLDEST === sort)
+        query = query.orderBy('enewsdate', 'ASC')
+
+    else
+        query = query.orderBy('enewsdate', 'DESC')
+
     return query
-        .orderBy('enewsdate', 'DESC')
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 

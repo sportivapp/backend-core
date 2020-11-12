@@ -1,5 +1,6 @@
 const NewsLike = require('../models/NewsLike')
 const NewsView = require('../models/NewsView')
+const SortEnum = require('../models/enum/SortEnum')
 const { NotFoundError } = require('../models/errors')
 const companyService = require('./companyService')
 const newsService = require('./newsService')
@@ -7,9 +8,11 @@ const ServiceHelper = require('../helper/ServiceHelper')
 
 const newsUserService = {}
 
-newsUserService.getNews = async (pageRequest, user, companyId, categoryId, today, keyword) => {
+newsUserService.getNews = async (pageRequest, user, companyId, categoryId, today, keyword, sort) => {
 
     if (!user) companyId = null
+
+    if (!SortEnum.typeOf(sort)) sort = SortEnum.NEWEST
 
     if (companyId) {
         const isUserExistInCompany = await companyService.isUserExistInCompany(companyId, user.sub)
@@ -18,7 +21,7 @@ newsUserService.getNews = async (pageRequest, user, companyId, categoryId, today
 
     const filter = { companyId, categoryId, today, isPublic: !companyId }
 
-    return newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate(pageRequest, filter, keyword)
+    return newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate(pageRequest, filter, keyword, sort)
 }
 
 newsUserService.getNewsDetail = async (newsId, user) => {
