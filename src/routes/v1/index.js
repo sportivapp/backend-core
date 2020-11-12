@@ -42,6 +42,7 @@ const threadPostReplyRoutes = require('./threadPostReply')
 const teamUserMappingRoutes = require('./teamUserMapping')
 const reportThreadRoutes = require('./reportThread')
 const newsUserRoutes = require('./newsUser')
+const tournamentRoutes = require('./tournament')
 
 router.use('/api/v1', [
     userRoutes,
@@ -83,7 +84,8 @@ router.use('/api/v1', [
     threadPostReplyRoutes,
     teamUserMappingRoutes,
     reportThreadRoutes,
-    newsUserRoutes
+    newsUserRoutes,
+    tournamentRoutes
 ]);
 
 const mobileUserRoutes = require('./mobileUser');
