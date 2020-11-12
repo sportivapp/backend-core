@@ -44,6 +44,7 @@ class News extends Model {
         const Company = require('./Company')
         const User = require('./User')
         const Industry = require('./Industry')
+        const NewsLike = require('./NewsLike')
 
         return {
             file: {
@@ -76,6 +77,14 @@ class News extends Model {
                 join: {
                     from: 'enews.enewscreateby',
                     to: 'euser.euserid'
+                }
+            },
+            likes: {
+                relation: Model.HasManyRelation,
+                modelClass: NewsLike,
+                join: {
+                    from: 'enews.enewsid',
+                    to: 'enewslike.enewsenewsid'
                 }
             }
         }

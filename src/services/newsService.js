@@ -2,6 +2,7 @@ const News = require('../models/News')
 const NewsView = require('../models/NewsView')
 const CompanyUserMapping = require('../models/CompanyUserMapping')
 const ModuleNameEnum = require('../models/enum/ModuleNameEnum')
+const SortEnum = require('../models/enum/SortEnum')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const ServiceHelper = require('../helper/ServiceHelper')
 const industryService = require('./industryService')
@@ -159,21 +160,35 @@ newsService.editNews = async (newsDTO, newsId, user) => {
 
 }
 
-newsService.getNews = async (pageRequest, user, filter, keyword) => {
+newsService.getNews = async (pageRequest, user, filter, keyword, sort) => {
 
-    const { type, companyId, isPublic } = filter
+    const { type, companyId, isPublic, categoryId } = filter
 
     if (NewsTypeEnum.PUBLISHED !== type && NewsTypeEnum.SCHEDULED !== type && NewsTypeEnum.DRAFT !== type)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INVALID_TYPE)
+
+    if (!SortEnum.typeOf(sort)) sort = SortEnum.NEWEST
 
     let query = News.query()
         .modify('list')
         .where('enewsispublished', NewsTypeEnum.PUBLISHED === type)
         .where(raw('lower("enewstitle")'), 'like', `%${keyword.toLowerCase()}%`)
+        .where('enewsispublic', isPublic)
 
     if (companyId) query = query.where('ecompanyecompanyid', companyId)
 
-    if (isPublic) query = query.where('enewsispublic', isPublic)
+    if (categoryId) query = query.where('eindustryeindustryid', categoryId)
+
+    if (SortEnum.POPULAR === sort)
+        query = query
+            .select(News.relatedQuery('likes').count().as('likes'))
+            .orderBy('likes', 'DESC')
+
+    else if (SortEnum.OLDEST === sort)
+        query = query.orderBy('enewsdate', 'ASC')
+
+    else
+        query = query.orderBy('enewsdate', 'DESC')
 
     return query
     .orderBy('enewschangetime', 'DESC')
@@ -182,7 +197,7 @@ newsService.getNews = async (pageRequest, user, filter, keyword) => {
 
 }
 
-newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = async (pageRequest, filter, keyword) => {
+newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = async (pageRequest, filter, keyword, sort) => {
 
     const { companyId, isPublic, categoryId, today } = filter
 
@@ -192,10 +207,9 @@ newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = a
         .modify('list')
         .where('enewsispublished', true)
         .where(raw('lower("enewstitle")'), 'like', `%${keyword.toLowerCase()}%`)
+        .where('enewsispublic', isPublic)
 
     if (companyId) query = query.where('ecompanyecompanyid', companyId)
-
-    if (isPublic !== undefined) query = query.where('enewsispublic', isPublic)
 
     if (categoryId) query = query.where('eindustryeindustryid', categoryId)
 
@@ -207,8 +221,18 @@ newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = a
         query = query.where('enewsdate', '>=', date.getTime())
     }
 
+    if (SortEnum.POPULAR === sort)
+        query = query
+            .select(News.relatedQuery('likes').count().as('likes'))
+            .orderBy('likes', 'DESC')
+
+    else if (SortEnum.OLDEST === sort)
+        query = query.orderBy('enewsdate', 'ASC')
+
+    else
+        query = query.orderBy('enewsdate', 'DESC')
+
     return query
-        .orderBy('enewsdate', 'DESC')
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
