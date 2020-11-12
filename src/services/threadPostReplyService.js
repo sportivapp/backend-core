@@ -36,6 +36,7 @@ threadPostReplyService.getAllByThreadPostId = async (threadPostId, user) => {
         ethreadpostreplyid: reply.ethreadpostreplyid,
         ethreadpostreplycomment: reply.ethreadpostreplycomment,
         ethreadpostreplycreatetime: reply.ethreadpostreplycreatetime,
+        ethreadpostreplychangetime: reply.ethreadpostreplychangetime,
         threadPostReplyPicture: reply.threadPostReplyPicture,
         user: reply.user,
         isModerator: !!reply.moderator,
