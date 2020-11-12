@@ -28,7 +28,8 @@ class Thread extends Model {
             'ethreaddescription',
             'ethreadispublic',
             'ethreadlock',
-            'ethreadcreatetime')
+            'ethreadcreatetime',
+            'ethreadchangetime')
             .where('ethreaddeletestatus', false)
       }
     }
