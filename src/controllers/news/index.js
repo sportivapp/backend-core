@@ -72,8 +72,6 @@ controller.getNews = async (req, res, next) => {
 
     const pageRequest = { page: parseInt(page), size: parseInt(size) }
 
-    console.log(filter)
-
     try {
 
         const pageObj = await newsService.getNews(pageRequest, req.user, filter, keyword, sort)
