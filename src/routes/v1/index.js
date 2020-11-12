@@ -41,6 +41,8 @@ const sportTypeRoleRoutes = require('./sportTypeRole')
 const threadPostReplyRoutes = require('./threadPostReply')
 const teamUserMappingRoutes = require('./teamUserMapping')
 const reportThreadRoutes = require('./reportThread')
+const newsUserRoutes = require('./newsUser')
+const tournamentRoutes = require('./tournament')
 
 router.use('/api/v1', [
     userRoutes,
@@ -81,7 +83,9 @@ router.use('/api/v1', [
     sportTypeRoleRoutes,
     threadPostReplyRoutes,
     teamUserMappingRoutes,
-    reportThreadRoutes
+    reportThreadRoutes,
+    newsUserRoutes,
+    tournamentRoutes
 ]);
 
 const mobileUserRoutes = require('./mobileUser');
@@ -100,6 +104,7 @@ const mobileTeamUserRoutes = require('./mobileTeamUser');
 const mobileTeamLogRoutes = require('./mobileTeamLog');
 const mobileCompanyLogRoutes = require('./mobileCompanyLog')
 const myMobileForumRoutes = require('./myMobileForum')
+const mobileTheoryRoutes = require('./mobileTheory');
 
 router.use('/api/v1', [
     mobileUserRoutes,
@@ -118,7 +123,8 @@ router.use('/api/v1', [
     mobileTeamLogRoutes,
     threadPostReplyRoutes,
     mobileCompanyLogRoutes,
-    myMobileForumRoutes
+    myMobileForumRoutes,
+    mobileTheoryRoutes
 ]);
 
 module.exports = router;
