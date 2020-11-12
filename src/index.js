@@ -86,5 +86,5 @@ const httpServer = app.listen(httpPORT, function() {
 
 module.exports = {
     httpServer: httpServer,
-    httpsServer: httpsServer
+    // httpsServer: httpsServer
 }
