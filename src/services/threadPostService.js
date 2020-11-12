@@ -24,6 +24,7 @@ threadPostService.getAllPostByThreadId = async (threadId, page, size) => {
         .withGraphFetched('user(idAndName)')
         .withGraphFetched('threadPostPicture(baseAttributes)')
         .withGraphFetched('moderator')
+        .orderBy('ethreadpostcreatetime', 'ASC')
         .modifyGraph('moderator', builder => {
             builder
                 .select('eusereuserid')
