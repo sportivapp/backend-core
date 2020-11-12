@@ -281,6 +281,17 @@ newsService.getNewsById = async (newsId) => {
         })
 }
 
+newsService.publishAllScheduledNewsInDateNow = async () => {
+    console.log('publish news')
+    const dateNow = new Date()
+    dateNow.setSeconds(0)
+    return News.query()
+        .where('enewsscheduledate', dateNow.getTime())
+        .where('enewsisscheduled', true)
+        .where('enewsispublished', false)
+        .patch({ enewsispublished: true, enewsdate: dateNow.getTime(), enewschangetime: dateNow.getTime() })
+}
+
 function isCompleteNews(news) {
     return (news.enewstitle && news.enewstitle !== '') &&
         (news.enewscontent && news.enewscontent !== '') &&
