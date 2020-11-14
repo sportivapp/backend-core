@@ -46,7 +46,7 @@ OtpService.createOtp = async (email) => {
             throw new UnsupportedOperationError(ErrorEnum.OTP_CONFIRMED);
 
         const fifteenMinutes = 15 * 60 * 1000;
-        if ((Date.now() - promised[0].eotpchangetime) < fifteenMinutes)
+        if ((Date.now() - promised[0].eotpchangetime) > fifteenMinutes)
             throw new UnsupportedOperationError(ErrorEnum.OTP_EXPIRED);
 
         // resend Otp
