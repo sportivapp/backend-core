@@ -315,7 +315,6 @@ newsService.getNewsById = async (newsId) => {
 }
 
 newsService.publishAllScheduledNewsInDateNow = async () => {
-    console.log('abc')
     const dateNow = new Date()
     dateNow.setSeconds(0)
     return News.query()
