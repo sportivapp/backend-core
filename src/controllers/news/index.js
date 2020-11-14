@@ -29,10 +29,13 @@ controller.createNews = async (req, res, next) => {
 controller.publishNews = async (req, res, next) => {
 
     const { newsId } = req.params
-    const { isPublish } = req.body
+    const { isPublish, isScheduled, scheduleDate } = req.body
+
+    const dto = { isPublish, isScheduled, scheduleDate }
+
     try {
 
-        const result = await newsService.publishNews(isPublish, parseInt(newsId), req.user)
+        const result = await newsService.publishNews(dto, parseInt(newsId), req.user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
         
     } catch (e) {

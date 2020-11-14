@@ -84,6 +84,8 @@ httpsServer.listen(httpsPORT, function() {
     console.log(`HTTPS Server started on port ${httpsPORT}.`);
 });
 
+schedulerService.initialize();
+
 module.exports = {
     httpServer: httpServer,
     httpsServer: httpsServer
