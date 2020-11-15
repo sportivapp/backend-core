@@ -2,16 +2,6 @@ require('dotenv').config();
 const router = require('../router');
 const userController = require('../../controllers/user');
 const auth = require('../../middlewares/authentication');
-const multer = require('multer');
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, process.env.UPLOADS_DIRECTORY);
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname);
-    }
-});
-const upload = multer({ storage: storage })
 const { routes } = require('../../constant')
 
 router.post( routes.user.register, userController.register);
