@@ -9,6 +9,7 @@ const   express         = require('express'),
 require('dotenv').config();
 const app = express();
 const routes = require('./routes/v1');
+const schedulerService = require('./services/schedulerService')
 const firebaseAdmin = require('firebase-admin');
 const errorHandler = require('./middlewares/errorHandler');
 
@@ -83,6 +84,8 @@ const httpsPORT = process.env.HTTPS_PORT || 5101;
 httpsServer.listen(httpsPORT, function() {
     console.log(`HTTPS Server started on port ${httpsPORT}.`);
 });
+
+schedulerService.initialize();
 
 module.exports = {
     httpServer: httpServer,

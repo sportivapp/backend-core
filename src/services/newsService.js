@@ -20,7 +20,9 @@ const UnsupportedOperationErrorEnum = {
     FILE_NOT_EXIST: 'FILE_NOT_EXIST',
     NEWS_ALREADY_PUBLISHED: 'NEWS_ALREADY_PUBLISHED',
     INVALID_TYPE: 'INVALID_TYPE',
-    NEWS_NOT_COMPLETED: 'NEWS_NOT_COMPLETED'
+    NEWS_NOT_COMPLETED: 'NEWS_NOT_COMPLETED',
+    SCHEDULE_DATE_REQUIRED: 'SCHEDULE_DATE_REQUIRED',
+    NOT_SCHEDULED: 'NOT_SCHEDULED'
 }
 
 const NewsTypeEnum = {
@@ -85,7 +87,11 @@ newsService.createNews = async (newsDTO, user) => {
 
 }
 
-newsService.publishNews = async (isPublish, newsId, user) => {
+newsService.publishNews = async (dto, newsId, user) => {
+
+    if (dto.isScheduled && !dto.scheduleDate) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.SCHEDULE_DATE_REQUIRED)
+
+    if (!dto.isScheduled && dto.scheduleDate) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_SCHEDULED)
 
     const news = await News.query()
         .where('enewsid', newsId)
@@ -102,8 +108,6 @@ newsService.publishNews = async (isPublish, newsId, user) => {
 
     if (news.enewsispublished) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NEWS_ALREADY_PUBLISHED)
 
-    if (news.enewsispublished && news.enewsispublished !== isPublish) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NEWS_ALREADY_PUBLISHED)
-
     const isAllowed = await gradeService.getAllGradesByUserIdAndCompanyId(news.ecompanyecompanyid, user.sub)
         .then(grades => grades.map(grade => grade.egradeid))
         .then(gradeIds => settingService.isUserHaveFunctions(['P'], gradeIds, ModuleNameEnum.NEWS, news.ecompanyecompanyid))
@@ -111,7 +115,12 @@ newsService.publishNews = async (isPublish, newsId, user) => {
     if (!isAllowed) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION)
 
     return news.$query()
-        .updateByUserId({ enewsispublished: isPublish, enewsdate: Date.now() }, user.sub)
+        .updateByUserId({
+            enewsispublished: dto.isPublish && !dto.isScheduled,
+            enewsdate: dto.isScheduled ? Date.now() : null,
+            enewsscheduledate: dto.scheduleDate,
+            enewsisscheduled: dto.isScheduled
+        }, user.sub)
         .returning('*')
 
 }
@@ -303,6 +312,16 @@ newsService.getNewsById = async (newsId) => {
             if (!news) throw new NotFoundError()
             return news
         })
+}
+
+newsService.publishAllScheduledNewsInDateNow = async () => {
+    const dateNow = new Date()
+    dateNow.setSeconds(0)
+    return News.query()
+        .where('enewsscheduledate', '<=', dateNow.getTime())
+        .where('enewsisscheduled', true)
+        .where('enewsispublished', false)
+        .patch({ enewsispublished: true, enewsdate: dateNow.getTime(), enewschangetime: dateNow.getTime() })
 }
 
 function isCompleteNews(news) {
