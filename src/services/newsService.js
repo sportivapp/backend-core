@@ -117,8 +117,8 @@ newsService.publishNews = async (dto, newsId, user) => {
     return news.$query()
         .updateByUserId({
             enewsispublished: dto.isPublish && !dto.isScheduled,
-            enewsdate: dto.isScheduled ? Date.now() : null,
-            enewsscheduledate: dto.scheduleDate,
+            enewsdate: dto.isPublish ? Date.now() : null,
+            enewsscheduledate: dto.isScheduled ? dto.scheduleDate : null,
             enewsisscheduled: dto.isScheduled
         }, user.sub)
         .returning('*')
@@ -180,9 +180,11 @@ newsService.getNews = async (pageRequest, user, filter, keyword, sort) => {
 
     let query = News.query()
         .modify('list')
-        .where('enewsispublished', NewsTypeEnum.PUBLISHED === type)
         .where(raw('lower("enewstitle")'), 'like', `%${keyword.toLowerCase()}%`)
-        .where('enewsispublic', isPublic)
+
+    if (NewsTypeEnum.PUBLISHED) query = query.where('enewsispublished', true)
+
+    if (NewsTypeEnum.SCHEDULED) query = query.where('enewsisscheduled', true)
 
     if (isPublic !== undefined && isPublic !== null) query = query.where('enewsispublic', isPublic)
 
