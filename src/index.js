@@ -12,6 +12,7 @@ const routes = require('./routes/v1');
 const schedulerService = require('./services/schedulerService')
 const firebaseAdmin = require('firebase-admin');
 const errorHandler = require('./middlewares/errorHandler');
+const PathNotFoundError = require('./models/errors/PathNotFoundError')
 
 const databaseUrl = process.env.FIREBASE_URL || 'https://notification-sportiv.firebaseio.com'
 
@@ -34,10 +35,8 @@ app.use(express.static(process.env.TEMP_DIRECTORY));
 
 app.use(routes)
 
-app.use((_, __, next) => {
-    const err = new Error('Path Not Found');
-    err.status = 404;
-    next(err);
+app.use((_, __, ___) => {
+    throw new PathNotFoundError('Path Not Found')
 });
 
 // app.use((error, req, res, next) => {

@@ -9,7 +9,7 @@ controller.generateNewsLink = async (req, res, next) => {
 
     try {
 
-        const result = await newsUserService.generateNewsLink(parseInt(newsId), req.user)
+        const result = await newsUserService.generateNewsLink(parseInt(newsId))
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
         
     } catch (e) {
