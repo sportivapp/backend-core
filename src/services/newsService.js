@@ -184,6 +184,8 @@ newsService.getNews = async (pageRequest, user, filter, keyword, sort) => {
         .where(raw('lower("enewstitle")'), 'like', `%${keyword.toLowerCase()}%`)
         .where('enewsispublic', isPublic)
 
+    if (isPublic !== undefined && isPublic !== null) query = query.where('enewsispublic', isPublic)
+
     if (companyId) query = query.where('ecompanyecompanyid', companyId)
 
     if (categoryId) query = query.where('eindustryeindustryid', categoryId)
