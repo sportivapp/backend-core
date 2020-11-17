@@ -32,7 +32,7 @@ newsUserService.getNewsDetail = async (newsId, user) => {
 
     if (!newsFromDB.enewsispublic) {
         if (!user) throw new NotFoundError()
-        const isUserInCompany = await companyService.isUserExistInCompany(newsFromDB.ecompanyecompanyid, user.sub)
+        const isUserInCompany = await companyService.isUserExistInCompany(newsFromDB.company.ecompanyid, user.sub)
         if (!isUserInCompany) throw new NotFoundError
     }
 
