@@ -16,7 +16,12 @@ controller.login = async (req, res, next) => {
 
         const result = await authenticationService.login(loginDTO);
 
-        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+        return res.cookie('tok', result, {
+            secure: true,
+            httpOnly: true,
+            domain: process.env.COOKIE_DOMAIN,
+            maxAge: 3 * 60 * 60 * 1000
+        }).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
         next(e);
