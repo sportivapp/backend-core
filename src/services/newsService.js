@@ -181,11 +181,12 @@ newsService.getNews = async (pageRequest, user, filter, keyword, sort) => {
     let query = News.query()
         .modify('list')
         .where(raw('lower("enewstitle")'), 'like', `%${keyword.toLowerCase()}%`)
-        .where('enewsispublic', isPublic)
 
     if (NewsTypeEnum.PUBLISHED) query = query.where('enewsispublished', true)
 
     if (NewsTypeEnum.SCHEDULED) query = query.where('enewsisscheduled', true)
+
+    if (isPublic !== undefined && isPublic !== null) query = query.where('enewsispublic', isPublic)
 
     if (companyId) query = query.where('ecompanyecompanyid', companyId)
 

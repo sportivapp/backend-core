@@ -33,7 +33,7 @@ newsUserService.getNewsDetail = async (newsId, user) => {
     if (!newsFromDB.enewsispublic) {
         if (!user) throw new NotFoundError()
         const isUserInCompany = await companyService.isUserExistInCompany(newsFromDB.company.ecompanyid, user.sub)
-        if (!isUserInCompany) throw new NotFoundError
+        if (!isUserInCompany) throw new NotFoundError()
     }
 
     if (user) {
@@ -64,17 +64,11 @@ newsUserService.getNewsDetail = async (newsId, user) => {
     return { ...newsFromDB, isLiked: !!isLiked }
 }
 
-newsUserService.generateNewsLink = async (newsId, user) => {
+newsUserService.generateNewsLink = async (newsId) => {
 
     const newsFromDB = await newsService.getNewsById(newsId)
 
     if (!newsFromDB.enewsispublished) throw new NotFoundError()
-
-    if (!newsFromDB.enewsispublic) {
-        if (!user) throw new NotFoundError()
-        const isUserInCompany = await companyService.isUserExistInCompany(newsFromDB.ecompanyecompanyid, user.sub)
-        if (!isUserInCompany) throw new NotFoundError
-    }
 
     return process.env.NEWS_PREFIX_LINK + newsId
 }
@@ -100,7 +94,7 @@ newsUserService.likeNews = async (newsId, user) => {
     if (!news.enewsispublished) return false
 
     if (!news.enewsispublic) {
-        const isUserInCompany = await companyService.isUserExistInCompany(news.ecompanyecompanyid, user.sub)
+        const isUserInCompany = await companyService.isUserExistInCompany(news.company.ecompanyid, user.sub)
         if (!isUserInCompany) return false
     }
 
