@@ -210,6 +210,7 @@ module.exports = {
         },
         authentication: {
             login: '/login',
+            logout: '/logout',
             loginCompany: '/login-company',
             loginAuto: '/login-auto'
         },
