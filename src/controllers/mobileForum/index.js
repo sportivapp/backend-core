@@ -27,7 +27,6 @@ controller.createThread = async (req, res, next) => {
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
         
     } catch (e) {
-        console.log(e)
         next(e)
     }
 }
