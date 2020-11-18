@@ -29,6 +29,14 @@ controller.login = async (req, res, next) => {
 
 }
 
+controller.logout = async (req, res, next) => {
+
+    return res.cookie('tok', undefined, {
+        domain: process.env.COOKIE_DOMAIN,
+        maxAge: 0
+    }).send(ResponseHelper.toBaseResponse(true));
+}
+
 controller.loginCompany = async (req, res, next) => {
 
     const { companyId } = req.body;
