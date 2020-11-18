@@ -30,10 +30,10 @@ const ErrorEnum = {
 
 function isNameUniqueValidationError(e) {
 
-    if (!e.nativeError)
+    if (!e.nativeError || !(e instanceof UniqueViolationError))
         return false;
 
-    return e.nativeError.detail.includes('ethreadtitle') && e instanceof UniqueViolationError
+    return e.nativeError.detail.includes('ethreadtitle')
 }
 
 mobileForumService.isModerator = async (threadId, userId) => {
