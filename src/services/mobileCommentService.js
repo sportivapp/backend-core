@@ -112,6 +112,7 @@ mobileCommentService.getAllComments = async (page, size, threadId, user) => {
         .withGraphFetched('user(idAndName)')
         .withGraphFetched('threadPostPicture(baseAttributes)')
         .withGraphFetched('moderator')
+        .orderBy('ethreadpostcreatetime', 'ASC')
         .modifyGraph('moderator', builder => {
             builder
                 .select('eusereuserid')
@@ -125,6 +126,7 @@ mobileCommentService.getAllComments = async (page, size, threadId, user) => {
         ethreadpostid: threadPost.ethreadpostid,
         ethreadpostcomment: threadPost.ethreadpostcomment,
         ethreadpostcreatetime: threadPost.ethreadpostcreatetime,
+        ethreadpostchangetime: threadPost.ethreadpostchangetime,
         replyCount: parseInt(threadPost.replyCount),
         threadPostPicture: threadPost.threadPostPicture,
         user: threadPost.user,

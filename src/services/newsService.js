@@ -2,6 +2,7 @@ const News = require('../models/News')
 const NewsView = require('../models/NewsView')
 const CompanyUserMapping = require('../models/CompanyUserMapping')
 const ModuleNameEnum = require('../models/enum/ModuleNameEnum')
+const SortEnum = require('../models/enum/SortEnum')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const ServiceHelper = require('../helper/ServiceHelper')
 const industryService = require('./industryService')
@@ -19,7 +20,9 @@ const UnsupportedOperationErrorEnum = {
     FILE_NOT_EXIST: 'FILE_NOT_EXIST',
     NEWS_ALREADY_PUBLISHED: 'NEWS_ALREADY_PUBLISHED',
     INVALID_TYPE: 'INVALID_TYPE',
-    NEWS_NOT_COMPLETED: 'NEWS_NOT_COMPLETED'
+    NEWS_NOT_COMPLETED: 'NEWS_NOT_COMPLETED',
+    SCHEDULE_DATE_REQUIRED: 'SCHEDULE_DATE_REQUIRED',
+    NOT_SCHEDULED: 'NOT_SCHEDULED'
 }
 
 const NewsTypeEnum = {
@@ -84,7 +87,11 @@ newsService.createNews = async (newsDTO, user) => {
 
 }
 
-newsService.publishNews = async (isPublish, newsId, user) => {
+newsService.publishNews = async (dto, newsId, user) => {
+
+    if (dto.isScheduled && !dto.scheduleDate) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.SCHEDULE_DATE_REQUIRED)
+
+    if (!dto.isScheduled && dto.scheduleDate) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOT_SCHEDULED)
 
     const news = await News.query()
         .where('enewsid', newsId)
@@ -101,8 +108,6 @@ newsService.publishNews = async (isPublish, newsId, user) => {
 
     if (news.enewsispublished) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NEWS_ALREADY_PUBLISHED)
 
-    if (news.enewsispublished && news.enewsispublished !== isPublish) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NEWS_ALREADY_PUBLISHED)
-
     const isAllowed = await gradeService.getAllGradesByUserIdAndCompanyId(news.ecompanyecompanyid, user.sub)
         .then(grades => grades.map(grade => grade.egradeid))
         .then(gradeIds => settingService.isUserHaveFunctions(['P'], gradeIds, ModuleNameEnum.NEWS, news.ecompanyecompanyid))
@@ -110,7 +115,12 @@ newsService.publishNews = async (isPublish, newsId, user) => {
     if (!isAllowed) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION)
 
     return news.$query()
-        .updateByUserId({ enewsispublished: isPublish, enewsdate: Date.now() }, user.sub)
+        .updateByUserId({
+            enewsispublished: dto.isPublish && !dto.isScheduled,
+            enewsdate: dto.isPublish ? Date.now() : null,
+            enewsscheduledate: dto.isScheduled ? dto.scheduleDate : null,
+            enewsisscheduled: dto.isScheduled
+        }, user.sub)
         .returning('*')
 
 }
@@ -159,21 +169,39 @@ newsService.editNews = async (newsDTO, newsId, user) => {
 
 }
 
-newsService.getNews = async (pageRequest, user, filter, keyword) => {
+newsService.getNews = async (pageRequest, user, filter, keyword, sort) => {
 
-    const { type, companyId, isPublic } = filter
+    const { type, companyId, isPublic, categoryId } = filter
 
     if (NewsTypeEnum.PUBLISHED !== type && NewsTypeEnum.SCHEDULED !== type && NewsTypeEnum.DRAFT !== type)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INVALID_TYPE)
 
+    if (!SortEnum.typeOf(sort)) sort = SortEnum.NEWEST
+
     let query = News.query()
         .modify('list')
-        .where('enewsispublished', NewsTypeEnum.PUBLISHED === type)
         .where(raw('lower("enewstitle")'), 'like', `%${keyword.toLowerCase()}%`)
+
+    if (NewsTypeEnum.PUBLISHED === type) query = query.where('enewsispublished', true)
+
+    if (NewsTypeEnum.SCHEDULED === type) query = query.where('enewsisscheduled', true)
+
+    if (isPublic !== undefined && isPublic !== null) query = query.where('enewsispublic', isPublic)
 
     if (companyId) query = query.where('ecompanyecompanyid', companyId)
 
-    if (isPublic) query = query.where('enewsispublic', isPublic)
+    if (categoryId) query = query.where('eindustryeindustryid', categoryId)
+
+    if (SortEnum.POPULAR === sort)
+        query = query
+            .select(News.relatedQuery('likes').count().as('likes'))
+            .orderBy('likes', 'DESC')
+
+    else if (SortEnum.OLDEST === sort)
+        query = query.orderBy('enewsdate', 'ASC')
+
+    else
+        query = query.orderBy('enewsdate', 'DESC')
 
     return query
     .orderBy('enewschangetime', 'DESC')
@@ -182,7 +210,7 @@ newsService.getNews = async (pageRequest, user, filter, keyword) => {
 
 }
 
-newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = async (pageRequest, filter, keyword) => {
+newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = async (pageRequest, filter, keyword, sort) => {
 
     const { companyId, isPublic, categoryId, today } = filter
 
@@ -192,10 +220,9 @@ newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = a
         .modify('list')
         .where('enewsispublished', true)
         .where(raw('lower("enewstitle")'), 'like', `%${keyword.toLowerCase()}%`)
+        .where('enewsispublic', isPublic)
 
     if (companyId) query = query.where('ecompanyecompanyid', companyId)
-
-    if (isPublic !== undefined) query = query.where('enewsispublic', isPublic)
 
     if (categoryId) query = query.where('eindustryeindustryid', categoryId)
 
@@ -207,8 +234,18 @@ newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = a
         query = query.where('enewsdate', '>=', date.getTime())
     }
 
+    if (SortEnum.POPULAR === sort)
+        query = query
+            .select(News.relatedQuery('likes').count().as('likes'))
+            .orderBy('likes', 'DESC')
+
+    else if (SortEnum.OLDEST === sort)
+        query = query.orderBy('enewsdate', 'ASC')
+
+    else
+        query = query.orderBy('enewsdate', 'DESC')
+
     return query
-        .orderBy('enewsdate', 'DESC')
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
@@ -279,6 +316,16 @@ newsService.getNewsById = async (newsId) => {
             if (!news) throw new NotFoundError()
             return news
         })
+}
+
+newsService.publishAllScheduledNewsInDateNow = async () => {
+    const dateNow = new Date()
+    dateNow.setSeconds(0)
+    return News.query()
+        .where('enewsscheduledate', '<=', dateNow.getTime())
+        .where('enewsisscheduled', true)
+        .where('enewsispublished', false)
+        .patch({ enewsispublished: true, enewsdate: dateNow.getTime(), enewschangetime: dateNow.getTime() })
 }
 
 function isCompleteNews(news) {

@@ -29,10 +29,13 @@ controller.createNews = async (req, res, next) => {
 controller.publishNews = async (req, res, next) => {
 
     const { newsId } = req.params
-    const { isPublish } = req.body
+    const { isPublish, isScheduled, scheduleDate } = req.body
+
+    const dto = { isPublish, isScheduled, scheduleDate }
+
     try {
 
-        const result = await newsService.publishNews(isPublish, parseInt(newsId), req.user)
+        const result = await newsService.publishNews(dto, parseInt(newsId), req.user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
         
     } catch (e) {
@@ -66,15 +69,15 @@ controller.editNews = async (req, res, next) => {
 
 controller.getNews = async (req, res, next) => {
 
-    const { page = '0', size = '10', type = 'UNPUBLISHED', isPublic = 'false', keyword = '' } = req.query
+    const { page = '0', size = '10', type = 'PUBLISHED', isPublic = null, keyword = '', sort = 'NEWEST', categoryId = null } = req.query
 
-    const filter = { type: type.toUpperCase(), companyId: req.user.companyId, isPublic: isPublic === 'true' }
+    const filter = { type: type.toUpperCase(), companyId: req.user.companyId, categoryId, isPublic }
 
     const pageRequest = { page: parseInt(page), size: parseInt(size) }
 
     try {
 
-        const pageObj = await newsService.getNews(pageRequest, req.user, filter, keyword)
+        const pageObj = await newsService.getNews(pageRequest, req.user, filter, keyword, sort)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
         
     } catch (e) {
