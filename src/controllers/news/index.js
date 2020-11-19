@@ -69,9 +69,9 @@ controller.editNews = async (req, res, next) => {
 
 controller.getNews = async (req, res, next) => {
 
-    const { page = '0', size = '10', type = 'PUBLISHED', isPublic = 'false', keyword = '', sort = 'NEWEST', categoryId = null } = req.query
+    const { page = '0', size = '10', type = 'PUBLISHED', isPublic = null, keyword = '', sort = 'NEWEST', categoryId = null } = req.query
 
-    const filter = { type: type.toUpperCase(), companyId: req.user.companyId, categoryId, isPublic: isPublic === 'true' }
+    const filter = { type: type.toUpperCase(), companyId: req.user.companyId, categoryId, isPublic }
 
     const pageRequest = { page: parseInt(page), size: parseInt(size) }
 
