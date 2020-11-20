@@ -54,6 +54,7 @@ teamService.getTeams = async (page, size, keyword, filter) => {
 
     const teamsPagePromise = Team.query()
     .modify('baseAttributes')
+    .withGraphFetched('teamIndustry(baseAttributes)')
     .withGraphFetched('company(baseAttributes)')
     .whereRaw(`LOWER("eteamname") LIKE LOWER('%${keyword}%')`)
 
@@ -207,6 +208,7 @@ teamService.getMyTeams = async (page, size, keyword, user) => {
 
     return Team.query()
         .modify('baseAttributes')
+        .withGraphFetched('teamIndustry(baseAttributes)')
         .withGraphFetched('company(baseAttributes)')
         .whereRaw(`LOWER("eteamname") LIKE LOWER('%${keyword}%')`)
         .whereIn('eteamid', teamIds)
