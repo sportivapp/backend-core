@@ -34,8 +34,6 @@ function isTeamNameUniqueErr(e) {
     if (!e.nativeError)
         return false;
 
-    console.log(e.nativeError.detail)
-
     return e.nativeError.detail.includes('eteamname') && (e instanceof UniqueViolationError || e instanceof ConstraintViolationError)
 
 }
