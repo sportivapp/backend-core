@@ -1,7 +1,7 @@
-const router = require('../router')
-const controller = require('../../controllers/newsUser')
-const auth = require('../../middlewares/authentication');
-const { routes } = require('../../constant')
+const router = require('../../router')
+const controller = require('../../../controllers/newsUser')
+const auth = require('../../../middlewares/authentication');
+const { routes } = require('../../../constant')
 
 router.get( routes.newsUser.like, auth.authenticateTokenIfExist, controller.likeNews);
 router.get( routes.newsUser.generate, auth.authenticateTokenIfExist, controller.generateNewsLink);

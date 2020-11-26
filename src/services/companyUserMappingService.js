@@ -48,4 +48,13 @@ companyUserMappingService.checkCompanyUserByCompanyIdAndUserId = async (companyI
 
 }
 
+companyUserMappingService.deleteByUserIdAndCompanyId = async (userId, companyId, db) => {
+
+    return CompanyUserMapping.query(db)
+        .where('eusereuserid', userId)
+        .where('ecompanyecompanyid', companyId)
+        .delete()
+        .then(rowsAffected => rowsAffected === 1)
+}
+
 module.exports = companyUserMappingService

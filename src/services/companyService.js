@@ -314,6 +314,14 @@ CompanyService.getMyCompanyList = async (page, size, companyName, user) => {
 
 }
 
+CompanyService.getMyCompanyListCount = async (user) => {
+
+    return CompanyUserMapping.relatedQuery('company')
+        .for(CompanyUserMapping.query().where('eusereuserid', user.sub))
+        .count()
+        .first()
+}
+
 CompanyService.getAllCompanyList = async (page, size, type, keyword, companyId, user) => {
 
     const companyIds = await CompanyUserMapping.query()
@@ -519,6 +527,20 @@ CompanyService.deleteCompany = async (companyId) => {
     })
 }
 
+CompanyService.deleteCompanyWithDbObject = async (companyId, db = Company.knex()) => {
+
+    await CompanySequence.deleteSequence(companyId, db)
+
+    await CompanyModuleMapping.query(db)
+        .where('ecompanyecompanyid', companyId)
+        .del()
+
+    return Company.query(db)
+        .findById(companyId)
+        .delete()
+        .then(rowsAffected => rowsAffected === 1)
+}
+
 CompanyService.getCompanyById = async (companyId) => {
     return Company.query()
         .findById(companyId)
@@ -530,6 +552,44 @@ CompanyService.isUserExistInCompany = async (companyId, userId) => {
         .where('eusereuserid', userId)
         .first()
         .then(data => !!data)
+}
+
+CompanyService.getAllCompanies = async (page, size, keyword, categoryId) => {
+
+    if (categoryId)
+        return CompanyIndustryMapping.relatedQuery('company')
+            .for(CompanyIndustryMapping.query().where('eindustryeindustryid', categoryId))
+            .select(Company.relatedQuery('users').count().as('memberCount'))
+            .modify('baseAttributes')
+            .where(raw('lower(ecompanyname)'), 'like', `%${keyword.toLowerCase()}%`)
+            .page(page, size)
+
+     else
+        return Company.query()
+            .select(Company.relatedQuery('users').count().as('memberCount'))
+            .modify('baseAttributes')
+            .where(raw('lower(ecompanyname)'), 'like', `%${keyword.toLowerCase()}%`)
+            .page(page, size)
+}
+
+CompanyService.getMemberCount = async (companyId) => {
+
+    return Company.relatedQuery('users')
+        .for(companyId)
+        .count()
+        .first()
+        .then(result => result.count)
+}
+
+CompanyService.getDefaultPositions = async (companyId) => {
+
+    return CompanyDefaultPosition.query()
+        .where('ecompanyecompanyid', companyId)
+        .first()
+        .then(defaultPositionObj => {
+            if (!defaultPositionObj) throw new NotFoundError()
+            return defaultPositionObj
+        })
 }
 
 module.exports = CompanyService;
