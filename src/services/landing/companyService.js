@@ -19,8 +19,8 @@ landingCompanyService.getCompany = async (companyId, user) => {
     return Promise.all([company, companyLog, isMember])
         .then(([company, companyLog, isMember]) => ({
             ...company,
-            isApplied: CompanyLogTypeEnum.APPLY === companyLog.ecompanylogtype,
-            isInvited: CompanyLogTypeEnum.INVITE === companyLog.ecompanylogtype,
+            isApplied: companyLog && CompanyLogTypeEnum.APPLY === companyLog.ecompanylogtype,
+            isInvited: companyLog && CompanyLogTypeEnum.INVITE === companyLog.ecompanylogtype,
             isMember: !!isMember
         }))
 }
