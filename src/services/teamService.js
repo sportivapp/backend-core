@@ -609,7 +609,6 @@ teamService.removeUserFromOwnTeams = async (user, trx) => {
         .filter(teamId => !!teamUserMappingService.checkUserInTeam(teamId, user.sub))
         .map(teamId => teamUserMappingService.kickUserFromTeam(teamId, user.sub, trx))
 
-
     return Promise.all(removeUserFromTeams)
 
 }

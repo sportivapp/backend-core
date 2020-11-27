@@ -18,7 +18,6 @@ controller.userCancelJoins = async (req, res, next) => {
 
     const { companyLogIds } = req.body
 
-
     return companyLogService.userCancelJoins(companyLogIds, req.user)
         .then(result => ResponseHelper.toBaseResponse(result))
         .then(response => res.status(200).json(response))
