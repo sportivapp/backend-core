@@ -33,9 +33,9 @@ companyUserController.exitCompany = async (req, res, next) => {
 
 companyUserController.getRequestedCompanies = async (req, res, next) => {
 
-    const { page = '0', size = '10', keyword = '' } = req.query
+    const { page = '0', size = '10', keyword = '', categoryId = null } = req.query
 
-    return companyUserService.getRequestedCompanies(parseInt(page), parseInt(size), keyword, req.user)
+    return companyUserService.getRequestedCompanies(parseInt(page), parseInt(size), keyword, categoryId, req.user)
         .then(pageObj => ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
         .then(response => res.status(200).json(response))
         .catch(next)
@@ -43,9 +43,9 @@ companyUserController.getRequestedCompanies = async (req, res, next) => {
 
 companyUserController.getCompanyInvites = async (req, res, next) => {
 
-    const { page = '0', size = '10', keyword = '' } = req.query
+    const { page = '0', size = '10', keyword = '', categoryId = null } = req.query
 
-    return companyUserService.getCompanyInvites(parseInt(page), parseInt(size), keyword, req.user)
+    return companyUserService.getCompanyInvites(parseInt(page), parseInt(size), keyword, categoryId, req.user)
         .then(pageObj => ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
         .then(response => res.status(200).json(response))
         .catch(next)
