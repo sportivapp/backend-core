@@ -24,6 +24,9 @@ class CompanyLog extends Model {
         return {
             baseAttributes(builder) {
                 builder.select('ecompanylogid', 'ecompanyecompanyid', 'eusereuserid', 'ecompanylogtype', 'ecompanylogstatus')
+            },
+            list(builder) {
+                builder.select('ecompanylogid', 'ecompanylogtype', 'ecompanylogstatus')
             }
         }
     }

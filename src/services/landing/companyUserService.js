@@ -31,14 +31,14 @@ companyUserService.getMyCompanies = async (page, size, keyword, user) => {
     return companyService.getMyCompanyList(page, size, keyword, user)
 }
 
-companyUserService.getRequestedCompanies = async (page, size, keyword, user) => {
+companyUserService.getRequestedCompanies = async (page, size, keyword, categoryId, user) => {
 
-    return companyLogService.getCompanyListLogByUserId(user.sub, CompanyLogTypeEnum.APPLY, page, size, keyword)
+    return companyLogService.getCompanyListLogByUserId(user.sub, CompanyLogTypeEnum.APPLY, page, size, keyword, categoryId)
 }
 
-companyUserService.getCompanyInvites = async (page, size, keyword, user) => {
+companyUserService.getCompanyInvites = async (page, size, keyword, categoryId, user) => {
 
-    return companyLogService.getCompanyListLogByUserId(user.sub, CompanyLogTypeEnum.INVITE, page, size, keyword)
+    return companyLogService.getCompanyListLogByUserId(user.sub, CompanyLogTypeEnum.INVITE, page, size, keyword, categoryId)
 }
 
 companyUserService.exitCompany = async (companyId, user) => {

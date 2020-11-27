@@ -302,18 +302,24 @@ companyLogService.getListPendingByUserId = async (userId, type, sortDirection, p
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
 
-companyLogService.getCompanyListLogByUserId = async (userId, type, page, size, keyword) => {
+companyLogService.getCompanyListLogByUserId = async (userId, type, page, size, keyword, categoryId) => {
 
-    return CompanyLog.query()
-        .select('ecompanylog.*')
-        .select('company.*')
-        .select('company:logo.efilename as efilename')
-        .leftJoinRelated('company(baseAttributes).logo(baseAttributes)')
+    let query = CompanyLog.query()
+
+    if (categoryId)
+        query = query
+            .withGraphJoined('company(baseAttributes).[logo(baseAttributes), industries(baseAttributes)]')
+            .where('company:industries.eindustryid', categoryId)
+    else
+        query = query
+            .withGraphJoined('company(baseAttributes).logo(baseAttributes)')
+
+    return query
         .where('eusereuserid', userId)
         .where('ecompanylogtype', type)
         .andWhere('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
         .andWhere(raw('lower(company.ecompanyname)'), 'like', `%${keyword.toLowerCase()}%`)
-        .modify('baseAttributes')
+        .modify('list')
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
