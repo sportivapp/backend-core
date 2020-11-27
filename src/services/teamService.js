@@ -601,6 +601,19 @@ teamService.kickUserFromTeam = async (teamId, user, userId, logMessage) => {
 
 }
 
+teamService.removeUserFromOwnTeams = async (user, trx) => {
+
+    const teamIds = await teamUserMappingService.getTeamIdsByUser(user)
+
+    const removeUserFromTeams = teamIds
+        .filter(teamId => !!teamUserMappingService.checkUserInTeam(teamId, user.sub))
+        .map(teamId => teamUserMappingService.kickUserFromTeam(teamId, user.sub, trx))
+
+
+    return Promise.all(removeUserFromTeams)
+
+}
+
 teamService.changeTeamMemberSportRoles = async (teamUserMappingId, user, sportRoleIds) => {
 
     sportRoleIds = (!sportRoleIds || sportRoleIds.length === 0 ) ? null : sportRoleIds
