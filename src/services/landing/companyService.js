@@ -37,13 +37,17 @@ landingCompanyService.getAllCompanies = async (page, size, keyword, categoryId, 
 landingCompanyService.getCompany = async (companyId, user) => {
 
     const company = companyService.getCompleteCompanyById(companyId)
-    const companyLog = companyLogService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.APPLY, CompanyLogTypeEnum.INVITE])
-    const isMember = companyService.isUserExistInCompany(companyId, user.sub)
+    let companyLog = null
+    let isMember = false
+    if (user) {
+        companyLog = companyLogService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.APPLY, CompanyLogTypeEnum.INVITE])
+        isMember = companyService.isUserExistInCompany(companyId, user.sub)
+    }
     return Promise.all([company, companyLog, isMember])
         .then(([company, companyLog, isMember]) => ({
             ...company,
-            isApplied: companyLog && CompanyLogTypeEnum.APPLY === companyLog.ecompanylogtype,
-            isInvited: companyLog && CompanyLogTypeEnum.INVITE === companyLog.ecompanylogtype,
+            isApplied: !!companyLog && CompanyLogTypeEnum.APPLY === companyLog.ecompanylogtype,
+            isInvited: !!companyLog && CompanyLogTypeEnum.INVITE === companyLog.ecompanylogtype,
             isMember: !!isMember
         }))
 }
