@@ -40,8 +40,6 @@ exports.authenticateTokenIfExist = async (req, res, next) => {
             else req.user.functions = await profileService.getFunctionCodes(user)
             next();
         });
-    }
-
-    next();
+    } else next();
 
 }

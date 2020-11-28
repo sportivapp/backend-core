@@ -1,13 +1,36 @@
 const companyService = require('../companyService')
 const companyLogService = require('../companyLogService')
+const companyUserMappingService = require('../companyUserMappingService')
 const ServiceHelper = require('../../helper/ServiceHelper')
 const CompanyLogTypeEnum = require('../../models/enum/CompanyLogTypeEnum')
 
 const landingCompanyService = {}
 
-landingCompanyService.getAllCompanies = async (page, size, keyword, categoryId) => {
+landingCompanyService.getAllCompanies = async (page, size, keyword, categoryId, user) => {
 
-    return companyService.getAllCompanies(page, size, keyword, categoryId)
+    let excludedCompanyIds = []
+
+    if (user) {
+
+        const joinedCompanyIds = companyUserMappingService.getAllCompanyByUserId(user.sub)
+            .then(mappings => mappings.map(mapping => mapping.ecompanyecompanyid))
+
+        const appliedCompanies = companyLogService.getListPendingByUserId(user.sub, CompanyLogTypeEnum.APPLY, 'ASC', 0, Number.MAX_VALUE)
+            .then(pageObj => pageObj.data)
+            .then(list => list.map(log => log.ecompanyecompanyid))
+
+        const invitedCompanies = companyLogService.getListPendingByUserId(user.sub, CompanyLogTypeEnum.INVITE, 'ASC', 0, Number.MAX_VALUE)
+            .then(pageObj => pageObj.data)
+            .then(list => list.map(log => log.ecompanyecompanyid))
+
+        excludedCompanyIds = await Promise.all([joinedCompanyIds, appliedCompanies, invitedCompanies])
+            .then(([joinedCompanies, appliedCompanies, invitedCompanies]) => excludedCompanyIds
+                .concat(joinedCompanies)
+                .concat(appliedCompanies)
+                .concat(invitedCompanies))
+    }
+
+    return companyService.getAllCompanies(page, size, keyword, categoryId, excludedCompanyIds)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
 

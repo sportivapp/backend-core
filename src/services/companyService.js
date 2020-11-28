@@ -554,7 +554,7 @@ CompanyService.isUserExistInCompany = async (companyId, userId) => {
         .then(data => !!data)
 }
 
-CompanyService.getAllCompanies = async (page, size, keyword, categoryId) => {
+CompanyService.getAllCompanies = async (page, size, keyword, categoryId, excludedCompanyIds) => {
 
     if (categoryId)
         return CompanyIndustryMapping.relatedQuery('company')
@@ -562,6 +562,7 @@ CompanyService.getAllCompanies = async (page, size, keyword, categoryId) => {
             .select(Company.relatedQuery('users').count().as('memberCount'))
             .modify('baseAttributes')
             .where(raw('lower(ecompanyname)'), 'like', `%${keyword.toLowerCase()}%`)
+            .whereNotIn('ecompanyid', excludedCompanyIds)
             .page(page, size)
 
      else
@@ -569,6 +570,7 @@ CompanyService.getAllCompanies = async (page, size, keyword, categoryId) => {
             .select(Company.relatedQuery('users').count().as('memberCount'))
             .modify('baseAttributes')
             .where(raw('lower(ecompanyname)'), 'like', `%${keyword.toLowerCase()}%`)
+            .whereNotIn('ecompanyid', excludedCompanyIds)
             .page(page, size)
 }
 

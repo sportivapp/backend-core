@@ -7,7 +7,7 @@ companyController.getAllCompanies = async (req, res, next) => {
 
     const {page = '0', size = '10', keyword = '', categoryId = null} = req.query
 
-    return companyService.getAllCompanies(parseInt(page), parseInt(size), keyword, categoryId)
+    return companyService.getAllCompanies(parseInt(page), parseInt(size), keyword, categoryId, req.user)
         .then(pageObj => ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
         .then(response => res.status(200).json(response))
         .catch(next)
