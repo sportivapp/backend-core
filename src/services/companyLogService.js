@@ -302,6 +302,16 @@ companyLogService.getListPendingByUserId = async (userId, type, sortDirection, p
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
 
+
+companyLogService.getListPendingByTypesAndUserId = async (userId, types) => {
+
+    return CompanyLog.query()
+        .where('eusereuserid', userId)
+        .whereIn('ecompanylogtype', types)
+        .andWhere('ecompanylogstatus', CompanyLogStatusEnum.PENDING)
+}
+
+
 companyLogService.getCompanyListLogByUserId = async (userId, type, page, size, keyword, categoryId) => {
 
     let query = CompanyLog.query()

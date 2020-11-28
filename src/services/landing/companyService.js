@@ -15,19 +15,11 @@ landingCompanyService.getAllCompanies = async (page, size, keyword, categoryId, 
         const joinedCompanyIds = companyUserMappingService.getAllCompanyByUserId(user.sub)
             .then(mappings => mappings.map(mapping => mapping.ecompanyecompanyid))
 
-        const appliedCompanies = companyLogService.getListPendingByUserId(user.sub, CompanyLogTypeEnum.APPLY, 'ASC', 0, Number.MAX_VALUE)
-            .then(pageObj => pageObj.data)
-            .then(list => list.map(log => log.ecompanyecompanyid))
+        const companyIdsFromLog = companyLogService.getListPendingByTypesAndUserId(user.sub, [CompanyLogTypeEnum.APPLY, CompanyLogTypeEnum.INVITE])
+            .then(logs => logs.map(log => log.ecompanyecompanyid))
 
-        const invitedCompanies = companyLogService.getListPendingByUserId(user.sub, CompanyLogTypeEnum.INVITE, 'ASC', 0, Number.MAX_VALUE)
-            .then(pageObj => pageObj.data)
-            .then(list => list.map(log => log.ecompanyecompanyid))
-
-        excludedCompanyIds = await Promise.all([joinedCompanyIds, appliedCompanies, invitedCompanies])
-            .then(([joinedCompanies, appliedCompanies, invitedCompanies]) => excludedCompanyIds
-                .concat(joinedCompanies)
-                .concat(appliedCompanies)
-                .concat(invitedCompanies))
+        excludedCompanyIds = await Promise.all([joinedCompanyIds, companyIdsFromLog])
+            .then(([joinedCompanies, companyIdsFromLog]) => excludedCompanyIds.concat(joinedCompanies).concat(companyIdsFromLog))
     }
 
     return companyService.getAllCompanies(page, size, keyword, categoryId, excludedCompanyIds)
