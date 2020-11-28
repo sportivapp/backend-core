@@ -228,12 +228,12 @@ teamLogService.getPendingLogs = async (teamId, page, size, type, user) => {
 
     if (teamId) {
         teamLogsPromise.andWhere('eteameteamid', teamId)
-        .withGraphFetched('user(baseAttributes).file(baseAttributes)')
+            .withGraphFetched('user(baseAttributes).file(baseAttributes)')
     }
 
     if (!teamId) {
         teamLogsPromise.andWhere('eusereuserid', user.sub)
-            .withGraphFetched('team(baseAttributes).teamIndustry(baseAttributes)')
+            .withGraphFetched('team(baseAttributes).[teamIndustry(baseAttributes), company(baseAttributes)]')
     }
 
     return teamLogsPromise

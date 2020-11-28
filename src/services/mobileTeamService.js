@@ -3,7 +3,7 @@ const Team = require('../models/Team');
 const ServiceHelper = require('../helper/ServiceHelper');
 const { raw } = require('objection');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
-const { UniqueViolationError } = require('objection');
+const { UniqueViolationError, ConstraintViolationError } = require('objection');
 const teamLogService = require('./mobileTeamLogService');
 const teamUserService = require('./mobileTeamUserService');
 const mobileTeamSportTypeRoleService = require('./mobileTeamSportTypeRoleService');
@@ -34,7 +34,7 @@ function isTeamNameUniqueErr(e) {
     if (!e.nativeError)
         return false;
 
-    return e.nativeError.detail.includes('eteamname') && e instanceof UniqueViolationError
+    return e.nativeError.detail.includes('eteamname') && (e instanceof UniqueViolationError || e instanceof ConstraintViolationError)
 
 }
 
@@ -54,6 +54,7 @@ teamService.getTeams = async (page, size, keyword, filter) => {
 
     const teamsPagePromise = Team.query()
     .modify('baseAttributes')
+    .withGraphFetched('teamIndustry(baseAttributes)')
     .withGraphFetched('company(baseAttributes)')
     .whereRaw(`LOWER("eteamname") LIKE LOWER('%${keyword}%')`)
 
@@ -207,6 +208,7 @@ teamService.getMyTeams = async (page, size, keyword, user) => {
 
     return Team.query()
         .modify('baseAttributes')
+        .withGraphFetched('teamIndustry(baseAttributes)')
         .withGraphFetched('company(baseAttributes)')
         .whereRaw(`LOWER("eteamname") LIKE LOWER('%${keyword}%')`)
         .whereIn('eteamid', teamIds)
