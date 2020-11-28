@@ -20,7 +20,7 @@ const mobileCompanyLogRoutes = require('./mobileCompanyLog')
 const myMobileForumRoutes = require('./myMobileForum')
 const mobileTheoryRoutes = require('./mobileTheory');
 
-router.use('/api/v1', [
+router.use([
     mobileUserRoutes,
     mobileLicenseRoutes,
     mobileCompanyRoutes,
