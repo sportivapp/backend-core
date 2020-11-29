@@ -19,8 +19,6 @@ function findCountryByName(knex, name) {
 
 function newCityDataList(country) {
 
-    console.log(country)
-
     return [
         {
             ecityname: 'Banda Aceh',
