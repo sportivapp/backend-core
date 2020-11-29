@@ -103,16 +103,38 @@ mobileCommentService.updateComment = async (commentId, commentDTO, user) => {
 
 }
 
-mobileCommentService.getAllComments = async (page, size, threadId) => {
+mobileCommentService.getAllComments = async (page, size, threadId, user) => {
 
-    return ThreadPost.query()
+    const threadPostPage = await ThreadPost.query()
         .modify('baseAttributes')
         .select(ThreadPost.relatedQuery('replies').modify('notDeleted').count().as('replyCount'))
         .where('ethreadethreadid', threadId)
         .withGraphFetched('user(idAndName)')
         .withGraphFetched('threadPostPicture(baseAttributes)')
+        .withGraphFetched('moderator')
+        .orderBy('ethreadpostcreatetime', 'ASC')
+        .modifyGraph('moderator', builder => {
+            builder
+                .select('eusereuserid')
+                .groupBy('eusereuserid')
+                .where('ethreadethreadid', threadId)
+                .first()
+        })
         .page(page, size)
-        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+
+    threadPostPage.results = threadPostPage.results.map(threadPost => ({
+        ethreadpostid: threadPost.ethreadpostid,
+        ethreadpostcomment: threadPost.ethreadpostcomment,
+        ethreadpostcreatetime: threadPost.ethreadpostcreatetime,
+        ethreadpostchangetime: threadPost.ethreadpostchangetime,
+        replyCount: parseInt(threadPost.replyCount),
+        threadPostPicture: threadPost.threadPostPicture,
+        user: threadPost.user,
+        isModerator: !!threadPost.moderator,
+        isModifiable: threadPost.user.euserid === user.sub
+    }))
+
+    return ServiceHelper.toPageObj(page, size, threadPostPage)
 
 }
 

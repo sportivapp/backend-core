@@ -1,6 +1,7 @@
 const Notification = require('../models/Notification')
 const NotificationBody = require('../models/NotificationBody')
 const User = require('../models/User')
+const firebaseService = require('../helper/firebaseService')
 const ServiceHelper = require('../helper/ServiceHelper');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
@@ -9,6 +10,17 @@ const UnsupportedOperationErrorEnum = {
 }
 
 const notificationService = {};
+
+notificationService.buildNotificationEntity = async (entityId, entityType, title, message, action) => {
+
+    return {
+        enotificationbodyentityid: entityId,
+        enotificationbodyentitytype: entityType,
+        enotificationbodyaction: action,
+        enotificationbodytitle: title,
+        enotificationbodymessage: message
+    }
+}
 
 notificationService.checkUserInDB = async (userId) => {
 
@@ -41,7 +53,7 @@ notificationService.deleteNotificationBody = async () => {
 
 }
 
-notificationService.saveNotification = async (notificationObj, loggedInUser, targetUserIds) => {
+notificationService.saveNotification = async (notificationObj, loggedInUser, targetUserIds, db = Notification.knex()) => {
 
     const notificationBodyDTO = {
         enotificationbodyentityid: notificationObj.enotificationbodyentityid,
@@ -52,7 +64,7 @@ notificationService.saveNotification = async (notificationObj, loggedInUser, tar
         enotificationbodysenderid: loggedInUser.sub
     }
     
-    return NotificationBody.query()
+    return NotificationBody.query(db)
     .insertToTable(notificationBodyDTO, loggedInUser.sub)
     .then(notificationBody => {
 
@@ -61,8 +73,11 @@ notificationService.saveNotification = async (notificationObj, loggedInUser, tar
             enotificationbodyenotificationbodyid: notificationBody.enotificationbodyid
         }))
 
-        return Notification.query()
+        return Notification.query(db)
         .insertToTable(notificationDTO, loggedInUser.sub)
+        .then(resultArr => resultArr.map(notification => firebaseService
+            .pushNotification(notification.eusereuserid, notificationBody.enotificationbodytitle, notificationBody.enotificationbodymessage)))
+        .then(pushNotificationPromises => Promise.all(pushNotificationPromises))
     })
 
 }
@@ -89,6 +104,9 @@ notificationService.saveNotificationWithTransaction = async (notificationObj, lo
 
         return Notification.query(trx)
         .insertToTable(notificationDTO, loggedInUser.sub)
+        .then(resultArr => resultArr.map(notification => firebaseService
+            .pushNotification(notification.eusereuserid, notificationBody.enotificationbodytitle, notificationBody.enotificationbodymessage)))
+        .then(pushNotificationPromises => Promise.all(pushNotificationPromises))
     })
 
 }

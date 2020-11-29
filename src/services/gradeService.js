@@ -1,5 +1,6 @@
 const Grade = require('../models/Grades')
 const Department = require('../models/Department')
+const CompanyDefaultPosition = require('../models/CompanyDefaultPosition')
 const Company = require('../models/Company')
 const UserPositionMapping = require('../models/UserPositionMapping')
 const ServiceHelper = require('../helper/ServiceHelper')
@@ -12,7 +13,8 @@ const ErrorEnum = {
     SUPERIOR_NOT_FOUND: 'SUPERIOR_NOT_FOUND',
     COMPANY_NOT_FOUND: 'COMPANY_NOT_FOUND',
     DEPARTMENT_NOT_FOUND: 'DEPARTMENT_NOT_FOUND',
-    POSITION_NOT_FOUND: 'POSITION_NOT_FOUND'
+    POSITION_NOT_FOUND: 'POSITION_NOT_FOUND',
+    FORBIDDEN_ACTION: 'FORBIDDEN_ACTION'
 }
 
 gradeService.getAllGrades = async (page, size, companyId, departmentId) => {
@@ -37,8 +39,8 @@ gradeService.getAllGrades = async (page, size, companyId, departmentId) => {
             .withGraphFetched('branches')
             .then(companies => {
                 let ids = []
+                ids.push(companyId)
                 if (companies.length > 0) {
-                    ids.push(companyId)
                     companies.forEach(company => {
                         ids.push(company.ecompanyid)
                         company.branches.forEach(branch => ids.push(branch.ecompanyid))
@@ -88,6 +90,16 @@ gradeService.updateGradeById = async (gradeId, gradeDTO, user) => {
     const grade = await gradeService.getGradeById(gradeId)
         .catch(() => new UnsupportedOperationError(ErrorEnum.POSITION_NOT_FOUND))
 
+    // check if the grades that wants to be update has relation to CompanyDefaultPosition
+    await CompanyDefaultPosition.query()
+    .where('eadmingradeid', grade.egradeid)
+    .orWhere('emembergradeid', grade.egradeid)
+    .first()
+    .then(defaultPosition => {
+        if(defaultPosition) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
+        return true
+    })
+
     if (gradeDTO.egradesuperiorid) {
         const superior = await gradeService.getGradeById(gradeDTO.egradesuperiorid)
         if (!superior) throw new UnsupportedOperationError(ErrorEnum.SUPERIOR_NOT_FOUND)
@@ -102,7 +114,8 @@ gradeService.updateGradeById = async (gradeId, gradeDTO, user) => {
 
         if (grade.edepartmentedepartmentid !== gradeDTO.edepartmentedepartmentid) {
 
-            if (gradeDTO.edepartmentedepartmentid !== null) {
+
+            if (gradeDTO.edepartmentedepartmentid) {
                 const department = await departmentService.getDepartementId(gradeDTO.edepartmentedepartmentid)
                 if (!department) throw new UnsupportedOperationError(ErrorEnum.DEPARTMENT_NOT_FOUND)
             }
@@ -194,6 +207,21 @@ gradeService.getAllGradesByUserIdAndCompanyId = async (companyId, userId) => {
         .joinRelated('company')
         .where('users.euserid', userId)
         .where('company.ecompanyid', companyId)
+}
+
+gradeService.deleteUserPositionMappingByGradeIdsAndUserId = async (gradeIds, userId, db) => {
+
+    return UserPositionMapping.query(db)
+        .whereIn('egradeegradeid', gradeIds)
+        .where('eusereuserid', userId)
+        .delete()
+        .then(rowsAffected => rowsAffected === gradeIds.length)
+}
+
+gradeService.getAllGradesByUserId = async (userId) => {
+    return Grade.query()
+        .joinRelated('users')
+        .where('users.euserid', userId)
 }
 
 module.exports = gradeService

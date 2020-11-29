@@ -1,6 +1,7 @@
 const ClassUserMapping = require('../models/ClassUserMapping')
 const Class = require('../models/Class')
 const mobileClassService = require('./mobileClassService')
+const CompanyDefaultPosition = require('../models/CompanyDefaultPosition')
 const CompanyUserMapping = require('../models/CompanyUserMapping')
 const ClassTypeEnum = require('../models/enum/ClassTypeEnum')
 const ClassUserStatusEnum = require('../models/enum/ClassUserStatusEnum')
@@ -29,14 +30,21 @@ mobileClassUserService.getHighestPosition = async (classId) => {
 
     if(!foundCompany) throw new NotFoundError()    
 
-    const users = await Grade.relatedQuery('users')
-    .for(Grade.query()
-    .where('ecompanyecompanyid',foundCompany.ecompanyecompanyid).andWhere('egradesuperiorid', null))
-    .distinct('euserid')
+    const adminGradeId = await CompanyDefaultPosition.query()
+    .where('ecompanyecompanyid', foundCompany.ecompanyecompanyid)
+    .first()
+    .then(defaultPosition => {
+        return defaultPosition.eadmingradeid;
+    });
 
-    return users.map(user => user.euserid)
+    const users = await Grade.relatedQuery('users')
+        .for(Grade.query().where('egradeid', adminGradeId))
+        .distinct('euserid');
+
+    return users;
 
 }
+
 
 mobileClassUserService.registerByClassId = async (classId, user) => {
 
@@ -67,14 +75,15 @@ mobileClassUserService.registerByClassId = async (classId, user) => {
         .first()
 
     if (!classUserMapping)
+    return ClassUserMapping.transaction(trx => {
 
-        return ClassUserMapping.query()
+        return ClassUserMapping.query(trx)
             .insertToTable({
                 eclasseclassid: classId,
                 eusereuserid: user.sub
             }, user.sub)
             .then(mapping => mobileClassService.getClassById(mapping.eclasseclassid, user)
-            .then(classLog => {
+            .then(async classLog => {
 
             if(getHighestPosition.length > 0) {
                 const notificationObj = {
@@ -85,48 +94,56 @@ mobileClassUserService.registerByClassId = async (classId, user) => {
                     enotificationbodymessage: NotificationEnum.class.actions.register.message
                 }
 
-                notificationService.saveNotification(
+                await notificationService.saveNotificationWithTransaction(
                     notificationObj,
                     user,
-                    getHighestPosition
+                    getHighestPosition,
+                    trx
                 )
             }
                 return classLog
-            }))
+        }))
+    })
 
     else return mobileClassService.getClassById(classUserMapping.eclasseclassid, user)
 }
 
 mobileClassUserService.cancelRegistrationByClassUserId = async (classUserId, user) => {
 
-    const getHighestPosition = await mobileClassUserService.getHighestPosition(classId)
-
     const classUser = await ClassUserMapping.query().findById(classUserId)
 
     if (classUser.eclassusermappingstatus === ClassUserStatusEnum.APPROVED) return false
 
-    return classUser.$query()
+    return ClassUserMapping.transaction(trx => {
+        
+        return classUser.$query(trx)
         .updateByUserId({ eclassusermappingstatus: ClassUserStatusEnum.CANCELED }, user.sub)
         .then(rowsAffected => rowsAffected === 1)
-        .then(classLog => { 
+        .then(async classLog => { 
 
-        if(getHighestPosition.length > 0) {
-            const notificationObj = {
-            enotificationbodyentityid: classId,
-            enotificationbodyentitytype: NotificationEnum.class.type,
-            enotificationbodyaction: NotificationEnum.class.actions.canceled.code,
-            enotificationbodytitle: NotificationEnum.class.actions.canceled.title,
-            enotificationbodymessage: NotificationEnum.class.actions.canceled.message
-        }
+            const getHighestPosition = await mobileClassUserService.getHighestPosition(classUser.eclasseclassid)
+ 
+                if(getHighestPosition.length > 0) {
+                    const notificationObj = {
+                        enotificationbodyentityid: classUser.eclasseclassid,
+                        enotificationbodyentitytype: NotificationEnum.class.type,
+                        enotificationbodyaction: NotificationEnum.class.actions.canceled.code,
+                        enotificationbodytitle: NotificationEnum.class.actions.canceled.title,
+                        enotificationbodymessage: NotificationEnum.class.actions.canceled.message
+                    }
 
-        notificationService.saveNotification(
-            notificationObj,
-            user,
-            getHighestPosition
-        )
-    }
-        return classLog
+                    await notificationService.saveNotificationWithTransaction(
+                        notificationObj,
+                        user,
+                        getHighestPosition,
+                        trx
+                    )
+                }
+
+            return classLog
+        })
     })
+    
 }
 
 mobileClassUserService.getMyClasses = async (companyId, page, size, user) => {

@@ -3,6 +3,7 @@ const companyService = require('./companyService')
 const settingService = require('./settingService')
 const gradeService = require('./gradeService')
 const bcrypt = require('../helper/bcrypt')
+const ModuleNameEnum = require('../models/enum/ModuleNameEnum')
 const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
 
 const profileService = {}
@@ -102,12 +103,31 @@ profileService.getModules = async (user) => {
     const modules = await settingService.getModulesByGradeIds(user.companyId, gradeIds)
 
     if (modules.length === 0) {
-        const module = await settingService.getDefaultModuleByCompanyId(user.companyId)
-        return [module]
+        const modules = await settingService.getDefaultModuleByCompanyId(user.companyId)
+        return modules.filter(module => module.emodulename === ModuleNameEnum.FORUM || module.emodulename === ModuleNameEnum.NEWS)
     }
 
     return modules
 
+}
+
+profileService.getFunctionsByModuleId = async (moduleId, user) => {
+
+    const gradeIds = await gradeService.getAllGradesByUserIdAndCompanyId(user.companyId, user.sub)
+        .then(grades => grades.map(grade => grade.egradeid))
+
+    const codes = await settingService.getAllFunctionCodesByGradeIds(gradeIds)
+
+    const masterCodes = await settingService.getAllFunctionsByModuleId(moduleId)
+        .then(funcList => funcList.map(func => func.efunctioncode))
+
+    let functions = {}
+
+    masterCodes.forEach(masterCode => {
+        functions[masterCode.substring(0, 1)] = codes.indexOf(masterCode) !== -1
+    })
+
+    return functions
 }
 
 module.exports = profileService

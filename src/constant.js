@@ -32,6 +32,7 @@ module.exports = {
             changePassword: '/change-password',
             profile: '/profile',
             modules: '/profile/modules',
+            moduleFunctions: '/profile/modules/:moduleId/functions',
             functions: '/profile/functions'
         },
         grade: {
@@ -81,6 +82,9 @@ module.exports = {
             list: '/todolist',
             id: '/todolist/:todoId',
             category: '/todolist/todo/category'
+        },
+        tournament: {
+            companies: '/tournament/companies'
         },
         roster: {
             list: '/timesheet/:timesheetId/roster',
@@ -167,8 +171,16 @@ module.exports = {
             list: '/news',
             id: '/news/:newsId',
             publish: '/news/:newsId/publish',
-            count: '/news/:newsId/user',
-            generate: '/news/:newsId/link'
+            count: '/news/:newsId/count',
+            generate: '/news/:newsId/link',
+            like: '/news/:newsId/like',
+        },
+        newsUser: {
+            list: '/user-news',
+            id: '/user-news/:newsId',
+            like: '/user-news/:newsId/like',
+            count: '/user-news/:newsId/count',
+            generate: '/user-news/:newsId/link'
         },
         notification: {
             list: '/notification'
@@ -198,6 +210,7 @@ module.exports = {
         },
         authentication: {
             login: '/login',
+            logout: '/logout',
             loginCompany: '/login-company',
             loginAuto: '/login-auto'
         },

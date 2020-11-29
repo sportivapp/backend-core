@@ -10,6 +10,7 @@ const teamUserMappingService = require('./teamUserMappingService')
 const teamSportTypeRoleService = require('./teamSportTypeRoleService')
 const fileService = require('./fileService')
 const AddressService = require('./addressService')
+const companyService = require('./companyService')
 
 const teamService = {}
 
@@ -166,19 +167,27 @@ teamService.updateTeam = async (teamId, teamDTO, addressDTO, user) => {
         })
 }
 
-teamService.getMyTeamList = async (page, size, keyword, user) => {
+teamService.getMyTeamList = async (page, size, companyId, keyword, user) => {
+
+    let isUserInCompany = false
+
+    if (companyId) isUserInCompany = await companyService.isUserExistInCompany(companyId, user.sub)
     
     const teamIds = await teamUserMappingService.getTeamIdsByUser(user)
 
-    return Team.query()
+    let teamQuery = Team.query()
     .modify('baseAttributes')
     .withGraphFetched('company(baseAttributes)')
     .withGraphFetched('teamPicture(baseAttributes)')
     .withGraphFetched('teamIndustry(baseAttributes)')
     .whereRaw(`LOWER("eteamname") LIKE LOWER('%${keyword}%')`)
     .whereIn('eteamid', teamIds)
-    .page(page, size)
-    .then(teams => ServiceHelper.toPageObj(page, size, teams));
+
+    if (isUserInCompany) teamQuery = teamQuery.where('ecompanyecompanyid', companyId)
+
+    return teamQuery
+        .page(page, size)
+        .then(teams => ServiceHelper.toPageObj(page, size, teams));
 
 }
 
@@ -589,6 +598,18 @@ teamService.kickUserFromTeam = async (teamId, user, userId, logMessage) => {
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_IN_TEAM)
 
     return teamUserMappingService.removeUserFromTeam(userInTeam, user, userId, TeamLogStatusEnum.KICKED, logMessage);
+
+}
+
+teamService.removeUserFromOwnTeams = async (user, trx) => {
+
+    const teamIds = await teamUserMappingService.getTeamIdsByUser(user)
+
+    const removeUserFromTeams = teamIds
+        .filter(teamId => !!teamUserMappingService.checkUserInTeam(teamId, user.sub))
+        .map(teamId => teamUserMappingService.kickUserFromTeam(teamId, user.sub, trx))
+
+    return Promise.all(removeUserFromTeams)
 
 }
 

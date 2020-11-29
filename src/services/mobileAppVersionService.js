@@ -29,7 +29,7 @@ mobileAppVersionService.getVersion = async (version) => {
         isRecommendUpdate = true;
 
     return {
-        version: versions[versions.length - 1],
+        // version: versions[versions.length - 1],
         isForceUpdate: isForceUpdate,
         isRecommendUpdate: isRecommendUpdate
     }

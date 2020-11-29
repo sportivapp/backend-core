@@ -5,6 +5,7 @@ const Grade = require('../models/Grades');
 const gradeService = require('./gradeService')
 const { raw } = require('objection')
 const Module = require('../models/Module')
+const ModuleNameEnum = require('../models/enum/ModuleNameEnum')
 const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
 
 const SettingService = {};
@@ -66,9 +67,10 @@ SettingService.getModulesByGradeIds = async (companyId, gradeIds) => {
     let isModuleValid
 
     for (let key in functionObj) {
-        isModuleValid = true
+        isModuleValid = false
         functionObj[key].forEach(func => {
-            if (!func.status) isModuleValid = false
+            if (func.status) isModuleValid = true
+            if (func.name.includes(ModuleNameEnum.FORUM)) isModuleValid = true
         })
         if (isModuleValid) moduleIds.push(key)
     }
@@ -80,9 +82,8 @@ SettingService.getDefaultModuleByCompanyId = async (companyId) => {
     return CompanyModuleMapping.query()
         .where('ecompanyecompanyid', companyId)
         .orderBy('emoduleemoduleid', 'ASC')
-        .first()
         .withGraphFetched('module')
-        .then(mapping => mapping.module)
+        .then(mappings => mappings.map(mapping => mapping.module))
 }
 
 SettingService.updateModuleByCompanyId = async (companyId, moduleDTO, user) => {
@@ -139,6 +140,46 @@ SettingService.getAllFunctionByGradeId = async (gradeId) => {
     }
 
     return groupedFunction;
+
+}
+
+SettingService.getAllFunctionByGradeIdAndModuleId = async (gradeId, requestedModuleId) => {
+
+    const allFunctions = await Function.query();
+
+    // get all functions assigned to this grade
+    const myGradeFunctions = await Grade.query()
+        .joinRelated('functions')
+        .select('efunctionefunctioncode')
+        .where('egradeegradeid', gradeId);
+
+    // create object with (key, value) = (functioncode, true)
+    let gradeFunctionCodes = {};
+    for (let i = 0; i < myGradeFunctions.length; i++) {
+        gradeFunctionCodes[myGradeFunctions[i].efunctionefunctioncode] = true;
+    }
+
+    let groupedFunction = {};
+    for (let i = 0; i < allFunctions.length; i++) {
+        let moduleId = allFunctions[i].efunctioncode.substring(1);
+
+        if (typeof groupedFunction[moduleId] === 'undefined') {
+            groupedFunction[moduleId] = [];
+        }
+
+        let status = false;
+        if (gradeFunctionCodes.hasOwnProperty(allFunctions[i].efunctioncode)) {
+            status = true;
+        }
+
+        groupedFunction[moduleId].push({
+            code: allFunctions[i].efunctioncode,
+            name: allFunctions[i].efunctionname,
+            status: status
+        });
+    }
+
+    return groupedFunction[requestedModuleId];
 
 }
 
@@ -241,10 +282,27 @@ SettingService.getAllModules = async () => {
     return Module.query()
 }
 
+SettingService.getModuleByName = async (name) => {
+
+    return Module.query()
+        .where('emodulename', name)
+        .first()
+        .then(module => {
+            if (!module) throw new NotFoundError()
+            return module
+        })
+}
+
 SettingService.getAllFunctions = async (codeKeyword = '') => {
 
     return Function.query()
         .where(raw('lower("efunctioncode")'), 'like', `%${codeKeyword}%`)
+}
+
+SettingService.getAllFunctionsByModuleId = async (moduleId) => {
+
+    return Function.query()
+        .where('emoduleemoduleid', moduleId)
 }
 
 module.exports = SettingService;

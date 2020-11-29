@@ -3,6 +3,10 @@ const CompanyDefaultPosition = require('../models/CompanyDefaultPosition')
 const UserPositionMapping = require('../models/UserPositionMapping')
 const companyUserMappingService = {}
 
+const ErrorEnum = {
+    USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY'
+}
+
 companyUserMappingService.insertUserToCompanyByCompanyLogsWithTransaction = async (companyLogs, trx, user) => {
 
     const defaultPosition = await CompanyDefaultPosition.query(trx)
@@ -28,6 +32,34 @@ companyUserMappingService.insertUserToCompanyByCompanyLogsWithTransaction = asyn
 
     return Promise.all([insertedUsersPromise, insertedUserPositionPromise])
 
+}
+
+companyUserMappingService.checkCompanyUserByCompanyIdAndUserId = async (companyId, userId) => {
+
+    return CompanyUserMapping.query()
+        .where('ecompanyecompanyid', companyId)
+        .where('eusereuserid', userId)
+        .first()
+        .then(member => {
+            if (!member)
+                return false;
+            return true;
+        });
+
+}
+
+companyUserMappingService.deleteByUserIdAndCompanyId = async (userId, companyId, db) => {
+
+    return CompanyUserMapping.query(db)
+        .where('eusereuserid', userId)
+        .where('ecompanyecompanyid', companyId)
+        .delete()
+        .then(rowsAffected => rowsAffected === 1)
+}
+
+companyUserMappingService.getAllCompanyByUserId = async (userId) => {
+    return CompanyUserMapping.query()
+        .where('eusereuserid', userId)
 }
 
 module.exports = companyUserMappingService

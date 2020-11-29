@@ -6,7 +6,7 @@ const { UnsupportedOperationError } = require('../models/errors')
 
 const ErrorEnum = {
     EMAIL_INVALID: 'EMAIL_INVALID',
-    EMAIL_USED: 'EMAIL_USED',
+    EMAIL_EXISTED: 'EMAIL_EXISTED',
     OTP_PENDING: 'OTP_PENDING',
     OTP_CONFIRMED: 'OTP_CONFIRMED',
     OTP_EXPIRED: 'OTP_EXPIRED'
@@ -46,7 +46,7 @@ OtpService.createOtp = async (email) => {
             throw new UnsupportedOperationError(ErrorEnum.OTP_CONFIRMED);
 
         const fifteenMinutes = 15 * 60 * 1000;
-        if ((Date.now() - promised[0].eotpchangetime) < fifteenMinutes)
+        if ((Date.now() - promised[0].eotpchangetime) > fifteenMinutes)
             throw new UnsupportedOperationError(ErrorEnum.OTP_EXPIRED);
 
         // resend Otp

@@ -9,7 +9,12 @@ const   express         = require('express'),
 require('dotenv').config();
 const app = express();
 const routes = require('./routes/v1');
+const schedulerService = require('./services/schedulerService')
+const firebaseAdmin = require('firebase-admin');
 const errorHandler = require('./middlewares/errorHandler');
+const PathNotFoundError = require('./models/errors/PathNotFoundError')
+
+const databaseUrl = process.env.FIREBASE_URL || 'https://notification-sportiv.firebaseio.com'
 
 app.use(cors());
 app.use((_, res, next) => {
@@ -30,10 +35,8 @@ app.use(express.static(process.env.TEMP_DIRECTORY));
 
 app.use(routes)
 
-app.use((_, __, next) => {
-    const err = new Error('Path Not Found');
-    err.status = 404;
-    next(err);
+app.use((_, __, ___) => {
+    throw new PathNotFoundError('Path Not Found')
 });
 
 // app.use((error, req, res, next) => {
@@ -58,23 +61,20 @@ app.use((_, __, next) => {
 
 app.use(errorHandler)
 
+const serviceAccount = require(process.env.FIREBASE_KEY_DIRECTORY);
+
+firebaseAdmin.initializeApp({
+    credential: firebaseAdmin.credential.cert(serviceAccount),
+    databaseURL: databaseUrl
+});
+
 const httpPORT = process.env.PORT || 5100;
 const httpServer = app.listen(httpPORT, function() {
     console.log(`HTTP Server started on port ${httpPORT}`);
 })
 
-// configuration for https
-const options = {
-    key: fs.readFileSync('../../../etc/ssl/private/quickplay.key', 'utf8'),
-    cert: fs.readFileSync('../../../etc/ssl/certs/quickplay.crt', 'utf8')
-};
-const httpsServer = https.createServer(options, app);
-const httpsPORT = process.env.HTTPS_PORT || 5101;
-httpsServer.listen(httpsPORT, function() {
-    console.log(`HTTPS Server started on port ${httpsPORT}.`);
-});
+schedulerService.initialize();
 
 module.exports = {
-    httpServer: httpServer,
-    httpsServer: httpsServer
+    httpServer: httpServer
 }

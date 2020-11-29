@@ -12,7 +12,7 @@ const ErrorEnum = {
     FORBIDDEN_ACTION: 'FORBIDDEN_ACTION'
 }
 
-threadPostReplyService.getAllByThreadPostId = async (threadPostId) => {
+threadPostReplyService.getAllByThreadPostId = async (threadPostId, user) => {
 
     const post = await threadPostService.getPostById(threadPostId).catch(() => null)
 
@@ -24,6 +24,7 @@ threadPostReplyService.getAllByThreadPostId = async (threadPostId) => {
         .withGraphFetched('user(idAndName)')
         .withGraphFetched('threadPostReplyPicture(baseAttributes)')
         .withGraphFetched('moderator')
+        .orderBy('ethreadpostreplycreatetime', 'ASC')
         .modifyGraph('moderator', builder => {
             builder
                 .select('eusereuserid')
@@ -36,9 +37,11 @@ threadPostReplyService.getAllByThreadPostId = async (threadPostId) => {
         ethreadpostreplyid: reply.ethreadpostreplyid,
         ethreadpostreplycomment: reply.ethreadpostreplycomment,
         ethreadpostreplycreatetime: reply.ethreadpostreplycreatetime,
+        ethreadpostreplychangetime: reply.ethreadpostreplychangetime,
         threadPostReplyPicture: reply.threadPostReplyPicture,
         user: reply.user,
-        isModerator: !!reply.moderator
+        isModerator: !!reply.moderator,
+        isModifiable: reply.user.euserid === user.sub
     }))
 }
 

@@ -3,11 +3,12 @@ const Team = require('../models/Team');
 const ServiceHelper = require('../helper/ServiceHelper');
 const { raw } = require('objection');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
-const { UniqueViolationError } = require('objection');
+const { UniqueViolationError, ConstraintViolationError } = require('objection');
 const teamLogService = require('./mobileTeamLogService');
 const teamUserService = require('./mobileTeamUserService');
 const mobileTeamSportTypeRoleService = require('./mobileTeamSportTypeRoleService');
 const AddressService = require('./addressService');
+const companyUserMappingService = require('./companyUserMappingService');
 
 const ErrorEnum = {
     USER_IN_TEAM: 'USER_IN_TEAM',
@@ -33,7 +34,7 @@ function isTeamNameUniqueErr(e) {
     if (!e.nativeError)
         return false;
 
-    return e.nativeError.detail.includes('eteamname') && e instanceof UniqueViolationError
+    return e.nativeError.detail.includes('eteamname') && (e instanceof UniqueViolationError || e instanceof ConstraintViolationError)
 
 }
 
@@ -53,6 +54,7 @@ teamService.getTeams = async (page, size, keyword, filter) => {
 
     const teamsPagePromise = Team.query()
     .modify('baseAttributes')
+    .withGraphFetched('teamIndustry(baseAttributes)')
     .withGraphFetched('company(baseAttributes)')
     .whereRaw(`LOWER("eteamname") LIKE LOWER('%${keyword}%')`)
 
@@ -77,6 +79,11 @@ teamService.getTeam = async (teamId, user) => {
     if (!team)
         throw new NotFoundError()
 
+    let isInCompany = false;
+
+    if (team.ecompanyecompanyid)
+        isInCompany = await companyUserMappingService.checkCompanyUserByCompanyIdAndUserId(team.ecompanyecompanyid, user.sub)
+        
     // return null instead not found, because it
     const isInTeam = teamUserService.getTeamUserByTeamIdAndUserId(teamId, user.sub)
         .catch(() => null);
@@ -85,6 +92,7 @@ teamService.getTeam = async (teamId, user) => {
 
     return Promise.all([isInTeam, teamLog]).then(result => ({
         ...team,
+        isInCompany: !!isInCompany,
         isInTeam: !!result[0],
         teamLog: !result[1] ? null : result[1]
     }));
@@ -200,6 +208,7 @@ teamService.getMyTeams = async (page, size, keyword, user) => {
 
     return Team.query()
         .modify('baseAttributes')
+        .withGraphFetched('teamIndustry(baseAttributes)')
         .withGraphFetched('company(baseAttributes)')
         .whereRaw(`LOWER("eteamname") LIKE LOWER('%${keyword}%')`)
         .whereIn('eteamid', teamIds)
