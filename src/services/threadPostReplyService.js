@@ -24,6 +24,7 @@ threadPostReplyService.getAllByThreadPostId = async (threadPostId, user) => {
         .withGraphFetched('user(idAndName)')
         .withGraphFetched('threadPostReplyPicture(baseAttributes)')
         .withGraphFetched('moderator')
+        .orderBy('ethreadpostreplycreatetime', 'ASC')
         .modifyGraph('moderator', builder => {
             builder
                 .select('eusereuserid')
@@ -36,6 +37,7 @@ threadPostReplyService.getAllByThreadPostId = async (threadPostId, user) => {
         ethreadpostreplyid: reply.ethreadpostreplyid,
         ethreadpostreplycomment: reply.ethreadpostreplycomment,
         ethreadpostreplycreatetime: reply.ethreadpostreplycreatetime,
+        ethreadpostreplychangetime: reply.ethreadpostreplychangetime,
         threadPostReplyPicture: reply.threadPostReplyPicture,
         user: reply.user,
         isModerator: !!reply.moderator,
@@ -47,6 +49,7 @@ threadPostReplyService.getReplyById = async (replyId) => {
 
     return ThreadPostReply.query()
         .findById(replyId)
+        .modify('baseAttributes')
 }
 
 threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO, user) => {
@@ -102,8 +105,9 @@ threadPostReplyService.deleteReplyById = async (replyId, user) => {
         if (!isModerator) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
     }
 
-    return reply.$query()
-        .delete()
+    return ThreadPostReply.query()
+        .findById(replyId)
+        .deleteByUserId(user.sub)
         .then(rowsAffected => rowsAffected === 1)
 
 }

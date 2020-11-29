@@ -228,12 +228,12 @@ teamLogService.getPendingLogs = async (teamId, page, size, type, user) => {
 
     if (teamId) {
         teamLogsPromise.andWhere('eteameteamid', teamId)
-        .withGraphFetched('user(baseAttributes).file(baseAttributes)')
+            .withGraphFetched('user(baseAttributes).file(baseAttributes)')
     }
 
     if (!teamId) {
         teamLogsPromise.andWhere('eusereuserid', user.sub)
-            .withGraphFetched('team(baseAttributes).teamIndustry(baseAttributes)')
+            .withGraphFetched('team(baseAttributes).[teamIndustry(baseAttributes), company(baseAttributes)]')
     }
 
     return teamLogsPromise
@@ -281,6 +281,9 @@ teamLogService.invite = async (teamId, user, email) => {
     .where('euseremail', email)
     .first();
 
+    if (!invitedUser)
+        throw new UnsupportedOperationError(ErrorEnum.USER_NOT_EXIST)
+
     //to check is user in company
     await Team.query()
     .findById(teamId)
@@ -288,9 +291,6 @@ teamLogService.invite = async (teamId, user, email) => {
         if (team.ecompanyecompanyid)
             return mobileCompanyUserService.checkUserInCompany(invitedUser.euserid, team.ecompanyecompanyid)
     })
-
-    if (!invitedUser)
-        throw new UnsupportedOperationError(ErrorEnum.USER_NOT_EXIST)
 
     const teamUser = await teamUserService.getTeamUserByTeamIdAndUserId(teamId, invitedUser.euserid)
         .catch(() => null);

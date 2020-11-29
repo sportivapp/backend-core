@@ -107,11 +107,12 @@ mobileCommentService.getAllComments = async (page, size, threadId, user) => {
 
     const threadPostPage = await ThreadPost.query()
         .modify('baseAttributes')
-        .select(ThreadPost.relatedQuery('replies').count().as('replyCount'))
+        .select(ThreadPost.relatedQuery('replies').modify('notDeleted').count().as('replyCount'))
         .where('ethreadethreadid', threadId)
         .withGraphFetched('user(idAndName)')
         .withGraphFetched('threadPostPicture(baseAttributes)')
         .withGraphFetched('moderator')
+        .orderBy('ethreadpostcreatetime', 'ASC')
         .modifyGraph('moderator', builder => {
             builder
                 .select('eusereuserid')
@@ -125,6 +126,7 @@ mobileCommentService.getAllComments = async (page, size, threadId, user) => {
         ethreadpostid: threadPost.ethreadpostid,
         ethreadpostcomment: threadPost.ethreadpostcomment,
         ethreadpostcreatetime: threadPost.ethreadpostcreatetime,
+        ethreadpostchangetime: threadPost.ethreadpostchangetime,
         replyCount: parseInt(threadPost.replyCount),
         threadPostPicture: threadPost.threadPostPicture,
         user: threadPost.user,

@@ -19,11 +19,12 @@ threadPostService.getAllPostByThreadId = async (threadId, page, size) => {
 
     let threadPostPage = await ThreadPost.query()
         .modify('baseAttributes')
-        .select(ThreadPost.relatedQuery('replies').count().as('replyCount'))
+        .select(ThreadPost.relatedQuery('replies').modify('notDeleted').count().as('replyCount'))
         .where('ethreadethreadid', threadId)
         .withGraphFetched('user(idAndName)')
         .withGraphFetched('threadPostPicture(baseAttributes)')
         .withGraphFetched('moderator')
+        .orderBy('ethreadpostcreatetime', 'ASC')
         .modifyGraph('moderator', builder => {
             builder
                 .select('eusereuserid')
@@ -37,6 +38,7 @@ threadPostService.getAllPostByThreadId = async (threadId, page, size) => {
         ethreadpostid: threadPost.ethreadpostid,
         ethreadpostcomment: threadPost.ethreadpostcomment,
         ethreadpostcreatetime: threadPost.ethreadpostcreatetime,
+        ethreadpostchangetime: threadPost.ethreadpostchangetime,
         replyCount: parseInt(threadPost.replyCount),
         threadPostPicture: threadPost.threadPostPicture,
         user: threadPost.user,
@@ -49,6 +51,7 @@ threadPostService.getAllPostByThreadId = async (threadId, page, size) => {
 threadPostService.getPostById = async (threadPostId) => {
     return ThreadPost.query()
         .findById(threadPostId)
+        .modify('baseAttributes')
         .then(post => {
             if (!post) throw new NotFoundError()
             return post
@@ -109,8 +112,9 @@ threadPostService.deletePost = async (commentId, user) => {
         if (!isModerator) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
     }
 
-    return post.$query()
-        .delete()
+    return ThreadPost.query()
+        .findById(commentId)
+        .deleteByUserId(user.sub)
         .then(rowsAffected => rowsAffected === 1)
 
 }
