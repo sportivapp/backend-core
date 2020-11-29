@@ -49,6 +49,7 @@ threadPostReplyService.getReplyById = async (replyId) => {
 
     return ThreadPostReply.query()
         .findById(replyId)
+        .modify('baseAttributes')
 }
 
 threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO, user) => {
@@ -104,8 +105,9 @@ threadPostReplyService.deleteReplyById = async (replyId, user) => {
         if (!isModerator) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
     }
 
-    return reply.$query()
-        .delete()
+    return ThreadPostReply.query()
+        .findById(replyId)
+        .deleteByUserId(user.sub)
         .then(rowsAffected => rowsAffected === 1)
 
 }
