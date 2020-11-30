@@ -9,7 +9,7 @@ exports.up = (knex, Promise) => deleteIndex(knex)
     ))
 
 function deleteIndex(knex) {
-    knex.schema.raw('DROP INDEX "forum_name_userId_unique", "forum_name_teamId_unique", "forum_name_companyId_unique"')
+    return knex.schema.raw('DROP INDEX "forum_name_userId_unique", "forum_name_teamId_unique", "forum_name_companyId_unique"')
 }
 
 exports.down = (knex, Promise) => deleteIndex(knex);
