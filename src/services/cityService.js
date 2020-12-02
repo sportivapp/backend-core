@@ -3,15 +3,21 @@ const ServiceHelper = require('../helper/ServiceHelper')
 
 const cityService = {};
 
-cityService.getAllCitiesByCountryId = async ( countryId, page, size ) => {
+cityService.getAllCitiesByCountryId = async ( countryId, stateId, page, size ) => {
     
-    const cityPage = await City.query()
+    const cityPage = City.query()
         .select()
         .modify('baseAttributes')
-        .where('ecountryecountryid', countryId)
-        .page(page, size)
+        
+    if (stateId)
+        cityPage.where('estateestateid', stateId)
 
-    return ServiceHelper.toPageObj(page, size, cityPage)
+    if (countryId)
+        cityPage.where('ecountryecountryid', countryId)
+
+    return cityPage.page(page, size)
+        .then(cityPage => ServiceHelper.toPageObj(page, size, cityPage));
+
 }
 
 module.exports = cityService
