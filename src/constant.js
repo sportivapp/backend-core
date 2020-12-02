@@ -112,6 +112,9 @@ module.exports = {
         country: {
             list: '/country'
         },
+        city: {
+            list: '/city'
+        },
         experience: {
             list: '/experience',
             id: '/experience/:experienceId'
