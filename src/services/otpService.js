@@ -45,10 +45,6 @@ OtpService.createOtp = async (email) => {
         if (promised[0].otpcodeconfirmed)
             throw new UnsupportedOperationError(ErrorEnum.OTP_CONFIRMED);
 
-        const fifteenMinutes = 15 * 60 * 1000;
-        if ((Date.now() - promised[0].eotpchangetime) > fifteenMinutes)
-            throw new UnsupportedOperationError(ErrorEnum.OTP_EXPIRED);
-
         // resend Otp
         returnedOtp = await promised[0].$query().updateByUserId({ eotpcode: otpCode }, 0).returning('*');
     } 
