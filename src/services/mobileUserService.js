@@ -85,6 +85,10 @@ UserService.createUser = async (userDTO, otpCode) => {
     if (otp.eotpcode !== otpCode)
         throw new UnsupportedOperationError(ErrorUserEnum.OTP_CODE_NOT_MATCH)
 
+    const fifteenMinutes = 15 * 60 * 1000;
+    if ((Date.now() - otp.eotpchangetime) > fifteenMinutes)
+        throw new UnsupportedOperationError(ErrorEnum.OTP_EXPIRED);
+
     // confirm OTP
     await otp.$query().updateByUserId({ eotpconfirmed: true }, 0);
 
