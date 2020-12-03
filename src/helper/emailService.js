@@ -39,21 +39,22 @@ transporter.verify(function(error, success) {
 
 exports.sendEmailOTP = async (email, otpCode) => {
 
-    emailCheck(email, {
+    const exist = emailCheck(email, {
         from: process.env.MAIL_SMTPNAME,
         host: process.env.MAIL_SMTPHOST,
         timeout: 3000
     }).then(function(res) {
-        if(res === false) {
-            console.log('Email Check Response: ', res);
-            return
-        }
+        console.log('Email Check Response: ', res);
+        return res
     }).catch(function(err) {
         if(err) {
             console.log('Email Check Error: ', err);
-            return
+            return false
         }
     })
+
+    if (!exist)
+        return
 
     const html = "Kode OTP: " + otpCode + ". Hati-hati penipuan! Kode OTP ini hanya untuk kamu, jangan <br></br>" +
     "berikan ke siapapun. Pihak Sportiv tidak pernah meminta kode ini.";
