@@ -3,6 +3,7 @@ const nodemailer = require("nodemailer");
 const shortid = require("shortid");
 const bcrypt = require('../helper/bcrypt');
 const User = require('../models/User');
+const ValidateEmail = require('email-deep-validator');
 
 exports.validateEmail = async (email) => {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -36,6 +37,13 @@ transporter.verify(function(error, success) {
 });
 
 exports.sendEmailOTP = async (email, otpCode) => {
+
+    const emailValidator = new EmailValidator();
+    const { wellFormed, validDomain, validMailbox } = await emailValidator.verify(email);
+
+    console.log(wellFormed)
+    console.log(validDomain)
+    console.log(validMailbox)
 
     const html = "Kode OTP: " + otpCode + ". Hati-hati penipuan! Kode OTP ini hanya untuk kamu, jangan <br></br>" +
     "berikan ke siapapun. Pihak Sportiv tidak pernah meminta kode ini.";
