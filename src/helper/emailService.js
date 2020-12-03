@@ -54,7 +54,7 @@ exports.sendEmailOTP = async (email, otpCode) => {
     })
 
     if (!exist)
-        return
+        throw new UnsupportedOperationError('INVALID_EMAIL');
 
     const html = "Kode OTP: " + otpCode + ". Hati-hati penipuan! Kode OTP ini hanya untuk kamu, jangan <br></br>" +
     "berikan ke siapapun. Pihak Sportiv tidak pernah meminta kode ini.";
@@ -70,7 +70,7 @@ exports.sendEmailOTP = async (email, otpCode) => {
     transporter.sendMail(info, (err, data) => {
         if (err) {
             console.log('Email Send Error: ', err);
-            return
+            throw new UnsupportedOperationError('ERROR_SENDING_EMAIL');
         }
         console.log("Email sent!");
     });
