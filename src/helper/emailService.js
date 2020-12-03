@@ -4,6 +4,7 @@ const shortid = require("shortid");
 const bcrypt = require('../helper/bcrypt');
 const User = require('../models/User');
 const EmailValidator = require('email-deep-validator');
+const UnsupportedOperationError = require('../models/errors/UnsupportedOperationError');
 
 exports.validateEmail = async (email) => {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -45,6 +46,9 @@ exports.sendEmailOTP = async (email, otpCode) => {
     console.log(validDomain)
     console.log(validMailbox)
 
+    if (!wellFormed || !validDomain || !validMailbox)
+        throw new UnsupportedOperationError('BAD_EMAIL');
+
     const html = "Kode OTP: " + otpCode + ". Hati-hati penipuan! Kode OTP ini hanya untuk kamu, jangan <br></br>" +
     "berikan ke siapapun. Pihak Sportiv tidak pernah meminta kode ini.";
 
@@ -56,7 +60,7 @@ exports.sendEmailOTP = async (email, otpCode) => {
         html: html
     };
 
-    transporter.sendMail(info, (err, data) => {
+    await transporter.sendMail(info, (err, data) => {
         if (err) {
             console.log('Email Send Error: ', err);
         }
