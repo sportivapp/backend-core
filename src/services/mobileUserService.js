@@ -33,7 +33,8 @@ const ErrorUserEnum = {
     EMAIL_INVALID : 'EMAIL_INVALID',
     USER_ALREADY_EXIST : 'USER_ALREADY_EXIST',
     OTP_NOT_FOUND : 'OTP_NOT_FOUND',
-    OTP_CODE_NOT_MATCH : 'OTP_CODE_NOT_MATCH'
+    OTP_CODE_NOT_MATCH : 'OTP_CODE_NOT_MATCH',
+    OTP_EXPIRED: 'OTP_EXPIRED'
 }
 
 async function generateJWTToken(user) {
@@ -84,6 +85,10 @@ UserService.createUser = async (userDTO, otpCode) => {
 
     if (otp.eotpcode !== otpCode)
         throw new UnsupportedOperationError(ErrorUserEnum.OTP_CODE_NOT_MATCH)
+
+    const fifteenMinutes = 15 * 60 * 1000;
+    if ((Date.now() - otp.eotpchangetime) > fifteenMinutes)
+        throw new UnsupportedOperationError(ErrorUserEnum.OTP_EXPIRED);
 
     // confirm OTP
     await otp.$query().updateByUserId({ eotpconfirmed: true }, 0);
