@@ -40,17 +40,17 @@ exports.sendEmailOTP = async (email, otpCode) => {
     const html = "Kode OTP: " + otpCode + ". Hati-hati penipuan! Kode OTP ini hanya untuk kamu, jangan <br></br>" +
     "berikan ke siapapun. Pihak Sportiv tidak pernah meminta kode ini.";
 
-    const info = await transporter.sendMail({
+    const info = {
         from: process.env.MAIL_SMTPNAME, // sender address
         to: email, // list of receivers
         subject: "Kode OTP - Sportiv", // Subject line
         text: "", // plain text body
         html: html
-    });
+    };
 
     transporter.sendMail(info, (err, data) => {
         if (err) {
-            console.log(err);
+            console.log('Email Send Error: ', err);
         }
         console.log("Email sent!");
     });
