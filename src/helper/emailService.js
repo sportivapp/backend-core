@@ -45,13 +45,13 @@ exports.sendEmailOTP = async (email, otpCode) => {
         timeout: 3000
     }).then(function(res) {
         if(res === false) {
-            throw new UnsupportedOperationError('SEND_EMAIL_FALSE');
-            console.log(res);
+            console.log('Email Check Response: ', res);
+            return
         }
     }).catch(function(err) {
         if(err) {
-            throw new UnsupportedOperationError('SEND_EMAIL_ERROR');
-            console.log(err);
+            console.log('Email Check Error: ', err);
+            return
         }
     })
 
@@ -68,8 +68,8 @@ exports.sendEmailOTP = async (email, otpCode) => {
 
     transporter.sendMail(info, (err, data) => {
         if (err) {
-            console.log(err);
-            throw new UnsupportedOperationError('TRANSPORTER_SEND_ERROR');
+            console.log('Email Send Error: ', err);
+            return
         }
         console.log("Email sent!");
     });
