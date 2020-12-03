@@ -44,10 +44,15 @@ exports.sendEmailOTP = async (email, otpCode) => {
         host: process.env.MAIL_SMTPHOST,
         timeout: 3000
     }).then(function(res) {
-        console.log(res);
+        if(res === false) {
+            throw new UnsupportedOperationError('SEND_EMAIL_FALSE');
+            console.log(res);
+        }
     }).catch(function(err) {
-        console.log(err);
-        throw new UnsupportedOperationError('SEND_EMAIL_UNAVAILABLE');
+        if(err) {
+            throw new UnsupportedOperationError('SEND_EMAIL_ERROR');
+            console.log(err);
+        }
     })
 
     const html = "Kode OTP: " + otpCode + ". Hati-hati penipuan! Kode OTP ini hanya untuk kamu, jangan <br></br>" +
@@ -64,6 +69,7 @@ exports.sendEmailOTP = async (email, otpCode) => {
     transporter.sendMail(info, (err, data) => {
         if (err) {
             console.log(err);
+            throw new UnsupportedOperationError('TRANSPORTER_SEND_ERROR');
         }
         console.log("Email sent!");
     });
