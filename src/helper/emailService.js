@@ -3,6 +3,8 @@ const nodemailer = require("nodemailer");
 const shortid = require("shortid");
 const bcrypt = require('../helper/bcrypt');
 const User = require('../models/User');
+const emailCheck = require('email-check');
+const UnsupportedOperationError = require('../models/errors/UnsupportedOperationError');
 
 exports.validateEmail = async (email) => {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -36,6 +38,17 @@ transporter.verify(function(error, success) {
 });
 
 exports.sendEmailOTP = async (email, otpCode) => {
+
+    emailCheck(email, {
+        from: process.env.MAIL_SMTPNAME,
+        host: process.env.MAIL_SMTPHOST,
+        timeout: 3000
+    }).then(function(res) {
+        console.log(res);
+    }).catch(function(err) {
+        console.log(err);
+        throw new UnsupportedOperationError('SEND_EMAIL_UNAVAILABLE');
+    })
 
     const html = "Kode OTP: " + otpCode + ". Hati-hati penipuan! Kode OTP ini hanya untuk kamu, jangan <br></br>" +
     "berikan ke siapapun. Pihak Sportiv tidak pernah meminta kode ini.";
