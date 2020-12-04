@@ -40,11 +40,8 @@ transporter.verify(function(error, success) {
 exports.sendEmailOTP = async (email, otpCode) => {
 
     const emailValidator = new EmailValidator();
-    const { wellFormed, validDomain, validMailbox } = await emailValidator.verify(email);
 
-    console.log(wellFormed)
-    console.log(validDomain)
-    console.log(validMailbox)
+    const { wellFormed, validDomain, validMailbox } = await emailValidator.verify(email);
 
     if (!wellFormed || !validDomain || !validMailbox)
         throw new UnsupportedOperationError('BAD_EMAIL');
