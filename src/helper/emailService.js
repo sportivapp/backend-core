@@ -94,13 +94,13 @@ exports.sendForgotPasswordLink = async ( userId, email ) => {
 
     // const html = 'Forgot password link';
 
-    const info = await transporter.sendMail({
+    const info = {
         from: process.env.MAIL_SMTPNAME, // sender address
         to: email, // list of receivers
         subject: 'Forgot Password Code - Sportiv', // Subject line
         text: 'Berikut adalah password baru kamu: ' + newPassword, // plain text body
         // html: html
-    });
+    };
 
     transporter.sendMail(info, (err, data) => {
         if (err) {
@@ -146,13 +146,13 @@ exports.sendReportThread = async (report, callback) => {
                 Thread Title: ${report.thread.ethreadtitle}<br/><br/>`
     }
 
-    const info = await transporter.sendMail({
+    const info = {
         from: report.reporter.euseremail, // sender address
         to: 'noreply@sportiv.app', // list of receivers
         subject: `REPORT - ${type}`, // Subject line
         text: "", // plain text body
         html: html
-    });
+    };
 
-    transporter.sendMail(info, callback);
+    await transporter.sendMail(info, callback);
 }
