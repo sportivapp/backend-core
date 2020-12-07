@@ -41,13 +41,9 @@ exports.sendEmailOTP = async (email, otpCode) => {
 
     const emailValidator = new EmailValidator();
 
-    const { wellFormed, validDomain, validMailbox } = await emailValidator.verify(email);
+    const { wellFormed, validDomain } = await emailValidator.verify(email); // validMailbox
 
-    console.log(wellFormed);
-    console.log(validDomain);
-    console.log(validMailbox);
-
-    if (!wellFormed || !validDomain || !validMailbox)
+    if (!wellFormed || !validDomain) // || !validMailbox
         throw new UnsupportedOperationError('BAD_EMAIL');
 
     const html = "Kode OTP: " + otpCode + ". Hati-hati penipuan! Kode OTP ini hanya untuk kamu, jangan <br></br>" +
