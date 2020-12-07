@@ -43,6 +43,10 @@ exports.sendEmailOTP = async (email, otpCode) => {
 
     const { wellFormed, validDomain, validMailbox } = await emailValidator.verify(email);
 
+    console.log(wellFormed);
+    console.log(validDomain);
+    console.log(validMailbox);
+
     if (!wellFormed || !validDomain || !validMailbox)
         throw new UnsupportedOperationError('BAD_EMAIL');
 
