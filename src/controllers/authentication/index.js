@@ -20,7 +20,7 @@ controller.login = async (req, res, next) => {
             secure: true,
             httpOnly: true,
             domain: process.env.COOKIE_DOMAIN,
-            maxAge: 3 * 60 * 60 * 1000
+            maxAge: 3 * 24 * 60 * 60 * 1000
         }).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
