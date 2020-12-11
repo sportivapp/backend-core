@@ -3,6 +3,8 @@ const nodemailer = require("nodemailer");
 const shortid = require("shortid");
 const bcrypt = require('../helper/bcrypt');
 const User = require('../models/User');
+const EmailValidator = require('email-deep-validator');
+const UnsupportedOperationError = require('../models/errors/UnsupportedOperationError');
 
 exports.validateEmail = async (email) => {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -37,20 +39,27 @@ transporter.verify(function(error, success) {
 
 exports.sendEmailOTP = async (email, otpCode) => {
 
+    const emailValidator = new EmailValidator();
+
+    const { wellFormed, validDomain } = await emailValidator.verify(email); // validMailbox
+
+    if (!wellFormed || !validDomain) // || !validMailbox
+        throw new UnsupportedOperationError('BAD_EMAIL');
+
     const html = "Kode OTP: " + otpCode + ". Hati-hati penipuan! Kode OTP ini hanya untuk kamu, jangan <br></br>" +
     "berikan ke siapapun. Pihak Sportiv tidak pernah meminta kode ini.";
 
-    const info = await transporter.sendMail({
+    const info = {
         from: process.env.MAIL_SMTPNAME, // sender address
         to: email, // list of receivers
         subject: "Kode OTP - Sportiv", // Subject line
         text: "", // plain text body
         html: html
-    });
+    };
 
-    transporter.sendMail(info, (err, data) => {
+    await transporter.sendMail(info, (err, data) => {
         if (err) {
-            console.log(err);
+            console.log('Email Send Error: ', err);
         }
         console.log("Email sent!");
     });
@@ -85,13 +94,13 @@ exports.sendForgotPasswordLink = async ( userId, email ) => {
 
     // const html = 'Forgot password link';
 
-    const info = await transporter.sendMail({
+    const info = {
         from: process.env.MAIL_SMTPNAME, // sender address
         to: email, // list of receivers
         subject: 'Forgot Password Code - Sportiv', // Subject line
         text: 'Berikut adalah password baru kamu: ' + newPassword, // plain text body
         // html: html
-    });
+    };
 
     transporter.sendMail(info, (err, data) => {
         if (err) {
@@ -137,13 +146,13 @@ exports.sendReportThread = async (report, callback) => {
                 Thread Title: ${report.thread.ethreadtitle}<br/><br/>`
     }
 
-    const info = await transporter.sendMail({
+    const info = {
         from: report.reporter.euseremail, // sender address
         to: 'noreply@sportiv.app', // list of receivers
         subject: `REPORT - ${type}`, // Subject line
         text: "", // plain text body
         html: html
-    });
+    };
 
-    transporter.sendMail(info, callback);
+    await transporter.sendMail(info, callback);
 }
