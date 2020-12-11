@@ -107,7 +107,7 @@ mobileCommentService.getAllComments = async (page, size, threadId, user) => {
 
     const threadPostPage = await ThreadPost.query()
         .modify('baseAttributes')
-        .select(ThreadPost.relatedQuery('replies').count().as('replyCount'))
+        .select(ThreadPost.relatedQuery('replies').modify('notDeleted').count().as('replyCount'))
         .where('ethreadethreadid', threadId)
         .withGraphFetched('user(idAndName)')
         .withGraphFetched('threadPostPicture(baseAttributes)')

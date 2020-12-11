@@ -24,6 +24,10 @@ class ThreadPost extends Model {
       baseAttributes(builder) {
         builder.select('ethreadpostid', 'ethreadpostcomment', 'ethreadpostcreatetime', 'ethreadpostchangetime')
             .withGraphFetched('user(baseAttributes).file(baseAttributes)')
+            .where('ethreadpostdeletestatus', false)
+      },
+      notDeleted(builder) {
+        builder.where('ethreadpostdeletestatus', false)
       }
     }
   }

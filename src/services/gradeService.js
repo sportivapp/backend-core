@@ -209,6 +209,15 @@ gradeService.getAllGradesByUserIdAndCompanyId = async (companyId, userId) => {
         .where('company.ecompanyid', companyId)
 }
 
+gradeService.deleteUserPositionMappingByGradeIdsAndUserId = async (gradeIds, userId, db) => {
+
+    return UserPositionMapping.query(db)
+        .whereIn('egradeegradeid', gradeIds)
+        .where('eusereuserid', userId)
+        .delete()
+        .then(rowsAffected => rowsAffected === gradeIds.length)
+}
+
 gradeService.getAllGradesByUserId = async (userId) => {
     return Grade.query()
         .joinRelated('users')
