@@ -48,7 +48,7 @@ threadService.getAllThreads = async (page, size, keyword, isPublic, filter) => {
     }
 
     return Thread.query()
-        .select(Thread.relatedQuery('comments').count().as('commentCount'))
+        .select(Thread.relatedQuery('comments').modify('notDeleted').count().as('commentCount'))
         .modify('baseAttributes')
         .withGraphFetched('threadPicture(baseAttributes)')
         .withGraphFetched('threadCreator(baseAttributes).file(baseAttributes)')
@@ -63,7 +63,7 @@ threadService.getAllThreads = async (page, size, keyword, isPublic, filter) => {
 threadService.getThreadById = async (threadId) => {
     const thread = await Thread.query()
         .findById(threadId)
-        .select(Thread.relatedQuery('comments').count().as('commentCount'))
+        .select(Thread.relatedQuery('comments').modify('notDeleted').count().as('commentCount'))
         .modify('baseAttributes')
         .withGraphFetched('threadPicture(baseAttributes)')
         .withGraphFetched('threadCreator(baseAttributes).file(baseAttributes)')

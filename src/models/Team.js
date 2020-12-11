@@ -6,11 +6,11 @@ const Industry = require('./Industry');
 class Team extends Model {
     static get tableName() {
         return 'eteam';
-    };
+    }
 
     static get idColumn() {
         return 'eteamid';
-    };
+    }
 
     static get jsonSchema() {
         return {

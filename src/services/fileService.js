@@ -61,6 +61,8 @@ FileService.getFileByIdAndCreateBy = async (fileId, createBy) => {
 
 FileService.getFileById = async (fileId) => {
 
+    if (!fileId || fileId === 'null') throw new NotFoundError()
+
     return File
     .query()
     .findById(fileId)

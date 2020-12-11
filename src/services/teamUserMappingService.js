@@ -165,4 +165,13 @@ teamUserMappingService.removeUserFromTeam = async (userInTeam, user, userId, typ
 
 }
 
+teamUserMappingService.kickUserFromTeam = async (teamId, userId, db) => {
+
+    return TeamUserMapping.query(db)
+        .where('eusereuserid', userId)
+        .andWhere('eteameteamid', teamId)
+        .delete()
+        .then(rowsAffected => rowsAffected === 1)
+}
+
 module.exports = teamUserMappingService
