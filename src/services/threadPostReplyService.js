@@ -101,7 +101,9 @@ threadPostReplyService.deleteReplyById = async (replyId, user) => {
 
     if (reply.ethreadpostreplycreateby !== user.sub) {
 
-        const isModerator = await threadModeratorService.isThreadModerator(reply.ethreadethreadid, user.sub)
+        const post = await threadPostService.getPostById(reply.ethreadpostethreadpostid);
+
+        const isModerator = await threadModeratorService.isThreadModerator(post.ethreadethreadid, user.sub)
         if (!isModerator) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
     }
 
