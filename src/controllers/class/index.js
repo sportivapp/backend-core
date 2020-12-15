@@ -23,7 +23,11 @@ classController.createClass = async(req,res,next) => {
         eindustryeindustryid: industryId,
         ecompanyecompanyid: companyId,
         efileefileid: fileId,
-        requirements: requirements
+        requirements: requirements,
+        startTimeHour: startTimeHour,
+        startTimeMinute: startTimeMinute,
+        endTimeHour: endTimeHour,
+        endTimeMinute: endTimeMinute,
     }
 
     try {
@@ -70,7 +74,11 @@ classController.updateClassById = async (req, res, next) => {
         eclasspicmobilenumber: picMobileNumber,
         eindustryeindustryid: industryId,
         efileefileid: fileId,
-        requirements: requirements
+        requirements: requirements,
+        startTimeHour: startTimeHour,
+        startTimeMinute: startTimeMinute,
+        endTimeHour: endTimeHour,
+        endTimeMinute: endTimeMinute,
     }
 
     try {
