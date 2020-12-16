@@ -68,13 +68,13 @@ exports.sendEmailOTP = async (email, otpCode) => {
 
 exports.sendForgetEmail = async (email, link) => {
 
-    const info = await transporter.sendMail({
+    const info = {
         from: process.env.MAIL_SMTPNAME, // sender address
         to: email, // list of receivers
         subject: 'Tautan Lupa Kata Sandi - Sportiv', // Subject line
         text: 'Tautan untuk mengganti kata sandi: ' + link, // plain text body
         // html: html
-    });
+    };
 
     transporter.sendMail(info, (err, data) => {
         if (err) {
