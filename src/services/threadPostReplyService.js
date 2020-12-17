@@ -74,9 +74,12 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
     const notificationObj = await notificationService
         .buildNotificationEntity(post.ethreadpostid, replyEnum.type, createAction.title, createAction.message, createAction.title)
 
+    const userIds = []
+    userIds.push({ euserid: post.ethreadpostcreateby })
+
     return ThreadPostReply.transaction(async trx => {
 
-        notificationService.saveNotificationWithTransaction(notificationObj, user, [{ euserid: post.ethreadpostcreateby }], trx)
+        notificationService.saveNotificationWithTransaction(notificationObj, user, userIds, trx)
 
         return ThreadPostReply.query().insertToTable(replyDTO, user.sub)
     })
