@@ -2,6 +2,8 @@ const ThreadPostReply = require('../models/ThreadPostReply')
 const threadPostService = require('./threadPostService')
 const threadService = require('./threadService')
 const threadModeratorService = require('./threadModeratorService')
+const notificationService = require('./notificationService')
+const NotificationEnum = require('../models/enum/NotificationEnum')
 const { UnsupportedOperationError } = require('../models/errors')
 
 const threadPostReplyService = {}
@@ -66,7 +68,18 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
     replyDTO.ethreadethreadid = post.ethreadethreadid
     replyDTO.ethreadpostethreadpostid = threadPostId
 
-    return ThreadPostReply.query().insertToTable(replyDTO, user.sub)
+    const replyEnum = NotificationEnum.forumPostReply
+    const createAction = replyEnum.actions.reply
+
+    const notificationObj = notificationService
+        .buildNotificationEntity(post.ethreadpostid, replyEnum.type, createAction.title, createAction.message, createAction.title)
+
+    return ThreadPostReply.transaction(async trx => {
+
+        notificationService.saveNotificationWithTransaction(notificationObj, user, [post.ethreadpostcreateby], trx)
+
+        return ThreadPostReply.query().insertToTable(replyDTO, user.sub)
+    })
 
 }
 
