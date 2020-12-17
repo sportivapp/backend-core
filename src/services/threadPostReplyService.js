@@ -71,7 +71,7 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
     const replyEnum = NotificationEnum.forumPostReply
     const createAction = replyEnum.actions.reply
 
-    const notificationObj = notificationService
+    const notificationObj = await notificationService
         .buildNotificationEntity(post.ethreadpostid, replyEnum.type, createAction.title, createAction.message, createAction.title)
 
     return ThreadPostReply.transaction(async trx => {
