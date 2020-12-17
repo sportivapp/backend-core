@@ -10,7 +10,7 @@ const NotificationEnum = {
         actions: {
             create: {
                 title: 'New Forum',
-                code: 'NEW_FORUM',
+                code: 'NEW_THREAD',
                 message: 'A user has created a new forum!'
             }
         }
@@ -19,9 +19,9 @@ const NotificationEnum = {
         type: 'THREAD_POST',
         actions: {
             post: {
-                title: 'Forum Post',
-                code: 'FORUM_POST',
-                message: 'A user has posted in your forum!'
+                title: 'Forum Comment',
+                code: 'NEW_THREAD_POST',
+                message: 'A user has posted a comment in your forum!'
             }
         }
     },
@@ -30,8 +30,8 @@ const NotificationEnum = {
         actions: {
             reply: {
                 title: 'Forum Reply',
-                code: 'FORUM_REPLY',
-                message: 'A user has replied to your post in a forum!'
+                code: 'NEW_THREAD_REPLY',
+                message: 'A user has replied to your comment in a forum!'
             }
         }
     },
