@@ -390,9 +390,7 @@ CompanyService.getAllCompanyList = async (page, size, type, keyword, companyId, 
 
     const newPageObj = {
         results: result,
-        page: page,
-        size: size,
-        totalSize: pageObj.total
+        total: pageObj.total
     }
 
     return ServiceHelper.toPageObj(page, size, newPageObj)

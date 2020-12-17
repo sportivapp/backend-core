@@ -8,10 +8,10 @@ controller.getGrades = async (req, res, next) => {
     if (req.user.functions.indexOf('R4') === -1)
         return res.status(403).json(ResponseHelper.toErrorResponse(403))
 
-    const { page = '0', size = '10', companyId, departmentId } = req.query
+    const { page = '0', size = '10', companyId, departmentId, keyword = '' } = req.query
 
     try {
-        const pageObj = await gradeService.getAllGrades(parseInt(page), parseInt(size), companyId, departmentId)
+        const pageObj = await gradeService.getAllGrades(parseInt(page), parseInt(size), companyId, departmentId, keyword)
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
     } catch (e) {
         next(e)

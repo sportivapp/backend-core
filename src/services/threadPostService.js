@@ -3,6 +3,8 @@ const ServiceHelper = require('../helper/ServiceHelper')
 const threadService = require('./threadService')
 const threadModeratorService = require('./threadModeratorService')
 const fileService = require('./fileService')
+const notificationService = require('./notificationService')
+const NotificationEnum = require('../models/enum/NotificationEnum')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
 const threadPostService = {}
@@ -72,8 +74,26 @@ threadPostService.createPost = async (threadId, postDTO, user) => {
 
     postDTO.ethreadethreadid = thread.ethreadid
 
-    return ThreadPost.query()
-        .insertToTable(postDTO, user.sub)
+    const postEnum = NotificationEnum.forumPost
+    const createAction = postEnum.actions.post
+
+    const notificationObj = notificationService
+        .buildNotificationEntity(thread.ethreadid, postEnum.type, createAction.title, createAction.message, createAction.title)
+
+    const userIds = await ThreadPost.query()
+        .where('ethreadethreadid', thread.ethreadid)
+        .then(posts => posts.map(post => post.ethreadpostcreateby))
+        .then(userIds => {
+            userIds.push(thread.ethreadcreateby)
+            return userIds
+        })
+
+    return ThreadPost.transaction(async trx => {
+
+        notificationService.saveNotificationWithTransaction(notificationObj, user, userIds, trx)
+
+        return ThreadPost.query().insertToTable(postDTO, user.sub)
+    })
 }
 
 threadPostService.updatePost = async (commentId, postDTO, user) => {

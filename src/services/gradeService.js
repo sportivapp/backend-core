@@ -1,11 +1,11 @@
 const Grade = require('../models/Grades')
-const Department = require('../models/Department')
 const CompanyDefaultPosition = require('../models/CompanyDefaultPosition')
 const Company = require('../models/Company')
 const UserPositionMapping = require('../models/UserPositionMapping')
 const ServiceHelper = require('../helper/ServiceHelper')
 const departmentService = require('../services/departmentService')
 const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
+const { raw } = require('objection')
 
 const gradeService = {}
 
@@ -17,7 +17,7 @@ const ErrorEnum = {
     FORBIDDEN_ACTION: 'FORBIDDEN_ACTION'
 }
 
-gradeService.getAllGrades = async (page, size, companyId, departmentId) => {
+gradeService.getAllGrades = async (page, size, companyId, departmentId, keyword) => {
 
     if (departmentId) {
 
@@ -26,6 +26,7 @@ gradeService.getAllGrades = async (page, size, companyId, departmentId) => {
 
         const gradePage = await Grade.query()
             .where('edepartmentedepartmentid', departmentId)
+            .where(raw('lower("egradename")'), 'like', `%${keyword.toLowerCase()}%`)
             .withGraphFetched('[superior,department.parent.parent,company.parent.parent]')
             .page(page, size)
         return ServiceHelper.toPageObj(page, size, gradePage)
@@ -51,6 +52,7 @@ gradeService.getAllGrades = async (page, size, companyId, departmentId) => {
 
         const gradePage = await Grade.query()
             .whereIn('ecompanyecompanyid', branchIds)
+            .where(raw('lower("egradename")'), 'like', `%${keyword.toLowerCase()}%`)
             .withGraphFetched('[superior,department.parent.parent,company.parent.parent]')
             .page(page, size)
         return ServiceHelper.toPageObj(page, size, gradePage)
