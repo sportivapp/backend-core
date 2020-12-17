@@ -80,13 +80,11 @@ threadPostService.createPost = async (threadId, postDTO, user) => {
     const notificationObj = await notificationService
         .buildNotificationEntity(thread.ethreadid, postEnum.type, createAction.title, createAction.message, createAction.title)
 
-    console.log(notificationObj)
-
     const userIds = await ThreadPost.query()
         .where('ethreadethreadid', thread.ethreadid)
-        .then(posts => posts.map(post => post.ethreadpostcreateby))
+        .then(posts => posts.map(post => ({ euserid: post.ethreadpostcreateby })))
         .then(userIds => {
-            userIds.push(thread.ethreadcreateby)
+            userIds.push({ euserid: thread.ethreadcreateby })
             return userIds
         })
 
