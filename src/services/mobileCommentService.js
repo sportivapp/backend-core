@@ -3,6 +3,8 @@ const ThreadPost = require('../models/ThreadPost')
 const ThreadModerator = require('../models/ThreadModerator')
 const { UnsupportedOperationError } = require('../models/errors')
 const mobileForumService = require('../services/mobileForumService')
+const notificationService = require('./notificationService')
+const NotificationEnum = require('../models/enum/NotificationEnum')
 
 const mobileCommentService = {}
 
@@ -55,6 +57,8 @@ mobileCommentService.createComment = async (commentDTO, user) => {
 
     const threadExist = await mobileForumService.checkThread(commentDTO.ethreadethreadid)
 
+    const thread = await mobileForumService.getThreadById(commentDTO.ethreadethreadid)
+
     if(!threadExist) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_NOT_EXISTS)
 
     if (threadExist.ethreadlock) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_LOCKED)
@@ -64,8 +68,26 @@ mobileCommentService.createComment = async (commentDTO, user) => {
         commentDTO.efileefileid = null
     }
 
-    return ThreadPost.query()
-    .insertToTable(commentDTO, user.sub)
+    const postEnum = NotificationEnum.forumPost
+    const createAction = postEnum.actions.post
+
+    const notificationObj = await notificationService
+        .buildNotificationEntity(thread.ethreadid, postEnum.type, createAction.title, createAction.message, createAction.title)
+
+    const userIds = await ThreadPost.query()
+        .where('ethreadethreadid', thread.ethreadid)
+        .then(posts => posts.map(post => post.ethreadpostcreateby))
+        .then(userIds => {
+            userIds.push(thread.ethreadcreateby)
+            return userIds
+        })
+
+    return ThreadPost.transaction(async trx => {
+
+        notificationService.saveNotificationWithTransaction(notificationObj, user, userIds, trx)
+
+        return ThreadPost.query().insertToTable(commentDTO, user.sub)
+    })
 
 }
 
