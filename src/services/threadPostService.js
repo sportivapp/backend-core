@@ -77,8 +77,10 @@ threadPostService.createPost = async (threadId, postDTO, user) => {
     const postEnum = NotificationEnum.forumPost
     const createAction = postEnum.actions.post
 
-    const notificationObj = notificationService
+    const notificationObj = await notificationService
         .buildNotificationEntity(thread.ethreadid, postEnum.type, createAction.title, createAction.message, createAction.title)
+
+    console.log(notificationObj)
 
     const userIds = await ThreadPost.query()
         .where('ethreadethreadid', thread.ethreadid)
