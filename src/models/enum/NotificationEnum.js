@@ -5,6 +5,36 @@ const NotificationEnum = {
 
         }
     },
+    forum: {
+        type: 'THREAD',
+        actions: {
+            create: {
+                title: 'New Forum',
+                code: 'NEW_THREAD',
+                message: 'A user has created a new forum!'
+            }
+        }
+    },
+    forumPost: {
+        type: 'THREAD_POST',
+        actions: {
+            post: {
+                title: 'Forum Comment',
+                code: 'NEW_THREAD_POST',
+                message: 'A user has posted a comment in your forum!'
+            }
+        }
+    },
+    forumPostReply: {
+        type: 'THREAD_POST_REPLY',
+        actions: {
+            reply: {
+                title: 'Forum Reply',
+                code: 'NEW_THREAD_REPLY',
+                message: 'A user has replied to your comment in a forum!'
+            }
+        }
+    },
     class: {
         type: 'CLASS',
         actions: {
