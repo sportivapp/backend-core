@@ -3,11 +3,11 @@ const Model = require('./Model');
 class ThreadPost extends Model {
   static get tableName() {
     return 'ethreadpost';
-  };
+  }
 
   static get idColumn() {
     return 'ethreadpostid'
-  };
+  }
 
   static get jsonSchema() {
     return {
@@ -22,7 +22,7 @@ class ThreadPost extends Model {
   static get modifiers() {
     return {
       baseAttributes(builder) {
-        builder.select('ethreadpostid', 'ethreadethreadid', 'ethreadpostcomment', 'ethreadpostcreatetime', 'ethreadpostchangetime')
+        builder.select('ethreadpostid', 'ethreadethreadid', 'ethreadpostcomment', 'ethreadpostcreatetime', 'ethreadpostchangetime', 'ethreadpostcreateby')
             .withGraphFetched('user(baseAttributes).file(baseAttributes)')
             .where('ethreadpostdeletestatus', false)
       },
