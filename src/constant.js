@@ -143,7 +143,7 @@ module.exports = {
             id: '/class/:classId',
             classUser: '/class/:classId/users',
             pendingUser: '/class/:classId/pending-users',
-            processRegistration: '/class/process-registration'
+            processRegistration: '/class/:classId/process-registration'
         },
         classUser: {
             registration: '/user-class/registration',
