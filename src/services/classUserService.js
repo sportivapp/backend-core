@@ -43,7 +43,7 @@ classUserService.getUsersPendingListByClassId = async (page, size, classId, user
 
 }
 
-classUserService.processRegistration = async (classId, status, userId, user) => {
+classUserService.processRegistration = async (classId, status, userClassIds, user) => {
 
     const classInCompany = await Class.query()
     .findById(classId)
@@ -56,7 +56,7 @@ classUserService.processRegistration = async (classId, status, userId, user) => 
 
     const classUser = await ClassUserMapping.query()
         .where('eclasseclassid', classId)
-        .where('eusereuserid', userId)
+        .whereIn('eclassusermappingid', userClassIds)
         .where('eclassusermappingstatus', ClassUserStatusEnum.PENDING)
         .orderBy('eclassusermappingcreatetime', 'DESC')
         .withGraphFetched('class(baseAttributes)')
