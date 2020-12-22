@@ -58,18 +58,19 @@ classUserService.processRegistration = async (classId, status, userClassIds, use
     const classUser = await ClassUserMapping.query()
         .where('eclasseclassid', classId)
         .whereIn('eclassusermappingid', userClassIds)
-        .where('eclassusermappingstatus', ClassUserStatusEnum.PENDING)
-        .orderBy('eclassusermappingcreatetime', 'DESC');
+        .where('eclassusermappingstatus', ClassUserStatusEnum.PENDING);
 
     if (classUser.length === 0) throw new UnsupportedOperationError(ErrorEnum.CLASS_USER_NOT_FOUND);
 
     if (classUser.length !== userClassIds.length) 
         throw new UnsupportedOperationError(ErrorEnum.ONE_OR_MORE_CLASS_USER_NOT_FOUND);
 
-    return classUser.$query()
-        .updateByUserId({ eclassusermappingstatus: status }, user.sub)
-        .returning('*')
-        .withGraphFetched('class(baseAttributes)')
+    return ClassUserMapping.query()
+        .where('eclasseclassid', classId)
+        .whereIn('eclassusermappingid', userClassIds)
+        .where('eclassusermappingstatus', ClassUserStatusEnum.PENDING)
+        .updateByUserId({ eclassusermappingstatus: status }, user.sub);
+        
 }
 
 
