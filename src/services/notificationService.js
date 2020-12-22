@@ -44,6 +44,7 @@ notificationService.getAllNotification = async (page, size, user) => {
     return Notification.relatedQuery('notificationBody')
     .for(notificationSubQuery)
     .whereIn('enotificationbodyentitytype', [NotificationEnum.forum.type, NotificationEnum.forumPost.type])
+    .withGraphFetched('sender(idAndName).file(baseAttributes)')
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
