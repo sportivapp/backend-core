@@ -3,11 +3,11 @@ const Model = require('./Model');
 class NotificationBody extends Model {
     static get tableName() {
         return 'enotificationbody'
-    };
+    }
 
     static get idColumn() {
         return 'enotificationbodyid'
-    };
+    }
 
     static get jsonSchema() {
         return {
@@ -21,6 +21,7 @@ class NotificationBody extends Model {
     static get relationMappings() {
 
         const Notification = require('./Notification');
+        const User = require('./User')
 
         return {
             notifications: {
@@ -29,6 +30,14 @@ class NotificationBody extends Model {
                 join: {
                     from: 'enotificationbody.enotificationbodyid',
                     to: 'enotification.enotificationbodyenotificationbodyid'
+                }
+            },
+            sender: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: User,
+                join: {
+                    from: 'enotificationbody.enotificationbodysenderid',
+                    to: 'euser.euserid'
                 }
             }
         }
