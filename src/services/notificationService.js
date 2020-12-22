@@ -105,7 +105,7 @@ notificationService.saveNotificationWithTransaction = async (notificationObj, lo
         return Notification.query(trx)
         .insertToTable(notificationDTO, loggedInUser.sub)
         .then(resultArr => resultArr.map(notification => firebaseService
-            .pushNotification(notification.eusereuserid, notificationBody.enotificationbodytitle, notificationBody.enotificationbodymessage)))
+            .pushNotification(notification.eusereuserid, notificationBody.enotificationbodytitle, notificationBody)))
         .then(pushNotificationPromises => Promise.all(pushNotificationPromises))
     })
 

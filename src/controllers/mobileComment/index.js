@@ -61,6 +61,21 @@ controller.getAllComments = async (req, res, next) => {
 
 }
 
+controller.getCommentById = async (req, res, next) => {
+
+    const { commentId } = req.params
+
+    try {
+
+        const result = await mobileCommentService.getCommentById(commentId, req.user)
+        return res.status(200).json(ResponseHelper.toBaseResponse(result))
+
+    } catch (e) {
+        next(e)
+    }
+
+}
+
 controller.deleteComment = async (req, res, next) => {
 
     const { commentId } = req.params
