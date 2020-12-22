@@ -1,5 +1,6 @@
 const Notification = require('../models/Notification')
 const NotificationBody = require('../models/NotificationBody')
+const NotificationEnum = require('../models/enum/NotificationEnum')
 const User = require('../models/User')
 const firebaseService = require('../helper/firebaseService')
 const ServiceHelper = require('../helper/ServiceHelper');
@@ -42,6 +43,7 @@ notificationService.getAllNotification = async (page, size, user) => {
 
     return Notification.relatedQuery('notificationBody')
     .for(notificationSubQuery)
+    .whereIn('enotificationbodyentitytype', [NotificationEnum.forum.type, NotificationEnum.forumPost.type])
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
