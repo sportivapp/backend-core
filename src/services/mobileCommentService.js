@@ -5,6 +5,7 @@ const { UnsupportedOperationError } = require('../models/errors')
 const mobileForumService = require('../services/mobileForumService')
 const notificationService = require('./notificationService')
 const NotificationEnum = require('../models/enum/NotificationEnum')
+const userService = require('./userService')
 
 const mobileCommentService = {}
 
@@ -12,7 +13,8 @@ const UnsupportedOperationErrorEnum = {
     FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
     COMMENT_NOT_EXISTS: 'COMMENT_NOT_EXIST',
     THREAD_NOT_EXISTS: 'THREAD_NOT_EXISTS',
-    THREAD_LOCKED: 'THREAD_LOCKED'
+    THREAD_LOCKED: 'THREAD_LOCKED',
+    USER_NOT_FOUND: 'USER_NOT_FOUND'
 }
 
 // Change name from commentId to threadPostId here to match the column name in migration table
@@ -68,11 +70,14 @@ mobileCommentService.createComment = async (commentDTO, user) => {
         commentDTO.efileefileid = null
     }
 
-    const postEnum = NotificationEnum.forumPost
-    const createAction = postEnum.actions.post
+    const foundUser = await userService.getSingleUserById(user.sub)
+        .catch(() => new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_FOUND));
+
+    const postEnum = NotificationEnum.forum
+    const createAction = postEnum.actions.comment
 
     const notificationObj = await notificationService
-        .buildNotificationEntity(thread.ethreadid, postEnum.type, createAction.title, createAction.message, createAction.title)
+        .buildNotificationEntity(thread.ethreadid, postEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
 
     const userIds = await ThreadPost.query()
         .where('ethreadethreadid', thread.ethreadid)
@@ -157,6 +162,16 @@ mobileCommentService.getAllComments = async (page, size, threadId, user) => {
     }))
 
     return ServiceHelper.toPageObj(page, size, threadPostPage)
+
+}
+
+mobileCommentService.getCommentById = async (commentId) => {
+
+    return ThreadPost.query()
+        .modify('baseAttributes')
+        .where('ethreadpostid', commentId)
+        .withGraphFetched('thread(baseAttributes)')
+        .first()
 
 }
 
