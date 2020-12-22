@@ -90,7 +90,7 @@ threadPostService.createPost = async (threadId, postDTO, user) => {
         .then(posts => posts.map(post => ({ euserid: post.ethreadpostcreateby })))
         .then(userIds => {
             userIds.push({ euserid: thread.ethreadcreateby })
-            return userIds.filter(user => user.euserid !== user.sub)
+            return userIds.filter(postedUser => postedUser.euserid !== user.sub)
         })
 
     return ThreadPost.transaction(async trx => {

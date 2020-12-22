@@ -37,8 +37,11 @@ notificationService.getAllNotification = async (page, size, user) => {
     if(!userInDB)
         return ServiceHelper.toEmptyPage(page, size)
 
+    const notificationSubQuery = Notification.query().where('eusereuserid', user.sub)
+        .orderBy('enotificationcreatetime', 'DESC')
+
     return Notification.relatedQuery('notificationBody')
-    .for(Notification.query().where('eusereuserid', user.sub))
+    .for(notificationSubQuery)
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
