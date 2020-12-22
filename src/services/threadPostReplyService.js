@@ -4,6 +4,7 @@ const threadService = require('./threadService')
 const threadModeratorService = require('./threadModeratorService')
 const notificationService = require('./notificationService')
 const NotificationEnum = require('../models/enum/NotificationEnum')
+const userService = require('./userService')
 const { UnsupportedOperationError } = require('../models/errors')
 
 const threadPostReplyService = {}
@@ -11,7 +12,8 @@ const threadPostReplyService = {}
 const ErrorEnum = {
     POST_NOT_FOUND: 'POST_NOT_FOUND',
     REPLY_NOT_FOUND: 'REPLY_NOT_FOUND',
-    FORBIDDEN_ACTION: 'FORBIDDEN_ACTION'
+    FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
+    USER_NOT_FOUND: 'USER_NOT_FOUND'
 }
 
 threadPostReplyService.getAllByThreadPostId = async (threadPostId, user) => {
@@ -65,14 +67,17 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
 
     if (thread.ethreadlock) throw new UnsupportedOperationError(ErrorEnum.THREAD_LOCKED)
 
+    const foundUser = await userService.getSingleUserById(user.sub)
+        .catch(() => new UnsupportedOperationError(ErrorEnum.USER_NOT_FOUND));
+
     replyDTO.ethreadethreadid = post.ethreadethreadid
     replyDTO.ethreadpostethreadpostid = threadPostId
 
-    const replyEnum = NotificationEnum.forumPostReply
+    const replyEnum = NotificationEnum.forumPost
     const createAction = replyEnum.actions.reply
 
     const notificationObj = await notificationService
-        .buildNotificationEntity(post.ethreadpostid, replyEnum.type, createAction.title, createAction.message, createAction.title)
+        .buildNotificationEntity(post.ethreadpostid, replyEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
 
     const userIds = []
     userIds.push({ euserid: post.ethreadpostcreateby })
