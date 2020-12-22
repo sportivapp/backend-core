@@ -12,6 +12,7 @@ const ErrorEnum = {
     CLASS_USER_NOT_FOUND: 'CLASS_USER_NOT_FOUND',
     CLASS_NOT_IN_ORGANIZATION: 'CLASS_NOT_IN_ORGANIZATION',
     STATUS_INVALID: 'STATUS_INVALID',
+    ONE_OR_MORE_CLASS_USER_NOT_FOUND: 'ONE_OR_MORE_CLASS_USER_NOT_FOUND',
 }
 
 classUserService.getRegisteredUsersByClassId = async (page, size, classId) => {
