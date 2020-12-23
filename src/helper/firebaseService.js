@@ -14,6 +14,8 @@ firebaseService.pushNotification = async (targetUserId, notificationTitle, notif
         databaseURL: databaseUrl
     });
 
+    console.log(firebaseAdmin);
+
     const topic = `NotificationUser~${targetUserId}`
 
     const message = {
