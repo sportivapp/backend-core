@@ -10,11 +10,8 @@ require('dotenv').config();
 const app = express();
 const routes = require('./routes/v1');
 const schedulerService = require('./services/schedulerService')
-const firebaseAdmin = require('firebase-admin');
 const errorHandler = require('./middlewares/errorHandler');
 const PathNotFoundError = require('./models/errors/PathNotFoundError')
-
-const databaseUrl = process.env.FIREBASE_URL || 'https://sportiv-development.firebaseio.com'
 
 app.use(cors());
 app.use((_, res, next) => {
@@ -60,13 +57,6 @@ app.use((_, __, ___) => {
 // });
 
 app.use(errorHandler)
-
-const serviceAccount = require(process.env.FIREBASE_KEY_DIRECTORY);
-
-firebaseAdmin.initializeApp({
-    credential: firebaseAdmin.credential.cert(serviceAccount),
-    databaseURL: databaseUrl
-});
 
 const httpPORT = process.env.PORT || 5100;
 const httpServer = app.listen(httpPORT, function() {
