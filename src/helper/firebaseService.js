@@ -5,7 +5,14 @@ const firebaseService = {}
 
 firebaseService.pushNotification = async (targetUserId, notificationTitle, notificationBody) => {
 
-    console.log(firebaseAdmin);
+    const databaseUrl = process.env.FIREBASE_URL || 'https://sportiv-development.firebaseio.com'
+
+    const serviceAccount = require(process.env.FIREBASE_KEY_DIRECTORY);
+
+    firebaseAdmin.initializeApp({
+        credential: firebaseAdmin.credential.cert(serviceAccount),
+        databaseURL: databaseUrl
+    });
 
     const topic = `NotificationUser~${targetUserId}`
 
