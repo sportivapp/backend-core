@@ -14,7 +14,7 @@ const firebaseAdmin = require('firebase-admin');
 const errorHandler = require('./middlewares/errorHandler');
 const PathNotFoundError = require('./models/errors/PathNotFoundError')
 
-const databaseUrl = process.env.FIREBASE_URL || 'https://notification-sportiv.firebaseio.com'
+const databaseUrl = process.env.FIREBASE_URL || 'https://sportiv-development.firebaseio.com'
 
 app.use(cors());
 app.use((_, res, next) => {
