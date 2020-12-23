@@ -38,13 +38,11 @@ notificationService.getAllNotification = async (page, size, user) => {
     if(!userInDB)
         return ServiceHelper.toEmptyPage(page, size)
 
-    const notificationSubQuery = Notification.query().where('eusereuserid', user.sub)
-        .orderBy('enotificationcreatetime', 'DESC')
-
     return Notification.relatedQuery('notificationBody')
-    .for(notificationSubQuery)
-    .whereIn('enotificationbodyentitytype', [NotificationEnum.forum.type, NotificationEnum.forumPost.type])
+    .for(Notification.query().where('eusereuserid', user.sub))
     .withGraphFetched('sender(idAndName).file(baseAttributes)')
+    .whereIn('enotificationbodyentitytype', [NotificationEnum.forum.type, NotificationEnum.forumPost.type])
+    .orderBy('enotificationbodycreatetime', 'DESC')
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
