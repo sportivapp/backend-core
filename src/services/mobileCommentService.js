@@ -6,6 +6,7 @@ const mobileForumService = require('../services/mobileForumService')
 const notificationService = require('./notificationService')
 const NotificationEnum = require('../models/enum/NotificationEnum')
 const userService = require('./userService')
+const threadService = require('./threadService');
 
 const mobileCommentService = {}
 
@@ -208,5 +209,13 @@ mobileCommentService.getThreadIdsByUserIdAndThreadPostIds = async (userId, threa
         .then(threadPosts => threadPosts.map(threadPost => threadPost.ethreadethreadid))
 
 }}
+
+mobileCommentService.getThreadDetailByCommentId = async (commentId) => {
+
+    const comment = await mobileCommentService.getCommentById(commentId);
+
+    return threadService.getThreadById(comment.ethreadethreadid);
+
+}
 
 module.exports = mobileCommentService
