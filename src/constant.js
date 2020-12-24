@@ -205,7 +205,7 @@ module.exports = {
             list: '/comment',
             id: '/comment/:commentId',
             threadPostId: '/thread/:threadId/comments/:commentId',
-            idThread: '/comment/:commentId/thread'
+            idThread: '/comment/:commentId/thread',
         },
         thread: {
             list: '/thread',
