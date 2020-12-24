@@ -68,19 +68,4 @@ threadPostController.deletePost = async (req, res, next) => {
 
 }
 
-threadPostController.getThreadDetailByCommentId = async (req, res, next) => {
-
-    const { commentId } = req.params;
-
-    try {
-
-        const result = await threadPostService.getThreadDetailByCommentId(commentId);
-        return res.status(200).json(ResponseHelper.toBaseResponse(result));
-
-    } catch(e) {
-        next(e);
-    }
-
-}
-
 module.exports = threadPostController
