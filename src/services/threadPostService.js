@@ -144,4 +144,12 @@ threadPostService.deletePost = async (commentId, user) => {
 
 }
 
+threadPostService.getThreadDetailByCommentId = async (commentId) => {
+
+    const comment = await threadPostService.getPostById(commentId);
+
+    return threadService.getThreadById(comment.ethreadethreadid);
+
+}
+
 module.exports = threadPostService
