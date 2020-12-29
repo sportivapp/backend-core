@@ -80,14 +80,18 @@ mobileCommentService.createComment = async (commentDTO, user) => {
     const notificationObj = await notificationService
         .buildNotificationEntity(thread.ethreadid, postEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
 
-    const userIds = await ThreadPost.query()
-        .where('ethreadethreadid', thread.ethreadid)
-        .distinct('ethreadpostcreateby')
-        .then(posts => posts.map(post => ({ euserid: post.ethreadpostcreateby })))
-        .then(userIds => {
-            userIds.push({ euserid: thread.ethreadcreateby })
-            return userIds.filter(postedUser => postedUser.euserid !== user.sub)
-        })
+    const userIds = []
+    userIds.push({ euserid: thread.ethreadcreateby })
+
+    // this logic is to send notification to all other commentators
+    // const userIds = await ThreadPost.query()
+    //     .where('ethreadethreadid', thread.ethreadid)
+    //     .distinct('ethreadpostcreateby')
+    //     .then(posts => posts.map(post => ({ euserid: post.ethreadpostcreateby })))
+    //     .then(userIds => {
+    //         userIds.push({ euserid: thread.ethreadcreateby })
+    //         return userIds.filter(postedUser => postedUser.euserid !== user.sub)
+    //     })
 
     return ThreadPost.transaction(async trx => {
 
