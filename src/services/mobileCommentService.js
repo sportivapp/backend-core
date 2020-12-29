@@ -82,6 +82,9 @@ mobileCommentService.createComment = async (commentDTO, user) => {
 
     const userIds = await ThreadPost.query()
         .where('ethreadethreadid', thread.ethreadid)
+        .then(posts => posts.filter(function(value, index, self) {
+            return self.indexOf(value) === index;
+        }))
         .then(posts => posts.map(post => ({ euserid: post.ethreadpostcreateby })))
         .then(userIds => {
             userIds.push({ euserid: thread.ethreadcreateby })
