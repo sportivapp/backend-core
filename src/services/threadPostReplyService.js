@@ -78,23 +78,15 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
 
     const notificationObj = await notificationService
         .buildNotificationEntity(post.ethreadpostid, replyEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
-
-    console.log(post);
-    console.log(thread);
-
     // why the f is userids an object ?
     let userIds = []
     userIds.push({ euserid: post.ethreadpostcreateby });
     userIds.push({ euserid: thread.ethreadcreateby });
 
-    console.log(userIds);
-
     // Remove self
     userIds = userIds.filter(userId => {
         return userId.euserid !== user.sub;
     });
-
-    console.log(userIds);
 
     return ThreadPostReply.transaction(async trx => {
 
