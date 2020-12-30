@@ -77,7 +77,7 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
     const replyEnum = NotificationEnum.forumPost
     const replyCreateAction = replyEnum.actions.reply
 
-    const commentNotificationObj = commentNotificationObj = await notificationService
+    const commentNotificationObj = await notificationService
         .buildNotificationEntity(post.ethreadpostid, replyEnum.type, replyCreateAction.title, replyCreateAction.message(foundUser.eusername), replyCreateAction.title)
 
     // If comment creator is thread creator, do not push the id
