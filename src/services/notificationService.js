@@ -88,6 +88,9 @@ notificationService.saveNotification = async (notificationObj, loggedInUser, tar
 
 notificationService.saveNotificationWithTransaction = async (notificationObj, loggedInUser, targetUserIds, trx) => {
 
+    if (targetUserIds.length === 0)
+        return
+
     const notificationBodyDTO = {
         enotificationbodyentityid: notificationObj.enotificationbodyentityid,
         enotificationbodyentitytype: notificationObj.enotificationbodyentitytype,

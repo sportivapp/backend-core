@@ -77,27 +77,33 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
     const replyEnum = NotificationEnum.forumPost
     const replyCreateAction = replyEnum.actions.reply
 
-    const commentNotificationObj = await notificationService
+    const commentNotificationObj = commentNotificationObj = await notificationService
         .buildNotificationEntity(post.ethreadpostid, replyEnum.type, replyCreateAction.title, replyCreateAction.message(foundUser.eusername), replyCreateAction.title)
 
-    // To thread creator
-    const postEnum = NotificationEnum.forum
-    const postCreateAction = postEnum.actions.comment
+    // If comment creator is thread creator, do not push the id
+    // The saveNotificationWithTransaction function will return if targetIds empty
+    if (post.ethreadpostcreateby !== thread.ethreadcreateby) {
 
-    const threadNotificationObj = await notificationService
-        .buildNotificationEntity(thread.ethreadid, postEnum.type, postCreateAction.title, postCreateAction.message(foundUser.eusername), postCreateAction.title)
-    
-    // why the f is userids an object ?
+        // why the f is userids an object ?
+        commentUserIds.push({ euserid: post.ethreadpostcreateby });
+
+    }
     let commentUserIds = [];
-    commentUserIds.push({ euserid: post.ethreadpostcreateby });
-
-    let threadUserIds = [];
-    threadUserIds.push({ euserid: thread.ethreadcreateby });
 
     // Remove self
     commentUserIds = commentUserIds.filter(userId => {
         return userId.euserid !== user.sub;
     });
+
+    // To thread creator
+    const postEnum = NotificationEnum.forum
+    const postCreateAction = postEnum.actions.reply
+
+    const threadNotificationObj = await notificationService
+        .buildNotificationEntity(thread.ethreadid, postEnum.type, postCreateAction.title, postCreateAction.message(foundUser.eusername), postCreateAction.title)
+
+    let threadUserIds = [];
+    threadUserIds.push({ euserid: thread.ethreadcreateby });
 
     // Remove self
     threadUserIds = threadUserIds.filter(userId => {
