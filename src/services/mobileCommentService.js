@@ -80,8 +80,14 @@ mobileCommentService.createComment = async (commentDTO, user) => {
     const notificationObj = await notificationService
         .buildNotificationEntity(thread.ethreadid, postEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
 
-    const userIds = []
+    // why the f is userids an object ?
+    let userIds = []
     userIds.push({ euserid: thread.ethreadcreateby })
+
+    // Remove self
+    userIds = userIds.filter(userId => {
+        return userId.euserid !== user.sub;
+    });
 
     // this logic is to send notification to all other commentators
     // const userIds = await ThreadPost.query()
