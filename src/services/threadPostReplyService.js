@@ -75,17 +75,17 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
 
     // To comment creator
     const replyEnum = NotificationEnum.forumPost
-    const createAction = replyEnum.actions.reply
+    const replyCreateAction = replyEnum.actions.reply
 
     const commentNotificationObj = await notificationService
-        .buildNotificationEntity(post.ethreadpostid, replyEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
+        .buildNotificationEntity(post.ethreadpostid, replyEnum.type, replyCreateAction.title, createAction.message(foundUser.eusername), createAction.title)
 
     // To thread creator
     const postEnum = NotificationEnum.forum
-    const createAction = postEnum.actions.comment
+    const postCreateAction = postEnum.actions.comment
 
     const threadNotificationObj = await notificationService
-        .buildNotificationEntity(thread.ethreadid, postEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
+        .buildNotificationEntity(thread.ethreadid, postEnum.type, postCreateAction.title, createAction.message(foundUser.eusername), createAction.title)
     
     // why the f is userids an object ?
     let commentUserIds = [];
