@@ -84,10 +84,14 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
     userIds.push({ euserid: post.ethreadpostcreateby });
     userIds.push({ euserid: thread.ethreadcreateby });
 
+    console.log(userIds);
+
     // Remove self
     userIds = userIds.filter(userId => {
         return userId.euserid !== user.sub;
     });
+
+    console.log(userIds);
 
     return ThreadPostReply.transaction(async trx => {
 
