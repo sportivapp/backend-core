@@ -73,24 +73,41 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
     replyDTO.ethreadethreadid = post.ethreadethreadid
     replyDTO.ethreadpostethreadpostid = threadPostId
 
+    // To comment creator
     const replyEnum = NotificationEnum.forumPost
     const createAction = replyEnum.actions.reply
 
-    const notificationObj = await notificationService
+    const commentNotificationObj = await notificationService
         .buildNotificationEntity(post.ethreadpostid, replyEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
+
+    // To thread creator
+    const postEnum = NotificationEnum.forum
+    const createAction = postEnum.actions.comment
+
+    const threadNotificationObj = await notificationService
+        .buildNotificationEntity(thread.ethreadid, postEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
+    
     // why the f is userids an object ?
-    let userIds = []
-    userIds.push({ euserid: post.ethreadpostcreateby });
-    userIds.push({ euserid: thread.ethreadcreateby });
+    let commentUserIds = [];
+    commentUserIds.push({ euserid: post.ethreadpostcreateby });
+
+    let threadUserIds = [];
+    threadUserIds.push({ euserid: thread.ethreadcreateby });
 
     // Remove self
-    userIds = userIds.filter(userId => {
+    commentUserIds = commentUserIds.filter(userId => {
+        return userId.euserid !== user.sub;
+    });
+
+    // Remove self
+    threadUserIds = threadUserIds.filter(userId => {
         return userId.euserid !== user.sub;
     });
 
     return ThreadPostReply.transaction(async trx => {
 
-        notificationService.saveNotificationWithTransaction(notificationObj, user, userIds, trx)
+        notificationService.saveNotificationWithTransaction(commentNotificationObj, user, commentUserIds, trx);
+        notificationService.saveNotificationWithTransaction(threadNotificationObj, user, threadUserIds, trx);
 
         return ThreadPostReply.query().insertToTable(replyDTO, user.sub)
     })
