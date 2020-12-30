@@ -80,7 +80,7 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
         .buildNotificationEntity(post.ethreadpostid, replyEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
 
     // why the f is userids an object ?
-    const userIds = []
+    let userIds = []
     userIds.push({ euserid: post.ethreadpostcreateby });
     userIds.push({ euserid: thread.ethreadcreateby });
 
