@@ -35,10 +35,12 @@ controller.getUsersPendingListByClassId = async (req, res, next) => {
 
 controller.processRegistration = async (req, res, next) => {
 
-    const { classId, userId, status } = req.body
+    const { userClassIds } = req.body
+    const { classId } = req.params;
+    const { status } = req.query;
 
     try {
-        const result = await classUserService.processRegistration(classId, status.toUpperCase(), userId, req.user)
+        const result = await classUserService.processRegistration(classId, status.toUpperCase(), userClassIds, req.user)
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)

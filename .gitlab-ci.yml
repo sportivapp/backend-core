@@ -31,6 +31,6 @@ deploy:
       - chmod 700 ~/.ssh
       - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
-    - ssh -tt $SERVER_USER@$SERVER_HOST "cd /data1/opt/emtiv-backend && sudo git pull http://$GIT_USER:$GIT_PASSWORD@103.253.113.215:8090/emtiv/backend/emtiv-backend.git development && sudo npm install && sudo pm2 reload emtiv-backend && exit"
+    - ssh -tt $SERVER_USER@$SERVER_HOST "cd /opt/emtiv-backend && sudo git pull http://$GIT_USER:$GIT_PASSWORD@103.253.113.215:8091/emtiv/backend/emtiv-backend.git development && sudo npm install && sudo pm2 reload emtiv-backend && exit"
   only:
     - development

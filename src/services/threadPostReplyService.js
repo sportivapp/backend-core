@@ -2,6 +2,9 @@ const ThreadPostReply = require('../models/ThreadPostReply')
 const threadPostService = require('./threadPostService')
 const threadService = require('./threadService')
 const threadModeratorService = require('./threadModeratorService')
+const notificationService = require('./notificationService')
+const NotificationEnum = require('../models/enum/NotificationEnum')
+const userService = require('./userService')
 const { UnsupportedOperationError } = require('../models/errors')
 
 const threadPostReplyService = {}
@@ -9,7 +12,8 @@ const threadPostReplyService = {}
 const ErrorEnum = {
     POST_NOT_FOUND: 'POST_NOT_FOUND',
     REPLY_NOT_FOUND: 'REPLY_NOT_FOUND',
-    FORBIDDEN_ACTION: 'FORBIDDEN_ACTION'
+    FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
+    USER_NOT_FOUND: 'USER_NOT_FOUND'
 }
 
 threadPostReplyService.getAllByThreadPostId = async (threadPostId, user) => {
@@ -63,10 +67,56 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
 
     if (thread.ethreadlock) throw new UnsupportedOperationError(ErrorEnum.THREAD_LOCKED)
 
+    const foundUser = await userService.getSingleUserById(user.sub)
+        .catch(() => new UnsupportedOperationError(ErrorEnum.USER_NOT_FOUND));
+
     replyDTO.ethreadethreadid = post.ethreadethreadid
     replyDTO.ethreadpostethreadpostid = threadPostId
 
-    return ThreadPostReply.query().insertToTable(replyDTO, user.sub)
+    // To comment creator
+    const replyEnum = NotificationEnum.forumPost
+    const replyCreateAction = replyEnum.actions.reply
+
+    const commentNotificationObj = await notificationService
+        .buildNotificationEntity(post.ethreadpostid, replyEnum.type, replyCreateAction.title, replyCreateAction.message(foundUser.eusername), replyCreateAction.title)
+
+    let commentUserIds = [];
+    // If comment creator is thread creator, do not push the id
+    // The saveNotificationWithTransaction function will return if targetIds empty
+    if (post.ethreadpostcreateby !== thread.ethreadcreateby) {
+
+        // why the f is userids an object ?
+        commentUserIds.push({ euserid: post.ethreadpostcreateby });
+
+    }
+
+    // Remove self
+    commentUserIds = commentUserIds.filter(userId => {
+        return userId.euserid !== user.sub;
+    });
+
+    // To thread creator
+    const postEnum = NotificationEnum.forum
+    const postCreateAction = postEnum.actions.reply
+
+    const threadNotificationObj = await notificationService
+        .buildNotificationEntity(thread.ethreadid, postEnum.type, postCreateAction.title, postCreateAction.message(foundUser.eusername), postCreateAction.title)
+
+    let threadUserIds = [];
+    threadUserIds.push({ euserid: thread.ethreadcreateby });
+
+    // Remove self
+    threadUserIds = threadUserIds.filter(userId => {
+        return userId.euserid !== user.sub;
+    });
+
+    return ThreadPostReply.transaction(async trx => {
+
+        notificationService.saveNotificationWithTransaction(commentNotificationObj, user, commentUserIds, trx);
+        notificationService.saveNotificationWithTransaction(threadNotificationObj, user, threadUserIds, trx);
+
+        return ThreadPostReply.query().insertToTable(replyDTO, user.sub)
+    })
 
 }
 

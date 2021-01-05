@@ -3,6 +3,10 @@ const ThreadPost = require('../models/ThreadPost')
 const ThreadModerator = require('../models/ThreadModerator')
 const { UnsupportedOperationError } = require('../models/errors')
 const mobileForumService = require('../services/mobileForumService')
+const notificationService = require('./notificationService')
+const NotificationEnum = require('../models/enum/NotificationEnum')
+const userService = require('./userService')
+const threadService = require('./threadService');
 
 const mobileCommentService = {}
 
@@ -10,7 +14,8 @@ const UnsupportedOperationErrorEnum = {
     FORBIDDEN_ACTION: 'FORBIDDEN_ACTION',
     COMMENT_NOT_EXISTS: 'COMMENT_NOT_EXIST',
     THREAD_NOT_EXISTS: 'THREAD_NOT_EXISTS',
-    THREAD_LOCKED: 'THREAD_LOCKED'
+    THREAD_LOCKED: 'THREAD_LOCKED',
+    USER_NOT_FOUND: 'USER_NOT_FOUND'
 }
 
 // Change name from commentId to threadPostId here to match the column name in migration table
@@ -55,6 +60,8 @@ mobileCommentService.createComment = async (commentDTO, user) => {
 
     const threadExist = await mobileForumService.checkThread(commentDTO.ethreadethreadid)
 
+    const thread = await mobileForumService.getThreadById(commentDTO.ethreadethreadid)
+
     if(!threadExist) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_NOT_EXISTS)
 
     if (threadExist.ethreadlock) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_LOCKED)
@@ -64,8 +71,40 @@ mobileCommentService.createComment = async (commentDTO, user) => {
         commentDTO.efileefileid = null
     }
 
-    return ThreadPost.query()
-    .insertToTable(commentDTO, user.sub)
+    const foundUser = await userService.getSingleUserById(user.sub)
+        .catch(() => new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_FOUND));
+
+    const postEnum = NotificationEnum.forum
+    const createAction = postEnum.actions.comment
+
+    const notificationObj = await notificationService
+        .buildNotificationEntity(thread.ethreadid, postEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
+
+    // why the f is userids an object ?
+    let userIds = []
+    userIds.push({ euserid: thread.ethreadcreateby })
+
+    // Remove self
+    userIds = userIds.filter(userId => {
+        return userId.euserid !== user.sub;
+    });
+
+    // this logic is to send notification to all other commentators
+    // const userIds = await ThreadPost.query()
+    //     .where('ethreadethreadid', thread.ethreadid)
+    //     .distinct('ethreadpostcreateby')
+    //     .then(posts => posts.map(post => ({ euserid: post.ethreadpostcreateby })))
+    //     .then(userIds => {
+    //         userIds.push({ euserid: thread.ethreadcreateby })
+    //         return userIds.filter(postedUser => postedUser.euserid !== user.sub)
+    //     })
+
+    return ThreadPost.transaction(async trx => {
+
+        notificationService.saveNotificationWithTransaction(notificationObj, user, userIds, trx)
+
+        return ThreadPost.query().insertToTable(commentDTO, user.sub)
+    })
 
 }
 
@@ -138,6 +177,16 @@ mobileCommentService.getAllComments = async (page, size, threadId, user) => {
 
 }
 
+mobileCommentService.getCommentById = async (commentId) => {
+
+    return ThreadPost.query()
+        .modify('baseAttributes')
+        .where('ethreadpostid', commentId)
+        .withGraphFetched('thread(baseAttributes)')
+        .first()
+
+}
+
 mobileCommentService.deleteComment = async (commentId, user) => {
 
     const comment = await ThreadPost.query()
@@ -171,5 +220,13 @@ mobileCommentService.getThreadIdsByUserIdAndThreadPostIds = async (userId, threa
         .then(threadPosts => threadPosts.map(threadPost => threadPost.ethreadethreadid))
 
 }}
+
+mobileCommentService.getThreadDetailByCommentId = async (commentId) => {
+
+    const comment = await mobileCommentService.getCommentById(commentId);
+
+    return threadService.getThreadById(comment.ethreadethreadid);
+
+}
 
 module.exports = mobileCommentService
