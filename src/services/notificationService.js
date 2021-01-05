@@ -1,5 +1,6 @@
 const Notification = require('../models/Notification')
 const NotificationBody = require('../models/NotificationBody')
+const NotificationEnum = require('../models/enum/NotificationEnum')
 const User = require('../models/User')
 const firebaseService = require('../helper/firebaseService')
 const ServiceHelper = require('../helper/ServiceHelper');
@@ -39,6 +40,9 @@ notificationService.getAllNotification = async (page, size, user) => {
 
     return Notification.relatedQuery('notificationBody')
     .for(Notification.query().where('eusereuserid', user.sub))
+    .withGraphFetched('sender(idAndName).file(baseAttributes)')
+    .whereIn('enotificationbodyentitytype', [NotificationEnum.forum.type, NotificationEnum.forumPost.type])
+    .orderBy('enotificationbodycreatetime', 'DESC')
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
@@ -84,6 +88,9 @@ notificationService.saveNotification = async (notificationObj, loggedInUser, tar
 
 notificationService.saveNotificationWithTransaction = async (notificationObj, loggedInUser, targetUserIds, trx) => {
 
+    if (targetUserIds.length === 0)
+        return
+
     const notificationBodyDTO = {
         enotificationbodyentityid: notificationObj.enotificationbodyentityid,
         enotificationbodyentitytype: notificationObj.enotificationbodyentitytype,
@@ -105,7 +112,7 @@ notificationService.saveNotificationWithTransaction = async (notificationObj, lo
         return Notification.query(trx)
         .insertToTable(notificationDTO, loggedInUser.sub)
         .then(resultArr => resultArr.map(notification => firebaseService
-            .pushNotification(notification.eusereuserid, notificationBody.enotificationbodytitle, notificationBody.enotificationbodymessage)))
+            .pushNotification(notification.eusereuserid, notificationBody.enotificationbodytitle, notificationBody)))
         .then(pushNotificationPromises => Promise.all(pushNotificationPromises))
     })
 
