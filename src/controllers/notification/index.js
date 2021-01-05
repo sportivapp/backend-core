@@ -33,4 +33,29 @@ controller.deleteNotificationBody = async (req, res, next) => {
 
 }
 
+controller.createNotification = async (req, res, next) => {
+
+    const notificationDTO = {
+        enotificationbodyentityid: entityId,
+        enotificationbodyentitytype: entityType,
+        enotificationbodyaction: action,
+        enotificationbodytitle: title,
+        enotificationbodymessage: message,
+    } = req.body;
+
+    const user = req.body.user;
+    const userIds = req.body.userIds;
+
+    try {
+
+        const result = await notificationService.createNotification(notificationDTO, user, userIds);
+
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = controller;
