@@ -35,16 +35,15 @@ controller.deleteNotificationBody = async (req, res, next) => {
 
 controller.createNotification = async (req, res, next) => {
 
+    const { entityId, entityType, action, title, message, user, userIds } = req.body;
+
     const notificationDTO = {
         enotificationbodyentityid: entityId,
         enotificationbodyentitytype: entityType,
         enotificationbodyaction: action,
         enotificationbodytitle: title,
         enotificationbodymessage: message,
-    } = req.body;
-
-    const user = req.body.user;
-    const userIds = req.body.userIds;
+    };
 
     try {
 
