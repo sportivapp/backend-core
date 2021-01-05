@@ -118,4 +118,28 @@ notificationService.saveNotificationWithTransaction = async (notificationObj, lo
 
 }
 
+notificationService.createNotification = async (notificationDTO, user, targetUserIds) => {
+
+    if (targetUserIds.length === 0)
+        return
+
+    notificationDTO.enotificationbodysenderid = user.sub
+    
+    return NotificationBody.query()
+    .insertToTable(notificationDTO, user.sub)
+    .then(notification => {
+        const notificationDTO = targetUserIds.map(targetUserId => ({
+            eusereuserid: targetUserId,
+            enotificationbodyenotificationbodyid: notification.enotificationbodyid
+        }))
+
+        return Notification.query()
+        .insertToTable(notificationDTO, user.sub)
+        .then(resultArr => resultArr.map(notification => firebaseService
+            .pushNotification(notification.eusereuserid, notification.enotificationbodytitle, notification)))
+        .then(pushNotificationPromises => Promise.all(pushNotificationPromises))
+    })
+
+}
+
 module.exports = notificationService;
