@@ -129,7 +129,7 @@ notificationService.createNotification = async (notificationDTO, user, targetUse
     
     return NotificationBody.query()
     .insertToTable(notificationDTO, user.sub)
-    .then(notification => {
+    .then(notificationBody => {
         const notificationDTO = targetUserIds.map(targetUserId => ({
             eusereuserid: targetUserId,
             enotificationbodyenotificationbodyid: notification.enotificationbodyid
@@ -138,7 +138,7 @@ notificationService.createNotification = async (notificationDTO, user, targetUse
         return Notification.query()
         .insertToTable(notificationDTO, user.sub)
         .then(resultArr => resultArr.map(notification => firebaseService
-            .pushNotification(notification.eusereuserid, notification.enotificationbodytitle, notification)))
+            .pushNotification(notification.eusereuserid, notification.enotificationbodytitle, notificationBody)))
         .then(pushNotificationPromises => Promise.all(pushNotificationPromises))
     })
 
