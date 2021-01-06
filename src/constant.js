@@ -186,7 +186,8 @@ module.exports = {
             generate: '/user-news/:newsId/link'
         },
         notification: {
-            list: '/notification'
+            list: '/notification',
+            internalList: '/internal/notification'
         },
         license: {
             id : '/license/:licenseId'
