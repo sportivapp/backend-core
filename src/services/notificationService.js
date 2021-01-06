@@ -120,6 +120,8 @@ notificationService.saveNotificationWithTransaction = async (notificationObj, lo
 
 notificationService.createNotification = async (notificationDTO, user, targetUserIds) => {
 
+    console.log(notificationDTO);
+
     if (targetUserIds.length === 0)
         return
 
