@@ -43,6 +43,7 @@ controller.createNotification = async (req, res, next) => {
         enotificationbodyaction: action,
         enotificationbodytitle: title,
         enotificationbodymessage: message,
+        enotificationbodysenderid: user.sub
     };
 
     console.log(req.body);
