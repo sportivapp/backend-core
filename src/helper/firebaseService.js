@@ -6,8 +6,6 @@ const firebaseService = {}
 firebaseService.pushNotification = async (targetUserId, notificationTitle, notificationBody) => {
 
     const topic = `NotificationUser~${targetUserId}`
-
-    console.log(notificationBody);
     
 	notificationBody.enotificationbodyentityid = notificationBody.enotificationbodyentityid.toString();
 	notificationBody.enotificationbodysenderid = notificationBody.enotificationbodysenderid.toString();

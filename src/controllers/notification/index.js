@@ -45,9 +45,7 @@ controller.createNotification = async (req, res, next) => {
         enotificationbodymessage: message,
         enotificationbodysenderid: user.sub
     };
-
-    console.log(req.body);
-
+    
     try {
 
         const result = await notificationService.createNotification(notificationDTO, user, userIds);
