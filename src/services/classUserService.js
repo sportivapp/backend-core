@@ -1,8 +1,8 @@
 const ClassUserMapping = require('../models/ClassUserMapping')
 const Class = require('../models/Class')
-const CompanyUserMapping = require('../models/CompanyUserMapping')
 const ClassUserStatusEnum = require('../models/enum/ClassUserStatusEnum')
 const ServiceHelper = require('../helper/ServiceHelper')
+const { raw } = require('objection')
 const { UnsupportedOperationError } = require('../models/errors')
 
 const classUserService = {}
@@ -15,17 +15,17 @@ const ErrorEnum = {
     ONE_OR_MORE_CLASS_USER_NOT_FOUND: 'ONE_OR_MORE_CLASS_USER_NOT_FOUND',
 }
 
-classUserService.getRegisteredUsersByClassId = async (page, size, classId) => {
+classUserService.getRegisteredUsersByClassId = async (page, size, keyword, classId) => {
 
     return ClassUserMapping.query()
-    .where('eclasseclassid', classId)
-    .where('eclassusermappingstatus', ClassUserStatusEnum.APPROVED)
-    .withGraphFetched('user(baseAttributes)')
-    .page(page, size)
-    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+        .where('eclasseclassid', classId)
+        .where('eclassusermappingstatus', ClassUserStatusEnum.APPROVED)
+        .where(raw('lower("eusername")'), 'like', `%${keyword.toLowerCase()}%`)
+        .withGraphFetched('user(baseAttributes).file(baseAttributes)')
+        .page(page, size)
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
 }
-
 classUserService.getUsersPendingListByClassId = async (page, size, classId, user) => {
 
     const classInCompany = await Class.query()
