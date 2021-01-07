@@ -17,15 +17,18 @@ const ErrorEnum = {
 
 classUserService.getRegisteredUsersByClassId = async (page, size, keyword, classId) => {
 
-    return ClassUserMapping.query()
-        .where('eclasseclassid', classId)
-        .where('eclassusermappingstatus', ClassUserStatusEnum.APPROVED)
+    return ClassUserMapping.relatedQuery('user')
+        .for(ClassUserMapping.query()
+            .where('eclasseclassid', classId)
+            .where('eclassusermappingstatus', ClassUserStatusEnum.APPROVED))
         .where(raw('lower("eusername")'), 'like', `%${keyword.toLowerCase()}%`)
-        .withGraphFetched('user(baseAttributes).file(baseAttributes)')
+        .withGraphFetched('file(baseAttributes)')
+        .modify('baseAttributes')
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
 }
+
 classUserService.getUsersPendingListByClassId = async (page, size, classId, user) => {
 
     const classInCompany = await Class.query()
