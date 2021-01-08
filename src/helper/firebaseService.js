@@ -26,7 +26,8 @@ firebaseService.pushNotification = async (targetUserId, notificationTitle, notif
         const messaging = firebaseAdmin.messaging()
         messaging.sendToTopic(topic, message)
             .then(success => {
-                return loggingService.sendNotificationMessage(topic, message, success)
+                console.log(success);
+                return loggingService.sendNotificationMessage(topic, message, success);
             })
             .catch(err => {
                 const error = new Error(`Failed on sending message in topic: ${topic}, details: ${err}`)
