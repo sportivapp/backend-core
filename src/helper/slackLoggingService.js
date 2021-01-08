@@ -90,7 +90,7 @@ Messages.setLogMessage = ( error ) => {
  * @param messageBody
  * @return {Promise}
  */
-Messages.sendSlackMessage = async (messageBody, type) => {
+Messages.sendSlackMessage = async (messageBody, type = 'LOG') => {
     // make sure the incoming message body can be parsed into valid JSON
     try {
       messageBody = JSON.stringify(messageBody);
@@ -108,6 +108,7 @@ Messages.sendSlackMessage = async (messageBody, type) => {
         }
       };
   
+      console.log(type);
       let usedSlackUrl = slackUrl;
       if( type === 'NOTIFICATION' )
         usedSlackUrl = notificationSlackUrl;
