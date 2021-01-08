@@ -3,7 +3,7 @@ const https = require('https');
 Messages = {};
 
 const slackUrl = process.env.SLACK_URL || 'https://hooks.slack.com/services/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'
-const notificationSlackUrl = process.env.NOTIFICATION_SLACK_URL || ''
+const notificationSlackUrl = process.env.SLACK_NOTIFICATION_URL || ''
 
 // const userAccountNotification = {
 //     'username': 'SURYA WIBU', // This will appear as user name who posts the message
@@ -108,11 +108,9 @@ Messages.sendSlackMessage = async (messageBody, type = 'LOG') => {
         }
       };
   
-      console.log(type);
       let usedSlackUrl = slackUrl;
       if( type === 'NOTIFICATION' )
         usedSlackUrl = notificationSlackUrl;
-      console.log(usedSlackUrl);
 
       // actual request
       const req = https.request(usedSlackUrl, requestOptions, (res) => {
