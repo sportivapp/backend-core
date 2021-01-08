@@ -42,7 +42,7 @@ const notificationSlackUrl = process.env.NOTIFICATION_SLACK_URL || ''
 //     }]
 //   };
 
-Messages.sendNotificationMessage = ( topic, message, messageId ) => {
+Messages.setNotificationMessage = ( topic, message, messageId ) => {
 
   return userAccountNotification = {
     'username': 'NOTIFICATION BOT',
