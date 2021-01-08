@@ -109,7 +109,7 @@ Messages.sendSlackMessage = async (messageBody, type) => {
       };
   
       let usedSlackUrl = slackUrl;
-      if( type === 'NOTIFICATIOn' )
+      if( type === 'NOTIFICATION' )
         usedSlackUrl = notificationSlackUrl;
 
       // actual request
