@@ -53,7 +53,7 @@ Messages.setNotificationMessage = ( topic, message, success ) => {
             'color': '#eed140', // color of the attachments sidebar.
             'fields': [ // actual fields
                 {
-                    'type': success.messageId + ' : ' + topic,
+                    'title': success.messageId + ' : ' + topic,
                     'value': message,
                     'short': true,
                 },
