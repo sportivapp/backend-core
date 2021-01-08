@@ -42,7 +42,7 @@ const notificationSlackUrl = process.env.NOTIFICATION_SLACK_URL || ''
 //     }]
 //   };
 
-Messages.sendNotificationMessage = ( topic, message ) => {
+Messages.sendNotificationMessage = ( topic, message, messageId ) => {
 
   return userAccountNotification = {
     'username': 'NOTIFICATION BOT',
@@ -53,7 +53,7 @@ Messages.sendNotificationMessage = ( topic, message ) => {
             'color': '#eed140', // color of the attachments sidebar.
             'fields': [ // actual fields
                 {
-                    'type': topic,
+                    'type': messageId + ' : ' + topic,
                     'value': message,
                 },
             ],

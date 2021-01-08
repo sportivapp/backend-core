@@ -25,10 +25,9 @@ firebaseService.pushNotification = async (targetUserId, notificationTitle, notif
 
         const messaging = firebaseAdmin.messaging()
         messaging.sendToTopic(topic, message)
-            .then(success => console.log(success))
+            .then(success => loggingService.sendNotificationMessage(topic, message, success))
             .catch(ignored => {
                 const error = new Error(`Failed on sending message in topic: ${topic}, details: ${ignored}`)
-                loggingService.sendNotificationMessage(topic, message);
                 return loggingService.sendSlackMessage(loggingService.setLogMessage(error))
                     .then(ignored => false)
             })
