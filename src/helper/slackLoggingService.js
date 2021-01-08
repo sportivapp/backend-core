@@ -54,7 +54,7 @@ Messages.setNotificationMessage = ( topic, message, success ) => {
             'fields': [ // actual fields
                 {
                     'title': success.messageId + ' : ' + topic,
-                    'value': JSON.stringify(message),
+                    'value': JSON.stringify(message, null, 4),
                     'short': true,
                 },
             ],
