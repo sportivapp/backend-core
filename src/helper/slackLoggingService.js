@@ -42,7 +42,7 @@ const notificationSlackUrl = process.env.NOTIFICATION_SLACK_URL || ''
 //     }]
 //   };
 
-Messages.setNotificationMessage = ( topic, message, messageId ) => {
+Messages.setNotificationMessage = ( topic, message, success ) => {
 
   return userAccountNotification = {
     'username': 'NOTIFICATION BOT',
@@ -53,7 +53,7 @@ Messages.setNotificationMessage = ( topic, message, messageId ) => {
             'color': '#eed140', // color of the attachments sidebar.
             'fields': [ // actual fields
                 {
-                    'type': messageId + ' : ' + topic,
+                    'type': success.messageId + ' : ' + topic,
                     'value': message,
                 },
             ],
@@ -90,7 +90,7 @@ Messages.setLogMessage = ( error ) => {
  * @param messageBody
  * @return {Promise}
  */
-Messages.sendSlackMessage = async (messageBody) => {
+Messages.sendSlackMessage = async (messageBody, type) => {
     // make sure the incoming message body can be parsed into valid JSON
     try {
       messageBody = JSON.stringify(messageBody);
@@ -108,8 +108,12 @@ Messages.sendSlackMessage = async (messageBody) => {
         }
       };
   
+      let usedSlackUrl = slackUrl;
+      if( type === 'NOTIFICATIOn' )
+        usedSlackUrl = notificationSlackUrl;
+
       // actual request
-      const req = https.request(slackUrl, requestOptions, (res) => {
+      const req = https.request(usedSlackUrl, requestOptions, (res) => {
         let response = '';
   
   
