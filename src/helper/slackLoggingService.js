@@ -111,6 +111,7 @@ Messages.sendSlackMessage = async (messageBody, type) => {
       let usedSlackUrl = slackUrl;
       if( type === 'NOTIFICATION' )
         usedSlackUrl = notificationSlackUrl;
+      console.log(usedSlackUrl);
 
       // actual request
       const req = https.request(usedSlackUrl, requestOptions, (res) => {
