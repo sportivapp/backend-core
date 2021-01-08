@@ -3,6 +3,7 @@ const https = require('https');
 Messages = {};
 
 const slackUrl = process.env.SLACK_URL || 'https://hooks.slack.com/services/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'
+const notificationSlackUrl = process.env.NOTIFICATION_SLACK_URL || ''
 
 // const userAccountNotification = {
 //     'username': 'SURYA WIBU', // This will appear as user name who posts the message
@@ -40,6 +41,26 @@ const slackUrl = process.env.SLACK_URL || 'https://hooks.slack.com/services/T018
 //     ]
 //     }]
 //   };
+
+Messages.sendNotificationMessage = ( topic, message ) => {
+
+  return userAccountNotification = {
+    'username': 'NOTIFICATION BOT',
+    'text': 'NEW NOTIFICATION!',
+    'icon_emoji': ':japanese_goblin:', // User icon, you can also use custom icons here
+        'attachments': [
+            { // this defines the attachment block, allows for better layout usage
+            'color': '#eed140', // color of the attachments sidebar.
+            'fields': [ // actual fields
+                {
+                    'type': topic,
+                    'value': message,
+                },
+            ],
+        }]
+    };
+
+}
 
 Messages.setLogMessage = ( error ) => {
     return userAccountNotification = {
