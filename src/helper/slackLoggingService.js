@@ -55,6 +55,7 @@ Messages.setNotificationMessage = ( topic, message, success ) => {
                 {
                     'type': success.messageId + ' : ' + topic,
                     'value': message,
+                    'short': true,
                 },
             ],
         }]
