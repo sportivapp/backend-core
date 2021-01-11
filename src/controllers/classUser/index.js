@@ -6,11 +6,11 @@ const controller = {}
 controller.getRegisteredUsersByClassId = async (req, res, next) => {
 
     const { classId } = req.params
-    const { page = '0', size = '10' } = req.query
+    const { page = '0', size = '10', keyword = '' } = req.query
 
     try {
-        
-        const pageObj = await classUserService.getRegisteredUsersByClassId(parseInt(page), parseInt(size), parseInt(classId), req.user)
+
+        const pageObj = await classUserService.getRegisteredUsersByClassId(parseInt(page), parseInt(size), keyword, parseInt(classId))
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
 
     } catch (e) {

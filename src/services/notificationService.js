@@ -60,7 +60,7 @@ notificationService.deleteNotificationBody = async () => {
 notificationService.saveNotification = async (notificationObj, loggedInUser, targetUserIds, db = Notification.knex()) => {
 
     const notificationBodyDTO = {
-        enotificationbodyentityid: notificationObj.enotificationbodyentityid,
+        enotificationbodyentityid: notificationObj.enotificationbodyentityid.toString(),
         enotificationbodyentitytype: notificationObj.enotificationbodyentitytype,
         enotificationbodyaction: notificationObj.enotificationbodyaction,
         enotificationbodytitle: notificationObj.enotificationbodytitle,
@@ -92,7 +92,7 @@ notificationService.saveNotificationWithTransaction = async (notificationObj, lo
         return
 
     const notificationBodyDTO = {
-        enotificationbodyentityid: notificationObj.enotificationbodyentityid,
+        enotificationbodyentityid: notificationObj.enotificationbodyentityid.toString(),
         enotificationbodyentitytype: notificationObj.enotificationbodyentitytype,
         enotificationbodyaction: notificationObj.enotificationbodyaction,
         enotificationbodytitle: notificationObj.enotificationbodytitle,
@@ -123,7 +123,7 @@ notificationService.createNotification = async (notificationDTO, user, targetUse
     if (targetUserIds.length === 0)
         return
 
-    notificationDTO.enotificationbodysenderid = user.sub
+    notificationDTO.enotificationbodysenderid = user.sub;
     
     return NotificationBody.query()
     .insertToTable(notificationDTO, user.sub)
