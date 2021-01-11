@@ -230,5 +230,8 @@ module.exports = {
             thread: '/report/thread',
             threadType: '/report/thread/type'
         },
+        banner: {
+            list: '/banner',
+        }
     }
 }
