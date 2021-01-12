@@ -8,7 +8,7 @@ bannerController.insertBanner = async(req, res, next) => {
     const { fileId } = req.body;
 
     const bannerDTO = {
-        efilefileid: fileId,
+        efileefileid: fileId,
     }
 
     try {
