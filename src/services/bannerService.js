@@ -25,6 +25,7 @@ bannerService.insertBanner = async (bannerDTO, user) => {
 bannerService.getBanners = async () => {
 
     return Banner.query()
+        .modify('baseAttributes')
         .where('ebannerstatus', BannerStatusEnum.ACTIVE);
 
 }
