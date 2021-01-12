@@ -12,7 +12,7 @@ class Banner extends Model {
     static get modifiers() {
         return {
             baseAttributes(builder) {
-                builder.select('ebannerstarttime', 'ebannerendtime', 'ebannerstatus')
+                builder.select('ebannerid', 'ebannerstarttime', 'ebannerendtime', 'ebannerstatus')
                     .withGraphFetched('banner(baseAttributes)')
             }
         }
