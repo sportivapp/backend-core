@@ -234,5 +234,8 @@ module.exports = {
             redirect: '/auth/steam',
             authenticate: '/auth/steam/authenticate',
         },
+        banner: {
+            list: '/banner',
+        }
     }
 }
