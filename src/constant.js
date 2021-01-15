@@ -230,5 +230,9 @@ module.exports = {
             thread: '/report/thread',
             threadType: '/report/thread/type'
         },
+        steam: {
+            redirect: '/auth/steam',
+            authenticate: '/auth/steam/authenticate',
+        },
     }
 }
