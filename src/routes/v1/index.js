@@ -10,7 +10,7 @@ const internalRoutes = require('./internal')
 
 router.use('/api/v1', [adminRoutes, mobileRoutes, landingRoutes, commonRoutes, internalRoutes])
 
-const steamRoutes = reuqire('./steam');
+const steamRoutes = require('./steam');
 
 router.use([steamRoutes]);
 
