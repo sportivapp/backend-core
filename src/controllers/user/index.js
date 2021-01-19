@@ -27,49 +27,6 @@ userController.register = async (req, res, next) => {
 
 }
 
-userController.createUser = async (req, res, next) => {
-
-    if (req.user.functions.indexOf('C5') === -1)
-        return res.status(403).json(ResponseHelper.toErrorResponse(403))
-
-    const user = req.user
-    const {
-        userNik,
-        username,
-        userEmail,
-        userMobileNumber,
-        gender,
-        hobby,
-        address,
-        identityNumber,
-        fileId
-    } = req.body
-
-    try {
-        
-        const userDTO = {
-            eusernik: userNik,
-            eusername: username,
-            euseremail: userEmail.toLowerCase(),
-            eusermobilenumber: userMobileNumber,
-            eusergender: gender,
-            euserhobby: hobby,
-            euseridentitynumber: identityNumber,
-            euseraddress: address,
-            efileefileid: fileId === 0 ? null : fileId
-        }
-
-        const data = await userService.createUser(userDTO, user)
-
-        if (!data)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400));
-        return res.status(200).json(ResponseHelper.toBaseResponse(data));
-
-    } catch (e) {
-        next(e)
-    }
-}
-
 userController.getUserById = async (req, res, next) => {
 
     const user = req.user;
