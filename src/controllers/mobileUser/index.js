@@ -77,7 +77,8 @@ controller.getSelf = async (req, res, next) => {
 
 controller.updateUser = async (req, res, next) => {
 
-    const { name, mobileNumber, identityNumber, dob, gender, hobby, countryId, fileId, address, industryIds, facebook, instagram, linkedin } = req.body;
+    const { name, mobileNumber, identityNumber, dob, gender, hobby, countryId, fileId, address, industryIds, 
+        facebook, instagram, linkedin, cityId } = req.body;
 
     const userDTO = {
         eusername: name,
@@ -92,6 +93,7 @@ controller.updateUser = async (req, res, next) => {
         euserfacebook: facebook,
         euserinstagram: instagram,
         euserlinkedin: linkedin,
+        ecityecityid: cityId,
     }
 
     try {

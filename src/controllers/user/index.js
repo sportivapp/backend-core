@@ -79,7 +79,8 @@ userController.updateUserById = async (req, res, next) => {
         hobby,
         address,
         identityNumber,
-        fileId
+        fileId,
+        cityId,
     } = req.body
     const { userId } = req.params
 
@@ -96,7 +97,8 @@ userController.updateUserById = async (req, res, next) => {
             euserhobby: hobby,
             euseridentitynumber: identityNumber,
             euseraddress: address,
-            efileefileid: fileId
+            efileefileid: fileId,
+            ecityecityid: cityId,
         }
 
         const data = await userService.updateUserById(userId, userDTO, user)

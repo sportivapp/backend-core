@@ -11,7 +11,7 @@ router.delete( routes.user.removeCoach, auth.authenticateToken, controller.remov
 router.post('/user-profile', auth.authenticateToken, controller.getOtherUserById);
 router.get('/user-self-profile', auth.authenticateToken, controller.getSelf);
 router.get( routes.user.pending, auth.authenticateToken, controller.getListPendingByUserId);
-router.put('/user', auth.authenticateToken, controller.updateUser);
+router.put( routes.user.list, auth.authenticateToken, controller.updateUser);
 router.get( routes.user.industry, auth.authenticateToken, controller.getIndustryByUserId );
 router.put( routes.user.industry, auth.authenticateToken, controller.changeIndustryByUserId);
 router.post('/user-change-password', auth.authenticateToken, controller.changePassword);
