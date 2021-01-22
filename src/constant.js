@@ -24,7 +24,9 @@ module.exports = {
             removeCoach: '/user/coach-remove',
             industry: '/user/industry',
             pending: '/user-pending-log',
-            profile: '/user-profile'
+            profile: '/user-profile',
+            selfProfile: '/user-self-profile',
+            changePassword: '/user-change-password',
         },
         profile: {
             changeCompany: '/change-company',
