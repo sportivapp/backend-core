@@ -102,10 +102,7 @@ UserService.createUser = async (userDTO, otpCode) => {
 UserService.getUserById = async (userId) => {
 
     const user = await User.query()
-    .select('euserid', 'eusername', 'eusermobilenumber', 'euseremail', 'euseridentitynumber', 'euserdob', 'euseraddress', 'eusergender', 
-    'euserhobby', 'euserfacebook', 'euserinstagram', 'euserlinkedin', 'ecountryname', 'efileefileid', 'euseriscoach')
-    .leftJoinRelated('country')
-    .where('euserid', userId)
+    .findById(userId)
     .first();
 
     if (!user)
