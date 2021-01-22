@@ -50,6 +50,7 @@ UserService.getSingleUserById = async (userId) => {
 
     return User.query()
         .modify('baseAttributes')
+        .withGraphFetched('file')
         .findById(userId)
         .then(user => {
             if (!user) throw UnsupportedOperationError(ErrorEnum.USER_NOT_FOUND);

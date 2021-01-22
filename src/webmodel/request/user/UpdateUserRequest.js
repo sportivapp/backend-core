@@ -1,10 +1,11 @@
 const Joi = require('joi')
 
 const schema = Joi.object({
-    userNik: Joi.string(),
-    username: Joi.string().max(255).required(),
-    userMobileNumber: Joi.string().max(255).required(),
-    isMultiApproval: Joi.boolean()
+    username: Joi.string().min(3).max(255).required(),
+    dob: Joi.number().required(),
+    userMobileNumber: Joi.string().min(10).required(),
+    address: Joi.string().required(),
+    cityId: Joi.number().required(),
 })
 
 module.exports = schema
