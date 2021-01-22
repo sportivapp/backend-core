@@ -103,6 +103,7 @@ UserService.getUserById = async (userId) => {
 
     const user = await User.query()
     .findById(userId)
+    .modify('baseAttributes')
     .first();
 
     if (!user)
