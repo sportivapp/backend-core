@@ -8,7 +8,7 @@ router.post( routes.user.register, userController.register);
 router.post( routes.user.create, auth.authenticateToken, userController.createUser);
 router.post( routes.user.login, userController.login);
 router.post( routes.user.forgot, userController.forgotPassword);
-router.get( routes.user.list, auth.authenticateToken, userController.getAllUserByCompanyId);
+router.get( routes.user.byCompany, auth.authenticateToken, userController.getAllUserByCompanyId);
 router.get( routes.user.import, userController.importTemplate);
 router.get( routes.user.id , auth.authenticateToken, userController.getUserById);
 router.post( routes.user.profile, auth.authenticateToken, userController.getOtherUserById);
