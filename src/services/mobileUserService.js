@@ -8,12 +8,7 @@ const fileService = require('./fileService');
 const Otp = require('../models/Otp');
 const emailService = require('../helper/emailService');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
-const CompanyUserMapping = require('../models/CompanyUserMapping');
-const TeamUserMapping = require('../models/TeamUserMapping');
-const License = require('../models/License');
-const ServiceHelper = require('../helper/ServiceHelper')
 const CompanyLogTypeEnum = require('../models/enum/CompanyLogTypeEnum')
-const CompanyLogStatusEnum = require('../models/enum/CompanyLogStatusEnum')
 const companyLogService = require('../services/companyLogService')
 
 const UserService = {};
@@ -118,9 +113,9 @@ UserService.getOtherUserById = async (userId, type) => {
     if (type !== 'USER' && type !== 'COACH')
         return
 
-    let relatedIndustry = 'coachIndustries'
+    let relatedIndustry = 'coachIndustries(baseAttributes)'
     if (type === 'USER')
-        relatedIndustry = 'userIndustries'
+        relatedIndustry = 'userIndustries(baseAttributes)'
 
     return User.query()
     .findById(userId)
@@ -134,8 +129,7 @@ UserService.getOtherUserById = async (userId, type) => {
         if(user === undefined)
             throw new NotFoundError()
         return user
-    })
-    // .withGraphFetched("[" + relatedIndustry + ", companies(baseAttributes), teams(baseAttributes), experiences.industry, licenses.industry]")
+    });
 
 }
 
@@ -213,9 +207,6 @@ UserService.updateUserCoachData = async (userCoachDTO, user, industryIds) => {
 UserService.removeCoach = async (user) => {
 
     const userFromDB = await UserService.getUserById(user.sub);
-
-    // if (!userFromDB)
-    //     throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
 
     if (userFromDB.euseriscoach === false)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_A_COACH)

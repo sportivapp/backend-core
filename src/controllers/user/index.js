@@ -1,31 +1,7 @@
 const userService = require('../../services/userService')
 const ResponseHelper = require('../../helper/ResponseHelper')
-const templatePath = require('../../../templates/index');
 
 const userController = {}
-
-userController.register = async (req, res, next) => {
-
-    const { nik, name, email, mobileNumber, password, otpCode } = req.body;
-
-    const userDTO = {
-        eusernik: nik,
-        eusername: name,
-        euseremail: email.toLowerCase(),
-        eusermobilenumber: mobileNumber,
-        euserpassword: password
-    }
-
-    try {
-
-        const result = await userService.register(userDTO, otpCode);
-        return res.status(200).json(ResponseHelper.toBaseResponse(result));
-
-    } catch(e) {
-        next(e);
-    }
-
-}
 
 userController.getUserById = async (req, res, next) => {
 

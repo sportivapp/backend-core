@@ -1,6 +1,5 @@
 const mobileUserService = require('../../services/mobileUserService');
 const ResponseHelper = require('../../helper/ResponseHelper');
-// const axios = require('axios');
 
 const controller = {};
 
@@ -42,6 +41,7 @@ controller.createUser = async (req, res, next) => {
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
+        console.log(e);
         next(e);
     }
 
@@ -109,7 +109,7 @@ controller.updateUser = async (req, res, next) => {
 
 controller.updateUserCoachData = async (req, res, next) => {
 
-    const { name, mobileNumber, dob, gender, hobby, countryId, fileId, address, facebook, instagram, linkedin, industryIds } = req.body;
+    const { name, mobileNumber, dob, gender, hobby, cityId, fileId, address, facebook, instagram, linkedin, industryIds } = req.body;
 
     const userCoachDTO = {
         eusername: name,
@@ -117,7 +117,7 @@ controller.updateUserCoachData = async (req, res, next) => {
         euserdob: dob,
         eusergender: gender,
         euserhobby: hobby,
-        ecountryecountryid : countryId,
+        ecityecityid : cityId,
         efileefileid: fileId === 0 ? null : fileId,
         euseraddress: address,
         euserfacebook: facebook,

@@ -10,9 +10,9 @@ const userSchemas = {}
 
 userSchemas[routes.user.login] = UserLoginRequest
 userSchemas[routes.user.forgot] = ForgotPasswordRequest
-userSchemas[routes.user.create] = CreateUserRequest
+userSchemas[routes.user.list] = CreateUserRequest
 userSchemas[routes.user.password] = ChangePasswordRequest
-userSchemas[routes.user.id] = UpdateUserRequest
+userSchemas[routes.user.update] = UpdateUserRequest
 userSchemas[routes.user.approval] = AddApprovalUserRequest
 
 module.exports = userSchemas
