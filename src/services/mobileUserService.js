@@ -13,23 +13,20 @@ const companyLogService = require('../services/companyLogService')
 
 const UserService = {};
 
-const UnsupportedOperationErrorEnum = {
+const ErrorEnum = {
     NOT_ADMIN: 'NOT_ADMIN',
     USER_NOT_EXIST: 'USER_NOT_EXIST',
     INDUSTRY_IS_EMPTY: 'INDUSTRY_IS_EMPTY',
     ALREADY_REGISTERED_AS_COACH: 'ALREADY_REGISTERED_AS_COACH',
     USER_NOT_A_COACH: 'USER_NOT_A_COACH',
     WRONG_PASSWORD: 'WRONG_PASSWORD',
-    FILE_NOT_FOUND: 'FILE_NOT_FOUND'
-}
-
-const ErrorUserEnum = {
+    FILE_NOT_FOUND: 'FILE_NOT_FOUND',
     EMAIL_NOT_FOUND :'EMAIL_NOT_FOUND',
     EMAIL_INVALID : 'EMAIL_INVALID',
     USER_ALREADY_EXIST : 'USER_ALREADY_EXIST',
     OTP_NOT_FOUND : 'OTP_NOT_FOUND',
     OTP_CODE_NOT_MATCH : 'OTP_CODE_NOT_MATCH',
-    OTP_EXPIRED: 'OTP_EXPIRED'
+    OTP_EXPIRED: 'OTP_EXPIRED',
 }
 
 async function generateJWTToken(user) {
@@ -64,26 +61,19 @@ UserService.login = async (loginDTO) => {
 UserService.createUser = async (userDTO, otpCode) => {
 
     const isEmail = emailService.validateEmail(userDTO.euseremail);
-
     if (!isEmail)
-        throw new UnsupportedOperationError(ErrorUserEnum.EMAIL_INVALID)
-
+        throw new UnsupportedOperationError(ErrorEnum.EMAIL_INVALID)
     const user = await User.query().where('euseremail', userDTO.euseremail).first();
-
     if (user)
-        throw new UnsupportedOperationError(ErrorUserEnum.USER_ALREADY_EXIST)
-
+        throw new UnsupportedOperationError(ErrorEnum.USER_ALREADY_EXIST)
     const otp = await Otp.query().where('euseremail', userDTO.euseremail).first();
-
     if (!otp)
-        throw new UnsupportedOperationError(ErrorUserEnum.OTP_NOT_FOUND)
-
+        throw new UnsupportedOperationError(ErrorEnum.OTP_NOT_FOUND)
     if (otp.eotpcode !== otpCode)
-        throw new UnsupportedOperationError(ErrorUserEnum.OTP_CODE_NOT_MATCH)
-
+        throw new UnsupportedOperationError(ErrorEnum.OTP_CODE_NOT_MATCH)
     const fifteenMinutes = 15 * 60 * 1000;
     if ((Date.now() - otp.eotpchangetime) > fifteenMinutes)
-        throw new UnsupportedOperationError(ErrorUserEnum.OTP_EXPIRED);
+        throw new UnsupportedOperationError(ErrorEnum.OTP_EXPIRED);
 
     // confirm OTP
     await otp.$query().updateByUserId({ eotpconfirmed: true }, 0);
@@ -160,13 +150,13 @@ UserService.updateUser = async (userDTO, industryIds, user) => {
         const file = await fileService.getFileByIdAndCreateBy(userDTO.efileefileid, user.sub);
 
         if (!file)
-            throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FILE_NOT_FOUND)
+            throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_FOUND)
     }
 
     const userFromDB = await UserService.getUserById(user.sub);
 
     if (!userFromDB)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
+        throw new UnsupportedOperationError(ErrorEnum.USER_NOT_EXIST)
     
     // Update user only
     if (industryIds.length === 0) {
@@ -187,7 +177,7 @@ UserService.updateUserCoachData = async (userCoachDTO, user, industryIds) => {
     const userFromDB = await UserService.getUserById(user.sub);
 
     if (userFromDB.euseriscoach)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.ALREADY_REGISTERED_AS_COACH) 
+        throw new UnsupportedOperationError(ErrorEnum.ALREADY_REGISTERED_AS_COACH) 
 
     const coachIndustryMappings = industryIds.map(industryId => ({
         eindustryeindustryid: industryId,
@@ -209,7 +199,7 @@ UserService.removeCoach = async (user) => {
     const userFromDB = await UserService.getUserById(user.sub);
 
     if (userFromDB.euseriscoach === false)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_A_COACH)
+        throw new UnsupportedOperationError(ErrorEnum.USER_NOT_A_COACH)
 
     await CoachIndustryMapping.query()
     .delete()
@@ -225,12 +215,12 @@ UserService.changePassword = async (oldPassword, newPassword, user) => {
     const userFromDB = await User.query().where('euserid', user.sub).first();
 
     if (!userFromDB)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
+        throw new UnsupportedOperationError(ErrorEnum.USER_NOT_EXIST)
 
     const checkOldPassword = await bcrypt.compare(oldPassword, userFromDB.euserpassword);
 
     if (!checkOldPassword)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.WRONG_PASSWORD)
+        throw new UnsupportedOperationError(ErrorEnum.WRONG_PASSWORD)
     
     const hashedNewPassword = await bcrypt.hash(newPassword);
 
@@ -264,7 +254,7 @@ UserService.changeIndustryByUserId = async (user, type, industryIds) => {
     await UserService.getUserById(user.sub)
 
     if(industryIds.length <= 0) 
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INDUSTRY_IS_EMPTY)
+        throw new UnsupportedOperationError(ErrorEnum.INDUSTRY_IS_EMPTY)
 
     const mapping = industryIds.map(industryId => ({
         eusereuserid: user.sub,
@@ -302,7 +292,7 @@ UserService.getListPendingByUserId = async (page, size, userId, type, sortType) 
         .first()
     
     if(!userFromDB)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_EXIST)
+        throw new UnsupportedOperationError(ErrorEnum.USER_NOT_EXIST)
 
     if( type !== CompanyLogTypeEnum.INVITE && type !== CompanyLogTypeEnum.APPLY)
         throw new NotFoundError()

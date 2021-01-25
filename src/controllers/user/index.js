@@ -3,6 +3,27 @@ const ResponseHelper = require('../../helper/ResponseHelper')
 
 const userController = {}
 
+userController.register = async (req, res, next) => {
+
+    const { email, mobileNumber, password, otpCode } = req.body;
+
+    const userDTO = {
+        euseremail: email.toLowerCase(),
+        eusermobilenumber: mobileNumber,
+        euserpassword: password
+    }
+
+    try {
+
+        const result = await userService.register(userDTO, otpCode);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 userController.getUserById = async (req, res, next) => {
 
     const user = req.user;
