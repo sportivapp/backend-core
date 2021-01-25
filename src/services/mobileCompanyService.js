@@ -68,7 +68,6 @@ companyService.getCompany = async (companyId, user) => {
     .first()
 
     const pendingLog = companyLogService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.APPLY, CompanyLogTypeEnum.INVITE]);
-    // console.log(pendingApply)
 
     return Promise.all([companyDetailPromise, isInCompany, pendingLog])
     .then(result => {
