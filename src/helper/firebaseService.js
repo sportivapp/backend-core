@@ -3,7 +3,7 @@ const loggingService = require('./slackLoggingService')
 
 const firebaseService = {}
 
-firebaseService.pushNotification = async (targetUserId, notificationTitle, notificationBody) => {
+firebaseService.pushNotification = async (targetUserId, notificationTitle, notificationMessage, notificationBody) => {
 
     const topic = `NotificationUser~${targetUserId}`
     
@@ -16,10 +16,10 @@ firebaseService.pushNotification = async (targetUserId, notificationTitle, notif
 	notificationBody.enotificationbodyid = notificationBody.enotificationbodyid.toString();
 
     const message = {
-        // notification: {
-        //     title: notificationTitle,
-        //     body: notificationBody.enotificationbodymessage
-        // },
+        notification: {
+            title: notificationTitle,
+            body: notificationMessage
+        },
     	data: notificationBody
     }
 
