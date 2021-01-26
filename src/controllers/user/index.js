@@ -1,16 +1,13 @@
 const userService = require('../../services/userService')
 const ResponseHelper = require('../../helper/ResponseHelper')
-const templatePath = require('../../../templates/index');
 
 const userController = {}
 
 userController.register = async (req, res, next) => {
 
-    const { nik, name, email, mobileNumber, password, otpCode } = req.body;
+    const { email, mobileNumber, password, otpCode } = req.body;
 
     const userDTO = {
-        eusernik: nik,
-        eusername: name,
         euseremail: email.toLowerCase(),
         eusermobilenumber: mobileNumber,
         euserpassword: password
@@ -196,6 +193,22 @@ userController.login = async (req, res, next) => {
             maxAge: 15 * 60 * 1000
         }).json(ResponseHelper.toBaseResponse(result))
 
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+userController.getUsersByName = async (req, res, next) => {
+
+    const { page, size, keyword } = req.query;
+
+    try {
+
+        const pageObj = await userService.getUsersByName(parseInt(page), parseInt(size), keyword);
+
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
+ 
     } catch(e) {
         next(e);
     }

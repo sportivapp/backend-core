@@ -13,10 +13,10 @@ module.exports = {
         },
         user: {
             login: '/user-login',
-            register: '/user',
             forgot: '/user-forgot-password',
             create: '/user-create',
             list: '/user',
+            update: '/user',
             byCompany: '/user/company/:companyId',
             import: '/user-import-template',
             id: '/user/:userId',
@@ -28,6 +28,7 @@ module.exports = {
             profile: '/user-profile',
             selfProfile: '/user-self-profile',
             changePassword: '/user-change-password',
+            searchByName: '/user-search-name',
         },
         profile: {
             changeCompany: '/change-company',
