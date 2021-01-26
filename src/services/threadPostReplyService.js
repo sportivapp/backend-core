@@ -83,6 +83,8 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
     let commentUserIds = [];
     // If comment creator is thread creator, do not push the id
     // The saveNotificationWithTransaction function will return if targetIds empty
+    let commentUserIds = [];
+
     if (post.ethreadpostcreateby !== thread.ethreadcreateby) {
 
         // why the f is userids an object ?
