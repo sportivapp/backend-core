@@ -224,20 +224,20 @@ UserService.getAllUsersByUserIds = async (userIds) => {
 UserService.getUsersByName = async ( page, size, keyword ) => {
 
     if( !page || !size ) {
-        page = 0
-        size = 10
+        page = 0;
+        size = 10;
     }
 
-    if( !keyword ) keyword = ''
+    if( !keyword ) keyword = '';
 
     const userPage = await User.query()
         .modify('idAndName')
         .select('euseremail')
         .where(raw('lower(eusername)'), 'like', `%${keyword.toLowerCase()}%`)
         .withGraphFetched('file(baseAttributes)')
-        .page(page, size)
+        .page(page, size);
  
-    return ServiceHelper.toPageObj(page, size, userPage)
+    return ServiceHelper.toPageObj(page, size, userPage);
 
 }
 

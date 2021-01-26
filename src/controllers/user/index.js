@@ -204,13 +204,13 @@ userController.login = async (req, res, next) => {
 
 userController.getUsersByName = async (req, res, next) => {
 
-    const { page, size, keyword } = req.query
+    const { page, size, keyword } = req.query;
 
     try {
 
-        const pageObj = await userService.getUsersByName(parseInt(page), parseInt(size), keyword)
+        const pageObj = await userService.getUsersByName(parseInt(page), parseInt(size), keyword);
 
-        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
  
     } catch(e) {
         next(e);
