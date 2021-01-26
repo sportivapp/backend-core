@@ -8,7 +8,8 @@ const emailService = require('../helper/emailService');
 const ServiceHelper = require('../helper/ServiceHelper')
 const firebaseService = require('../helper/firebaseService')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
-const Otp = require('../models/Otp')
+const Otp = require('../models/Otp');
+const { raw } = require('objection');
 
 const ErrorEnum = {
     EMAIL_INVALID: 'EMAIL_INVALID',
@@ -218,6 +219,25 @@ UserService.sendForgotPasswordLink = async ( email ) => {
 UserService.getAllUsersByUserIds = async (userIds) => {
     return User.query()
         .whereIn('euserid', userIds)
+}
+
+UserService.getUsersByName = async ( page, size, keyword ) => {
+
+    if( !page || !size ) {
+        page = 0;
+        size = 10;
+    }
+
+    if( !keyword ) keyword = '';
+
+    const userPage = await User.query()
+        .modify('idAndNameAndEmail')
+        .where(raw('lower(eusername)'), 'like', `%${keyword.toLowerCase()}%`)
+        .withGraphFetched('file(baseAttributes)')
+        .page(page, size);
+ 
+    return ServiceHelper.toPageObj(page, size, userPage);
+
 }
 
 module.exports = UserService;
