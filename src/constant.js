@@ -28,6 +28,7 @@ module.exports = {
             profile: '/user-profile',
             selfProfile: '/user-self-profile',
             changePassword: '/user-change-password',
+            searchByName: '/user-search-name',
         },
         profile: {
             changeCompany: '/change-company',
