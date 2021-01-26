@@ -1,9 +1,4 @@
 const Model = require('./Model');
-const Team = require('./Team');
-const Industry = require('./Industry');
-const License = require('./License');
-const Experience = require('./Experience');
-
 
 class User extends Model {
   static get tableName() {
@@ -41,6 +36,10 @@ class User extends Model {
     const UserIndustryMapping = require('./UserIndustryMapping')
     const Class = require('./Class')
     const City = require('./City');
+    const Team = require('./Team');
+    const Industry = require('./Industry');
+    const License = require('./License');
+    const Experience = require('./Experience');
 
     return {
       permits: {

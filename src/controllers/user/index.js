@@ -1,16 +1,13 @@
 const userService = require('../../services/userService')
 const ResponseHelper = require('../../helper/ResponseHelper')
-const templatePath = require('../../../templates/index');
 
 const userController = {}
 
 userController.register = async (req, res, next) => {
 
-    const { nik, name, email, mobileNumber, password, otpCode } = req.body;
+    const { email, mobileNumber, password, otpCode } = req.body;
 
     const userDTO = {
-        eusernik: nik,
-        eusername: name,
         euseremail: email.toLowerCase(),
         eusermobilenumber: mobileNumber,
         euserpassword: password

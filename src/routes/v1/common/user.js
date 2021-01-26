@@ -4,7 +4,7 @@ const userController = require('../../../controllers/user');
 const auth = require('../../../middlewares/authentication');
 const { routes } = require('../../../constant')
 
-router.post( routes.user.register, userController.register);
+router.post( routes.user.list, userController.register);
 router.post( routes.user.login, userController.login);
 router.post( routes.user.forgot, userController.forgotPassword);
 router.get( routes.user.byCompany, auth.authenticateToken, userController.getAllUserByCompanyId);
