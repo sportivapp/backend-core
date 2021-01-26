@@ -246,10 +246,13 @@ class User extends Model {
         builder.select('euserid', 'eusername', 'eusermobilenumber', 'euseremail', 'euseridentitynumber', 'eusernik', 
         'euserdob', 'euseraddress', 'eusergender', 'euserhobby', 'euserfacebook', 'euserinstagram', 'euserlinkedin', 
         'efileefileid', 'euseriscoach')
-        .withGraphFetched('city(baseAttributes)')
+        .withGraphFetched('city(baseAttributes)');
       },
       idAndName(builder) {
-        builder.select('euserid', 'eusername', 'efileefileid')
+        builder.select('euserid', 'eusername', 'efileefileid');
+      },
+      idAndNameAndEmail(builder) {
+        builder.select('euserid', 'eusername', 'euseremail', 'efileefileid');
       },
       name(builder) {
         builder.select('eusername');
