@@ -7,7 +7,8 @@ const ServiceHelper = require('../helper/ServiceHelper');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
 const UnsupportedOperationErrorEnum = {
-    USER_NOT_EXIST: 'USER_NOT_EXIST'
+    USER_NOT_EXIST: 'USER_NOT_EXIST',
+    MISSING_NOTIFICATION_TARGET: 'MISSING_NOTIFICATION_TARGET',
 }
 
 const notificationService = {};
@@ -121,14 +122,21 @@ notificationService.saveNotificationWithTransaction = async (notificationObj, lo
 notificationService.createNotification = async (notificationDTO, user, targetUserIds) => {
 
     if (targetUserIds.length === 0)
-        return
+        throw UnsupportedOperationError(UnsupportedOperationErrorEnum.MISSING_NOTIFICATION_TARGET);
+
+    // Logic to remove duplicate userIds and sender's userId
+    let seen = {};
+    seen[user.sub] = true;
+    const filteredTargetUserIds = targetUserIds.filter(targetUserId => {
+        return seen.hasOwnProperty(targetUserId) ? false : (seen[targetUserId] = true);
+    });
 
     notificationDTO.enotificationbodysenderid = user.sub;
     
     return NotificationBody.query()
     .insertToTable(notificationDTO, user.sub)
     .then(notificationBody => {
-        const notificationDTO = targetUserIds.map(targetUserId => ({
+        const notificationDTO = filteredTargetUserIds.map(targetUserId => ({
             eusereuserid: targetUserId,
             enotificationbodyenotificationbodyid: notificationBody.enotificationbodyid
         }))
