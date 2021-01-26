@@ -231,8 +231,7 @@ UserService.getUsersByName = async ( page, size, keyword ) => {
     if( !keyword ) keyword = '';
 
     const userPage = await User.query()
-        .modify('idAndName')
-        .select('euseremail')
+        .modify('idAndNameAndEmail')
         .where(raw('lower(eusername)'), 'like', `%${keyword.toLowerCase()}%`)
         .withGraphFetched('file(baseAttributes)')
         .page(page, size);
