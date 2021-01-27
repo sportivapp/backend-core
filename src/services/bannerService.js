@@ -14,7 +14,7 @@ bannerService.insertBanner = async (bannerDTO, user) => {
     await fileService.getFileByIdAndCreateBy(bannerDTO.efileefileid, user.sub)
         .then(file => {
             if (!file)
-                throw UnsupportedOperationError(ErrorEnum.INVALID_FILE_OWNER);
+                throw new UnsupportedOperationError(ErrorEnum.INVALID_FILE_OWNER);
         });
 
     return Banner.query()
@@ -26,7 +26,8 @@ bannerService.getBanners = async () => {
 
     return Banner.query()
         .modify('baseAttributes')
-        .where('ebannerstatus', BannerStatusEnum.ACTIVE);
+        .where('ebannerstatus', BannerStatusEnum.ACTIVE)
+        .orderBy('ebannercreatetime', 'DESC');
 
 }
 
