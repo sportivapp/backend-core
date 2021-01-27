@@ -176,6 +176,8 @@ gradeService.saveUserPositions = async (userIds, positionId, loggedInUser) => {
         const grade = await gradeService.getGradeById(positionId)
             .catch(() => new UnsupportedOperationError(ErrorEnum.POSITION_NOT_FOUND))
 
+        // Add the user who's changing the position
+        userIds.push(loggedInUser.sub);
         const users = userIds.map(userId =>
             ({
                 eusereuserid: parseInt(userId),
