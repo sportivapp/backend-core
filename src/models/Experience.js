@@ -1,5 +1,4 @@
 const Model = require('./Model');
-const { ManyToManyRelation } = require('./Model');
 
 class Experience extends Model {
   static get tableName() {

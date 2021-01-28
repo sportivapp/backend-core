@@ -3,6 +3,7 @@ const https = require('https');
 Messages = {};
 
 const slackUrl = process.env.SLACK_URL || 'https://hooks.slack.com/services/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'
+const notificationSlackUrl = process.env.SLACK_NOTIFICATION_URL || ''
 
 // const userAccountNotification = {
 //     'username': 'SURYA WIBU', // This will appear as user name who posts the message
@@ -41,6 +42,27 @@ const slackUrl = process.env.SLACK_URL || 'https://hooks.slack.com/services/T018
 //     }]
 //   };
 
+Messages.setNotificationMessage = ( topic, message, success ) => {
+
+  return userAccountNotification = {
+    'username': 'NOTIFICATION BOT',
+    'text': 'NEW NOTIFICATION!',
+    'icon_emoji': ':japanese_goblin:', // User icon, you can also use custom icons here
+        'attachments': [
+            { // this defines the attachment block, allows for better layout usage
+            'color': '#eed140', // color of the attachments sidebar.
+            'fields': [ // actual fields
+                {
+                    'title': success.messageId + ' : ' + topic,
+                    'value': JSON.stringify(message, null, 4),
+                    'short': true,
+                },
+            ],
+        }]
+    };
+
+}
+
 Messages.setLogMessage = ( error ) => {
     return userAccountNotification = {
         'username': 'ERROR BOT', // This will appear as user name who posts the message
@@ -69,7 +91,7 @@ Messages.setLogMessage = ( error ) => {
  * @param messageBody
  * @return {Promise}
  */
-Messages.sendSlackMessage = async (messageBody) => {
+Messages.sendSlackMessage = async (messageBody, type = 'LOG') => {
     // make sure the incoming message body can be parsed into valid JSON
     try {
       messageBody = JSON.stringify(messageBody);
@@ -87,8 +109,12 @@ Messages.sendSlackMessage = async (messageBody) => {
         }
       };
   
+      let usedSlackUrl = slackUrl;
+      if( type === 'NOTIFICATION' )
+        usedSlackUrl = notificationSlackUrl;
+
       // actual request
-      const req = https.request(slackUrl, requestOptions, (res) => {
+      const req = https.request(usedSlackUrl, requestOptions, (res) => {
         let response = '';
   
   

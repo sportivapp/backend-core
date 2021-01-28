@@ -3,7 +3,7 @@ const loggingService = require('./slackLoggingService')
 
 const firebaseService = {}
 
-firebaseService.pushNotification = async (targetUserId, notificationTitle, notificationBody) => {
+firebaseService.pushNotification = async (targetUserId, notificationTitle, notificationMessage, notificationBody) => {
 
     const topic = `NotificationUser~${targetUserId}`
     
@@ -16,20 +16,23 @@ firebaseService.pushNotification = async (targetUserId, notificationTitle, notif
 	notificationBody.enotificationbodyid = notificationBody.enotificationbodyid.toString();
 
     const message = {
-        // notification: {
-        //     title: notificationTitle,
-        //     body: notificationBody.enotificationbodymessage
-        // },
+        notification: {
+            title: notificationTitle,
+            body: notificationMessage
+        },
     	data: notificationBody
     }
 
         const messaging = firebaseAdmin.messaging()
         messaging.sendToTopic(topic, message)
-            .then(success => console.log(success))
-            .catch(ignored => {
-                const error = new Error(`Failed on sending message in topic: ${topic}, details: ${ignored}`)
+            .then(success => {
+                return loggingService.sendSlackMessage(loggingService.setNotificationMessage(topic, message, success), 'NOTIFICATION')
+                    .then(result => true);
+            })
+            .catch(err => {
+                const error = new Error(`Failed on sending message in topic: ${topic}, details: ${err}`)
                 return loggingService.sendSlackMessage(loggingService.setLogMessage(error))
-                    .then(ignored => false)
+                    .then(err => false)
             })
 }
 

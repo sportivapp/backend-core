@@ -13,10 +13,11 @@ module.exports = {
         },
         user: {
             login: '/user-login',
-            register: '/user',
             forgot: '/user-forgot-password',
             create: '/user-create',
-            list: '/user/company/:companyId',
+            list: '/user',
+            update: '/user',
+            byCompany: '/user/company/:companyId',
             import: '/user-import-template',
             id: '/user/:userId',
             approval: '/user/approval',
@@ -24,7 +25,10 @@ module.exports = {
             removeCoach: '/user/coach-remove',
             industry: '/user/industry',
             pending: '/user-pending-log',
-            profile: '/user-profile'
+            profile: '/user-profile',
+            selfProfile: '/user-self-profile',
+            changePassword: '/user-change-password',
+            searchByName: '/user-search-name',
         },
         profile: {
             changeCompany: '/change-company',
@@ -186,7 +190,8 @@ module.exports = {
             generate: '/user-news/:newsId/link'
         },
         notification: {
-            list: '/notification'
+            list: '/notification',
+            internalList: '/internal/notification'
         },
         license: {
             id : '/license/:licenseId'
@@ -229,5 +234,12 @@ module.exports = {
             thread: '/report/thread',
             threadType: '/report/thread/type'
         },
+        steam: {
+            redirect: '/auth/steam',
+            authenticate: '/auth/steam/authenticate',
+        },
+        banner: {
+            list: '/banner',
+        }
     }
 }
