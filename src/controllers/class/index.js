@@ -1,8 +1,6 @@
 const classService = require('../../services/classService')
 const ResponseHelper = require('../../helper/ResponseHelper')
 
-
-
 const classController = {}
 
 classController.createClass = async(req,res,next) => {
@@ -24,10 +22,6 @@ classController.createClass = async(req,res,next) => {
         ecompanyecompanyid: companyId,
         efileefileid: fileId,
         requirements: requirements,
-        startTimeHour: startTimeHour,
-        startTimeMinute: startTimeMinute,
-        endTimeHour: endTimeHour,
-        endTimeMinute: endTimeMinute,
     }
 
     try {
@@ -75,10 +69,6 @@ classController.updateClassById = async (req, res, next) => {
         eindustryeindustryid: industryId,
         efileefileid: fileId,
         requirements: requirements,
-        startTimeHour: startTimeHour,
-        startTimeMinute: startTimeMinute,
-        endTimeHour: endTimeHour,
-        endTimeMinute: endTimeMinute,
     }
 
     try {
