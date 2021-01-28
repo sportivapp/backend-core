@@ -5,10 +5,10 @@ const bcrypt = require('../helper/bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const emailService = require('../helper/emailService');
-const ServiceHelper = require('../helper/ServiceHelper')
-const firebaseService = require('../helper/firebaseService')
+const ServiceHelper = require('../helper/ServiceHelper');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
-const Otp = require('../models/Otp')
+const Otp = require('../models/Otp');
+const { raw } = require('objection');
 
 const ErrorEnum = {
     EMAIL_INVALID: 'EMAIL_INVALID',
@@ -16,7 +16,8 @@ const ErrorEnum = {
     OTP_NOT_FOUND: 'OTP_NOT_FOUND',
     OTP_CODE_NOT_MATCH: 'OTP_CODE_NOT_MATCH',
     USER_NOT_FOUND: 'USER_NOT_FOUND',
-    UNSUCCESSFUL_LOGIN: 'UNSUCCESSFUL_LOGIN'
+    UNSUCCESSFUL_LOGIN: 'UNSUCCESSFUL_LOGIN',
+    OTP_EXPIRED: 'OTP_EXPIRED',
 }
 
 
@@ -27,15 +28,18 @@ UserService.register = async (userDTO, otpCode) => {
 
     const isEmail = emailService.validateEmail(userDTO.euseremail);
     if (!isEmail)
-        throw new UnsupportedOperationError(ErrorUserEnum.EMAIL_INVALID)
+        throw new UnsupportedOperationError(ErrorEnum.EMAIL_INVALID)
     const user = await User.query().where('euseremail', userDTO.euseremail).first();
     if (user)
-        throw new UnsupportedOperationError(ErrorUserEnum.USER_ALREADY_EXIST)
+        throw new UnsupportedOperationError(ErrorEnum.USER_ALREADY_EXIST)
     const otp = await Otp.query().where('euseremail', userDTO.euseremail).first();
     if (!otp)
-        throw new UnsupportedOperationError(ErrorUserEnum.OTP_NOT_FOUND)
+        throw new UnsupportedOperationError(ErrorEnum.OTP_NOT_FOUND)
     if (otp.eotpcode !== otpCode)
-        throw new UnsupportedOperationError(ErrorUserEnum.OTP_CODE_NOT_MATCH)
+        throw new UnsupportedOperationError(ErrorEnum.OTP_CODE_NOT_MATCH)
+    const fifteenMinutes = 15 * 60 * 1000;
+    if ((Date.now() - otp.eotpchangetime) > fifteenMinutes)
+        throw new UnsupportedOperationError(ErrorEnum.OTP_EXPIRED);
 
     // confirm OTP
     await otp.$query().updateByUserId({ eotpconfirmed: true }, 0);
@@ -50,6 +54,7 @@ UserService.getSingleUserById = async (userId) => {
 
     return User.query()
         .modify('baseAttributes')
+        .withGraphFetched('file')
         .findById(userId)
         .then(user => {
             if (!user) throw UnsupportedOperationError(ErrorEnum.USER_NOT_FOUND);
@@ -77,14 +82,6 @@ UserService.getUserById = async ( userId, user ) => {
 }
 
 UserService.getOtherUserById = async (userId, type, companyId) => {
-
-    const userInCompany = await CompanyUserMapping.
-    query()
-    .where('ecompanyecompanyid', companyId)
-    .where('eusereuserid', userId)
-    .first()
-
-    // if(!userInCompany) throw new NotFoundError()
 
     if (type !== 'USER' && type !== 'COACH')
         return
@@ -217,6 +214,25 @@ UserService.sendForgotPasswordLink = async ( email ) => {
 UserService.getAllUsersByUserIds = async (userIds) => {
     return User.query()
         .whereIn('euserid', userIds)
+}
+
+UserService.getUsersByName = async ( page, size, keyword ) => {
+
+    if( !page || !size ) {
+        page = 0;
+        size = 10;
+    }
+
+    if( !keyword ) keyword = '';
+
+    const userPage = await User.query()
+        .modify('idAndNameAndEmail')
+        .where(raw('lower(eusername)'), 'like', `%${keyword.toLowerCase()}%`)
+        .withGraphFetched('file(baseAttributes)')
+        .page(page, size);
+ 
+    return ServiceHelper.toPageObj(page, size, userPage);
+
 }
 
 module.exports = UserService;

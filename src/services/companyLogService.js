@@ -201,8 +201,6 @@ companyLogService.joinCompany = async (companyId, user) => {
 
     const isUserInCompany = await companyService.isUserExistInCompany(companyId, user.sub);
 
-    console.log(isUserInCompany)
-
     if (isUserInCompany) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_IN_COMPANY)
 
     const existingLog = await companyLogService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.INVITE, CompanyLogTypeEnum.APPLY]);
