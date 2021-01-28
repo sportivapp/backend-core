@@ -77,19 +77,13 @@ teamUserService.checkAdminByTeamLogsAndUserId = async (teamLogs, userId) => {
 
 }
 
-teamUserService.checkAdminOnTeamIds = async (teamIds, userId) => {
+teamUserService.getMyTeamsPositionAdmin = async (user, position) => {
 
-    const promises = []
-
-    teamIds.forEach(teamId => {
-        const promise = teamUserService.getTeamUserCheckAdmin(teamId, userId)
-            .then(() => teamId)
-            .catch(() => null)
-        promises.push(promise)
-    })
-
-    return Promise.all(promises)
-        .then(teamIds => teamIds.filter(teamId => !!teamId))
+    return TeamUserMapping.query()
+        .modify('baseAttributes')
+        .withGraphFetched('team(baseAttributes).[teamIndustry(baseAttributes), company(baseAttributes)]')
+        .where('eusereuserid', user.sub)
+        .where('eteamusermappingposition', position);
 
 }
 
@@ -260,6 +254,18 @@ teamUserService.getTeamIdsByUserId = async (userId) => {
     return TeamUserMapping.query()
         .where('eusereuserid', userId)
         .then(teamUserMappings => teamUserMappings.map(teamUserMapping => teamUserMapping.eteameteamid))
+
+}
+
+teamUserService.getTeamIdsByUserIdAndIsAdmin = async (userId, isAdmin) => {
+
+    let teamUsersPromise = TeamUserMapping.query()
+        .where('eusereuserid', userId)
+
+    if (isAdmin)
+        teamUsersPromise = teamUsersPromise.where('eteamusermappingposition', 'ADMIN')
+    
+    return teamUsersPromise.then(teamUserMappings => teamUserMappings.map(teamUserMapping => teamUserMapping.eteameteamid))
 
 }
 

@@ -206,7 +206,7 @@ mobileCommentService.deleteComment = async (commentId, user) => {
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION)
 
     return ThreadPost.query()
-    .delete()
+    .deleteByUserId(user.sub)
     .where('ethreadpostid', commentId)
     .then(rowsAffected => rowsAffected === 1)
 
@@ -217,6 +217,7 @@ mobileCommentService.getThreadIdsByUserIdAndThreadPostIds = async (userId, threa
     return ThreadPost.query()
         .where('ethreadpostcreateby', userId)
         .orWhereIn('ethreadpostid', threadPostIds)
+        .where('ethreadpostdeletestatus', false)
         .then(threadPosts => threadPosts.map(threadPost => threadPost.ethreadethreadid))
 
 }}

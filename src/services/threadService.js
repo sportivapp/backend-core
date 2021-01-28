@@ -7,7 +7,6 @@ const companyService = require('./companyService')
 const fileService = require('./fileService')
 const teamService = require('./teamService')
 const teamUserMappingService = require('./teamUserMappingService')
-const profileService = require('./profileService')
 const gradeService = require('./gradeService')
 const settingService = require('./settingService')
 const ModuleNameEnum = require('../models/enum/ModuleNameEnum')
@@ -225,7 +224,9 @@ threadService.deleteThreadById = async (threadId, user) => {
 
 threadService.getThreadDetailById = async (threadId) => {
 
-    return Thread.query().findById(threadId).modify('baseAttributes')
+    return Thread.query()
+        .findById(threadId)
+        .modify('baseAttributes')
 }
 
 threadService.isModerator = async (threadId, userId) => {
