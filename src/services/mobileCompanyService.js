@@ -57,28 +57,36 @@ companyService.getHighestPosition = async (companyId) => {
 
 companyService.getCompany = async (companyId, user) => {
 
-    const companyDetailPromise = Company.query()
-    .modify('about')
-    .where('ecompanyid', companyId)
-    .first();
-    
-    const isInCompany = CompanyUserMapping.query()
+    const isInCompany = await CompanyUserMapping.query()
     .where('ecompanyecompanyid', companyId)
     .where('eusereuserid', user.sub)
-    .first()
+    .first();
+
+    let companyDetailPromise = Company.query()
+    .where('ecompanyid', companyId)
+    .modify('about')
+    .modifyGraph('news', builder => {
+        builder.where('ecompanyecompanyid', companyId)
+            .where('enewsispublished', true)
+
+        if (!isInCompany)
+            builder.where('enewsispublic', true)
+
+    })
+    .first();
 
     const pendingLog = companyLogService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.APPLY, CompanyLogTypeEnum.INVITE]);
 
-    return Promise.all([companyDetailPromise, isInCompany, pendingLog])
+    return Promise.all([companyDetailPromise, pendingLog])
     .then(result => {
 
         return {
             ...result[0],
-            isInCompany: result[1] ? true : false,
-            pendingLog: result[2] || null
+            pendingLog: result[1] || null,
+            isInCompany: isInCompany ? true : false,
         }
 
-    })
+    });
 
 }
 
