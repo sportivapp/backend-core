@@ -1,9 +1,4 @@
 const Model = require('./Model');
-const Team = require('./Team');
-const Industry = require('./Industry');
-const License = require('./License');
-const Experience = require('./Experience');
-
 
 class User extends Model {
   static get tableName() {
@@ -40,7 +35,11 @@ class User extends Model {
     const Department = require('./Department')
     const UserIndustryMapping = require('./UserIndustryMapping')
     const Class = require('./Class')
-    const ClassUserMapping = require('./ClassUserMapping')
+    const City = require('./City');
+    const Team = require('./Team');
+    const Industry = require('./Industry');
+    const License = require('./License');
+    const Experience = require('./Experience');
 
     return {
       permits: {
@@ -226,7 +225,15 @@ class User extends Model {
           },
           to: 'eclass.eclassid'
         }
-      }
+      },
+      city: {
+        relation: Model.HasOneRelation,
+        modelClass: City,
+        join: {
+          from: 'euser.ecityecityid',
+          to: 'ecity.ecityid',
+        }
+      },
 
     }
   }
@@ -235,10 +242,16 @@ class User extends Model {
     return {
       ...this.baseModifiers(),
       baseAttributes(builder) {
-        builder.select('euserid', 'eusername', 'euseremail', 'eusernik', 'eusermobilenumber', 'euseridentitynumber', 'euserdob', 'eusergender', 'efileefileid')
+        builder.select('euserid', 'eusername', 'eusermobilenumber', 'euseremail', 'euseridentitynumber', 'eusernik', 
+        'euserdob', 'euseraddress', 'eusergender', 'euserhobby', 'euserfacebook', 'euserinstagram', 'euserlinkedin', 
+        'efileefileid', 'euseriscoach')
+        .withGraphFetched('city(baseAttributes)');
       },
       idAndName(builder) {
-        builder.select('euserid', 'eusername', 'efileefileid')
+        builder.select('euserid', 'eusername', 'efileefileid');
+      },
+      idAndNameAndEmail(builder) {
+        builder.select('euserid', 'eusername', 'euseremail', 'efileefileid');
       },
       name(builder) {
         builder.select('eusername');

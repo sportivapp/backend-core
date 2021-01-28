@@ -1,16 +1,13 @@
 const userService = require('../../services/userService')
 const ResponseHelper = require('../../helper/ResponseHelper')
-const templatePath = require('../../../templates/index');
 
 const userController = {}
 
 userController.register = async (req, res, next) => {
 
-    const { nik, name, email, mobileNumber, password, otpCode } = req.body;
+    const { email, mobileNumber, password, otpCode } = req.body;
 
     const userDTO = {
-        eusernik: nik,
-        eusername: name,
         euseremail: email.toLowerCase(),
         eusermobilenumber: mobileNumber,
         euserpassword: password
@@ -25,49 +22,6 @@ userController.register = async (req, res, next) => {
         next(e);
     }
 
-}
-
-userController.createUser = async (req, res, next) => {
-
-    if (req.user.functions.indexOf('C5') === -1)
-        return res.status(403).json(ResponseHelper.toErrorResponse(403))
-
-    const user = req.user
-    const {
-        userNik,
-        username,
-        userEmail,
-        userMobileNumber,
-        gender,
-        hobby,
-        address,
-        identityNumber,
-        fileId
-    } = req.body
-
-    try {
-        
-        const userDTO = {
-            eusernik: userNik,
-            eusername: username,
-            euseremail: userEmail.toLowerCase(),
-            eusermobilenumber: userMobileNumber,
-            eusergender: gender,
-            euserhobby: hobby,
-            euseridentitynumber: identityNumber,
-            euseraddress: address,
-            efileefileid: fileId === 0 ? null : fileId
-        }
-
-        const data = await userService.createUser(userDTO, user)
-
-        if (!data)
-            return res.status(400).json(ResponseHelper.toErrorResponse(400));
-        return res.status(200).json(ResponseHelper.toBaseResponse(data));
-
-    } catch (e) {
-        next(e)
-    }
 }
 
 userController.getUserById = async (req, res, next) => {
@@ -122,7 +76,8 @@ userController.updateUserById = async (req, res, next) => {
         hobby,
         address,
         identityNumber,
-        fileId
+        fileId,
+        cityId,
     } = req.body
     const { userId } = req.params
 
@@ -139,7 +94,8 @@ userController.updateUserById = async (req, res, next) => {
             euserhobby: hobby,
             euseridentitynumber: identityNumber,
             euseraddress: address,
-            efileefileid: fileId
+            efileefileid: fileId,
+            ecityecityid: cityId,
         }
 
         const data = await userService.updateUserById(userId, userDTO, user)
@@ -243,14 +199,16 @@ userController.login = async (req, res, next) => {
 
 }
 
-userController.importTemplate = async (req, res, next) => {
+userController.getUsersByName = async (req, res, next) => {
+
+    const { page, size, keyword } = req.query;
 
     try {
 
-        res.setHeader('Content-disposition', 'attachment; filename=Import Data Karyawan Template.xlsx');
-        res.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        return res.download(templatePath);
+        const pageObj = await userService.getUsersByName(parseInt(page), parseInt(size), keyword);
 
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
+ 
     } catch(e) {
         next(e);
     }

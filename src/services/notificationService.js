@@ -7,7 +7,8 @@ const ServiceHelper = require('../helper/ServiceHelper');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 
 const UnsupportedOperationErrorEnum = {
-    USER_NOT_EXIST: 'USER_NOT_EXIST'
+    USER_NOT_EXIST: 'USER_NOT_EXIST',
+    MISSING_NOTIFICATION_TARGET: 'MISSING_NOTIFICATION_TARGET',
 }
 
 const notificationService = {};
@@ -60,7 +61,7 @@ notificationService.deleteNotificationBody = async () => {
 notificationService.saveNotification = async (notificationObj, loggedInUser, targetUserIds, db = Notification.knex()) => {
 
     const notificationBodyDTO = {
-        enotificationbodyentityid: notificationObj.enotificationbodyentityid,
+        enotificationbodyentityid: notificationObj.enotificationbodyentityid.toString(),
         enotificationbodyentitytype: notificationObj.enotificationbodyentitytype,
         enotificationbodyaction: notificationObj.enotificationbodyaction,
         enotificationbodytitle: notificationObj.enotificationbodytitle,
@@ -92,7 +93,7 @@ notificationService.saveNotificationWithTransaction = async (notificationObj, lo
         return
 
     const notificationBodyDTO = {
-        enotificationbodyentityid: notificationObj.enotificationbodyentityid,
+        enotificationbodyentityid: notificationObj.enotificationbodyentityid.toString(),
         enotificationbodyentitytype: notificationObj.enotificationbodyentitytype,
         enotificationbodyaction: notificationObj.enotificationbodyaction,
         enotificationbodytitle: notificationObj.enotificationbodytitle,
@@ -111,6 +112,37 @@ notificationService.saveNotificationWithTransaction = async (notificationObj, lo
 
         return Notification.query(trx)
         .insertToTable(notificationDTO, loggedInUser.sub)
+        .then(resultArr => resultArr.map(notification => firebaseService
+            .pushNotification(notification.eusereuserid, notificationBody.enotificationbodytitle, notificationBody.enotificationbodymessage, notificationBody)))
+        .then(pushNotificationPromises => Promise.all(pushNotificationPromises))
+    })
+
+}
+
+notificationService.createNotification = async (notificationDTO, user, targetUserIds) => {
+
+    if (targetUserIds.length === 0)
+        throw UnsupportedOperationError(UnsupportedOperationErrorEnum.MISSING_NOTIFICATION_TARGET);
+
+    // Logic to remove duplicate userIds and sender's userId
+    let seen = {};
+    seen[user.sub] = true;
+    const filteredTargetUserIds = targetUserIds.filter(targetUserId => {
+        return seen.hasOwnProperty(targetUserId) ? false : (seen[targetUserId] = true);
+    });
+
+    notificationDTO.enotificationbodysenderid = user.sub;
+    
+    return NotificationBody.query()
+    .insertToTable(notificationDTO, user.sub)
+    .then(notificationBody => {
+        const notificationDTO = filteredTargetUserIds.map(targetUserId => ({
+            eusereuserid: targetUserId,
+            enotificationbodyenotificationbodyid: notificationBody.enotificationbodyid
+        }))
+
+        return Notification.query()
+        .insertToTable(notificationDTO, user.sub)
         .then(resultArr => resultArr.map(notification => firebaseService
             .pushNotification(notification.eusereuserid, notificationBody.enotificationbodytitle, notificationBody)))
         .then(pushNotificationPromises => Promise.all(pushNotificationPromises))
