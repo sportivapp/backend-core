@@ -14,12 +14,13 @@ newsUserService.getNews = async (pageRequest, user, companyId, categoryId, today
 
     if (!SortEnum.typeOf(sort)) sort = SortEnum.NEWEST
 
+    let isPublic = true;
     if (companyId) {
         const isUserExistInCompany = await companyService.isUserExistInCompany(companyId, user.sub)
-        if (!isUserExistInCompany) return ServiceHelper.toEmptyPage(pageRequest.page, pageRequest.size)
+        if (isUserExistInCompany) isPublic = false;
     }
 
-    const filter = { companyId, categoryId, today, isPublic: !companyId }
+    const filter = { companyId, categoryId, today, isPublic: isPublic }
 
     return newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate(pageRequest, filter, keyword, sort)
 }

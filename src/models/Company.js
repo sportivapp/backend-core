@@ -33,7 +33,6 @@ class Company extends Model {
           .withGraphFetched('carousel(baseAttributes)')
           .withGraphFetched('address(baseAttributes)')
           .withGraphFetched('industries(baseAttributes)')
-          .withGraphFetched('news(companyDetail)')
       }
     }
   }
