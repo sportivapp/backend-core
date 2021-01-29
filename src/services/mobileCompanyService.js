@@ -65,14 +65,6 @@ companyService.getCompany = async (companyId, user) => {
     let companyDetailPromise = Company.query()
     .where('ecompanyid', companyId)
     .modify('about')
-    .modifyGraph('news', builder => {
-        builder.where('ecompanyecompanyid', companyId)
-            .where('enewsispublished', true)
-
-        if (!isInCompany)
-            builder.where('enewsispublic', true)
-
-    })
     .first();
 
     const pendingLog = companyLogService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.APPLY, CompanyLogTypeEnum.INVITE]);

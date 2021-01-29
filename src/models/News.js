@@ -35,9 +35,6 @@ class News extends Model {
                     .withGraphFetched('company(baseAttributes)')
                     .withGraphFetched('creator(baseAttributes).file(baseAttributes)')
             },
-            companyDetail(builder) {
-                builder.select('enewsid', 'enewstitle', 'enewsdate', 'enewsispublic', 'enewsispublished', 'ecompanyecompanyid');
-            },
         }
     }
 

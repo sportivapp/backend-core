@@ -220,7 +220,9 @@ newsService.getNewsFilterByCompanyIdAndPublicStatusAndCategoryIdAndTodayDate = a
         .modify('list')
         .where('enewsispublished', true)
         .where(raw('lower("enewstitle")'), 'like', `%${keyword.toLowerCase()}%`)
-        .where('enewsispublic', isPublic)
+    
+    if (isPublic)
+        query.where('enewsispublic', isPublic)
 
     if (companyId) query = query.where('ecompanyecompanyid', companyId)
 
