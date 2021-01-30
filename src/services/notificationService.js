@@ -62,7 +62,7 @@ notificationService.saveNotificationWithTransaction = async (notificationObj, lo
 
     // Logic to remove duplicate userIds and sender's userId
     let seen = {};
-    seen[user.sub] = true;
+    seen[loggedInUser.sub] = true;
     const filteredTargetUserIds = targetUserIds.filter(targetUserId => {
         return seen.hasOwnProperty(targetUserId) ? false : (seen[targetUserId] = true);
     });
