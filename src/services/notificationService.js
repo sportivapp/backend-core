@@ -58,39 +58,17 @@ notificationService.deleteNotificationBody = async () => {
 
 }
 
-notificationService.saveNotification = async (notificationObj, loggedInUser, targetUserIds, db = Notification.knex()) => {
-
-    const notificationBodyDTO = {
-        enotificationbodyentityid: notificationObj.enotificationbodyentityid.toString(),
-        enotificationbodyentitytype: notificationObj.enotificationbodyentitytype,
-        enotificationbodyaction: notificationObj.enotificationbodyaction,
-        enotificationbodytitle: notificationObj.enotificationbodytitle,
-        enotificationbodymessage: notificationObj.enotificationbodymessage,
-        enotificationbodysenderid: loggedInUser.sub
-    }
-    
-    return NotificationBody.query(db)
-    .insertToTable(notificationBodyDTO, loggedInUser.sub)
-    .then(notificationBody => {
-
-        const notificationDTO = targetUserIds.map(targetUserId => ({
-            eusereuserid: targetUserId,
-            enotificationbodyenotificationbodyid: notificationBody.enotificationbodyid
-        }))
-
-        return Notification.query(db)
-        .insertToTable(notificationDTO, loggedInUser.sub)
-        .then(resultArr => resultArr.map(notification => firebaseService
-            .pushNotification(notification.eusereuserid, notificationBody.enotificationbodytitle, notificationBody.enotificationbodymessage)))
-        .then(pushNotificationPromises => Promise.all(pushNotificationPromises))
-    })
-
-}
-
 notificationService.saveNotificationWithTransaction = async (notificationObj, loggedInUser, targetUserIds, trx) => {
 
-    if (targetUserIds.length === 0)
-        return
+    // Logic to remove duplicate userIds and sender's userId
+    let seen = {};
+    seen[user.sub] = true;
+    const filteredTargetUserIds = targetUserIds.filter(targetUserId => {
+        return seen.hasOwnProperty(targetUserId) ? false : (seen[targetUserId] = true);
+    });
+
+    if (filteredTargetUserIds.length === 0)
+        throw UnsupportedOperationError(UnsupportedOperationErrorEnum.MISSING_NOTIFICATION_TARGET);
 
     const notificationBodyDTO = {
         enotificationbodyentityid: notificationObj.enotificationbodyentityid.toString(),
@@ -121,15 +99,15 @@ notificationService.saveNotificationWithTransaction = async (notificationObj, lo
 
 notificationService.createNotification = async (notificationDTO, user, targetUserIds) => {
 
-    if (targetUserIds.length === 0)
-        throw UnsupportedOperationError(UnsupportedOperationErrorEnum.MISSING_NOTIFICATION_TARGET);
-
     // Logic to remove duplicate userIds and sender's userId
     let seen = {};
     seen[user.sub] = true;
     const filteredTargetUserIds = targetUserIds.filter(targetUserId => {
         return seen.hasOwnProperty(targetUserId) ? false : (seen[targetUserId] = true);
     });
+
+    if (filteredTargetUserIds.length === 0)
+        throw UnsupportedOperationError(UnsupportedOperationErrorEnum.MISSING_NOTIFICATION_TARGET);
 
     notificationDTO.enotificationbodysenderid = user.sub;
     

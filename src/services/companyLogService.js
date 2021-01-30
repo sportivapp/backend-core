@@ -449,7 +449,7 @@ companyLogService.exitCompany = async (companyId, user) => {
                     enotificationbodymessage: NotificationEnum.user.actions.exit.message
                 }
 
-                notificationService.saveNotification(notificationObj, user, adminIds)
+                notificationService.saveNotificationWithTransaction(notificationObj, user, adminIds, trx)
             }
         }
         return removedUser
