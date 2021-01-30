@@ -47,24 +47,6 @@ AnnouncementService.addUser = async (announcementId, userIds, loggedInUser, db) 
 
     return AnnouncementUserMapping.query(db).insertToTable(users, loggedInUser.sub)
         .then(announcementLog => {
-
-            if (users.length > 0) {
-                const notificationObj = {
-                    enotificationbodyentityid: announcementId,
-                    enotificationbodyentitytype: NotificationEnum.announcement.type,
-                    enotificationbodyaction: NotificationEnum.announcement.actions.publish.code,
-                    enotificationbodytitle: NotificationEnum.announcement.actions.publish.title,
-                    enotificationbodymessage: NotificationEnum.announcement.actions.publish.message
-                }
-
-
-                notificationService.saveNotification(
-                    notificationObj,
-                    loggedInUser,
-                    userIds
-                )
-            }
-
             return announcementLog
         })
 }
