@@ -83,7 +83,7 @@ notificationService.saveNotificationWithTransaction = async (notificationObj, lo
     .insertToTable(notificationBodyDTO, loggedInUser.sub)
     .then(notificationBody => {
 
-        const notificationDTO = targetUserIds.map(targetUserId => ({
+        const notificationDTO = filteredTargetUserIds.map(targetUserId => ({
             eusereuserid: targetUserId.euserid,
             enotificationbodyenotificationbodyid: notificationBody.enotificationbodyid
         }))
