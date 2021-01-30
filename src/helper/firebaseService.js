@@ -18,7 +18,8 @@ firebaseService.pushNotification = async (targetUserId, notificationTitle, notif
     const message = {
         notification: {
             title: notificationTitle,
-            body: notificationMessage
+            body: notificationMessage,
+            sound: "default",
         },
     	data: notificationBody
     }
