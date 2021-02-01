@@ -24,11 +24,16 @@ class Team extends Model {
 
     static get modifiers() {
         return {
-          baseAttributes(builder) {
-            builder.select('eteamid', 'eteamname', 'eteamdescription', 'eteamispublic', 'ecompanyecompanyid').withGraphFetched('teamPicture(baseAttributes)')
-          }
+            baseAttributes(builder) {
+                builder.select('eteamid', 'eteamname', 'eteamdescription', 'eteamispublic', 'ecompanyecompanyid').withGraphFetched('teamPicture(baseAttributes)')
+            },
+            basic(builder) {
+                builder.select('eteamid', 'eteamname', 'eteamdescription', 'eteamispublic', 'ecompanyecompanyid')
+                .withGraphFetched('teamIndustry(baseAttributes)')
+                .withGraphFetched('company(baseAttributes)')
+            }
         }
-      }
+    }
 
     static get relationMappings() {
 

@@ -156,6 +156,7 @@ threadPostReplyService.getThreadPostIdsByUserId = async (userId) => {{
 
     return ThreadPostReply.query()
         .where('ethreadpostreplycreateby', userId)
+        .where('ethreadpostreplydeletestatus', false)
         .then(threadPostReplies => threadPostReplies.map(threadPostReply => threadPostReply.ethreadpostethreadpostid))
 
 }}
