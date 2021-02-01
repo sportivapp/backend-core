@@ -411,36 +411,18 @@ companyService.exitCompany = async (companyId, user) => {
 
             await Promise.all([removeApprovalUser, removeApproval, removePermits, removePositionUserMapping, removeRosterUserMapping, removeShiftRoster, removeUserFromTeam])
 
-            const getAdminsInCompany = await CompanyDefaultPosition.query(trx)
-            .where('ecompanyecompanyid', companyId)
-            .first()
-            .then(position => {
+            // const getAdminsInCompany = await CompanyDefaultPosition.query(trx)
+            // .where('ecompanyecompanyid', companyId)
+            // .first()
+            // .then(position => {
     
-                if(!position) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.COMPANY_NOT_EXIST)
+            //     if(!position) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.COMPANY_NOT_EXIST)
     
-                return Grade.relatedQuery('users', trx)
-                .for(Grade.query().where('egradeid', position.eadmingradeid))
-                .distinct('euserid')
+            //     return Grade.relatedQuery('users', trx)
+            //     .for(Grade.query().where('egradeid', position.eadmingradeid))
+            //     .distinct('euserid')
     
-            })
-
-            if(getAdminsInCompany.length > 0 ) {
-    
-                const notificationObj = {
-                    enotificationbodyentityid: user.sub,
-                    enotificationbodyentitytype: NotificationEnum.user.type,
-                    enotificationbodyaction: NotificationEnum.user.actions.exit.code,
-                    enotificationbodytitle: NotificationEnum.user.actions.exit.title,
-                    enotificationbodymessage: NotificationEnum.user.actions.exit.message
-                }
-        
-                await notificationService.saveNotificationWithTransaction(
-                    notificationObj,
-                    user,
-                    getAdminsInCompany,
-                    trx
-                )
-            }
+            // })
 
             const companyMemberCount = await companyService.getCompanyMemberCount(companyId);
 
