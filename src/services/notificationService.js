@@ -68,7 +68,7 @@ notificationService.saveNotificationWithTransaction = async (notificationObj, lo
     });
 
     if (filteredTargetUserIds.length === 0)
-        throw UnsupportedOperationError(UnsupportedOperationErrorEnum.MISSING_NOTIFICATION_TARGET);
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.MISSING_NOTIFICATION_TARGET);
 
     const notificationBodyDTO = {
         enotificationbodyentityid: notificationObj.enotificationbodyentityid.toString(),
