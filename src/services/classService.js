@@ -1,5 +1,4 @@
 const Class = require('../models/Class')
-const ClassUserMapping = require('../models/ClassUserMapping')
 const Industry = require('../models/Industry')
 const Company = require('../models/Company')
 const ClassRequirement = require('../models/ClassRequirement')
@@ -8,9 +7,6 @@ const ServiceHelper = require('../helper/ServiceHelper')
 const CompanyUserMapping = require('../models/CompanyUserMapping')
 const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
 const ClassTypeEnum = require('../models/enum/ClassTypeEnum')
-const ClassUserStatusEnum = require('../models/enum/ClassUserStatusEnum')
-const { raw } = require('objection')
-const { user } = require('../models/enum/NotificationEnum')
 
 const classService = {}
 

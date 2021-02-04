@@ -1,3 +1,5 @@
+const v2 = '/api/v2';
+
 module.exports = {
     routes: {
         base: '/api/v1',
@@ -148,6 +150,10 @@ module.exports = {
             classUser: '/class/:classId/users',
             pendingUser: '/class/:classId/pending-users',
             processRegistration: '/class/:classId/process-registration'
+        },
+        classV2: {
+            list: v2 + '/class',
+            id: v2 + '/class/:classId',
         },
         classUser: {
             registration: '/user-class/registration',
