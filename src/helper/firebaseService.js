@@ -34,7 +34,7 @@ firebaseService.pushNotification = async (targetUserId, notificationTitle, notif
     }
 
     const messaging = firebaseAdmin.messaging()
-    messaging.send(topic, message)
+    messaging.send(message)
         .then(success => {
             return loggingService.sendSlackMessage(loggingService.setNotificationMessage(topic, message, success), 'NOTIFICATION')
                 .then(result => true);
