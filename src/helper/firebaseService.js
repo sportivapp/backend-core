@@ -16,7 +16,20 @@ firebaseService.pushNotification = async (targetUserId, notificationTitle, notif
 	notificationBody.enotificationbodyid = notificationBody.enotificationbodyid.toString();
 
     const message = {
-    	data: notificationBody
+        data: notificationBody,
+        apns: {
+            headers: {
+                "apns-priority": "10",
+            },
+            payload: {
+                aps: {
+                    alert: {
+                        title: notificationBody.enotificationbodytitle,
+                        body: notificationBody.enotificationbodymessage,
+                    }
+                }
+            }
+        }
     }
 
         const messaging = firebaseAdmin.messaging()
