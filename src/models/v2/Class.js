@@ -21,19 +21,22 @@ class Class extends Model {
 
     static get modifiers() {
         return {
-            baseAttributes(builder) {
-                builder.select('id', 'title', 'description', 'address', 'city_id', 'industry_id', 
-                'pic_name', 'pic_mobile_number', 'company_id')
+            adminList(builder) {
+                builder.select('id', 'title', 'city_id', 'industry_id', 'file_id')
+                    .withGraphFetched('industry(baseAttributes)')
+                    .withGraphFetched('city(baseAttributes)')
+                    .withGraphFetched('classMedia(list)');
             }
         }
     }
 
     static get relationMappings() {
 
-        const Company = require('../Company')
-        const Industry = require('../Industry')
-        const User = require('../User')
-        const File = require('../File')
+        const Company = require('../Company');
+        const Industry = require('../Industry');
+        const User = require('../User');
+        const ClassMedia = require('./ClassMedia');
+        const City = require('../City');
  
         return {
             company: {
@@ -60,14 +63,22 @@ class Class extends Model {
                     to: 'euser.euserid',
                 }
             },
-            media: {
+            classMedia: {
                 relation: Model.HasManyRelation,
-                modelClass: File,
+                modelClass: ClassMedia,
                 join: {
-                    from: 'eclass.file_id',
-                    to: 'efile.efileid'
+                    from: 'class.uuid',
+                    to: 'class_media.class_uuid',
                 }
-            }
+            },
+            city: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: City,
+                join: {
+                    from: 'class.city_id',
+                    to: 'ecity.ecityid',
+                }
+            },
         }
     }
 }

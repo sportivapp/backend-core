@@ -21,8 +21,9 @@ class ClassMedia extends Model {
 
     static get modifiers() {
         return {
-            baseAttributes(builder) {
-                builder.select('id', 'file_id', 'class_uuid');
+            list(builder) {
+                builder.select('id', 'file_id', 'class_uuid')
+                    .withGraphFetched('file(baseAttributes)');
             }
         }
     }

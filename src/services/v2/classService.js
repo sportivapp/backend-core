@@ -3,6 +3,7 @@ const classMediaService = require('./classMediaService');
 const classCoachService = require('./classCoachService');
 const classCategoriesService = require('./classCategoryService');
 const UnsupportedOperationError = require('../../models/errors/UnsupportedOperationError');
+const ServiceHelper = require('../../helper/ServiceHelper');
 
 const ErrorEnum = {
     INVALID_COACH_ID: 'INVALID_COACH_ID',
@@ -48,5 +49,22 @@ classService.createClass = async (classDTO, fileIds, classCoachUserIds, categori
     });
 
 };
+
+classService.getClasses = async (page, size, keyword, industryId) => {
+
+    let clsPromise = Class.query()
+        .modify('adminList')
+        .whereRaw(`LOWER("title") LIKE LOWER('%${keyword}%')`)
+
+    if (industryId)
+        clsPromise = clsPromise.where('industry_id', industryId);
+
+    return clsPromise
+        .page(page, size)
+        .then(classes =>
+            ServiceHelper.toPageObj(page, size, classes)
+        );;
+
+}
 
 module.exports = classService;
