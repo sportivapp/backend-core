@@ -5,11 +5,11 @@ const classController = {};
 
 classController.createClass = async (req, res, next) => {
 
-    const { title, description, address, cityId, industryId, picName, picMobileNumber } = req.body;
+    const { title, description, address, cityId, industryId, picName, picMobileNumber, administrationFee } = req.body;
     const { fileIds } = req.body;
-    const { classCompanyUserIds } = req.body;
+    const { classCoachUserIds } = req.body;
     const { categories } = req.body;
-    const { classCategoryCompanyUserIds } = req.body;
+    const { categoryCoachUserIds } = req.body;
 
     const classDTO = {
         title: title,
@@ -20,15 +20,16 @@ classController.createClass = async (req, res, next) => {
         picName: picName,
         picMobileNumber: picMobileNumber,        
         companyId: req.user.companyId,
+        administrationFee: administrationFee,
     };
 
     try {
 
-        const result = await classService.createClass(classDTO, fileIds, classCompanyUserIds, categories, 
-            classCategoryCompanyUserIds, req.user);
+        const result = await classService.createClass(classDTO, fileIds, classCoachUserIds, categories, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
+        console.log(e);
         next(e);
     }
 

@@ -6,6 +6,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('class', t => {
     t.string('address').notNullable();
     t.string('pic_name');
     t.string('pic_mobile_number');
+    t.decimal('administration_fee', 14, 2);
     t.integer('file_id');
     t.integer('company_id');
     t.integer('industry_id');

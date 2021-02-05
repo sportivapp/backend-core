@@ -1,8 +1,8 @@
 const Model = require('./Model');
 
-class ClassCategory extends Model {
+class ClassCoach extends Model {
     static get tableName() {
-        return 'class_category';
+        return 'class_coach';
     };
 
     static get idColumn() {
@@ -22,14 +22,15 @@ class ClassCategory extends Model {
     static get modifiers() {
         return {
             baseAttributes(builder) {
-                builder.select('id', 'title', 'description', 'price', 'requirements');
+                builder.select('uuid', 'user_id', 'class_uuid');
             }
         }
     }
 
     static get relationMappings() {
 
-        const Class = require('./Class')
+        const Class = require('./Class');
+        const User = require('../User');
  
         return {
             class: {
@@ -37,11 +38,19 @@ class ClassCategory extends Model {
                 modelClass: Class,
                 join: {
                     from: 'class_category.class_uuid',
-                    to: 'class.uuid'
+                    to: 'class.uuid',
                 }
             },
+            classCoach: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: User,
+                join: {
+                    from: 'class_coach.user_id',
+                    to: 'euser.euserid',
+                }
+            }
         }
     }
 }
 
-module.exports = ClassCategory;
+module.exports = ClassCoach;
