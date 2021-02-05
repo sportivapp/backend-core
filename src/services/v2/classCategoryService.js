@@ -1,36 +1,54 @@
 const ClassCategory = require('../../models/v2/ClassCategory');
 const classCategoryCoachService = require('./classCategoryCoachService');
+const classCategorySessionService = require ('./classCategorySessionService');
 
 const classCategoryService = {};
 
+const oneWeek = 7 * 24 * 60 * 60 * 1000;
+
 classCategoryService.initCategories = async (classId, categories, user, trx) => {
 
-    const ctgsPromise = categories.map(category => {
+    const classCategoryPromises = categories.map(category => {
         const newCategory = {};
         newCategory.classUuid = classId;
         newCategory.title = category.title;
         newCategory.description = category.description;
         newCategory.price = category.price;
         newCategory.requirements = JSON.stringify(category.requirements);
-        
-        return ClassCategory.query(trx)
-            .insertToTable(newCategory, user.sub);
-    });
-    const returnedCategories = await Promise.all(ctgsPromise);
 
-    let categoryCoachDTO = [];
-    for (let i=0;i<categories.length;i++) {
-        for (let j=0;j<categories[i].categoryCoachUserIds.length;j++) {
-            categoryCoachDTO.push({
-                classCategoryUuid: returnedCategories[i].uuid,
-                userId: categories[i].categoryCoachUserIds[j],
+        return classCategories = ClassCategory.query(trx)
+            .insertToTable(newCategory, user.sub)
+            .then(async classCategory => {
+                const categoryCoachDTO = category.categoryCoachUserIds.map(categoryCoachUserId => {
+                    return {
+                        classCategoryUuid: classCategory.uuid,
+                        userId: categoryCoachUserId,
+                    }
+                });
+                let sessionDTO = [];
+                category.sessions.map(session => {    
+                    while (session.startDate < category.endDate) {
+                        sessionDTO.push({
+                            classCategoryUuid: classCategory.uuid,
+                            startDate: session.startDate,
+                            endDate: session.endDate,
+                        });
+                        session.startDate += oneWeek;
+                        session.endDate += oneWeek;
+                    }
+                });
+                const classCategoryCoach = await classCategoryCoachService.initCategoryCoach(categoryCoachDTO, user, trx);
+                const classCategorySession = await classCategorySessionService.initCategorySession(sessionDTO, user, trx);
+
+                return {
+                    ...classCategory,
+                    classCategoryCoach: classCategoryCoach,
+                    classCategorySession: classCategorySession,
+                }
             });
-        }
-    }
 
-    await classCategoryCoachService.initCategoryCoach(categoryCoachDTO, user, trx);
-
-    return 
+    });
+    return Promise.all(classCategoryPromises);
 
 };
 

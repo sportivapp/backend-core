@@ -7,6 +7,7 @@ const ServiceHelper = require('../../helper/ServiceHelper');
 
 const ErrorEnum = {
     INVALID_COACH_ID: 'INVALID_COACH_ID',
+    INVALID_START_SESSION_DATE: 'INVALID_START_SESSION_DATE',
 }
 
 const classService = {};
@@ -19,6 +20,13 @@ classService.createClass = async (classDTO, fileIds, classCoachUserIds, categori
             if (!foundClassCoach)
                 throw new UnsupportedOperationError(ErrorEnum.INVALID_COACH_ID);
         });
+
+        const startDate = new Date(category.startDate);
+        const firstSessionDate = new Date(category.sessions[0].startDate);
+
+        if (startDate.getDay() !== firstSessionDate.getDay())
+            throw new UnsupportedOperationError(ErrorEnum.INVALID_START_SESSION_DATE);
+
     });
 
     return Class.transaction(async trx => {
@@ -40,11 +48,16 @@ classService.createClass = async (classDTO, fileIds, classCoachUserIds, categori
             }
         });
 
-        await classMediaService.initMedia(mediaDTO, user, trx);
-        await classCoachService.initClassCoach(classCoachDTO, user, trx);
-        await classCategoriesService.initCategories(cls.uuid, categories, user, trx);
+        const classMedia = await classMediaService.initMedia(mediaDTO, user, trx);
+        const classCoach = await classCoachService.initClassCoach(classCoachDTO, user, trx);
+        const classCategory = await classCategoriesService.initCategories(cls.uuid, categories, user, trx);
 
-        return cls;
+        return {
+            ...cls,
+            classMedia: classMedia,
+            classCoach: classCoach,
+            classCategory: classCategory,
+        };
 
     });
 
