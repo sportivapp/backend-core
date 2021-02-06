@@ -22,13 +22,13 @@ class Class extends Model {
     static get modifiers() {
         return {
             adminList(builder) {
-                builder.select('uuid', 'title', 'city_id', 'industry_id', 'file_id')
+                builder.select('uuid', 'title', 'administration_fee', 'city_id', 'industry_id', 'file_id')
                     .withGraphFetched('industry(baseAttributes)')
                     .withGraphFetched('city(baseAttributes)')
                     .withGraphFetched('classMedia(list)');
             },
             adminDetail(builder) {
-                builder.select('uuid', 'title', 'administration_fee', 'pic_name', 'pic_mobile_number')
+                builder.select('uuid', 'title', 'description', 'administration_fee', 'pic_name', 'pic_mobile_number')
                     .withGraphFetched('industry(baseAttributes)')
                     .withGraphFetched('city(baseAttributes)')
                     .withGraphFetched('classMedia(list)')

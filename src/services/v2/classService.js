@@ -15,6 +15,9 @@ const classService = {};
 
 classService.createClass = async (classDTO, fileIds, classCoachUserIds, categories, user) => {
 
+    if (!user.companyId)
+        throw new UnsupportedOperationError('USER_NOT_IN_COMPANY');
+
     categories.map(category => {
         category.categoryCoachUserIds.map(categoryUserId => {
             const foundClassCoach = classCoachUserIds.find(classUserId => classUserId === categoryUserId);

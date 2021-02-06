@@ -163,6 +163,7 @@ module.exports = {
             id: v2 + '/class/:classUuid',
             idCategory: v2 + '/class/:classUuid/classCategory/:classCategoryUuid',
             reschedule: v2 + '/class/:classUuid/classCategory/:classCategoryUuid/classCategorySession/:classCategorySessionUuid/reschedule',
+            register: v2 + '/class/:classUuid/classCategory/:classCategoryUuid/register',
         },
         classCategory: {
             list: v2 + '/category',
