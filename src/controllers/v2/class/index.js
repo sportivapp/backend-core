@@ -28,7 +28,6 @@ classController.createClass = async (req, res, next) => {
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
-        console.log(e)
         next(e);
     }
 
@@ -44,7 +43,59 @@ classController.getClasses = async (req, res, next) => {
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
 
     } catch(e) {
-        console.log(e)
+        next(e);
+    }
+
+}
+
+classController.getClass = async (req, res, next) => {
+
+    const { classUuid } = req.params;
+
+    try {
+
+        const result = await classService.getClass(classUuid);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classController.getClassCategory = async (req, res, next) => {
+
+    const { classUuid, classCategoryUuid } = req.params;
+
+    try {
+
+        const result = await classService.getClassCategory(classUuid, classCategoryUuid, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classController.reschedule = async (req, res, next) => {
+
+    const { classUuid, classCategoryUuid, classCategorySessionUuid } = req.params;
+    const { startDate, endDate } = req.body;
+
+    const classCategorySessionDTO = {
+        uuid: classCategorySessionUuid,
+        classCategoryUuid: classCategoryUuid,
+        startDate: startDate,
+        endDate: endDate,
+    }
+
+    try {
+
+        const result = await classService.reschedule(classUuid, classCategorySessionDTO, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
         next(e);
     }
 

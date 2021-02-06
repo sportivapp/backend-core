@@ -151,16 +151,22 @@ module.exports = {
             pendingUser: '/class/:classId/pending-users',
             processRegistration: '/class/:classId/process-registration'
         },
-        classV2: {
-            list: v2 + '/class',
-            id: v2 + '/class/:classId',
-        },
         classUser: {
             registration: '/user-class/registration',
             list: '/user-class',
             id: '/user-class/:classUserId',
             history: '/user-class-history',
             historyId: '/user-class-history/:classUserId'
+        },
+        classV2: {
+            list: v2 + '/class',
+            id: v2 + '/class/:classUuid',
+            idCategory: v2 + '/class/:classUuid/classCategory/:classCategoryUuid',
+            reschedule: v2 + '/class/:classUuid/classCategory/:classCategoryUuid/classCategorySession/:classCategorySessionUuid/reschedule',
+        },
+        classCategory: {
+            list: v2 + '/category',
+            id: v2 + '/category/:classCategoryUuid',
         },
         permit: {
             list: '/permit',

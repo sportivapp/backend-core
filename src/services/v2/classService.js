@@ -2,12 +2,13 @@ const Class = require('../../models/v2/Class');
 const classMediaService = require('./classMediaService');
 const classCoachService = require('./classCoachService');
 const classCategoriesService = require('./classCategoryService');
-const UnsupportedOperationError = require('../../models/errors/UnsupportedOperationError');
+const { UnsupportedOperationError, NotFoundError } = require('../../models/errors');
 const ServiceHelper = require('../../helper/ServiceHelper');
 
 const ErrorEnum = {
     INVALID_COACH_ID: 'INVALID_COACH_ID',
     INVALID_START_SESSION_DATE: 'INVALID_START_SESSION_DATE',
+    USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY',
 }
 
 const classService = {};
@@ -77,6 +78,54 @@ classService.getClasses = async (page, size, keyword, industryId) => {
         .then(classes =>
             ServiceHelper.toPageObj(page, size, classes)
         );;
+
+}
+
+classService.getClass = async (classUuid) => {
+
+    return Class.query()
+        .modify('adminDetail')
+        .findById(classUuid)
+        .then(cls => {
+            if (!cls)
+                throw new NotFoundError();
+            return cls;
+        });
+
+}
+
+classService.findById = async (classUuid) => {
+
+    return Class.query()
+        .findById(classUuid)
+        .then(cls => {
+            if (!cls)
+                throw new NotFoundError();
+            return cls;
+        });
+
+}
+
+classService.checkUserInClassCompany = async (classUuid, user) => {
+
+    const cls = classService.findById(classUuid);
+    if (cls.companyId !== user.companyId)
+        throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_COMPANY);
+        
+
+}
+
+classService.getClassCategory = async (classUuid, classCategoryUuid, user) => {
+
+    await classService.checkUserInClassCompany(classUuid, user);
+    return classCategoriesService.getClassCategory(classCategoryUuid);
+
+}
+
+classService.reschedule = async (classUuid, classCategorySessionDTO, user) => {
+
+    await classService.checkUserInClassCompany(classUuid, user);
+    return classCategoriesService.reschedule(classCategorySessionDTO, user)
 
 }
 

@@ -21,8 +21,9 @@ class ClassCategorySession extends Model {
 
     static get modifiers() {
         return {
-            baseAttributes(builder) {
-                builder.select('uuid', 'class_category_uuid', 'start_date', 'end_date');
+            list(builder) {
+                builder.select('uuid', 'class_category_uuid', 'start_date', 'end_date')
+                    .orderBy('start_date', 'ASC');
             }
         }
     }

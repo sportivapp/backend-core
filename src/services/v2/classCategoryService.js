@@ -1,3 +1,4 @@
+const { NotFoundError } = require('../../models/errors');
 const ClassCategory = require('../../models/v2/ClassCategory');
 const classCategoryCoachService = require('./classCategoryCoachService');
 const classCategorySessionService = require ('./classCategorySessionService');
@@ -50,6 +51,25 @@ classCategoryService.initCategories = async (classId, categories, user, trx) => 
     });
     return Promise.all(classCategoryPromises);
 
-};
+}
+
+classCategoryService.getClassCategory = async (classCategoryUuid) => {
+
+    return ClassCategory.query()
+        .modify('detail')
+        .findById(classCategoryUuid)
+        .then(classCategory => {
+            if (!classCategory)
+                throw new NotFoundError();
+            return classCategory;
+        })
+
+}
+
+classCategoryService.reschedule = async (classCategorySessionDTO, user) => {
+
+    return classCategorySessionService.reschedule(classCategorySessionDTO, user);
+
+}
 
 module.exports = classCategoryService;

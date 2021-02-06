@@ -22,10 +22,17 @@ class Class extends Model {
     static get modifiers() {
         return {
             adminList(builder) {
-                builder.select('id', 'title', 'city_id', 'industry_id', 'file_id')
+                builder.select('uuid', 'title', 'city_id', 'industry_id', 'file_id')
                     .withGraphFetched('industry(baseAttributes)')
                     .withGraphFetched('city(baseAttributes)')
                     .withGraphFetched('classMedia(list)');
+            },
+            adminDetail(builder) {
+                builder.select('uuid', 'title', 'administration_fee', 'pic_name', 'pic_mobile_number')
+                    .withGraphFetched('industry(baseAttributes)')
+                    .withGraphFetched('city(baseAttributes)')
+                    .withGraphFetched('classMedia(list)')
+                    .withGraphFetched('classCategories(list)');
             }
         }
     }
@@ -37,6 +44,7 @@ class Class extends Model {
         const User = require('../User');
         const ClassMedia = require('./ClassMedia');
         const City = require('../City');
+        const ClassCategory = require('./ClassCategory');
  
         return {
             company: {
@@ -79,6 +87,14 @@ class Class extends Model {
                     to: 'ecity.ecityid',
                 }
             },
+            classCategories: {
+                relation: Model.HasManyRelation,
+                modelClass: ClassCategory,
+                join: {
+                    from: 'class.uuid',
+                    to: 'class_category.class_uuid'
+                }
+            }
         }
     }
 }
