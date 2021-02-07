@@ -11,7 +11,8 @@ classCategoryParticipantService.findByIdAndUserId = async (classCategoryUuid, us
 
     return ClassCategoryParticipant.query()
         .where('class_category_uuid', classCategoryUuid)
-        .where('user_id', userId);
+        .where('user_id', userId)
+        .first();
 
 }
 
