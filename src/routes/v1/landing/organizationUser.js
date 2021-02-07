@@ -1,4 +1,4 @@
-const router = require('../../landingRouter.js');
+const router = require('../landingRouter.js');
 const controller = require('../../../controllers/landing/companyUser')
 const auth = require('../../../middlewares/authentication');
 

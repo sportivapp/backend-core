@@ -5,6 +5,6 @@ const router = express.Router();
 const adminRoutes = require('./admin');
 const mobileRoutes = require('./mobile');
 
-router.use([adminRoutes, mobileRoutes])
+router.use('/api/v2', [adminRoutes, mobileRoutes]);
 
 module.exports = router;
