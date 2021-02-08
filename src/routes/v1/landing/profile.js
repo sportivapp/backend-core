@@ -1,5 +1,5 @@
 require('dotenv').config();
-const router = require('../../landingRouter');
+const router = require('../landingRouter');
 const profileController = require('../../../controllers/profile');
 const auth = require('../../../middlewares/authentication');
 const { routes } = require('../../../constant')

@@ -8,4 +8,4 @@ const schema = Joi.object({
     otpCode: Joi.string().required(),
 })
 
-module.exports = schema
+module.exports = schema;

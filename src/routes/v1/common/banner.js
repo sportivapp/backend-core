@@ -1,4 +1,4 @@
-const router = require('../../router')
+const router = require('../router')
 const bannerController = require('../../../controllers/banner')
 const { routes } = require('../../../constant')
 const auth = require('../../../middlewares/authentication');

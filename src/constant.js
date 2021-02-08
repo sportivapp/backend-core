@@ -1,3 +1,5 @@
+const v2 = '/api/v2';
+
 module.exports = {
     routes: {
         base: '/api/v1',
@@ -155,6 +157,17 @@ module.exports = {
             id: '/user-class/:classUserId',
             history: '/user-class-history',
             historyId: '/user-class-history/:classUserId'
+        },
+        classV2: {
+            list: '/class',
+            id: '/class/:classUuid',
+            idCategory: '/class/:classUuid/classCategory/:classCategoryUuid',
+            reschedule: '/class/:classUuid/classCategory/:classCategoryUuid/classCategorySession/:classCategorySessionUuid/reschedule',
+            register: '/class/:classUuid/classCategory/:classCategoryUuid/register',
+        },
+        classCategory: {
+            list: '/category',
+            id:  '/category/:classCategoryUuid',
         },
         permit: {
             list: '/permit',

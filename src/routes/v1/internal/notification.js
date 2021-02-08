@@ -1,4 +1,4 @@
-const router = require('../../router')
+const router = require('../router')
 const notificationController= require('../../../controllers/notification');
 const { routes } = require('../../../constant')
 

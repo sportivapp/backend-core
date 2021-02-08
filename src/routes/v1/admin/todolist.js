@@ -1,4 +1,4 @@
-const router = require('../../router')
+const router = require('../router')
 const todoListService = require('../../../controllers/todoList');
 const auth = require('../../../middlewares/authentication');
 const { routes } = require('../../../constant')

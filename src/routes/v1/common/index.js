@@ -18,6 +18,7 @@ const threadPostReplyRoutes = require('./threadPostReply')
 const userRoutes = require('./user');
 const cityRoutes = require('./city');
 const bannerRoutes = require('./banner');
+const newsUserRoutes = require('./newsUser');
 
 router.use([
     industryRoutes,
@@ -36,6 +37,7 @@ router.use([
     userRoutes,
     cityRoutes,
     bannerRoutes,
+    newsUserRoutes,
 ]);
 
 module.exports = router

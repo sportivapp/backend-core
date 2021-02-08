@@ -1,4 +1,4 @@
-const router = require('../../router')
+const router = require('../router')
 const controller = require('../../../controllers/industry')
 const auth = require('../../../middlewares/authentication')
 const { routes } = require('../../../constant')

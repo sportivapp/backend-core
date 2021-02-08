@@ -20,8 +20,6 @@ const ErrorEnum = {
     OTP_EXPIRED: 'OTP_EXPIRED',
 }
 
-
-
 const UserService = {};
 
 UserService.register = async (userDTO, otpCode) => {

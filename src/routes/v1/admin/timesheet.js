@@ -1,4 +1,4 @@
-const router = require('../../router')
+const router = require('../router')
 const timesheetService = require('../../../controllers/timesheet');
 const auth = require('../../../middlewares/authentication');
 const { routes } = require('../../../constant')
