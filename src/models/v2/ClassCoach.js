@@ -41,7 +41,7 @@ class ClassCoach extends Model {
                     to: 'class.uuid',
                 }
             },
-            classCoach: {
+            coach: {
                 relation: Model.BelongsToOneRelation,
                 modelClass: User,
                 join: {

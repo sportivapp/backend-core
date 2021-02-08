@@ -25,13 +25,6 @@ class Model extends objection.Model {
 
   static baseProperties(tableName) {
     const schema = {}
-    // schema[tableName.concat('createtime')] = { type: 'bigint' }
-    // schema[tableName.concat('createby')] = { type: 'integer' }
-    // schema[tableName.concat('changetime')] = { type: 'bigint' }
-    // schema[tableName.concat('changeby')] = { type: 'integer' }
-    // schema[tableName.concat('deletetime')] = { type: 'bigint' }
-    // schema[tableName.concat('deleteby')] = { type: 'integer' }
-    // schema[tableName.concat('deletestatus')] = { type: 'boolean' }
     return schema
   }
 

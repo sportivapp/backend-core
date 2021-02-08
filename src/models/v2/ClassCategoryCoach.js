@@ -41,7 +41,7 @@ class ClassCategoryCoach extends Model {
                     to: 'class_category.uuid',
                 }
             },
-            classCategoryCoach: {
+            coach: {
                 relation: Model.BelongsToOneRelation,
                 modelClass: User,
                 join: {

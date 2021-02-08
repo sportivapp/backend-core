@@ -35,7 +35,7 @@ classController.createClass = async (req, res, next) => {
 
 classController.getClasses = async (req, res, next) => {
 
-    const { page='0', size='10', keyword='', industryId } = req.query;
+    const { page='0', size='10', keyword='', industryId=1 } = req.query;
 
     try {
 
