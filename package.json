@@ -19,6 +19,7 @@
     "bluebird": "^3.7.2",
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
+    "commitizen": "^4.2.3",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "crypto-js": "^4.0.0",
@@ -44,5 +45,13 @@
     "shortid": "^2.2.15",
     "swagger-jsdoc": "^4.0.0",
     "swagger-ui-express": "^4.1.4"
+  },
+  "devDependencies": {
+    "cz-conventional-changelog": "^3.3.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }

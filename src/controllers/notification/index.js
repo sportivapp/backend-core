@@ -3,6 +3,34 @@ const ResponseHelper = require('../../helper/ResponseHelper');
 
 const controller = {};
 
+controller.getNotificationCount = async (req, res, next) => {
+
+    try {
+
+        const result = await notificationService.getNotificationCount(req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+controller.readNotification = async (req, res, next) => {
+
+    const { notificationId } = req.params;
+
+    try {
+
+        const result = await notificationService.readNotification(notificationId, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 controller.getAllNotification = async (req, res, next) => {
 
     const {page = '0', size = '100' } = req.query
