@@ -5,7 +5,7 @@ const classController = {};
 
 classController.getClasses = async (req, res, next) => {
 
-    const { page='0', size='10', keyword='', industryId, cityId } = req.query;
+    const { page='0', size='10', keyword='', industryId=1, cityId=1 } = req.query;
 
     try {
 
