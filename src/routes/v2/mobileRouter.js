@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const validator = require('../middlewares/web-validation')
+const validator = require('../../middlewares/web-validation')
 
 const newRouter = {}
 
-const BASE_URL = '/landing'
+const BASE_URL = '/mobile'
 
 newRouter.get = (path, ...callbacks) => {
     if (callbacks.length === 1) return router.get(BASE_URL.concat(path), validator, callbacks[0])

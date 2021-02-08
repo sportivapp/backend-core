@@ -1,4 +1,4 @@
-const router = require('../../router');
+const router = require('../router');
 const steamController = require('../../../controllers/steam');
 const { routes } = require('../../../constant');
 

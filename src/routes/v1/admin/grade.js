@@ -1,5 +1,5 @@
 const { routes } = require('../../../constant')
-const router = require('../../router');
+const router = require('../router');
 const gradeController = require('../../../controllers/grade')
 const auth = require('../../../middlewares/authentication');
 

@@ -9,6 +9,8 @@ const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const UnsupportedOperationErrorEnum = {
     USER_NOT_EXIST: 'USER_NOT_EXIST',
     MISSING_NOTIFICATION_TARGET: 'MISSING_NOTIFICATION_TARGET',
+    INVALID_NOTIFICATION: 'INVALID_NOTIFICATION',
+    NOTIFICATION_WAS_READ: 'NOTIFICATION_WAS_READ',
 }
 
 const notificationService = {};
@@ -29,6 +31,42 @@ notificationService.checkUserInDB = async (userId) => {
     return User.query()
     .where('euserid', userId)
     .first();
+
+}
+
+notificationService.getNotificationCount = async (user) => {
+
+    return Notification.query()
+        .where('eusereuserid', user.sub)
+        .andWhere('enotificationisread', false)
+        .count()
+        .then(notificationCount => {
+            if (notificationCount.length !== 0)
+                return parseInt(notificationCount[0].count);
+            return 0;
+        });
+
+}
+
+notificationService.readNotification = async (notificationId, user) => {
+
+    const notification = await Notification.query()
+        .where('enotificationid', notificationId)
+        .where('eusereuserid', user.sub)
+        .where('enotificationisread', false)
+        .first();
+
+    if (!notification)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INVALID_NOTIFICATION);
+
+    if (notification && notification.enotificationisread === true)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOTIFICATION_WAS_READ);
+
+    return notification.$query()
+        .updateByUserId({
+            enotificationisread: true,
+        }, user.sub)
+        .returning('*');
 
 }
 
