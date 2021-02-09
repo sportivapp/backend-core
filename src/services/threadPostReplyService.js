@@ -73,9 +73,6 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
     replyDTO.ethreadethreadid = post.ethreadethreadid
     replyDTO.ethreadpostethreadpostid = threadPostId
 
-    const reply = await ThreadPostReply.query()
-        .insertToTable(replyDTO, user.sub);
-
     // To comment creator
     const postEnum = NotificationEnum.forumPost
     const postCreateAction = postEnum.actions.reply
@@ -88,14 +85,16 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
     }
 
     // To reply creator
+    const replyTo = await ThreadPostReply.query()
+        .findById(replyDTO.ethreadpostreplyethreadpostreplyid);
     const replyEnum = NotificationEnum.forumPostReply
     const replyCreateAction = replyEnum.actions.reply
     const replyNotificationObj = await notificationService
-        .buildNotificationEntity(reply.ethreadpostreplyid, replyEnum.type, replyCreateAction.title, replyCreateAction.message(foundUser.eusername), replyCreateAction.title)
+        .buildNotificationEntity(replyTo.ethreadpostreplyid, replyEnum.type, replyCreateAction.title, replyCreateAction.message(foundUser.eusername), replyCreateAction.title)
     // If reply creator is thread creator, notify the thread instead
     let replyUserIds = [];
-    if (reply.ethreadpostreplycreateby !== thread.ethreadcreateby) {
-        replyUserIds.push(reply.ethreadpostreplycreateby);
+    if (replyTo.ethreadpostreplycreateby !== thread.ethreadcreateby) {
+        replyUserIds.push(replyTo.ethreadpostreplycreateby);
     }
 
     // To thread creator
@@ -109,8 +108,8 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
     notificationService.saveNotification(replyNotificationObj, user, replyUserIds);
     notificationService.saveNotification(threadNotificationObj, user, threadUserIds);
 
-    return reply
-
+    return ThreadPostReply.query()
+        .insertToTable(replyDTO, user.sub);
 
 }
 
