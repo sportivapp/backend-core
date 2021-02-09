@@ -95,7 +95,7 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
     // If reply creator is thread creator, notify the thread instead
     let replyUserIds = [];
     if (reply.ethreadpostreplycreateby !== thread.ethreadcreateby) {
-        replyUserIds.push(post.ethreadpostreplycreateby);
+        replyUserIds.push(reply.ethreadpostreplycreateby);
     }
 
     // To thread creator
