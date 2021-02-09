@@ -84,15 +84,15 @@ mobileCommentService.createComment = async (commentDTO, user) => {
         .insertToTable(commentDTO, user.sub)
 
     const forumEnum = NotificationEnum.forum
-    const createAction = forumEnum.actions.comment
+    const forumCreateAction = forumEnum.actions.comment
     const forumNotificationObj = await notificationService
-        .buildNotificationEntity(thread.ethreadid, forumEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
+        .buildNotificationEntity(thread.ethreadid, forumEnum.type, forumCreateAction.title, forumCreateAction.message(foundUser.eusername), forumCreateAction.title)
     const threadUserIds = [thread.ethreadcreateby]
 
     const postEnum = NotificationEnum.forumPost
-    const createAction = postEnum.actions.comment
+    const postCreateAction = postEnum.actions.comment
     const postNotificationObj = await notificationService
-        .buildNotificationEntity(threadPost.ethreadpostid, postEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
+        .buildNotificationEntity(threadPost.ethreadpostid, postEnum.type, postCreateAction.title, postCreateAction.message(foundUser.eusername), postCreateAction.title)
     const threadPostUserIds = await mobileCommentService.getCommentsByThreadId(commentDTO.ethreadethreadid)
         .then(threadPosts => threadPosts.filter(threadPost => {
             return threadPost.ethreadpostcreateby !== thread.ethreadcreateby
