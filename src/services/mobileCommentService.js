@@ -56,10 +56,16 @@ mobileCommentService.checkMakerAndModerator = async (threadPostId, userId) => {
 
 }
 
+mobileCommentService.getCommentsByThreadId = async (threadId) => {
+
+    return ThreadPost.query()
+        .where('ethreadethreadid', threadId);
+
+}
+
 mobileCommentService.createComment = async (commentDTO, user) => {
 
     const threadExist = await mobileForumService.checkThread(commentDTO.ethreadethreadid)
-
     const thread = await mobileForumService.getThreadById(commentDTO.ethreadethreadid)
 
     if(!threadExist) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_NOT_EXISTS)
@@ -74,21 +80,31 @@ mobileCommentService.createComment = async (commentDTO, user) => {
     const foundUser = await userService.getSingleUserById(user.sub)
         .catch(() => new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_FOUND));
 
-    const postEnum = NotificationEnum.forum
+    const threadPost = await ThreadPost.query(trx)
+        .insertToTable(commentDTO, user.sub)
+
+    const forumEnum = NotificationEnum.forum
+    const createAction = forumEnum.actions.comment
+    const forumNotificationObj = await notificationService
+        .buildNotificationEntity(thread.ethreadid, forumEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
+    const threadUserIds = [thread.ethreadcreateby]
+
+    const postEnum = NotificationEnum.forumPost
     const createAction = postEnum.actions.comment
+    const postNotificationObj = await notificationService
+        .buildNotificationEntity(threadPost.ethreadpostid, postEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
+    const threadPostUserIds = await mobileCommentService.getCommentsByThreadId(commentDTO.ethreadethreadid)
+        .then(threadPosts => threadPosts.filter(threadPost => {
+            return threadPost.ethreadpostcreateby !== thread.ethreadcreateby
+        })
+        .then(threadPosts => threadPosts.map(threadPost => {
+            return threadPost.ethreadpostcreateby
+        })));
 
-    const notificationObj = await notificationService
-        .buildNotificationEntity(thread.ethreadid, postEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
+    notificationService.saveNotificationWithTransaction(forumNotificationObj, user, threadUserIds)
+    notificationService.saveNotificationWithTransaction(postNotificationObj, user, threadPostUserIds)
 
-    let userIds = []
-    userIds.push(thread.ethreadcreateby)
-
-    return ThreadPost.transaction(async trx => {
-
-        notificationService.saveNotificationWithTransaction(notificationObj, user, userIds, trx)
-
-        return ThreadPost.query().insertToTable(commentDTO, user.sub)
-    })
+    return threadPost;
 
 }
 

@@ -114,7 +114,7 @@ notificationService.deleteNotificationBody = async () => {
 
 }
 
-notificationService.saveNotificationWithTransaction = async (notificationObj, loggedInUser, targetUserIds, trx) => {
+notificationService.saveNotificationWithTransaction = async (notificationObj, loggedInUser, targetUserIds) => {
 
     // Logic to remove duplicate userIds and sender's userId
     let seen = {};
