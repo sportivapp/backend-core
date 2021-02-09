@@ -73,29 +73,43 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
     replyDTO.ethreadethreadid = post.ethreadethreadid
     replyDTO.ethreadpostethreadpostid = threadPostId
 
+    const reply = await ThreadPostReply.query()
+        .insertToTable(replyDTO, user.sub);
+
     // To comment creator
-    const replyEnum = NotificationEnum.forumPost
-    const replyCreateAction = replyEnum.actions.reply
+    const postEnum = NotificationEnum.forumPost
+    const postCreateAction = postEnum.actions.reply
     const commentNotificationObj = await notificationService
-        .buildNotificationEntity(post.ethreadpostid, replyEnum.type, replyCreateAction.title, replyCreateAction.message(foundUser.eusername), replyCreateAction.title)
-    // If comment creator is thread creator, notify the comment
+        .buildNotificationEntity(post.ethreadpostid, postEnum.type, postCreateAction.title, postCreateAction.message(foundUser.eusername), postCreateAction.title)
+    // If comment creator is thread creator, notify the thread instead
     let commentUserIds = [];
     if (post.ethreadpostcreateby !== thread.ethreadcreateby) {
         commentUserIds.push(post.ethreadpostcreateby);
     }
 
+    // To reply creator
+    const replyEnum = NotificationEnum.forumPostReply
+    const replyCreateAction = replyEnum.actions.reply
+    const replyNotificationObj = await notificationService
+        .buildNotificationEntity(reply.ethreadpostreplyid, replyEnum.type, replyCreateAction.title, replyCreateAction.message(foundUser.eusername), replyCreateAction.title)
+    // If reply creator is thread creator, notify the thread instead
+    let replyUserIds = [];
+    if (reply.ethreadpostreplycreateby !== thread.ethreadcreateby) {
+        replyUserIds.push(post.ethreadpostreplycreateby);
+    }
+
     // To thread creator
-    const postEnum = NotificationEnum.forum
-    const postCreateAction = postEnum.actions.reply
+    const threadEnum = NotificationEnum.forum
+    const threadCreateAction = threadEnum.actions.reply
     const threadNotificationObj = await notificationService
-        .buildNotificationEntity(thread.ethreadid, postEnum.type, postCreateAction.title, postCreateAction.message(foundUser.eusername), postCreateAction.title)
+        .buildNotificationEntity(thread.ethreadid, threadEnum.type, threadCreateAction.title, threadCreateAction.message(foundUser.eusername), threadCreateAction.title)
     let threadUserIds = [thread.ethreadcreateby];
 
     notificationService.saveNotification(commentNotificationObj, user, commentUserIds);
+    notificationService.saveNotification(replyNotificationObj, user, replyUserIds);
     notificationService.saveNotification(threadNotificationObj, user, threadUserIds);
 
-    return ThreadPostReply.query()
-        .insertToTable(replyDTO, user.sub)
+    return reply
 
 
 }

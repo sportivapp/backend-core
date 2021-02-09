@@ -18,12 +18,12 @@ threadPostReplyController.getAllReplyByThreadPostId = async (req, res, next) => 
 threadPostReplyController.createReply = async (req, res, next) => {
 
     const { commentId } = req.params
-
     const { comment, fileId } = req.body
 
     const replyDTO = {
         ethreadpostreplycomment: comment,
-        efileefileid: fileId
+        efileefileid: fileId,
+        ethreadpostreplyethreadpostreplyid: replyId
     }
 
     try {
