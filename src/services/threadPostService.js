@@ -89,7 +89,7 @@ threadPostService.createPost = async (threadId, postDTO, user) => {
         .where('ethreadethreadid', thread.ethreadid)
         .then(posts => posts.map(post => ({ euserid: post.ethreadpostcreateby })))
         .then(userIds => {
-            userIds.push({ euserid: thread.ethreadcreateby })
+            userIds.push(thread.ethreadcreateby)
             return userIds.filter(postedUser => postedUser.euserid !== user.sub)
         })
 
