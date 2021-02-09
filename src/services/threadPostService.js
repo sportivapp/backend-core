@@ -62,6 +62,13 @@ threadPostService.getPostById = async (threadPostId) => {
         })
 }
 
+threadPostService.getPostsByThreadId = async (threadId) => {
+
+    return ThreadPost.query()
+        .where('ethreadethreadid', threadId);
+
+}
+
 threadPostService.createPost = async (threadId, postDTO, user) => {
 
     const thread = await threadService.getThreadDetailById(threadId)
@@ -78,27 +85,32 @@ threadPostService.createPost = async (threadId, postDTO, user) => {
         .catch(() => new UnsupportedOperationError(ErrorEnum.USER_NOT_FOUND));
 
     postDTO.ethreadethreadid = thread.ethreadid
+    const threadPost = await ThreadPost.query(trx)
+        .insertToTable(postDTO, user.sub)
 
-    const postEnum = NotificationEnum.forum
+    const forumEnum = NotificationEnum.forum
+    const createAction = forumEnum.actions.comment
+    const forumNotificationObj = await notificationService
+        .buildNotificationEntity(thread.ethreadid, forumEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
+    const threadUserIds = [thread.ethreadcreateby]
+
+    const postEnum = NotificationEnum.forumPost
     const createAction = postEnum.actions.comment
-
-    const notificationObj = await notificationService
-        .buildNotificationEntity(thread.ethreadid, postEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
-
-    const userIds = await ThreadPost.query()
-        .where('ethreadethreadid', thread.ethreadid)
-        .then(posts => posts.map(post => ({ euserid: post.ethreadpostcreateby })))
-        .then(userIds => {
-            userIds.push(thread.ethreadcreateby)
-            return userIds.filter(postedUser => postedUser.euserid !== user.sub)
+    const postNotificationObj = await notificationService
+        .buildNotificationEntity(threadPost.ethreadpostid, postEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
+    const threadPostUserIds = await threadPostService.getPostsByThreadId(postDTO.ethreadethreadid)
+        .then(threadPosts => threadPosts.filter(threadPost => {
+            return threadPost.ethreadpostcreateby !== thread.ethreadcreateby
         })
+        .then(threadPosts => threadPosts.map(threadPost => {
+            return threadPost.ethreadpostcreateby
+        })));
 
-    return ThreadPost.transaction(async trx => {
+    notificationService.saveNotification(forumNotificationObj, user, threadUserIds)
+    notificationService.saveNotification(postNotificationObj, user, threadPostUserIds)
 
-        notificationService.saveNotificationWithTransaction(notificationObj, user, userIds, trx)
+    return threadPost;
 
-        return ThreadPost.query(trx).insertToTable(postDTO, user.sub)
-    })
 }
 
 threadPostService.updatePost = async (commentId, postDTO, user) => {

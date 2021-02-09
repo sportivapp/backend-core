@@ -14,12 +14,12 @@ const NotificationEnum = {
                 message: 'A user has created a new forum!'
             },
             comment: {
-                title: 'New Comment',
+                title: 'Komentar baru!',
                 code: 'NEW_THREAD_POST',
                 message: (sender) => `Anda mendapat komentar dari ${sender}. Periksa sekarang!`
             },
             reply: {
-                title: 'New Reply',
+                title: 'Balasan baru!',
                 code: 'NEW_THREAD_POST_REPLY',
                 message: (sender) => `${sender} membalas komentar dari forum anda. Periksa sekarang!`
             }
@@ -29,15 +29,28 @@ const NotificationEnum = {
         type: 'THREAD_POST',
         actions: {
             reply: {
-                title: 'New Forum Reply',
+                title: 'Balasan baru!',
                 code: 'NEW_THREAD_REPLY',
                 message: (sender) => `Anda mendapat balasan dari ${sender}. Periksa sekarang!`
+            },
+            comment: {
+                title: 'Komentar baru!',
+                code: 'NEW_THREAD_POST',
+                message: (sender) => `Ada komentar baru dari ${sender}. Periksa sekarang!`
             }
         }
     },
     forumPostReply: {
         type: 'THREAD_POST_REPLY',
-        actions: {}
+        actions: {
+            relpy: {
+                reply: {
+                    title: 'Balasan baru!',
+                    code: 'NEW_THREAD_REPLY',
+                    message: (sender) => `Anda mendapat balasan dari ${sender}. Periksa sekarang!`
+                },
+            }
+        }
     },
     class: {
         type: 'CLASS',

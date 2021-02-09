@@ -96,13 +96,12 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
     let threadUserIds = [];
     threadUserIds.push(thread.ethreadcreateby);
 
-    return ThreadPostReply.transaction(async trx => {
+    notificationService.saveNotification(commentNotificationObj, user, commentUserIds);
+    notificationService.saveNotification(threadNotificationObj, user, threadUserIds);
 
-        notificationService.saveNotificationWithTransaction(commentNotificationObj, user, commentUserIds, trx);
-        notificationService.saveNotificationWithTransaction(threadNotificationObj, user, threadUserIds, trx);
+    return ThreadPostReply.query()
+        .insertToTable(replyDTO, user.sub)
 
-        return ThreadPostReply.query().insertToTable(replyDTO, user.sub)
-    })
 
 }
 
