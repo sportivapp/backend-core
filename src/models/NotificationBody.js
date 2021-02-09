@@ -41,8 +41,8 @@ class NotificationBody extends Model {
                     to: 'euser.euserid'
                 }
             },
-            notification: {
-                relation: Model.BelongsToOneRelation,
+            notifications: {
+                relation: Model.HasManyRelation,
                 modelClass: Notification,
                 join: {
                     from: 'enotificationbody.enotificationbodyid',

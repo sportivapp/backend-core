@@ -57,16 +57,16 @@ notificationService.clickNotification = async (notificationId, user) => {
         .first();
 
     if (!notification)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INVALID_NOTIFICATION);
+        throw new NotFoundError();
 
     if (notification && notification.enotificationisclicked === true)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOTIFICATION_WAS_CLICKED);
+        return true;
 
     return notification.$query()
         .updateByUserId({
             enotificationisclicked: true,
         }, user.sub)
-        .returning('*');
+        .then(rowsAffected => rowsAffected === 1);
 
 }
 
@@ -77,14 +77,31 @@ notificationService.getAllNotification = async (page, size, user) => {
     if(!userInDB)
         return ServiceHelper.toEmptyPage(page, size)
 
-    return Notification.relatedQuery('notificationBody')
+    const notificationPage = await Notification.relatedQuery('notificationBody')
     .modify('baseAttributes')
     .for(Notification.query().where('eusereuserid', user.sub))
     .withGraphFetched('sender(idAndName).file(baseAttributes)')
-    .withGraphFetched('notification(status)')
     .orderBy('enotificationbodycreatetime', 'DESC')
     .page(page, size)
-    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+
+    const notificationPageResultsPromise = notificationPage.results.map(async notification => {
+        const status = await Notification.query()
+            .modify('status')
+            .where('eusereuserid', user.sub)
+            .first();
+
+        return {
+            ...notification,
+            status: status,
+        }
+    })
+
+    return Promise.all(notificationPageResultsPromise)
+        .then(nList => { 
+            notificationPage.results = nList; 
+            return notificationPage
+        })
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 
 }
 
