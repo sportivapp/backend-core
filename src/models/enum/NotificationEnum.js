@@ -9,9 +9,9 @@ const NotificationEnum = {
         type: 'THREAD',
         actions: {
             create: {
-                title: 'New Forum',
+                title: 'Forum baru!',
                 code: 'NEW_THREAD',
-                message: 'A user has created a new forum!'
+                message: (sender, forumName) => `${sender} telah membuat forum ${forumName}`
             },
             comment: {
                 title: 'Komentar baru!',

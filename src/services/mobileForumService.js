@@ -11,6 +11,10 @@ const fileService = require('./fileService')
 const ModuleNameEnum = require('../models/enum/ModuleNameEnum')
 const { raw } = require('objection')
 const { UniqueViolationError } = require('objection');
+const NotificationEnum = require('../models/enum/NotificationEnum')
+const notificationService = require('./notificationService')
+const mobileTeamUserService = require('./mobileTeamUserService');
+const mobileCompanyUserService = require('./mobileCompanyUserService')
 
 const mobileForumService = {}
 
@@ -110,16 +114,32 @@ mobileForumService.createThread = async (threadDTO, user) => {
         const file = await fileService.getFileById(threadDTO.efileefileid)
         if (!file) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_EXIST)
     }
-
+    
     return Thread.transaction(async trx => {
         
-            const thread = await Thread.query(trx)
-                .insertToTable(threadDTO, user.sub)
+        const thread = await Thread.query(trx)
+            .insertToTable(threadDTO, user.sub)
 
-            const moderator = await ThreadModerator.query(trx)
-                .insertToTable({ethreadethreadid: thread.ethreadid, eusereuserid: user.sub});
+        const moderator = await ThreadModerator.query(trx)
+            .insertToTable({ethreadethreadid: thread.ethreadid, eusereuserid: user.sub});
 
-            return Promise.resolve({ thread, moderator });
+        if (thread.ecompanyecompanyid || thread.eteameteamid) {
+
+            const threadEnum = NotificationEnum.forum
+            const threadCreateAction = threadEnum.actions.create
+            const threadNotificationObj = await notificationService
+                .buildNotificationEntity(thread.ethreadid, threadEnum.type, threadCreateAction.title, threadCreateAction.message(foundUser.eusername), threadCreateAction.title)
+            let memberIds;
+            if (thread.eteameteamid)
+                memberIds = await mobileTeamUserService.getUserIdsByTeamId(thread.eteameteamid);
+            if (thread.ecompanyecompanyid)
+                memberIds = await mobileCompanyUserService.getUserIdsByCompanyId(thread.ecompanyecompanyid);
+            
+            notificationService.saveNotification(threadNotificationObj, user, memberIds);
+        
+        }
+
+        return Promise.resolve({ thread, moderator });
 
     }).catch(e => {
         if (isNameUniqueValidationError(e)) throw new UnsupportedOperationError(ErrorEnum.TITLE_EXISTED)
