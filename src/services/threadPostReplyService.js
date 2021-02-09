@@ -80,12 +80,10 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
     const commentNotificationObj = await notificationService
         .buildNotificationEntity(post.ethreadpostid, replyEnum.type, replyCreateAction.title, replyCreateAction.message(foundUser.eusername), replyCreateAction.title)
 
-    // If comment creator is thread creator, do not push the id
-    // The saveNotificationWithTransaction function will return if targetIds empty
+    // If comment creator is thread creator, notify the comment
     let commentUserIds = [];
     if (post.ethreadpostcreateby !== thread.ethreadcreateby) {
-        // why the f is userids an object ?
-        commentUserIds.push({ euserid: post.ethreadpostcreateby });
+        commentUserIds.push(post.ethreadpostcreateby);
     }
 
     // To thread creator
@@ -96,7 +94,7 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
         .buildNotificationEntity(thread.ethreadid, postEnum.type, postCreateAction.title, postCreateAction.message(foundUser.eusername), postCreateAction.title)
 
     let threadUserIds = [];
-    threadUserIds.push({ euserid: thread.ethreadcreateby });
+    threadUserIds.push(thread.ethreadcreateby);
 
     return ThreadPostReply.transaction(async trx => {
 

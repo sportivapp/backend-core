@@ -140,7 +140,7 @@ notificationService.saveNotificationWithTransaction = async (notificationObj, lo
     .then(notificationBody => {
 
         const notificationDTO = filteredTargetUserIds.map(targetUserId => ({
-            eusereuserid: targetUserId.euserid,
+            eusereuserid: targetUserId,
             enotificationbodyenotificationbodyid: notificationBody.enotificationbodyid
         }))
 
