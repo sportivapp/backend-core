@@ -125,16 +125,17 @@ companyService.getMyCompanies = async (page, size, keyword, user) => {
 companyService.getUsersByCompanyId = async (companyId, page, size, keyword) => {
 
     return User.query()
-    .withGraphFetched('file')
-    .joinRelated('companies')
-    .withGraphFetched('grades')
-    .modifyGraph('grades', builder => {
-        builder.where('ecompanyecompanyid', companyId)
-    })
-    .where('companies.ecompanyid', companyId)
-    .andWhere(raw('lower("eusername")'), 'like', `%${keyword}%`)
-    .page(page, size)
-    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+        .withGraphFetched('file')
+        .joinRelated('companies')
+        .withGraphFetched('grades')
+        .modifyGraph('grades', builder => {
+            builder.where('ecompanyecompanyid', companyId)
+        })
+        .where('companies.ecompanyid', companyId)
+        .andWhere(raw('lower("eusername")'), 'like', `%${keyword}%`)
+        .orderBy('eusercreatetime', 'ASC')
+        .page(page, size)
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
 
 companyService.getVirtualMemberCard = async (companyId, user) => {
