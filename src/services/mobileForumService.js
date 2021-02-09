@@ -131,7 +131,8 @@ mobileForumService.createThread = async (threadDTO, user) => {
             const threadEnum = NotificationEnum.forum
             const threadCreateAction = threadEnum.actions.create
             const threadNotificationObj = await notificationService
-                .buildNotificationEntity(thread.ethreadid, threadEnum.type, threadCreateAction.title, threadCreateAction.message(foundUser.eusername), threadCreateAction.title)
+                .buildNotificationEntity(thread.ethreadid, threadEnum.type, threadCreateAction.title, 
+                    threadCreateAction.message(foundUser.eusername, thread.ethreadtitle), threadCreateAction.title)
             let memberIds;
             if (thread.eteameteamid)
                 memberIds = await mobileTeamUserService.getUserIdsByTeamId(thread.eteameteamid);
