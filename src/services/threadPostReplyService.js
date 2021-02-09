@@ -76,10 +76,8 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
     // To comment creator
     const replyEnum = NotificationEnum.forumPost
     const replyCreateAction = replyEnum.actions.reply
-
     const commentNotificationObj = await notificationService
         .buildNotificationEntity(post.ethreadpostid, replyEnum.type, replyCreateAction.title, replyCreateAction.message(foundUser.eusername), replyCreateAction.title)
-
     // If comment creator is thread creator, notify the comment
     let commentUserIds = [];
     if (post.ethreadpostcreateby !== thread.ethreadcreateby) {
@@ -89,12 +87,9 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
     // To thread creator
     const postEnum = NotificationEnum.forum
     const postCreateAction = postEnum.actions.reply
-
     const threadNotificationObj = await notificationService
         .buildNotificationEntity(thread.ethreadid, postEnum.type, postCreateAction.title, postCreateAction.message(foundUser.eusername), postCreateAction.title)
-
-    let threadUserIds = [];
-    threadUserIds.push(thread.ethreadcreateby);
+    let threadUserIds = [thread.ethreadcreateby];
 
     notificationService.saveNotification(commentNotificationObj, user, commentUserIds);
     notificationService.saveNotification(threadNotificationObj, user, threadUserIds);

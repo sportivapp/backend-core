@@ -80,7 +80,7 @@ mobileCommentService.createComment = async (commentDTO, user) => {
     const foundUser = await userService.getSingleUserById(user.sub)
         .catch(() => new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_FOUND));
 
-    const threadPost = await ThreadPost.query(trx)
+    const threadPost = await ThreadPost.query()
         .insertToTable(commentDTO, user.sub)
 
     const forumEnum = NotificationEnum.forum
