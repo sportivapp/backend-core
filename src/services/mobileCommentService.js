@@ -101,8 +101,8 @@ mobileCommentService.createComment = async (commentDTO, user) => {
             return threadPost.ethreadpostcreateby
         })));
 
-    notificationService.saveNotificationWithTransaction(forumNotificationObj, user, threadUserIds)
-    notificationService.saveNotificationWithTransaction(postNotificationObj, user, threadPostUserIds)
+    notificationService.saveNotification(forumNotificationObj, user, threadUserIds)
+    notificationService.saveNotification(postNotificationObj, user, threadPostUserIds)
 
     return threadPost;
 
