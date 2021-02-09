@@ -41,7 +41,7 @@ class ClassCategoryParticipant extends Model {
                     to: 'class_category.uuid',
                 }
             },
-            classCategoryParticipant: {
+            participant: {
                 relation: Model.HasManyRelation,
                 modelClass: User,
                 join : {
