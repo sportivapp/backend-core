@@ -27,7 +27,7 @@ classCategoryService.initCategories = async (classId, categories, user, trx) => 
                     }
                 });
                 let sessionDTO = [];
-                category.sessions.map(session => {    
+                category.schedules.map(session => {    
                     while (session.startDate < category.endDate) {
                         sessionDTO.push({
                             classCategoryUuid: classCategory.uuid,
