@@ -15,6 +15,7 @@ const NotificationEnum = require('../models/enum/NotificationEnum')
 const notificationService = require('./notificationService')
 const mobileTeamUserService = require('./mobileTeamUserService');
 const mobileCompanyUserService = require('./mobileCompanyUserService')
+const userService = require('./userService');
 
 const mobileForumService = {}
 
