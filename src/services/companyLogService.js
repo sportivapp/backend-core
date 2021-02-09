@@ -216,21 +216,7 @@ companyLogService.joinCompany = async (companyId, user) => {
         if (!existingLog) {
 
             return companyLogService.createCompanyLogWithTransaction(companyId, user, user.sub, CompanyLogTypeEnum.APPLY, trx)
-                .then(async companyLog => {
-
-                    if (adminIds.length > 0) {
-
-                        const notificationObj = notificationService.buildNotificationEntity(
-                            user.sub,
-                            NotificationEnum.user.type,
-                            NotificationEnum.user.actions.join.title,
-                            NotificationEnum.user.actions.join.message,
-                            NotificationEnum.user.actions.join.title
-                        )
-
-                        notificationService.saveNotificationWithTransaction(notificationObj, user, adminIds, trx)
-                    }
-
+                .then(companyLog => {
                     return companyLog
                 })
         }
@@ -244,23 +230,7 @@ companyLogService.joinCompany = async (companyId, user) => {
         if (existingLog.ecompanylogtype === CompanyLogTypeEnum.INVITE && existingLog.ecompanylogstatus === CompanyLogStatusEnum.PENDING)
 
             return companyLogService.updateCompanyLogByCompanyIdAndUserIdAndStatus(companyId, user, user.sub, CompanyLogStatusEnum.ACCEPTED, trx)
-                .then(async processedUser => {
-
-                    await companyUserMappingService.insertUserToCompanyByCompanyLogsWithTransaction([existingLog], trx, user);
-
-                    if(adminIds.length > 0 ) {
-
-                        const notificationObj = notificationService.buildNotificationEntity(
-                            user.sub,
-                            NotificationEnum.user.type,
-                            NotificationEnum.user.actions.accepted.title,
-                            NotificationEnum.user.actions.accepted.message,
-                            NotificationEnum.user.actions.accepted.title
-                        )
-
-                        notificationService.saveNotificationWithTransaction(notificationObj, user, adminIds, trx)
-                    }
-
+                .then(processedUser => {
                     return processedUser
                 })
     })
@@ -430,28 +400,6 @@ companyLogService.exitCompany = async (companyId, user) => {
 
         await Promise.all([removeUserPositionMapping, removeUserFromTeam])
 
-        const isCompanyDeleted = await companyService.getMemberCount(companyId)
-            .then(count => {
-                if (count === 0) return companyService.deleteCompanyWithDbObject(companyId, trx)
-            })
-
-        if (!isCompanyDeleted) {
-
-            const adminIds = await getAdminIdsQuery
-
-            if(adminIds.length > 0 ) {
-
-                const notificationObj = {
-                    enotificationbodyentityid: user.sub,
-                    enotificationbodyentitytype: NotificationEnum.user.type,
-                    enotificationbodyaction: NotificationEnum.user.actions.exit.code,
-                    enotificationbodytitle: NotificationEnum.user.actions.exit.title,
-                    enotificationbodymessage: NotificationEnum.user.actions.exit.message
-                }
-
-                notificationService.saveNotificationWithTransaction(notificationObj, user, adminIds, trx)
-            }
-        }
         return removedUser
 
     })
@@ -498,36 +446,6 @@ companyLogService.processInvitation = async (companyLogIds, user, status) => {
                         return adminIds
                     })
             })
-
-        if(getAdminsInCompany.length > 0 ) {
-
-            let notificationObj
-
-            if(CompanyLogStatusEnum.ACCEPTED === status) {
-
-                notificationObj = {
-                    enotificationbodyentityid: user.sub,
-                    enotificationbodyentitytype: NotificationEnum.user.type,
-                    enotificationbodyaction: NotificationEnum.user.actions.accepted.code,
-                    enotificationbodytitle: NotificationEnum.user.actions.accepted.title,
-                    enotificationbodymessage: NotificationEnum.user.actions.accepted.message
-                }
-
-            } else {
-
-                notificationObj = {
-                    enotificationbodyentityid: user.sub,
-                    enotificationbodyentitytype: NotificationEnum.user.type,
-                    enotificationbodyaction: NotificationEnum.user.actions.rejected.code,
-                    enotificationbodytitle: NotificationEnum.user.actions.rejected.title,
-                    enotificationbodymessage: NotificationEnum.user.actions.rejected.message
-                }
-
-            }
-
-            notificationService.saveNotificationWithTransaction(notificationObj, user, getAdminsInCompany, trx)
-        }
-
 
         return newCompanyLogs
 
