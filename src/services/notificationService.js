@@ -135,7 +135,7 @@ notificationService.saveNotification = async (notificationObj, loggedInUser, tar
         enotificationbodysenderid: loggedInUser.sub
     }
     
-    return NotificationBody.query(trx)
+    return NotificationBody.query()
     .insertToTable(notificationBodyDTO, loggedInUser.sub)
     .then(notificationBody => {
 
@@ -144,7 +144,7 @@ notificationService.saveNotification = async (notificationObj, loggedInUser, tar
             enotificationbodyenotificationbodyid: notificationBody.enotificationbodyid
         }))
 
-        return Notification.query(trx)
+        return Notification.query()
         .insertToTable(notificationDTO, loggedInUser.sub)
         .then(resultArr => resultArr.map(notification => firebaseService
             .pushNotification(notification.eusereuserid, notificationBody.enotificationbodytitle, notificationBody.enotificationbodymessage, notificationBody)))

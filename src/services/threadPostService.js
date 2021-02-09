@@ -85,7 +85,7 @@ threadPostService.createPost = async (threadId, postDTO, user) => {
         .catch(() => new UnsupportedOperationError(ErrorEnum.USER_NOT_FOUND));
 
     postDTO.ethreadethreadid = thread.ethreadid
-    const threadPost = await ThreadPost.query(trx)
+    const threadPost = await ThreadPost.query()
         .insertToTable(postDTO, user.sub)
 
     const forumEnum = NotificationEnum.forum
