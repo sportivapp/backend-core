@@ -206,7 +206,7 @@ module.exports = {
             list: '/notification',
             internalList: '/internal/notification',
             count: '/notification/count',
-            read: '/notification/:notificationId/read',
+            click: '/notification/:notificationId/click',
         },
         license: {
             id : '/license/:licenseId'
