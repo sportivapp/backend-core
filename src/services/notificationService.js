@@ -78,10 +78,10 @@ notificationService.getAllNotification = async (page, size, user) => {
         return ServiceHelper.toEmptyPage(page, size)
 
     return Notification.relatedQuery('notificationBody')
+    .modify('baseAttributes')
     .for(Notification.query().where('eusereuserid', user.sub))
     .withGraphFetched('sender(idAndName).file(baseAttributes)')
-    .withGraphFetched('notification')
-    // .whereIn('enotificationbodyentitytype', [NotificationEnum.forum.type, NotificationEnum.forumPost.type])
+    .withGraphFetched('notification(status)')
     .orderBy('enotificationbodycreatetime', 'DESC')
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))

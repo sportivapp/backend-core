@@ -18,6 +18,15 @@ class NotificationBody extends Model {
         };
     }
 
+    static get modifiers() {
+        return {
+            baseAttributes(builder) {
+                builder.select('enotificationbodyid', 'enotificationbodyentityid', 'enotificationbodyentitytype',
+                    'enotificationbodyaction', 'enotificationbodytitle', 'enotificationbodymessage');
+            }
+        }
+    }
+
     static get relationMappings() {
 
         const Notification = require('./Notification');

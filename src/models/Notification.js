@@ -21,7 +21,7 @@ class Notification extends Model {
     static get modifiers() {
         return {
             status(builder) {
-                builder.select('enotificationisread', 'enotificationisclicked');
+                builder.select('enotificationid', 'enotificationisread', 'enotificationisclicked');
             }
         }
     }
