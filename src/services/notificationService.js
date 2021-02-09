@@ -10,7 +10,7 @@ const UnsupportedOperationErrorEnum = {
     USER_NOT_EXIST: 'USER_NOT_EXIST',
     MISSING_NOTIFICATION_TARGET: 'MISSING_NOTIFICATION_TARGET',
     INVALID_NOTIFICATION: 'INVALID_NOTIFICATION',
-    NOTIFICATION_WAS_READ: 'NOTIFICATION_WAS_READ',
+    NOTIFICATION_WAS_CLICKED: 'NOTIFICATION_WAS_CLICKED',
 }
 
 const notificationService = {};
@@ -48,23 +48,23 @@ notificationService.getNotificationCount = async (user) => {
 
 }
 
-notificationService.readNotification = async (notificationId, user) => {
+notificationService.clickNotification = async (notificationId, user) => {
 
     const notification = await Notification.query()
         .where('enotificationid', notificationId)
         .where('eusereuserid', user.sub)
-        .where('enotificationisread', false)
+        .where('enotificationisclicked', false)
         .first();
 
     if (!notification)
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.INVALID_NOTIFICATION);
 
-    if (notification && notification.enotificationisread === true)
-        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOTIFICATION_WAS_READ);
+    if (notification && notification.enotificationisclicked === true)
+        throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.NOTIFICATION_WAS_CLICKED);
 
     return notification.$query()
         .updateByUserId({
-            enotificationisread: true,
+            enotificationisclicked: true,
         }, user.sub)
         .returning('*');
 
@@ -80,7 +80,8 @@ notificationService.getAllNotification = async (page, size, user) => {
     return Notification.relatedQuery('notificationBody')
     .for(Notification.query().where('eusereuserid', user.sub))
     .withGraphFetched('sender(idAndName).file(baseAttributes)')
-    .whereIn('enotificationbodyentitytype', [NotificationEnum.forum.type, NotificationEnum.forumPost.type])
+    .withGraphFetched('notification')
+    // .whereIn('enotificationbodyentitytype', [NotificationEnum.forum.type, NotificationEnum.forumPost.type])
     .orderBy('enotificationbodycreatetime', 'DESC')
     .page(page, size)
     .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))

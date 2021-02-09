@@ -16,13 +16,13 @@ controller.getNotificationCount = async (req, res, next) => {
 
 }
 
-controller.readNotification = async (req, res, next) => {
+controller.clickNotification = async (req, res, next) => {
 
     const { notificationId } = req.params;
 
     try {
 
-        const result = await notificationService.readNotification(notificationId, req.user);
+        const result = await notificationService.clickNotification(notificationId, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {

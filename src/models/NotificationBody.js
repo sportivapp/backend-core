@@ -24,14 +24,6 @@ class NotificationBody extends Model {
         const User = require('./User')
 
         return {
-            notifications: {
-                relation: Model.HasManyRelation,
-                modelClass: Notification,
-                join: {
-                    from: 'enotificationbody.enotificationbodyid',
-                    to: 'enotification.enotificationbodyenotificationbodyid'
-                }
-            },
             sender: {
                 relation: Model.BelongsToOneRelation,
                 modelClass: User,
@@ -39,7 +31,15 @@ class NotificationBody extends Model {
                     from: 'enotificationbody.enotificationbodysenderid',
                     to: 'euser.euserid'
                 }
-            }
+            },
+            notification: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Notification,
+                join: {
+                    from: 'enotificationbody.enotificationbodyid',
+                    to: 'enotification.enotificationbodyenotificationbodyid'
+                }
+            },
         }
     }
 
