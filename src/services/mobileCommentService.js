@@ -56,10 +56,11 @@ mobileCommentService.checkMakerAndModerator = async (threadPostId, userId) => {
 
 }
 
-mobileCommentService.getCommentsByThreadId = async (threadId) => {
+mobileCommentService.getCommentsByThreadIdAndNotCreateBy = async (threadId, userId) => {
 
     return ThreadPost.query()
-        .where('ethreadethreadid', threadId);
+        .where('ethreadethreadid', threadId)
+        .whereNot('ethreadpostcreateby', userId);
 
 }
 
@@ -93,13 +94,10 @@ mobileCommentService.createComment = async (commentDTO, user) => {
     const postCreateAction = postEnum.actions.comment
     const postNotificationObj = await notificationService
         .buildNotificationEntity(threadPost.ethreadpostid, postEnum.type, postCreateAction.title, postCreateAction.message(foundUser.eusername), postCreateAction.title)
-    const threadPostUserIds = await mobileCommentService.getCommentsByThreadId(commentDTO.ethreadethreadid)
-        .then(threadPosts => threadPosts.filter(threadPost => {
-            return threadPost.ethreadpostcreateby !== thread.ethreadcreateby
-        })
+    const threadPostUserIds = await mobileCommentService.getCommentsByThreadIdAndNotCreateBy(commentDTO.ethreadethreadid, user.sub)
         .then(threadPosts => threadPosts.map(threadPost => {
             return threadPost.ethreadpostcreateby
-        })));
+        }));
 
     notificationService.saveNotification(forumNotificationObj, user, threadUserIds)
     notificationService.saveNotification(postNotificationObj, user, threadPostUserIds)

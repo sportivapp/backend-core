@@ -62,10 +62,11 @@ threadPostService.getPostById = async (threadPostId) => {
         })
 }
 
-threadPostService.getPostsByThreadId = async (threadId) => {
+threadPostService.getPostsByThreadIdAndNotCreateBy = async (threadId, userId) => {
 
     return ThreadPost.query()
-        .where('ethreadethreadid', threadId);
+        .where('ethreadethreadid', threadId)
+        .whereNot('ethreadpostcreateby', userId);
 
 }
 
@@ -98,13 +99,10 @@ threadPostService.createPost = async (threadId, postDTO, user) => {
     const postCreateAction = postEnum.actions.comment
     const postNotificationObj = await notificationService
         .buildNotificationEntity(threadPost.ethreadpostid, postEnum.type, postCreateAction.title, postCreateAction.message(foundUser.eusername), postCreateAction.title)
-    const threadPostUserIds = await threadPostService.getPostsByThreadId(postDTO.ethreadethreadid)
-        .then(threadPosts => threadPosts.filter(threadPost => {
-            return threadPost.ethreadpostcreateby !== thread.ethreadcreateby
-        })
+    const threadPostUserIds = await threadPostService.getPostsByThreadIdAndNotCreateBy(postDTO.ethreadethreadid, user.sub)
         .then(threadPosts => threadPosts.map(threadPost => {
             return threadPost.ethreadpostcreateby
-        })));
+        }));
 
     notificationService.saveNotification(forumNotificationObj, user, threadUserIds)
     notificationService.saveNotification(postNotificationObj, user, threadPostUserIds)
