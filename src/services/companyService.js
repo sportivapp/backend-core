@@ -117,6 +117,7 @@ CompanyService.getUsersByCompanyId = async(companyId, page, size, keyword) => {
         })
         .where('companies.ecompanyid', companyId)
         .andWhere(raw('lower("eusername")'), 'like', `%${keyword}%`)
+        .orderBy('eusercreatetime', 'ASC')
         .page(page, size)
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }

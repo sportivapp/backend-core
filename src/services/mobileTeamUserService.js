@@ -269,4 +269,14 @@ teamUserService.getTeamIdsByUserIdAndIsAdmin = async (userId, isAdmin) => {
 
 }
 
+teamUserService.getUserIdsByTeamId = async (teamId) => {
+
+    return TeamUserMapping.query()
+        .where('eteameteamid', teamId)
+        .then(teamUsers => teamUsers.map(teamUser => {
+            return teamUser.eusereuserid
+        }));
+
+}
+
 module.exports = teamUserService;

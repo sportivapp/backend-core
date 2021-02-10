@@ -82,27 +82,9 @@ mobileClassUserService.registerByClassId = async (classId, user) => {
                 eclasseclassid: classId,
                 eusereuserid: user.sub
             }, user.sub)
-            .then(mapping => mobileClassService.getClassById(mapping.eclasseclassid, user)
-            .then(async classLog => {
-
-            if(getHighestPosition.length > 0) {
-                const notificationObj = {
-                    enotificationbodyentityid: classId,
-                    enotificationbodyentitytype: NotificationEnum.class.type,
-                    enotificationbodyaction: NotificationEnum.class.actions.register.code,
-                    enotificationbodytitle: NotificationEnum.class.actions.register.title,
-                    enotificationbodymessage: NotificationEnum.class.actions.register.message
-                }
-
-                await notificationService.saveNotificationWithTransaction(
-                    notificationObj,
-                    user,
-                    getHighestPosition,
-                    trx
-                )
-            }
-                return classLog
-        }))
+            .then(() => { 
+                return mobileClassService.getClassById(mapping.eclasseclassid, user)
+            });
     })
 
     else return mobileClassService.getClassById(classUserMapping.eclasseclassid, user)
@@ -118,30 +100,7 @@ mobileClassUserService.cancelRegistrationByClassUserId = async (classUserId, use
         
         return classUser.$query(trx)
         .updateByUserId({ eclassusermappingstatus: ClassUserStatusEnum.CANCELED }, user.sub)
-        .then(rowsAffected => rowsAffected === 1)
-        .then(async classLog => { 
-
-            const getHighestPosition = await mobileClassUserService.getHighestPosition(classUser.eclasseclassid)
- 
-                if(getHighestPosition.length > 0) {
-                    const notificationObj = {
-                        enotificationbodyentityid: classUser.eclasseclassid,
-                        enotificationbodyentitytype: NotificationEnum.class.type,
-                        enotificationbodyaction: NotificationEnum.class.actions.canceled.code,
-                        enotificationbodytitle: NotificationEnum.class.actions.canceled.title,
-                        enotificationbodymessage: NotificationEnum.class.actions.canceled.message
-                    }
-
-                    await notificationService.saveNotificationWithTransaction(
-                        notificationObj,
-                        user,
-                        getHighestPosition,
-                        trx
-                    )
-                }
-
-            return classLog
-        })
+        .then(rowsAffected => rowsAffected === 1);
     })
     
 }
