@@ -84,17 +84,22 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
         commentUserIds.push(post.ethreadpostcreateby);
     }
 
-    // To reply creator
-    const replyTo = await ThreadPostReply.query()
-        .findById(replyDTO.ethreadpostreplyethreadpostreplyid);
-    const replyEnum = NotificationEnum.forumPostReply
-    const replyCreateAction = replyEnum.actions.reply
-    const replyNotificationObj = await notificationService
-        .buildNotificationEntity(replyTo.ethreadpostreplyid, replyEnum.type, replyCreateAction.title, replyCreateAction.message(foundUser.eusername), replyCreateAction.title)
-    // If reply creator is thread creator, notify the thread instead
-    let replyUserIds = [];
-    if (replyTo.ethreadpostreplycreateby !== thread.ethreadcreateby) {
-        replyUserIds.push(replyTo.ethreadpostreplycreateby);
+    if (replyDTO.ethreadpostreplyethreadpostreplyid) {
+
+        // To reply creator
+        const replyTo = await ThreadPostReply.query()
+            .findById(replyDTO.ethreadpostreplyethreadpostreplyid);
+        const replyEnum = NotificationEnum.forumPostReply
+        const replyCreateAction = replyEnum.actions.reply
+        const replyNotificationObj = await notificationService
+            .buildNotificationEntity(replyTo.ethreadpostreplyid, replyEnum.type, replyCreateAction.title, replyCreateAction.message(foundUser.eusername), replyCreateAction.title)
+        // If reply creator is thread creator, notify the thread instead
+        let replyUserIds = [];
+        if (replyTo.ethreadpostreplycreateby !== thread.ethreadcreateby) {
+            replyUserIds.push(replyTo.ethreadpostreplycreateby);
+        }
+        notificationService.saveNotification(replyNotificationObj, user, replyUserIds);
+
     }
 
     // To thread creator
@@ -105,7 +110,6 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
     let threadUserIds = [thread.ethreadcreateby];
 
     notificationService.saveNotification(commentNotificationObj, user, commentUserIds);
-    notificationService.saveNotification(replyNotificationObj, user, replyUserIds);
     notificationService.saveNotification(threadNotificationObj, user, threadUserIds);
 
     return ThreadPostReply.query()
