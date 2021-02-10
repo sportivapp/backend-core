@@ -70,12 +70,25 @@ notificationService.clickNotification = async (notificationId, user) => {
 
 }
 
+notificationService.readNotifications = async (userId) => {
+
+    return Notification.query()
+        .patch({
+            enotificationisread: true,
+            enotificationchangeby: userId,
+            enotificationchangetime: Date.now()
+        })
+        .where('eusereuserid', userId);
+
+}
+
 notificationService.getAllNotification = async (page, size, user) => {
 
     const userInDB = await notificationService.checkUserInDB(user.sub)
 
     if(!userInDB)
-        return ServiceHelper.toEmptyPage(page, size)
+        return ServiceHelper.toEmptyPage(page, size);
+    await notificationService.readNotifications(user.sub);
 
     const notificationPage = await Notification.relatedQuery('notificationBody')
     .modify('baseAttributes')
@@ -102,15 +115,6 @@ notificationService.getAllNotification = async (page, size, user) => {
             return notificationPage
         })
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
-
-}
-
-notificationService.deleteNotificationBody = async () => {
-
-    return NotificationBody.query()
-    .delete()
-    .where('enotificationbodycreatetime', '<', Date.now() - 2678400) // where notification already more than 30 days old
-    .then(rowsAffected => rowsAffected > 0)
 
 }
 
