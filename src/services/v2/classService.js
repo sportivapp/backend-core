@@ -25,12 +25,6 @@ classService.createClass = async (classDTO, fileIds, classCoachUserIds, categori
                 throw new UnsupportedOperationError(ErrorEnum.INVALID_COACH_ID);
         });
 
-        // const startDate = new Date(category.startDate);
-        // const firstSessionDate = new Date(category.schedules[0].startDate);
-
-        // if (startDate.getDay() !== firstSessionDate.getDay())
-        //     throw new UnsupportedOperationError(ErrorEnum.INVALID_START_SESSION_DATE);
-
     });
 
     return Class.transaction(async trx => {

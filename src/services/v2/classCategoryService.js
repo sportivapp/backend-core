@@ -2,6 +2,8 @@ const { NotFoundError } = require('../../models/errors');
 const ClassCategory = require('../../models/v2/ClassCategory');
 const classCategoryCoachService = require('./classCategoryCoachService');
 const classCategorySessionService = require ('./classCategorySessionService');
+const dayToCodeEnum = require('../../models/enum/DayToCodeEnum');
+const codeToMonthEnum = require('../../models/enum/CodeToMonthEnum');
 
 const classCategoryService = {};
 
@@ -27,15 +29,22 @@ classCategoryService.initCategories = async (classId, categories, user, trx) => 
                     }
                 });
                 let sessionDTO = [];
-                category.schedules.map(session => {    
-                    while (session.startDate < category.endDate) {
+                category.schedules.map(session => {
+                    const categoryStartDate = new Date(category.startMonth);
+                    let sessionStartDate = new Date(categoryStartDate.getFullYear(), categoryStartDate.getMonth(), dayToCodeEnum[session.day], session.startTime).getTime();
+                    let sessionEndDate = new Date(categoryStartDate.getFullYear(), categoryStartDate.getMonth(), dayToCodeEnum[session.day], session.endTime).getTime();
+                    // Loop to increase 7days per session from startDate to endDate
+                    while (sessionStartDate < category.endMonth) {
+                        let monthCode = new Date(sessionStartDate).getMonth();
                         sessionDTO.push({
                             classCategoryUuid: classCategory.uuid,
-                            startDate: session.startDate,
-                            endDate: session.endDate,
+                            startDate: sessionStartDate,
+                            endDate: sessionEndDate,
+                            monthCode: monthCode,
+                            monthName: codeToMonthEnum[monthCode],
                         });
-                        session.startDate += oneWeek;
-                        session.endDate += oneWeek;
+                        sessionStartDate += oneWeek;
+                        sessionEndDate += oneWeek;
                     }
                 });
                 const classCategoryCoach = await classCategoryCoachService.initCategoryCoach(categoryCoachDTO, user, trx);
