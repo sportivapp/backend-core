@@ -99,7 +99,7 @@ threadPostService.createPost = async (threadId, postDTO, user) => {
     const postCreateAction = postEnum.actions.comment
     const postNotificationObj = await notificationService
         .buildNotificationEntity(threadPost.ethreadpostid, postEnum.type, postCreateAction.title, postCreateAction.message(foundUser.eusername), postCreateAction.title)
-    const threadPostUserIds = await threadPostService.getPostsByThreadIdAndNotCreateBy(postDTO.ethreadethreadid, user.sub)
+    const threadPostUserIds = await threadPostService.getPostsByThreadIdAndNotCreateBy(postDTO.ethreadethreadid, thread.ethreadcreateby)
         .then(threadPosts => threadPosts.map(threadPost => {
             return threadPost.ethreadpostcreateby
         }));

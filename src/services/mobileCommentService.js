@@ -94,7 +94,7 @@ mobileCommentService.createComment = async (commentDTO, user) => {
     const postCreateAction = postEnum.actions.comment
     const postNotificationObj = await notificationService
         .buildNotificationEntity(threadPost.ethreadpostid, postEnum.type, postCreateAction.title, postCreateAction.message(foundUser.eusername), postCreateAction.title)
-    const threadPostUserIds = await mobileCommentService.getCommentsByThreadIdAndNotCreateBy(commentDTO.ethreadethreadid, user.sub)
+    const threadPostUserIds = await mobileCommentService.getCommentsByThreadIdAndNotCreateBy(commentDTO.ethreadethreadid, thread.ethreadcreateby)
         .then(threadPosts => threadPosts.map(threadPost => {
             return threadPost.ethreadpostcreateby
         }));
