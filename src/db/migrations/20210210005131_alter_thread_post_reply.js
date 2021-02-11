@@ -3,5 +3,5 @@ exports.up = (knex, Promise) => knex.schema.alterTable('ethreadpostreply', t => 
 });
 
 exports.down = (knex, Promise) => knex.schema.alterTable('ethreadpostreply', t => {
-    t.dropColumn('enotificationisclicked');
+    t.dropColumn('ethreadpostreplyethreadpostreplyid');
 });
