@@ -22,7 +22,7 @@ class NotificationBody extends Model {
         return {
             baseAttributes(builder) {
                 builder.select('enotificationbodyid', 'enotificationbodyentityid', 'enotificationbodyentitytype',
-                    'enotificationbodyaction', 'enotificationbodytitle', 'enotificationbodymessage');
+                    'enotificationbodyaction', 'enotificationbodytitle', 'enotificationbodymessage', 'enotificationbodycreatetime');
             }
         }
     }
