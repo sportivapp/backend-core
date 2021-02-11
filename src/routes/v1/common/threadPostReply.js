@@ -3,9 +3,10 @@ const threadPostReplyController = require('../../../controllers/threadPostReply'
 const auth = require('../../../middlewares/authentication')
 const { routes } = require('../../../constant')
 
-router.get(routes.commentReply.list, auth.authenticateToken, threadPostReplyController.getAllReplyByThreadPostId)
-router.post(routes.commentReply.list, auth.authenticateToken, threadPostReplyController.createReply)
+router.get(routes.commentReply.list, auth.authenticateToken, threadPostReplyController.getAllReplyByThreadPostId);
+router.post(routes.commentReply.list, auth.authenticateToken, threadPostReplyController.createReply);
 router.put(routes.commentReply.id, auth.authenticateToken, threadPostReplyController.editReply);
-router.delete(routes.commentReply.id, auth.authenticateToken, threadPostReplyController.deleteReply)
+router.delete(routes.commentReply.id, auth.authenticateToken, threadPostReplyController.deleteReply);
+router.get(routes.commentReply.idThread, auth.authenticateToken, threadPostReplyController.getThreadDetailByReplyId);
 
 module.exports = router.expressRouter;

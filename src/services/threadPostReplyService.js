@@ -170,4 +170,12 @@ threadPostReplyService.getThreadPostIdsByUserId = async (userId) => {{
 
 }}
 
+threadPostReplyService.getThreadDetailByReplyId = async (replyId) => {
+
+    const reply = await threadPostReplyService.getReplyById(replyId);
+
+    return threadService.getThreadById(reply.ethreadethreadid);
+
+}
+
 module.exports = threadPostReplyService
