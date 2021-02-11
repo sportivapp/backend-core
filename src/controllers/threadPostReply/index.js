@@ -66,4 +66,19 @@ threadPostReplyController.deleteReply = async (req, res, next) => {
 
 }
 
+threadPostReplyController.getThreadDetailByReplyId = async (req, res, next) => {
+
+    const { replyId } = req.params;
+
+    try {
+
+        const result = await threadPostReplyService.getThreadDetailByReplyId(replyId);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = threadPostReplyController
