@@ -244,7 +244,7 @@ module.exports = {
         commentReply: {
             list: '/comments/:commentId/replies',
             id: '/comments/:commentId/replies/:replyId',
-            idThread: '/reply/:replyId/thread',
+            idThread: '/replies/:replyId/thread',
         },
         report: {
             thread: '/report/thread',
