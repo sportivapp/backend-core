@@ -93,14 +93,16 @@ classService.getClasses = async (page, size, keyword, industryId) => {
 
 classService.getClass = async (classUuid) => {
 
-    return Class.query()
+    const cls = await Class.query()
         .modify('adminDetail')
-        .findById(classUuid)
-        .then(cls => {
-            if (!cls)
-                throw new NotFoundError();
-            return cls;
-        });
+        .findById(classUuid);
+
+    const priceRange = await classCategoryService.getClassCategoryPriceRangeByClassUuid(cls.uuid);
+
+    return {
+        ...cls,
+        priceRange: priceRange,
+    }
 
 }
 

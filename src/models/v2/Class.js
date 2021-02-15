@@ -32,7 +32,8 @@ class Class extends Model {
                     .withGraphFetched('industry(baseAttributes)')
                     .withGraphFetched('city(baseAttributes)')
                     .withGraphFetched('classMedia(list)')
-                    .withGraphFetched('classCategories(list)');
+                    .withGraphFetched('classCategories(list)')
+                    .withGraphFetched('coaches(baseAttributes)');
             }
         }
     }
@@ -45,6 +46,7 @@ class Class extends Model {
         const ClassMedia = require('./ClassMedia');
         const City = require('../City');
         const ClassCategory = require('./ClassCategory');
+        const ClassCoach = require('./ClassCoach');
  
         return {
             company: {
@@ -93,6 +95,14 @@ class Class extends Model {
                 join: {
                     from: 'class.uuid',
                     to: 'class_category.class_uuid'
+                }
+            },
+            coaches: {
+                relation: Model.HasManyRelation,
+                modelClass: ClassCoach,
+                join: {
+                    from: 'class.uuid',
+                    to: 'class_coach.class_uuid',
                 }
             }
         }
