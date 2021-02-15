@@ -26,7 +26,8 @@ class ClassCategory extends Model {
             },
             detail(builder) {
                 builder.select('uuid', 'title', 'description', 'price', 'requirements')
-                    .withGraphFetched('categorySessions(list)');
+                    .withGraphFetched('categorySessions(list)')
+                    .withGraphFetched('coaches(baseAttributes)');
             },
             price(builder) {
                 builder.select('price');
@@ -38,6 +39,7 @@ class ClassCategory extends Model {
 
         const Class = require('./Class');
         const ClassCategorySession = require('./ClassCategorySession');
+        const ClassCategoryCoach = require('./ClassCategoryCoach');
  
         return {
             class: {
@@ -51,9 +53,17 @@ class ClassCategory extends Model {
             categorySessions: {
                 relation: Model.HasManyRelation,
                 modelClass: ClassCategorySession,
-                join : {
+                join: {
                     from: 'class_category.uuid',
                     to: 'class_category_session.class_category_uuid',
+                }
+            },
+            coaches: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: ClassCategoryCoach,
+                join: {
+                    from: 'class_category.uuid',
+                    to: 'class_category_coach.class_category_uuid',
                 }
             }
         }
