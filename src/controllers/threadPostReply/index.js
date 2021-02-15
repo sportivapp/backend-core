@@ -18,12 +18,12 @@ threadPostReplyController.getAllReplyByThreadPostId = async (req, res, next) => 
 threadPostReplyController.createReply = async (req, res, next) => {
 
     const { commentId } = req.params
-
-    const { comment, fileId } = req.body
+    const { comment, fileId, replyId } = req.body
 
     const replyDTO = {
         ethreadpostreplycomment: comment,
-        efileefileid: fileId
+        efileefileid: fileId,
+        ethreadpostreplyethreadpostreplyid: replyId
     }
 
     try {
@@ -62,6 +62,21 @@ threadPostReplyController.deleteReply = async (req, res, next) => {
         return res.status(200).json(ResponseHelper.toBaseResponse(result))
     } catch (e) {
         next(e)
+    }
+
+}
+
+threadPostReplyController.getThreadDetailByReplyId = async (req, res, next) => {
+
+    const { replyId } = req.params;
+
+    try {
+
+        const result = await threadPostReplyService.getThreadDetailByReplyId(replyId);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
     }
 
 }

@@ -2,17 +2,20 @@ const Thread = require('../models/Thread')
 const ThreadModerator = require('../models/ThreadModerator')
 const ServiceHelper = require('../helper/ServiceHelper')
 const { NotFoundError, UnsupportedOperationError } = require('../models/errors')
-const TimeEnum = require('../models/enum/TimeEnum')
 const mobileCompanyService = require('./mobileCompanyService')
 const gradeService = require('./gradeService')
 const settingService = require('./settingService')
-const mobileTeamUserService = require('./mobileTeamUserService')
 const mobileTeamService = require('./mobileTeamService')
 const teamUserService = require('./mobileTeamUserService')
 const fileService = require('./fileService')
 const ModuleNameEnum = require('../models/enum/ModuleNameEnum')
 const { raw } = require('objection')
 const { UniqueViolationError } = require('objection');
+const NotificationEnum = require('../models/enum/NotificationEnum')
+const notificationService = require('./notificationService')
+const mobileTeamUserService = require('./mobileTeamUserService');
+const mobileCompanyUserService = require('./mobileCompanyUserService')
+const userService = require('./userService');
 
 const mobileForumService = {}
 
@@ -55,7 +58,6 @@ mobileForumService.checkThread = async (threadId) => {
 
     return Thread.query()
     .findById(threadId)
-    .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
     .then(thread => {
         if(!thread) return false
         return true
@@ -113,16 +115,35 @@ mobileForumService.createThread = async (threadDTO, user) => {
         const file = await fileService.getFileById(threadDTO.efileefileid)
         if (!file) throw new UnsupportedOperationError(ErrorEnum.FILE_NOT_EXIST)
     }
-
+    
     return Thread.transaction(async trx => {
         
-            const thread = await Thread.query(trx)
-                .insertToTable(threadDTO, user.sub)
+        const thread = await Thread.query(trx)
+            .insertToTable(threadDTO, user.sub)
 
-            const moderator = await ThreadModerator.query(trx)
-                .insertToTable({ethreadethreadid: thread.ethreadid, eusereuserid: user.sub});
+        const moderator = await ThreadModerator.query(trx)
+            .insertToTable({ethreadethreadid: thread.ethreadid, eusereuserid: user.sub});
 
-            return Promise.resolve({ thread, moderator });
+        if (thread.ecompanyecompanyid || thread.eteameteamid) {
+
+            const foundUser = await userService.getSingleUserById(user.sub);
+
+            const threadEnum = NotificationEnum.forum
+            const threadCreateAction = threadEnum.actions.create
+            const threadNotificationObj = await notificationService
+                .buildNotificationEntity(thread.ethreadid, threadEnum.type, threadCreateAction.title, 
+                    threadCreateAction.message(foundUser.eusername, thread.ethreadtitle), threadCreateAction.title)
+            let memberIds;
+            if (thread.eteameteamid)
+                memberIds = await mobileTeamUserService.getUserIdsByTeamId(thread.eteameteamid);
+            if (thread.ecompanyecompanyid)
+                memberIds = await mobileCompanyUserService.getUserIdsByCompanyId(thread.ecompanyecompanyid);
+            
+            notificationService.saveNotification(threadNotificationObj, user, memberIds);
+        
+        }
+
+        return Promise.resolve({ thread, moderator });
 
     }).catch(e => {
         if (isNameUniqueValidationError(e)) throw new UnsupportedOperationError(ErrorEnum.TITLE_EXISTED)
@@ -142,25 +163,6 @@ mobileForumService.updateThreadById = async (threadId, threadDTO, user) => {
     // If user made the thread, cannot be private
     if(!thread.eteameteamid && !thread.ecompanyecompanyid && !thread.ethreadispublic)
         throw new UnsupportedOperationError(ErrorEnum.PRIVATE_NOT_AVAILABLE);
-
-    // If team thread AND it is public, check whether it's made by an Admin
-    // if(thread.eteameteamid && thread.ethreadispublic)
-    //     await teamUserService.getTeamUserCheckAdmin(thread.eteameteamid, user.sub);
-
-    // if(thread.ecompanyecompanyid && thread.ethreadispublic) {
-
-    //     await mobileCompanyService.checkUserInCompany(thread.ecompanyecompanyid, user.sub)
-    //         .then(userInCompany => {
-    //             if(!userInCompany) throw new UnsupportedOperationError(ErrorEnum.USER_NOT_IN_COMPANY)
-    //         });
-
-    //     const isAllowed = await gradeService.getAllGradesByUserIdAndCompanyId(thread.ecompanyecompanyid, user.sub)
-    //         .then(grades => grades.map(grade => grade.egradeid))
-    //         .then(gradeIds => settingService.isUserHaveFunctions(['P'], gradeIds, ModuleNameEnum.FORUM, thread.ecompanyecompanyid))
-
-    //     if (!isAllowed) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
-        
-    // }
 
     if (threadDTO.efileefileid) {
         const file = await fileService.getFileById(threadDTO.efileefileid)
@@ -183,47 +185,45 @@ mobileForumService.getThreadList = async (page, size, filter, isPublic, keyword)
     const getFilter = await mobileForumService.normalizeFilter(filter)
 
     let threadPromise = Thread.query()
-    .modify('baseAttributes')
-    .select(Thread.relatedQuery('comments').modify('notDeleted').count().as('commentsCount'))
-    .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
+        .modify('baseAttributes')
+        .select(Thread.relatedQuery('comments').modify('notDeleted').count().as('commentsCount'))
 
     if(getFilter.companyId !== null) {
         threadPromise = threadPromise
-        .where('ecompanyecompanyid', filter.companyId)
+            .where('ecompanyecompanyid', filter.companyId)
     }
 
     if(getFilter.teamId !== null) {
         threadPromise = threadPromise
-        .where('eteameteamid', filter.teamId)
+            .where('eteameteamid', filter.teamId)
     }
 
     return threadPromise
-    .where('ethreadispublic', isPublic)
+        .where('ethreadispublic', isPublic)
         .where(raw('lower(ethreadtitle)'), 'like', `%${keyword.toLowerCase()}%`)
-    .orderBy('ethreadcreatetime', 'DESC')
-    .withGraphFetched('threadCreator(name)')
-    .withGraphFetched('company(baseAttributes)')
-    .withGraphFetched('team(baseAttributes)')
-    .page(page, size)
-    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+        .orderBy('ethreadcreatetime', 'DESC')
+        .withGraphFetched('threadCreator(name)')
+        .withGraphFetched('company(baseAttributes)')
+        .withGraphFetched('team(baseAttributes)')
+        .page(page, size)
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj));
 
 }
 
 mobileForumService.getThreadDetailById = async (threadId) => {
 
     return Thread.query()
-    .findById(threadId)
-    .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
-    .modify('baseAttributes')
-    .select(Thread.relatedQuery('comments').modify('notDeleted').count().as('commentsCount'))
-    .withGraphFetched('threadPicture(baseAttributes)')
-    .withGraphFetched('threadCreator(name).file(baseAttributes)')
-    .withGraphFetched('company(baseAttributes)')
-    .withGraphFetched('team(baseAttributes)')
-    .then(thread => {
-        if(!thread) throw new NotFoundError()
-        return thread
-    })
+        .findById(threadId)
+        .modify('baseAttributes')
+        .select(Thread.relatedQuery('comments').modify('notDeleted').count().as('commentsCount'))
+        .withGraphFetched('threadPicture(baseAttributes)')
+        .withGraphFetched('threadCreator(name).file(baseAttributes)')
+        .withGraphFetched('company(baseAttributes)')
+        .withGraphFetched('team(baseAttributes)')
+        .then(thread => {
+            if(!thread) throw new NotFoundError();
+            return thread
+        });
     
 }
 
@@ -231,7 +231,7 @@ mobileForumService.getThreadById = async (threadId) => {
 
     return Thread.query()
         .findById(threadId)
-        .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
+        .modify('baseAttributes')
         .then(thread => {
             if(!thread) throw new UnsupportedOperationError(ErrorEnum.THREAD_NOT_FOUND);
             return thread;
@@ -248,8 +248,8 @@ mobileForumService.deleteThreadById = async (threadId, user) => {
     return mobileForumService.getThreadById(threadId)
         .then(thread => {
             return thread.$query()
-                .del()
-                .then(rowsAffected => rowsAffected === 1);
+                .deleteByUserId(user.sub)
+                .then(rowsAffected => rowsAffected === 1)
         });
 
 }
@@ -288,25 +288,12 @@ mobileForumService.getUserOrganizationListWithPermission = async (page, size, ke
 mobileForumService.getUserTeamListWithAdminStatus = async (page, size, keyword, type, user) => {
 
     if (type === 'PUBLIC') {
-        const myTeamsPage = await mobileTeamService.getMyTeams(page, Number.MAX_SAFE_INTEGER, keyword, user)
-        let myTeams = myTeamsPage.data
-        const myTeamIds = myTeams.map(team => team.eteamid)
-        const adminTeamIds = await mobileTeamUserService.checkAdminOnTeamIds(myTeamIds, user.sub)
-        myTeams = myTeams.filter(team => adminTeamIds.indexOf(team.eteamid) !== -1)
-        let newTeams = myTeams
-        if (myTeams.length > (page * size)) {
-            newTeams = []
-            for (let i = page * size; i < myTeams.length; i++) {
-                newTeams.push(myTeams[i])
-            }
-        }
-        myTeamsPage.data = newTeams
-        myTeamsPage.paging.size = size
-        myTeamsPage.paging.totalSize = myTeams.length
-        return myTeamsPage
+
+        return mobileTeamService.getUserTeamListIsAdmin(page, size, keyword, user, true);
+
     }
 
-    return mobileTeamService.getMyTeams(page, size, keyword, user)
+    return mobileTeamService.getUserTeamListIsAdmin(page, size, keyword, user, false);
 }
 
 mobileForumService.getMyThreadList = async (page, size, keyword, user, filter) => {
@@ -318,7 +305,6 @@ mobileForumService.getMyThreadList = async (page, size, keyword, user, filter) =
         .withGraphFetched('company(baseAttributes)')
         .withGraphFetched('team(baseAttributes)')
         .orderBy('ethreadcreatetime', 'DESC')
-        .where('ethreadcreatetime', '>', Date.now() - TimeEnum.THREE_MONTHS)
         .whereRaw(`LOWER("ethreadtitle") LIKE LOWER('%${keyword}%')`)
         .where('ethreadcreateby', user.sub)
         .orWhereIn('ethreadid', filter.threadIds)

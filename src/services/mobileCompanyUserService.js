@@ -68,4 +68,14 @@ mobileCompanyUserService.getCompanyIdsByUserId = async (userId) => {
 
 }
 
+mobileCompanyUserService.getUserIdsByCompanyId = async (companyId) => {
+
+    return CompanyUserMapping.query()
+        .where('ecompanyecompanyid', companyId)
+        .then(companyUsers => companyUsers.map(companyUser => {
+            return companyUser.eusereuserid;
+        }))
+
+}
+
 module.exports = mobileCompanyUserService

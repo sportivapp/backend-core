@@ -217,4 +217,17 @@ teamService.getMyTeams = async (page, size, keyword, user) => {
 
 }
 
+teamService.getUserTeamListIsAdmin = async (page, size, keyword, user, isAdmin) => {
+
+    const teamIds = await teamUserService.getTeamIdsByUserIdAndIsAdmin(user.sub, isAdmin);
+
+    return Team.query()
+        .modify('basic')
+        .whereRaw(`LOWER("eteamname") LIKE LOWER('%${keyword}%')`)
+        .whereIn('eteamid', teamIds)
+        .page(page, size)
+        .then(teams => ServiceHelper.toPageObj(page, size, teams));
+
+}
+
 module.exports = teamService;

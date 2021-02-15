@@ -23,10 +23,13 @@ bannerController.insertBanner = async(req, res, next) => {
 
 bannerController.getBanners = async(req, res, next) => {
 
+    const { type = 'HOME' } = req.query;
+
     try {
 
-        const result = await bannerService.getBanners();
+        const result = await bannerService.getBanners(type);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
     } catch(e){
         next(e);
     }

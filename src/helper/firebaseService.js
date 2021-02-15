@@ -16,20 +16,34 @@ firebaseService.pushNotification = async (targetUserId, notificationTitle, notif
 	notificationBody.enotificationbodyid = notificationBody.enotificationbodyid.toString();
 
     const message = {
-    	data: notificationBody
+        topic: topic,
+        data: notificationBody,
+        apns: {
+            headers: {
+                "apns-priority": "10",
+            },
+            payload: {
+                aps: {
+                    alert: {
+                        title: notificationBody.enotificationbodytitle,
+                        body: notificationBody.enotificationbodymessage,
+                    }
+                }
+            }
+        }
     }
 
-        const messaging = firebaseAdmin.messaging()
-        messaging.sendToTopic(topic, message)
-            .then(success => {
-                return loggingService.sendSlackMessage(loggingService.setNotificationMessage(topic, message, success), 'NOTIFICATION')
-                    .then(result => true);
-            })
-            .catch(err => {
-                const error = new Error(`Failed on sending message in topic: ${topic}, details: ${err}`)
-                return loggingService.sendSlackMessage(loggingService.setLogMessage(error))
-                    .then(err => false)
-            })
+    const messaging = firebaseAdmin.messaging()
+    messaging.send(message)
+        .then(success => {
+            return loggingService.sendSlackMessage(loggingService.setNotificationMessage(topic, message, success), 'NOTIFICATION')
+                .then(result => true);
+        })
+        .catch(err => {
+            const error = new Error(`Failed on sending message in topic: ${topic}, details: ${err}`)
+            return loggingService.sendSlackMessage(loggingService.setLogMessage(error))
+                .then(err => false)
+        });
 }
 
 module.exports = firebaseService

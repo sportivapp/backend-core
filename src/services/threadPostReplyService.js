@@ -74,37 +74,46 @@ threadPostReplyService.createReplyByThreadPostId = async (threadPostId, replyDTO
     replyDTO.ethreadpostethreadpostid = threadPostId
 
     // To comment creator
-    const replyEnum = NotificationEnum.forumPost
-    const replyCreateAction = replyEnum.actions.reply
-
+    const postEnum = NotificationEnum.forumPost
+    const postCreateAction = postEnum.actions.reply
     const commentNotificationObj = await notificationService
-        .buildNotificationEntity(post.ethreadpostid, replyEnum.type, replyCreateAction.title, replyCreateAction.message(foundUser.eusername), replyCreateAction.title)
-
-    // If comment creator is thread creator, do not push the id
-    // The saveNotificationWithTransaction function will return if targetIds empty
+        .buildNotificationEntity(post.ethreadpostid, postEnum.type, postCreateAction.title, postCreateAction.message(foundUser.eusername), postCreateAction.title)
+    // If comment creator is thread creator, notify the thread instead
     let commentUserIds = [];
     if (post.ethreadpostcreateby !== thread.ethreadcreateby) {
-        // why the f is userids an object ?
-        commentUserIds.push({ euserid: post.ethreadpostcreateby });
+        commentUserIds.push(post.ethreadpostcreateby);
+    }
+
+    if (replyDTO.ethreadpostreplyethreadpostreplyid) {
+
+        // To reply creator
+        const replyTo = await ThreadPostReply.query()
+            .findById(replyDTO.ethreadpostreplyethreadpostreplyid);
+        const replyEnum = NotificationEnum.forumPostReply
+        const replyCreateAction = replyEnum.actions.reply
+        const replyNotificationObj = await notificationService
+            .buildNotificationEntity(replyTo.ethreadpostreplyid, replyEnum.type, replyCreateAction.title, replyCreateAction.message(foundUser.eusername), replyCreateAction.title)
+        // If reply creator is thread creator, notify the thread instead
+        let replyUserIds = [];
+        if (replyTo.ethreadpostreplycreateby !== thread.ethreadcreateby) {
+            replyUserIds.push(replyTo.ethreadpostreplycreateby);
+        }
+        notificationService.saveNotification(replyNotificationObj, user, replyUserIds);
+
     }
 
     // To thread creator
-    const postEnum = NotificationEnum.forum
-    const postCreateAction = postEnum.actions.reply
-
+    const threadEnum = NotificationEnum.forum
+    const threadCreateAction = threadEnum.actions.reply
     const threadNotificationObj = await notificationService
-        .buildNotificationEntity(thread.ethreadid, postEnum.type, postCreateAction.title, postCreateAction.message(foundUser.eusername), postCreateAction.title)
+        .buildNotificationEntity(thread.ethreadid, threadEnum.type, threadCreateAction.title, threadCreateAction.message(foundUser.eusername), threadCreateAction.title)
+    let threadUserIds = [thread.ethreadcreateby];
 
-    let threadUserIds = [];
-    threadUserIds.push({ euserid: thread.ethreadcreateby });
+    notificationService.saveNotification(commentNotificationObj, user, commentUserIds);
+    notificationService.saveNotification(threadNotificationObj, user, threadUserIds);
 
-    return ThreadPostReply.transaction(async trx => {
-
-        notificationService.saveNotificationWithTransaction(commentNotificationObj, user, commentUserIds, trx);
-        notificationService.saveNotificationWithTransaction(threadNotificationObj, user, threadUserIds, trx);
-
-        return ThreadPostReply.query().insertToTable(replyDTO, user.sub)
-    })
+    return ThreadPostReply.query()
+        .insertToTable(replyDTO, user.sub);
 
 }
 
@@ -156,8 +165,17 @@ threadPostReplyService.getThreadPostIdsByUserId = async (userId) => {{
 
     return ThreadPostReply.query()
         .where('ethreadpostreplycreateby', userId)
+        .where('ethreadpostreplydeletestatus', false)
         .then(threadPostReplies => threadPostReplies.map(threadPostReply => threadPostReply.ethreadpostethreadpostid))
 
 }}
+
+threadPostReplyService.getThreadDetailByReplyId = async (replyId) => {
+
+    const reply = await threadPostReplyService.getReplyById(replyId);
+
+    return threadService.getThreadById(reply.ethreadethreadid);
+
+}
 
 module.exports = threadPostReplyService

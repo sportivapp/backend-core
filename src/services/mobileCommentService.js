@@ -56,10 +56,17 @@ mobileCommentService.checkMakerAndModerator = async (threadPostId, userId) => {
 
 }
 
+mobileCommentService.getCommentsByThreadIdAndNotCreateBy = async (threadId, userId) => {
+
+    return ThreadPost.query()
+        .where('ethreadethreadid', threadId)
+        .whereNot('ethreadpostcreateby', userId);
+
+}
+
 mobileCommentService.createComment = async (commentDTO, user) => {
 
     const threadExist = await mobileForumService.checkThread(commentDTO.ethreadethreadid)
-
     const thread = await mobileForumService.getThreadById(commentDTO.ethreadethreadid)
 
     if(!threadExist) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.THREAD_NOT_EXISTS)
@@ -74,37 +81,28 @@ mobileCommentService.createComment = async (commentDTO, user) => {
     const foundUser = await userService.getSingleUserById(user.sub)
         .catch(() => new UnsupportedOperationError(UnsupportedOperationErrorEnum.USER_NOT_FOUND));
 
-    const postEnum = NotificationEnum.forum
-    const createAction = postEnum.actions.comment
+    const threadPost = await ThreadPost.query()
+        .insertToTable(commentDTO, user.sub)
 
-    const notificationObj = await notificationService
-        .buildNotificationEntity(thread.ethreadid, postEnum.type, createAction.title, createAction.message(foundUser.eusername), createAction.title)
+    const forumEnum = NotificationEnum.forum
+    const forumCreateAction = forumEnum.actions.comment
+    const forumNotificationObj = await notificationService
+        .buildNotificationEntity(thread.ethreadid, forumEnum.type, forumCreateAction.title, forumCreateAction.message(foundUser.eusername), forumCreateAction.title)
+    const threadUserIds = [thread.ethreadcreateby]
 
-    // why the f is userids an object ?
-    let userIds = []
-    userIds.push({ euserid: thread.ethreadcreateby })
+    const postEnum = NotificationEnum.forumPost
+    const postCreateAction = postEnum.actions.comment
+    const postNotificationObj = await notificationService
+        .buildNotificationEntity(threadPost.ethreadpostid, postEnum.type, postCreateAction.title, postCreateAction.message(foundUser.eusername), postCreateAction.title)
+    const threadPostUserIds = await mobileCommentService.getCommentsByThreadIdAndNotCreateBy(commentDTO.ethreadethreadid, thread.ethreadcreateby)
+        .then(threadPosts => threadPosts.map(threadPost => {
+            return threadPost.ethreadpostcreateby
+        }));
 
-    // Remove self
-    userIds = userIds.filter(userId => {
-        return userId.euserid !== user.sub;
-    });
+    notificationService.saveNotification(forumNotificationObj, user, threadUserIds)
+    notificationService.saveNotification(postNotificationObj, user, threadPostUserIds)
 
-    // this logic is to send notification to all other commentators
-    // const userIds = await ThreadPost.query()
-    //     .where('ethreadethreadid', thread.ethreadid)
-    //     .distinct('ethreadpostcreateby')
-    //     .then(posts => posts.map(post => ({ euserid: post.ethreadpostcreateby })))
-    //     .then(userIds => {
-    //         userIds.push({ euserid: thread.ethreadcreateby })
-    //         return userIds.filter(postedUser => postedUser.euserid !== user.sub)
-    //     })
-
-    return ThreadPost.transaction(async trx => {
-
-        notificationService.saveNotificationWithTransaction(notificationObj, user, userIds, trx)
-
-        return ThreadPost.query().insertToTable(commentDTO, user.sub)
-    })
+    return threadPost;
 
 }
 
@@ -206,7 +204,7 @@ mobileCommentService.deleteComment = async (commentId, user) => {
         throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION)
 
     return ThreadPost.query()
-    .delete()
+    .deleteByUserId(user.sub)
     .where('ethreadpostid', commentId)
     .then(rowsAffected => rowsAffected === 1)
 
@@ -217,6 +215,7 @@ mobileCommentService.getThreadIdsByUserIdAndThreadPostIds = async (userId, threa
     return ThreadPost.query()
         .where('ethreadpostcreateby', userId)
         .orWhereIn('ethreadpostid', threadPostIds)
+        .where('ethreadpostdeletestatus', false)
         .then(threadPosts => threadPosts.map(threadPost => threadPost.ethreadethreadid))
 
 }}

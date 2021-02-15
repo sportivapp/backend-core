@@ -125,16 +125,17 @@ companyService.getMyCompanies = async (page, size, keyword, user) => {
 companyService.getUsersByCompanyId = async (companyId, page, size, keyword) => {
 
     return User.query()
-    .withGraphFetched('file')
-    .joinRelated('companies')
-    .withGraphFetched('grades')
-    .modifyGraph('grades', builder => {
-        builder.where('ecompanyecompanyid', companyId)
-    })
-    .where('companies.ecompanyid', companyId)
-    .andWhere(raw('lower("eusername")'), 'like', `%${keyword}%`)
-    .page(page, size)
-    .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
+        .withGraphFetched('file')
+        .joinRelated('companies')
+        .withGraphFetched('grades')
+        .modifyGraph('grades', builder => {
+            builder.where('ecompanyecompanyid', companyId)
+        })
+        .where('companies.ecompanyid', companyId)
+        .andWhere(raw('lower("eusername")'), 'like', `%${keyword}%`)
+        .orderBy('eusercreatetime', 'ASC')
+        .page(page, size)
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj))
 }
 
 companyService.getVirtualMemberCard = async (companyId, user) => {
@@ -204,19 +205,6 @@ companyService.joinCompany = async (companyId, user) => {
     // Check if this user already invited / applied
     const pendingInviteApply = await mobileCompanyLogService.getPendingLog(companyId, user.sub, [CompanyLogTypeEnum.INVITE, CompanyLogTypeEnum.APPLY]);
 
-    const getAdminsInCompany = await CompanyDefaultPosition.query()
-    .where('ecompanyecompanyid', companyId)
-    .first()
-    .then(position => {
-
-        if(!position) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.COMPANY_NOT_EXIST)
-
-        return Grade.relatedQuery('users')
-        .for(Grade.query().where('egradeid', position.eadmingradeid))
-        .distinct('euserid')
-
-    })
-
     return CompanyLog.transaction(trx => {
 
     // If there is no pending invite / apply, create apply log
@@ -225,25 +213,6 @@ companyService.joinCompany = async (companyId, user) => {
             // after create the company log, create notification for admin
             return companyLogService.createCompanyLogWithTransaction(companyId, user, user.sub, CompanyLogTypeEnum.APPLY, trx)
             .then(async companyLog => {
-    
-                if(getAdminsInCompany.length > 0 ) {
-        
-                    const notificationObj = {
-                        enotificationbodyentityid: user.sub,
-                        enotificationbodyentitytype: NotificationEnum.user.type,
-                        enotificationbodyaction: NotificationEnum.user.actions.join.code,
-                        enotificationbodytitle: NotificationEnum.user.actions.join.title,
-                        enotificationbodymessage: NotificationEnum.user.actions.join.message
-                    }
-            
-                    await notificationService.saveNotificationWithTransaction(
-                        notificationObj,
-                        user,
-                        getAdminsInCompany,
-                        trx
-                    )
-                }
-    
                 return companyLog
             })
         }
@@ -258,25 +227,7 @@ companyService.joinCompany = async (companyId, user) => {
             return companyService.processIntoCompanyWithTransaction(companyId, user, user.sub, trx)
             .then(async processedUser => {
 
-                await mobileCompanyUserService.insertUserToCompanyByCompanyLogsWithTransaction([pendingInviteApply], trx, user);
-    
-                if(getAdminsInCompany.length > 0 ) {
-        
-                    const notificationObj = {
-                        enotificationbodyentityid: user.sub,
-                        enotificationbodyentitytype: NotificationEnum.user.type,
-                        enotificationbodyaction: NotificationEnum.user.actions.accepted.code,
-                        enotificationbodytitle: NotificationEnum.user.actions.accepted.title,
-                        enotificationbodymessage: NotificationEnum.user.actions.accepted.message
-                    }
-            
-                    await notificationService.saveNotificationWithTransaction(
-                        notificationObj,
-                        user,
-                        getAdminsInCompany,
-                        trx
-                    )
-                }
+            await mobileCompanyUserService.insertUserToCompanyByCompanyLogsWithTransaction([pendingInviteApply], trx, user);
 
             return processedUser
         })
@@ -403,36 +354,18 @@ companyService.exitCompany = async (companyId, user) => {
 
             await Promise.all([removeApprovalUser, removeApproval, removePermits, removePositionUserMapping, removeRosterUserMapping, removeShiftRoster, removeUserFromTeam])
 
-            const getAdminsInCompany = await CompanyDefaultPosition.query(trx)
-            .where('ecompanyecompanyid', companyId)
-            .first()
-            .then(position => {
+            // const getAdminsInCompany = await CompanyDefaultPosition.query(trx)
+            // .where('ecompanyecompanyid', companyId)
+            // .first()
+            // .then(position => {
     
-                if(!position) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.COMPANY_NOT_EXIST)
+            //     if(!position) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.COMPANY_NOT_EXIST)
     
-                return Grade.relatedQuery('users', trx)
-                .for(Grade.query().where('egradeid', position.eadmingradeid))
-                .distinct('euserid')
+            //     return Grade.relatedQuery('users', trx)
+            //     .for(Grade.query().where('egradeid', position.eadmingradeid))
+            //     .distinct('euserid')
     
-            })
-
-            if(getAdminsInCompany.length > 0 ) {
-    
-                const notificationObj = {
-                    enotificationbodyentityid: user.sub,
-                    enotificationbodyentitytype: NotificationEnum.user.type,
-                    enotificationbodyaction: NotificationEnum.user.actions.exit.code,
-                    enotificationbodytitle: NotificationEnum.user.actions.exit.title,
-                    enotificationbodymessage: NotificationEnum.user.actions.exit.message
-                }
-        
-                await notificationService.saveNotificationWithTransaction(
-                    notificationObj,
-                    user,
-                    getAdminsInCompany,
-                    trx
-                )
-            }
+            // })
 
             const companyMemberCount = await companyService.getCompanyMemberCount(companyId);
 
@@ -464,63 +397,10 @@ companyService.processInvitation = async (companyLogIds, user, status) => {
     return CompanyLog.transaction(async trx => {
 
         if (CompanyLogStatusEnum.ACCEPTED === status) {
-
             await mobileCompanyUserService.insertUserToCompanyByCompanyLogsWithTransaction(companyLogs, trx, user);
         }
 
         const newCompanyLogs = await mobileCompanyLogService.updateLogsByCompanyLogsWithTransaction(companyLogs, status, user, trx)
-
-        const companyIds = newCompanyLogs.map(newCompanyLog => newCompanyLog.ecompanyecompanyid)
-
-        const getAdminsInCompany = await CompanyDefaultPosition.query(trx)
-        .whereIn('ecompanyecompanyid', companyIds)
-        .then(positions => {
-
-            if(positions.length !== companyIds.length) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.COMPANY_NOT_EXIST)
-            
-            const adminGradeIds = positions.map(position => position.eadmingradeid)
-
-            return Grade.relatedQuery('users')
-            .for(Grade.query().whereIn('egradeid', adminGradeIds))
-            .distinct('euserid')
-
-        })
-
-        if(getAdminsInCompany.length > 0 ) {
-
-            let notificationObj 
-
-            if(CompanyLogStatusEnum.ACCEPTED === status) {
-
-                notificationObj = {                    
-                    enotificationbodyentityid: user.sub,
-                    enotificationbodyentitytype: NotificationEnum.user.type,
-                    enotificationbodyaction: NotificationEnum.user.actions.accepted.code,
-                    enotificationbodytitle: NotificationEnum.user.actions.accepted.title,
-                    enotificationbodymessage: NotificationEnum.user.actions.accepted.message
-                }
-
-            } else {
-
-                notificationObj = {                    
-                    enotificationbodyentityid: user.sub,
-                    enotificationbodyentitytype: NotificationEnum.user.type,
-                    enotificationbodyaction: NotificationEnum.user.actions.rejected.code,
-                    enotificationbodytitle: NotificationEnum.user.actions.rejected.title,
-                    enotificationbodymessage: NotificationEnum.user.actions.rejected.message
-                }
-
-            }
-
-            await notificationService.saveNotificationWithTransaction(
-                notificationObj,
-                user,
-                getAdminsInCompany,
-                trx
-            )
-        }
-
-
         return newCompanyLogs
 
     })

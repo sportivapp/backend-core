@@ -1,3 +1,5 @@
+const v2 = '/api/v2';
+
 module.exports = {
     routes: {
         base: '/api/v1',
@@ -156,6 +158,17 @@ module.exports = {
             history: '/user-class-history',
             historyId: '/user-class-history/:classUserId'
         },
+        classV2: {
+            list: '/class',
+            id: '/class/:classUuid',
+            idCategory: '/class/:classUuid/classCategory/:classCategoryUuid',
+            reschedule: '/class/:classUuid/classCategory/:classCategoryUuid/classCategorySession/:classCategorySessionUuid/reschedule',
+            register: '/class/:classUuid/classCategory/:classCategoryUuid/register',
+        },
+        classCategory: {
+            list: '/category',
+            id:  '/category/:classCategoryUuid',
+        },
         permit: {
             list: '/permit',
             id: '/permit/:permitId',
@@ -191,7 +204,9 @@ module.exports = {
         },
         notification: {
             list: '/notification',
-            internalList: '/internal/notification'
+            internalList: '/internal/notification',
+            count: '/notification/count',
+            click: '/notification/:notificationId/click',
         },
         license: {
             id : '/license/:licenseId'
@@ -228,7 +243,8 @@ module.exports = {
         },
         commentReply: {
             list: '/comments/:commentId/replies',
-            id: '/comments/:commentId/replies/:replyId'
+            id: '/comments/:commentId/replies/:replyId',
+            idThread: '/replies/:replyId/thread',
         },
         report: {
             thread: '/report/thread',

@@ -1,4 +1,4 @@
-const router = require('../../landingRouter')
+const router = require('../landingRouter')
 const countryController = require('../../../controllers/country')
 const { routes } = require('../../../constant')
 

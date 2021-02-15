@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const validator = require('../middlewares/web-validation')
+const validator = require('../../middlewares/web-validation')
 
 const newRouter = {}
 

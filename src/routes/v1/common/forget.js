@@ -1,4 +1,4 @@
-const router = require('../../router')
+const router = require('../router')
 const controller = require('../../../controllers/forget');
 
 router.post('/forget-email', controller.sendForgetEmail);

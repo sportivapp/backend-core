@@ -11,6 +11,9 @@ const gradeService = require('./gradeService')
 const companyService = require('./companyService')
 const fileService = require('./fileService')
 const { raw } = require('objection')
+const mobileCompanyUserService = require ('./mobileCompanyUserService');
+const NotificationEnum = require('../models/enum/NotificationEnum')
+const notificationService = require('./notificationService')
 
 const UnsupportedOperationErrorEnum = {
     USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY',
@@ -113,6 +116,15 @@ newsService.publishNews = async (dto, newsId, user) => {
         .then(gradeIds => settingService.isUserHaveFunctions(['P'], gradeIds, ModuleNameEnum.NEWS, news.ecompanyecompanyid))
 
     if (!isAllowed) throw new UnsupportedOperationError(UnsupportedOperationErrorEnum.FORBIDDEN_ACTION)
+
+    const newsEnum = NotificationEnum.news
+    const newsCreateAction = newsEnum.actions.create
+    const newsNotificationObj = await notificationService
+        .buildNotificationEntity(news.enewsid, newsEnum.type, newsCreateAction.title, 
+            newsCreateAction.message(news.enewstitle), newsCreateAction.title)
+    const memberIds = await mobileCompanyUserService.getUserIdsByCompanyId(news.ecompanyecompanyid);
+    
+    notificationService.saveNotification(newsNotificationObj, user, memberIds);
 
     return news.$query()
         .updateByUserId({

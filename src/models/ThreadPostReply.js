@@ -23,7 +23,7 @@ class ThreadPostReply extends Model {
     static get modifiers() {
         return {
             baseAttributes(builder) {
-                builder.select('ethreadpostreplyid', 'ethreadpostethreadpostid', 'ethreadpostreplycomment', 
+                builder.select('ethreadpostreplyid', 'ethreadpostethreadpostid', 'ethreadethreadid', 'ethreadpostreplycomment', 
                 'ethreadpostreplycreatetime', 'ethreadpostreplycreateby', 'ethreadpostreplychangetime')
                     .withGraphFetched('user(baseAttributes).file(baseAttributes)')
                     .where('ethreadpostreplydeletestatus', false)
