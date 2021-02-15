@@ -28,6 +28,9 @@ class ClassCategory extends Model {
                 builder.select('uuid', 'title', 'description', 'price', 'requirements')
                     .withGraphFetched('categorySessions(list)');
             },
+            price(builder) {
+                builder.select('price');
+            }
         }
     }
 
