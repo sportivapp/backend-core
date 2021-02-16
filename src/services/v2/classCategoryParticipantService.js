@@ -25,7 +25,7 @@ classCategoryParticipantService.getClassParticipants = async (classUuid) => {
         classParticipants.map(classParticipant => {
             if (!grouped[classParticipant.classCategoryUuid])
                 grouped[classParticipant.classCategoryUuid] = {
-                    id: classParticipant.uuid,
+                    uuid: classParticipant.uuid,
                     classCategoryUuid: classParticipant.classCategory.uuid,
                     classCategoryTitle: classParticipant.classCategory.title,
                     user: [],
