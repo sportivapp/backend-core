@@ -21,9 +21,11 @@ class ClassCategoryParticipant extends Model {
 
     static get modifiers() {
         return {
-            baseAttributes(builder) {
-                builder.select('uuid', 'class_uuid', 'class_category_uuid', 'user_id');
-            },
+            withCategory(builder) {
+                builder.select('uuid', 'class_uuid', 'class_category_uuid', 'user_id')
+                    .withGraphFetched('user(baseAttributes)')
+                    .withGraphFetched('classCategory(list)');
+            },            
         }
     }
 
@@ -41,8 +43,8 @@ class ClassCategoryParticipant extends Model {
                     to: 'class_category.uuid',
                 }
             },
-            participant: {
-                relation: Model.HasManyRelation,
+            user: {
+                relation: Model.BelongsToOneRelation,
                 modelClass: User,
                 join : {
                     from: 'class_category_participant.user_id',

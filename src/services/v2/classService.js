@@ -78,7 +78,6 @@ classService.getClasses = async (page, size, keyword, industryId) => {
         return {
             ...cls,
             priceRange: await classCategoryService.getClassCategoryPriceRangeByClassUuid(cls.uuid),
-            participants: await classCategoryParticipantService.getParticipantsCountByClassUuid(cls.uuid),
         }
     });
     
@@ -138,6 +137,12 @@ classService.reschedule = async (classUuid, classCategorySessionDTO, user) => {
 
     await classService.checkUserInClassCompany(classUuid, user);
     return classCategoriesService.reschedule(classCategorySessionDTO, user)
+
+}
+
+classService.getClassParticipants = async (classUuid, classCategoryUuid, user) => {
+
+    return classCategoryParticipantService.getClassParticipants(classUuid);
 
 }
 

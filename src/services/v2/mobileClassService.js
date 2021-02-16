@@ -2,6 +2,7 @@ const Class = require('../../models/v2/Class');
 const { UnsupportedOperationError, NotFoundError } = require('../../models/errors');
 const ServiceHelper = require('../../helper/ServiceHelper');
 const classCategoryService = require('./mobileClassCategoryService');
+const classCategoryParticipantService = require('./mobileClassCategoryParticipantService');
 
 const ErrorEnum = {
     INVALID_COACH_ID: 'INVALID_COACH_ID',
@@ -64,7 +65,7 @@ classService.getClassCategory = async (classUuid, classCategoryUuid) => {
 
 classService.register = async (classUuid, classCategoryUuid, user) => {
 
-    return classCategoryService.register(classCategoryUuid, user);
+    return classCategoryParticipantService.register(classUuid, classCategoryUuid, user);
 
 }
 

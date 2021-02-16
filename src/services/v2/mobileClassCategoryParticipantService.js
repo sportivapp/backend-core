@@ -16,7 +16,7 @@ classCategoryParticipantService.findByIdAndUserId = async (classCategoryUuid, us
 
 }
 
-classCategoryParticipantService.register = async (classCategoryUuid, user) => {
+classCategoryParticipantService.register = async (classUuid, classCategoryUuid, user) => {
 
     const participant = await classCategoryParticipantService.findByIdAndUserId(classCategoryUuid, user.sub);
     if (participant)
@@ -24,6 +24,7 @@ classCategoryParticipantService.register = async (classCategoryUuid, user) => {
 
     return ClassCategoryParticipant.query()
         .insertToTable({
+            classUuid, classUuid,
             classCategoryUuid: classCategoryUuid,
             userId: user.sub,
         }, user.sub);

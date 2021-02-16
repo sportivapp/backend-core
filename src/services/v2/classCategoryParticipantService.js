@@ -13,4 +13,38 @@ classCategoryParticipantService.getParticipantsCountByClassUuid = async (classUu
 
 }
 
+classCategoryParticipantService.getClassParticipants = async (classUuid) => {
+
+    if (classUuid) {
+
+        const classParticipants = await ClassCategoryParticipant.query()
+            .modify('withCategory')
+            .where('class_uuid', classUuid)
+
+        let grouped = {};
+        classParticipants.map(classParticipant => {
+            if (!grouped[classParticipant.classCategoryUuid])
+                grouped[classParticipant.classCategoryUuid] = {
+                    id: classParticipant.uuid,
+                    classCategoryUuid: classParticipant.classCategory.uuid,
+                    classCategoryTitle: classParticipant.classCategory.title,
+                    user: [],
+                };
+
+            grouped[classParticipant.classCategoryUuid].user.push({
+                ...classParticipant.user
+            });
+        });
+
+        const result = Object.keys(grouped)
+            .map(function(key) {
+                return grouped[key];
+            })
+
+        return result;
+
+    }
+
+}
+
 module.exports = classCategoryParticipantService;
