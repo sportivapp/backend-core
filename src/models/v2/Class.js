@@ -34,6 +34,16 @@ class Class extends Model {
                     .withGraphFetched('classMedia(list)')
                     .withGraphFetched('classCategories(list)')
                     .withGraphFetched('coaches(baseAttributes)');
+            },
+            userDetail(builder) {
+                builder.select('uuid', 'title', 'description', 'administration_fee', 'pic_name', 'pic_mobile_number')
+                    .withGraphFetched('industry(baseAttributes)')
+                    .withGraphFetched('city(baseAttributes)')
+                    .withGraphFetched('classMedia(list)')
+                    .withGraphFetched('classCategories(list)')
+                    .withGraphFetched('coaches(baseAttributes)')
+                    .withGraphFetched('company(baseAttributes)')
+                    .withGraphFetched('participants(baseAttributes)');
             }
         }
     }
@@ -47,6 +57,7 @@ class Class extends Model {
         const City = require('../City');
         const ClassCategory = require('./ClassCategory');
         const ClassCoach = require('./ClassCoach');
+        const ClassCategoryParticipant = require('./ClassCategoryParticipant');
  
         return {
             company: {
@@ -103,6 +114,14 @@ class Class extends Model {
                 join: {
                     from: 'class.uuid',
                     to: 'class_coach.class_uuid',
+                }
+            },
+            participants: {
+                relation: Model.HasManyRelation,
+                modelClass: ClassCategoryParticipant,
+                join: {
+                    from: 'class.uuid',
+                    to: 'class_category_participant.class_uuid',
                 }
             }
         }

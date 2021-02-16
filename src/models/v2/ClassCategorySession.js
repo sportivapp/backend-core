@@ -24,6 +24,13 @@ class ClassCategorySession extends Model {
             list(builder) {
                 builder.select('uuid', 'class_category_uuid', 'start_date', 'end_date')
                     .orderBy('start_date', 'ASC');
+            },
+            listThisMonth(builder) {
+                const monthCode = new Date().getMonth();
+
+                builder.select('uuid', 'class_category_uuid', 'start_date', 'end_date')
+                    .where('month_code', monthCode)
+                    .orderBy('start_date', 'ASC');
             }
         }
     }

@@ -21,6 +21,10 @@ class ClassCategoryParticipant extends Model {
 
     static get modifiers() {
         return {
+            baseAttributes(builder) {
+                builder.select('uuid', 'class_uuid', 'class_category_uuid', 'user_id')
+                    .withGraphFetched('user(baseAttributes)')
+            },
             withCategory(builder) {
                 builder.select('uuid', 'class_uuid', 'class_category_uuid', 'user_id')
                     .withGraphFetched('user(baseAttributes)')

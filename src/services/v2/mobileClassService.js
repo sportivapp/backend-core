@@ -24,24 +24,45 @@ classService.getClasses = async (page, size, keyword, industryId, cityId) => {
     if (cityId)
         clsPromise = clsPromise.where('city_id', cityId);
 
-    return clsPromise
-        .page(page, size)
-        .then(classes =>
-            ServiceHelper.toPageObj(page, size, classes)
-        );;
+    const pageObj = await clsPromise.page(page, size)
+
+    const resultPromise = pageObj.results.map(async cls => {
+        return {
+            ...cls,
+            priceRange: await classCategoryService.getClassCategoryPriceRangeByClassUuid(cls.uuid),
+            totalParticipants: await classCategoryParticipantService.getParticipantsCountByClassUuid(cls.uuid),
+        }
+    });
+    
+    return Promise.all(resultPromise)
+        .then(cList => {
+            pageObj.results = cList;
+            return pageObj;
+        })
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj));
 
 }
 
 classService.getClass = async (classUuid) => {
 
-    return Class.query()
-        .modify('adminDetail')
+    const cls = await Class.query()
+        .modify('userDetail')
         .findById(classUuid)
-        .then(cls => {
+        .then(async cls => {
             if (!cls)
-                throw new NotFoundError();
+                throw NotFoundError();
             return cls;
         });
+
+    const clsCategoriesPromise = cls.classCategories.map(async category => {
+        const totalParticipants = await classCategoryParticipantService
+            .getParticipantsCountByClassCategoryUuid(category.uuid);
+        category.totalParticipants = totalParticipants;
+    })
+
+    await Promise.all(clsCategoriesPromise);
+
+    return cls;
 
 }
 

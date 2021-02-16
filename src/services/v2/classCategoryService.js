@@ -65,7 +65,7 @@ classCategoryService.initCategories = async (classId, categories, user, trx) => 
 classCategoryService.getClassCategory = async (classCategoryUuid) => {
 
     return ClassCategory.query()
-        .modify('detail')
+        .modify('adminDetail')
         .findById(classCategoryUuid)
         .then(classCategory => {
             if (!classCategory)
