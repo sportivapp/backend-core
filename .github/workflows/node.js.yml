@@ -19,6 +19,6 @@ jobs:
         port: ${{ secrets.SSH_PORT }}
         script: |
           cd /opt/emtiv-backend
-          git pull origin development
-          npm i
-          pm2 reload emtiv-backend
+          sudo git pull origin development
+          sudo npm i
+          sudo pm2 reload emtiv-backend
