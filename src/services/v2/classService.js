@@ -4,6 +4,8 @@ const classCoachService = require('./classCoachService');
 const classCategoriesService = require('./classCategoryService');
 const { UnsupportedOperationError, NotFoundError } = require('../../models/errors');
 const ServiceHelper = require('../../helper/ServiceHelper');
+const classCategoryService = require('./classCategoryService');
+const classCategoryParticipantService = require('./classCategoryParticipantService');
 
 const ErrorEnum = {
     INVALID_COACH_ID: 'INVALID_COACH_ID',
@@ -70,24 +72,36 @@ classService.getClasses = async (page, size, keyword, industryId) => {
     if (industryId)
         clsPromise = clsPromise.where('industry_id', industryId);
 
-    return clsPromise
-        .page(page, size)
-        .then(classes =>
-            ServiceHelper.toPageObj(page, size, classes)
-        );;
+    const pageObj = await clsPromise.page(page, size)
+
+    const resultPromise = pageObj.results.map(async cls => {
+        return {
+            ...cls,
+            priceRange: await classCategoryService.getClassCategoryPriceRangeByClassUuid(cls.uuid),
+        }
+    });
+    
+    return Promise.all(resultPromise)
+        .then(cList => {
+            pageObj.results = cList;
+            return pageObj;
+        })
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj));
 
 }
 
 classService.getClass = async (classUuid) => {
 
-    return Class.query()
+    const cls = await Class.query()
         .modify('adminDetail')
-        .findById(classUuid)
-        .then(cls => {
-            if (!cls)
-                throw new NotFoundError();
-            return cls;
-        });
+        .findById(classUuid);
+
+    const priceRange = await classCategoryService.getClassCategoryPriceRangeByClassUuid(cls.uuid);
+
+    return {
+        ...cls,
+        priceRange: priceRange,
+    }
 
 }
 
@@ -123,6 +137,12 @@ classService.reschedule = async (classUuid, classCategorySessionDTO, user) => {
 
     await classService.checkUserInClassCompany(classUuid, user);
     return classCategoriesService.reschedule(classCategorySessionDTO, user)
+
+}
+
+classService.getClassParticipants = async (classUuid, classCategoryUuid, user) => {
+
+    return classCategoryParticipantService.getClassParticipants(classUuid);
 
 }
 

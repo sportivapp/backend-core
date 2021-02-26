@@ -101,4 +101,19 @@ classController.reschedule = async (req, res, next) => {
 
 }
 
+classController.getClassParticipants = async (req, res, next) => {
+
+    const { classUuid } = req.params;
+
+    try {
+
+        const result = await classService.getClassParticipants(classUuid, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = classController;

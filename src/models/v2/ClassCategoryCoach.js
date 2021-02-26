@@ -22,7 +22,8 @@ class ClassCategoryCoach extends Model {
     static get modifiers() {
         return {
             baseAttributes(builder) {
-                builder.select('uuid', 'user_id', 'class_category_uuid');
+                builder.select('uuid', 'user_id', 'class_category_uuid')
+                    .withGraphFetched('user(baseAttributes)');
             }
         }
     }
@@ -41,11 +42,11 @@ class ClassCategoryCoach extends Model {
                     to: 'class_category.uuid',
                 }
             },
-            coach: {
+            user: {
                 relation: Model.BelongsToOneRelation,
                 modelClass: User,
                 join: {
-                    from: 'class__category_coach.user_id',
+                    from: 'class_category_coach.user_id',
                     to: 'euser.euserid',
                 }
             }

@@ -159,11 +159,12 @@ module.exports = {
             historyId: '/user-class-history/:classUserId'
         },
         classV2: {
-            list: '/class',
-            id: '/class/:classUuid',
-            idCategory: '/class/:classUuid/classCategory/:classCategoryUuid',
-            reschedule: '/class/:classUuid/classCategory/:classCategoryUuid/classCategorySession/:classCategorySessionUuid/reschedule',
-            register: '/class/:classUuid/classCategory/:classCategoryUuid/register',
+            list: '/class-v2',
+            id: '/class-v2/:classUuid',
+            idCategory: '/class-v2/:classUuid/classCategory/:classCategoryUuid',
+            reschedule: '/class-v2/:classUuid/classCategory/:classCategoryUuid/classCategorySession/:classCategorySessionUuid/reschedule',
+            register: '/class-v2/:classUuid/classCategory/:classCategoryUuid/register',
+            classParticipants: '/class-v2/:classUuid/participants',
         },
         classCategory: {
             list: '/category',

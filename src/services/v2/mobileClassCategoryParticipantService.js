@@ -16,7 +16,7 @@ classCategoryParticipantService.findByIdAndUserId = async (classCategoryUuid, us
 
 }
 
-classCategoryParticipantService.register = async (classCategoryUuid, user) => {
+classCategoryParticipantService.register = async (classUuid, classCategoryUuid, user) => {
 
     const participant = await classCategoryParticipantService.findByIdAndUserId(classCategoryUuid, user.sub);
     if (participant)
@@ -24,9 +24,32 @@ classCategoryParticipantService.register = async (classCategoryUuid, user) => {
 
     return ClassCategoryParticipant.query()
         .insertToTable({
+            classUuid, classUuid,
             classCategoryUuid: classCategoryUuid,
             userId: user.sub,
         }, user.sub);
+
+}
+
+classCategoryParticipantService.getParticipantsCountByClassUuid = async (classUuid) => {
+
+    return ClassCategoryParticipant.query()
+        .where('class_uuid', classUuid)
+        .count()
+        .then(count => {
+            return parseInt(count[0].count);
+        })
+
+}
+
+classCategoryParticipantService.getParticipantsCountByClassCategoryUuid = async (classCategoryUuid) => {
+
+    return ClassCategoryParticipant.query()
+        .where('class_category_uuid', classCategoryUuid)
+        .count()
+        .then(count => {
+            return parseInt(count[0].count);
+        })
 
 }
 
