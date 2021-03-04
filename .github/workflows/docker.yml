@@ -1,0 +1,57 @@
+#
+#  docker.yml
+#  Sportiv
+#
+#  Created by Yefta Sutanto on 04/03/21.
+#
+
+name: Publish Docker image
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - development
+
+jobs:
+  build_and_push:
+    name: Build & Push Docker image to GitHub Container Registry
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v3.x
+      - name: Are we on development?
+        if: github.ref == 'refs/heads/development'
+        run: |
+          echo "NODE_ENV=development" >> $GITHUB_ENV
+      - name: Are we on staging?
+        if: github.ref == 'refs/heads/staging'
+        run: |
+          echo "NODE_ENV=staging" >> $GITHUB_ENV
+      - name: Are we on main?
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "GITHUB_REF_SLUG=latest" >> $GITHUB_ENV
+          echo "NODE_ENV=production" >> $GITHUB_ENV
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GH_CONTAINER_ACCOUNT }}
+          password: ${{ secrets.GH_CONTAINER_PAT }}
+      - name: Build & Push to GitHub Container Registry
+        uses: docker/build-push-action@v2
+        with:
+          build-args: |
+            node_env=${{ env.NODE_ENV }}
+          tags: ghcr.io/${{ github.repository }}:${{ env.GITHUB_REF_SLUG }}
+          platforms: linux/amd64
+          push: true
+      - name: Call Deployment Webhook
+        run: |
+          curl -s -H "Content-Type: application/json" \
+            -d '{ "name": "ghcr.io/${{ github.repository }}", "tag": "${{ env.GITHUB_REF_SLUG }}" }' \
+            ${{ secrets.DEPLOYMENT_WEBHOOK_URL }}
