@@ -5,7 +5,7 @@ LABEL org.opencontainers.image.source https://github.com/sportivapp/backend-core
 
 ARG node_env=development
 
-RUN apk update && apk upgrade && apk add --no-cache git
+# RUN apk update && apk upgrade && apk add --no-cache git
 
 COPY package.json /app/sportivapp/backend-core/package.json
 COPY package-lock.json /app/sportivapp/backend-core/package-lock.json
