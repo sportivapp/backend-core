@@ -255,6 +255,14 @@ class User extends Model {
       },
       name(builder) {
         builder.select('eusername');
+      },
+      basic(builder) {
+        builder.select('euserid', 'eusername', 'euseremail', 'eusermobilenumber')
+          .withGraphFetched('file(baseAttributes)')
+      },
+      pic(builder) {
+        builder.select('euserid', 'eusername', 'euseremail', 'eusermobilenumber')
+          .withGraphFetched('file(baseAttributes)')
       }
     }
   }
