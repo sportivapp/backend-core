@@ -30,7 +30,7 @@
     "fs": "0.0.1-security",
     "https": "^1.0.0",
     "jest": "^26.1.0",
-    "joi": "github:sideway/joi",
+    "joi": "^17.4.0",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.21.5",
     "lodash": "^4.17.19",

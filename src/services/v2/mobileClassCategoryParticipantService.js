@@ -150,4 +150,26 @@ classCategoryParticipantService.getSessionParticipants = async (session, isCheck
 
 }
 
+classCategoryParticipantService.getParticipantsCountByClassUuid = async (classUuid) => {
+
+    return ClassCategoryParticipant.query()
+        .where('class_uuid', classUuid)
+        .count()
+        .then(count => {
+            return parseInt(count[0].count);
+        })
+
+}
+
+classCategoryParticipantService.getParticipantsCountByClassCategoryUuid = async (classCategoryUuid) => {
+
+    return ClassCategoryParticipant.query()
+        .where('class_category_uuid', classCategoryUuid)
+        .count()
+        .then(count => {
+            return parseInt(count[0].count);
+        })
+
+}
+
 module.exports = classCategoryParticipantService;

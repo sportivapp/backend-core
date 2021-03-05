@@ -256,4 +256,10 @@ classService.updateClass = async (classDTO, user) => {
 
 }
 
+classService.getClassParticipants = async (classUuid, classCategoryUuid, user) => {
+
+    return classCategoryParticipantService.getClassParticipants(classUuid);
+
+}
+
 module.exports = classService;

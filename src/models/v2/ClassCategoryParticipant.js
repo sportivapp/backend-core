@@ -44,6 +44,11 @@ class ClassCategoryParticipant extends Model {
             basic(builder) {
                 builder.select('uuid', 'user_id', 'class_uuid', 'class_category_uuid', 'month_utc', 'start')
             },
+            withCategory(builder) {
+                builder.select('uuid', 'class_uuid', 'class_category_uuid', 'user_id')
+                    .withGraphFetched('user(baseAttributes)')
+                    .withGraphFetched('classCategory(list)');
+            },            
         }
     }
 

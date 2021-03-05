@@ -1,3 +1,4 @@
+const ClassCategoryParticipant = require('./ClassCategoryParticipant');
 const Model = require('./Model');
 const sessionStatusEnum = require('../enum/SessionStatusEnum');
 
