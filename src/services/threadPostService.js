@@ -7,6 +7,7 @@ const notificationService = require('./notificationService')
 const NotificationEnum = require('../models/enum/NotificationEnum')
 const userService = require('./userService')
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
+const threadPostNotificationBodyService = require('./threadPostNotificationBodyService')
 
 const threadPostService = {}
 
@@ -147,10 +148,16 @@ threadPostService.deletePost = async (commentId, user) => {
         if (!isModerator) throw new UnsupportedOperationError(ErrorEnum.FORBIDDEN_ACTION)
     }
 
-    return ThreadPost.query()
-        .findById(commentId)
-        .deleteByUserId(user.sub)
-        .then(rowsAffected => rowsAffected === 1)
+    return ThreadPost.transaction(async trx => {
+
+        await threadPostNotificationBodyService.deleteThreadPostsNotification([commentId], trx);
+
+        return ThreadPost.query(trx)
+            .findById(commentId)
+            .deleteByUserId(user.sub)
+            .then(rowsAffected => rowsAffected === 1)
+
+    });
 
 }
 

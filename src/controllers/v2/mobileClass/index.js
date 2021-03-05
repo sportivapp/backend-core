@@ -24,7 +24,7 @@ classController.getClass = async (req, res, next) => {
 
     try {
 
-        const result = await classService.getClass(classUuid);
+        const result = await classService.getClass(classUuid, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
@@ -39,7 +39,7 @@ classController.getClassCategory = async (req, res, next) => {
 
     try {
 
-        const result = await classService.getClassCategory(classUuid, classCategoryUuid);
+        const result = await classService.getClassCategory(classUuid, classCategoryUuid, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
@@ -55,6 +55,36 @@ classController.register = async (req, res, next) => {
     try {
 
         const result = await classService.register(classUuid, classCategoryUuid, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classController.getMyClass = async (req, res, next) => {
+
+    const { status } = req.query;
+
+    try {
+
+        const result = await classService.getMyClass(status, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classController.getCoachClass = async (req, res, next) => {
+
+    const { status } = req.query;
+
+    try {
+
+        const result = await classService.getCoachClass(status, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
