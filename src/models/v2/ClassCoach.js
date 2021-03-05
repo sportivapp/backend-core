@@ -23,7 +23,10 @@ class ClassCoach extends Model {
         return {
             baseAttributes(builder) {
                 builder.select('uuid', 'user_id', 'class_uuid')
-                    .withGraphFetched('user(baseAttributes)');
+                    .withGraphFetched('user(basic)');
+            },
+            basic(builder) {
+                builder.select('uuid', 'user_id', 'class_uuid');
             }
         }
     }

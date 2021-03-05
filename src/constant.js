@@ -161,14 +161,30 @@ module.exports = {
         classV2: {
             list: '/class-v2',
             id: '/class-v2/:classUuid',
-            idCategory: '/class-v2/:classUuid/classCategory/:classCategoryUuid',
-            reschedule: '/class-v2/:classUuid/classCategory/:classCategoryUuid/classCategorySession/:classCategorySessionUuid/reschedule',
-            register: '/class-v2/:classUuid/classCategory/:classCategoryUuid/register',
-            classParticipants: '/class-v2/:classUuid/participants',
+            idCategory: '/class-v2/:classUuid/class-category/:classCategoryUuid',
+            listCategory: '/class-v2/:classUuid/class-category',
+            reschedule: '/class-v2/:classUuid/class-category/:classCategoryUuid/class-category-session/:classCategorySessionUuid/reschedule',
+            register: '/class-v2/:classUuid/class-category/:classCategoryUuid/register',
+            participants: '/class-v2/:classUuid/participants',
+            myClass: '/my-class-v2',
+            coachClass: '/coach-class-v2',
+            coaches: '/class-v2/:classUuid/coaches',
+        },
+        classCategorySession: {
+            list: '/class-category/:classCategoryUuid/class-category-session',
+            id: '/class-category/:classCategoryUuid/class-category-session/:classCategorySessionUuid',
+            participants: '/class-category/:classCategoryUuid/class-category-session/:classCategorySessionUuid/participants',
+            absence: '/class-category/:classCategoryUuid/class-category-session/:classCategorySessionUuid/absence',
         },
         classCategory: {
             list: '/category',
-            id:  '/category/:classCategoryUuid',
+            id: '/category/:classCategoryUuid',
+            idCoach: '/coach-category/:classCategoryUuid',
+            startSession: '/coach-category/:classCategoryUuid/class-category-session/:classCategorySessionUuid/start',
+            endSession: '/coach-category/:classCategoryUuid/class-category-session/:classCategorySessionUuid/end',
+            participants: '/class-category/:classCategoryUuid/participants',
+            myCategory: '/my-class-category/:classCategoryUuid',
+            extend: '/class-category/:classCategoryUuid/extend',
         },
         permit: {
             list: '/permit',
@@ -257,6 +273,12 @@ module.exports = {
         },
         banner: {
             list: '/banner',
+        },
+        permissionV2: {
+            moduleName: '/permissions/:moduleName'
+        },
+        verifyV2: {
+            token: '/verify/token'
         }
     }
 }
