@@ -22,18 +22,39 @@ class ClassCategoryCoach extends Model {
     static get modifiers() {
         return {
             baseAttributes(builder) {
-                builder.select('uuid', 'user_id', 'class_category_uuid')
-                    .withGraphFetched('user(baseAttributes)');
-            }
+                builder.select('uuid', 'user_id', 'class_uuid', 'class_category_uuid')
+                    .withGraphFetched('user(basic)');
+            },
+            basic(builder) {
+                builder.select('uuid', 'user_id');
+            },
         }
     }
 
     static get relationMappings() {
 
+        const ClassCoach = require('./ClassCoach');
+        const Class = require('./Class');
         const ClassCategory = require('./ClassCategory');
         const User = require('../User');
  
         return {
+            classCoach: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: ClassCoach,
+                join: {
+                    from: 'class_category_coach.class_coach_uuid',
+                    to: 'class_coach.uuid',
+                }
+            },
+            class: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Class,
+                join: {
+                    from: 'class_category_coach.class_uuid',
+                    to: 'class.uuid',
+                }
+            },
             classCategory: {
                 relation: Model.BelongsToOneRelation,
                 modelClass: ClassCategory,

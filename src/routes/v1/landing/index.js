@@ -11,6 +11,8 @@ const stateRoutes = require('./state')
 const otpRoutes = require('./otp')
 const profileRoutes = require('./profile')
 const forgetRoutes = require('./forget')
+const permissionRoutes = require('./permission')
+const verifyRoutes = require('./verify')
 
 router.use([
     authenticationRoutes,
@@ -21,6 +23,8 @@ router.use([
     forgetRoutes,
     companyRoutes,
     companyUserRoutes,
-    companyLogRoutes
+    companyLogRoutes,
+    permissionRoutes,
+    verifyRoutes
 ]);
 module.exports = router
