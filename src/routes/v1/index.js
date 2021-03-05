@@ -8,7 +8,7 @@ const landingRoutes = require('./landing')
 const commonRoutes = require('./common')
 const internalRoutes = require('./internal')
 
-router.use('/api/v1', [adminRoutes, mobileRoutes, landingRoutes, commonRoutes, internalRoutes])
+router.use('/core/api/v1', [adminRoutes, mobileRoutes, landingRoutes, commonRoutes, internalRoutes])
 
 const steamRoutes = require('./steam');
 
