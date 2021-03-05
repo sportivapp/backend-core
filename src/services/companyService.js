@@ -109,6 +109,7 @@ CompanyService.registerCompany = async(userDTO, companyDTO, addressDTO) => {
 CompanyService.getUsersByCompanyId = async(companyId, page, size, keyword) => {
 
     return User.query()
+        .modify('basic')
         .withGraphFetched('file')
         .joinRelated('companies')
         .withGraphFetched('grades')
