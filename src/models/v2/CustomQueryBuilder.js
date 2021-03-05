@@ -23,7 +23,7 @@ class CustomQueryBuilder extends QueryBuilder {
         }
     }
 
-    delete(usrId) {
+    softDelete() {
         const patchedAttributes = {}
         //soft delete operation
         patchedAttributes['deleteTime'] = Date.now()

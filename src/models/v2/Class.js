@@ -21,30 +21,77 @@ class Class extends Model {
 
     static get modifiers() {
         return {
+            register(builder) {
+                builder.select('uuid', 'title')
+                    .withGraphFetched('company(baseAttributes)')
+            },
             adminList(builder) {
-                builder.select('uuid', 'title', 'administration_fee', 'city_id', 'industry_id', 'file_id')
+                builder.select('uuid', 'title', 'administration_fee', 'company_id')
+                    .modify('notDeleted')
                     .withGraphFetched('industry(baseAttributes)')
                     .withGraphFetched('city(baseAttributes)')
                     .withGraphFetched('classMedia(list)');
             },
             adminDetail(builder) {
-                builder.select('uuid', 'title', 'description', 'administration_fee', 'pic_name', 'pic_mobile_number')
-                    .withGraphFetched('industry(baseAttributes)')
-                    .withGraphFetched('city(baseAttributes)')
-                    .withGraphFetched('classMedia(list)')
-                    .withGraphFetched('classCategories(list)')
-                    .withGraphFetched('coaches(baseAttributes)');
-            },
-            userDetail(builder) {
-                builder.select('uuid', 'title', 'description', 'administration_fee', 'pic_name', 'pic_mobile_number')
+                builder.select('uuid', 'title', 'description', 'pic_mobile_number', 'address', 'address_name', 'administration_fee', 'company_id')
+                    .modify('notDeleted')
                     .withGraphFetched('industry(baseAttributes)')
                     .withGraphFetched('city(baseAttributes)')
                     .withGraphFetched('classMedia(list)')
                     .withGraphFetched('classCategories(list)')
                     .withGraphFetched('coaches(baseAttributes)')
+                    .withGraphFetched('pic(pic)')
+                    .withGraphFetched('state(baseAttributes)');
+            },
+            userDetail(builder) {
+                builder.select('uuid', 'title', 'description', 'pic_mobile_number', 'address', 'address_name', 'administration_fee')
+                    .modify('notDeleted')
+                    .withGraphFetched('industry(baseAttributes)')
+                    .withGraphFetched('city(baseAttributes)')
+                    .withGraphFetched('classMedia(list)')
+                    .withGraphFetched('classCategories(list)')
+                    .withGraphFetched('coaches(baseAttributes)')
+                    .withGraphFetched('pic(pic)')
+                    .withGraphFetched('company(baseAttributes)');
+            },
+            notDeleted(builder) {
+                builder.whereRaw('delete_time IS NULL');
+            },
+            participants(builder) {
+                builder.select('uuid')
+                    .withGraphFetched('classCategories(uuidAndTitle).[participants(participant).[user(basic).[file(baseAttributes)]]]')
+            },
+            coachClass(builder, userId, status) {
+                builder.select('class.uuid', 'class.title')
+                    .withGraphFetched('industry(baseAttributes)')
+                    .withGraphFetched('city(baseAttributes)')
+                    .withGraphFetched('classMedia(list).[file(baseAttributes)]')
                     .withGraphFetched('company(baseAttributes)')
-                    .withGraphFetched('participants(baseAttributes)');
-            }
+                    .withGraphJoined('classCategories(uuidAndTitle).[coaches(basic), categorySessions(list)]')
+                        .where('classCategories:coaches.user_id', userId)
+                        .where('classCategories:categorySessions.start_date', '>=', Date.now())
+                        .where('classCategories:categorySessions.status', status)
+                        .orderBy('classCategories:categorySessions.start_date', 'ASC');
+            },
+            myClass(builder, participant, status) {
+                builder.select('class.uuid', 'class.title')
+                    .withGraphFetched('industry(baseAttributes)')
+                    .withGraphFetched('city(baseAttributes)')
+                    .withGraphFetched('classMedia(list).[file(baseAttributes)]')
+                    .withGraphFetched('company(baseAttributes)')    
+                    .withGraphJoined('classCategories(uuidAndTitle).[categorySessions(list)]')
+                        .where('classCategories.uuid', participant.classCategoryUuid)
+                        .where('classCategories:categorySessions.start_date', '>=', Date.now())
+                        .where('classCategories:categorySessions.start_date', '>=', participant.start)
+                        .where('classCategories:categorySessions.status', status)
+                        .orderBy('classCategories:categorySessions.start_date', 'ASC');
+            },
+            basic(builder) {
+                builder.select('uuid', 'title')
+                    .withGraphFetched('industry(baseAttributes)')
+                    .withGraphFetched('city(baseAttributes)')
+                    .withGraphFetched('classMedia(list)')
+            },
         }
     }
 
@@ -58,6 +105,7 @@ class Class extends Model {
         const ClassCategory = require('./ClassCategory');
         const ClassCoach = require('./ClassCoach');
         const ClassCategoryParticipant = require('./ClassCategoryParticipant');
+        const State = require('../State');
  
         return {
             company: {
@@ -123,7 +171,23 @@ class Class extends Model {
                     from: 'class.uuid',
                     to: 'class_category_participant.class_uuid',
                 }
-            }
+            },
+            pic: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: User,
+                join: {
+                    from: 'class.pic_id',
+                    to: 'euser.euserid',
+                }
+            },
+            state: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: State,
+                join: {
+                    from: 'class.state_id',
+                    to: 'estate.estateid',
+                }
+            },
         }
     }
 }

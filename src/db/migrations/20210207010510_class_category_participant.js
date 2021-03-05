@@ -4,11 +4,14 @@ exports.up = (knex, Promise) => knex.schema.createTable('class_category_particip
     t.uuid('class_uuid').references('class.uuid');
     t.uuid('class_category_uuid').references('class_category.uuid');
     t.integer('user_id');
+    t.bigInteger('month_utc');
+    t.bigInteger('start');
+    t.bigInteger('end');
     t.integer('create_by').notNullable();
     t.bigInteger('create_time').notNullable();
     t.integer('change_by');
     t.bigInteger('change_time');
-    t.boolean('delete_status').defaultTo(false);
+    t.bigInteger('delete_time');
 });
 
 exports.down = (knex, Promise) => knex.schema.dropTable('class_category_participant');

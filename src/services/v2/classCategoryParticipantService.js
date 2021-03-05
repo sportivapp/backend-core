@@ -1,4 +1,5 @@
 const ClassCategoryParticipant = require('../../models/v2/ClassCategoryParticipant');
+const timeService = require('../../helper/timeService');
 
 const classCategoryParticipantService = {};
 
@@ -13,37 +14,30 @@ classCategoryParticipantService.getParticipantsCountByClassUuid = async (classUu
 
 }
 
-classCategoryParticipantService.getClassParticipants = async (classUuid) => {
+classCategoryParticipantService.getParticipantsCountByClassCategoryUuid = async (classCategoryUuid) => {
 
-    if (classUuid) {
+    return ClassCategoryParticipant.query()
+        .where('class_category_uuid', classCategoryUuid)
+        .count()
+        .then(count => {
+            return parseInt(count[0].count);
+        })
 
-        const classParticipants = await ClassCategoryParticipant.query()
-            .modify('withCategory')
-            .where('class_uuid', classUuid)
+}
 
-        let grouped = {};
-        classParticipants.map(classParticipant => {
-            if (!grouped[classParticipant.classCategoryUuid])
-                grouped[classParticipant.classCategoryUuid] = {
-                    uuid: classParticipant.uuid,
-                    classCategoryUuid: classParticipant.classCategory.uuid,
-                    classCategoryTitle: classParticipant.classCategory.title,
-                    user: [],
-                };
+classCategoryParticipantService.getSessionParticipants = async (session, isCheckIn) => {
 
-            grouped[classParticipant.classCategoryUuid].user.push({
-                ...classParticipant.user
-            });
-        });
+    const monthUtc = timeService.thisMonthTimestampUTC();
+    let participants = ClassCategoryParticipant.query()
+        .modify('participantCheckIn')
+        .where('month_utc', monthUtc)
+        .where('start', '<', session.startDate)
+        .where('class_category_uuid', session.classCategoryUuid);
 
-        const result = Object.keys(grouped)
-            .map(function(key) {
-                return grouped[key];
-            })
+    if (isCheckIn)
+        participants = participants.where('is_check_in', isCheckIn)
 
-        return result;
-
-    }
+    return participants;
 
 }
 

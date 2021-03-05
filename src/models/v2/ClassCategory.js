@@ -1,5 +1,5 @@
-const ClassCategoryParticipant = require('./ClassCategoryParticipant');
 const Model = require('./Model');
+const sessionStatusEnum = require('../enum/SessionStatusEnum');
 
 class ClassCategory extends Model {
     static get tableName() {
@@ -31,13 +31,43 @@ class ClassCategory extends Model {
                     .withGraphFetched('coaches(baseAttributes)');
             },
             userDetail(builder) {
-                builder.select('uuid', 'title', 'description', 'price', 'requirements')
-                    .withGraphFetched('categorySessions(listThisMonth)')
-                    .withGraphFetched('coaches(baseAttributes)')
-                    .withGraphFetched('participants(baseAttributes)');
+                builder.select('class_category.uuid', 'class_category.title', 'description', 'price', 'requirements')
+                    .withGraphFetched('coaches(baseAttributes).[user(basic)]')
+                    .withGraphFetched('participants(participant).[user(basic)]')
+                    .withGraphJoined('categorySessions(list)')
             },
             price(builder) {
                 builder.select('price');
+            },
+            uuidAndTitle(builder) {
+                builder.select('uuid', 'title');
+            },
+            myCategory(builder, participant, status) {
+                builder.select('uuid', 'title')
+                    .withGraphFetched('class(basic)')
+                    .withGraphFetched('categorySessions(list)')
+                    .modifyGraph('categorySessions', builder => {
+                        builder.where('start_date', '>=', Date.now())
+                            .where('start_date', '>=', participant.start)
+                            .where('status', status)
+                            .orderBy('start_date', 'ASC');
+                    });
+            },
+            coachCategory(builder) {
+                builder.select('uuid', 'title')
+                    .withGraphFetched('class(basic)')
+                    .withGraphFetched('categorySessions(list) as ongoingSessions')
+                    .modifyGraph('ongoingSessions', builder => {
+                        builder.where('start_date', '>=', Date.now())
+                            .where('status', sessionStatusEnum.ONGOING)
+                            .orderBy('start_date', 'ASC');
+                    })
+                    .withGraphFetched('categorySessions(list) as upcomingSessions')
+                    .modifyGraph('upcomingSessions', builder => {
+                        builder.where('start_date', '>=', Date.now())
+                            .where('status', sessionStatusEnum.UPCOMING)
+                            .orderBy('start_date', 'ASC');
+                    });
             },
         }
     }
@@ -47,6 +77,8 @@ class ClassCategory extends Model {
         const Class = require('./Class');
         const ClassCategorySession = require('./ClassCategorySession');
         const ClassCategoryCoach = require('./ClassCategoryCoach');
+        const ClassCategoryParticipant = require('./ClassCategoryParticipant');
+        const ClassCategorySchedule = require('./ClassCategorySchedule');
  
         return {
             class: {
@@ -66,7 +98,7 @@ class ClassCategory extends Model {
                 }
             },
             coaches: {
-                relation: Model.BelongsToOneRelation,
+                relation: Model.HasManyRelation,
                 modelClass: ClassCategoryCoach,
                 join: {
                     from: 'class_category.uuid',
@@ -79,6 +111,14 @@ class ClassCategory extends Model {
                 join: {
                     from: 'class_category.uuid',
                     to: 'class_category_participant.class_category_uuid',
+                }
+            },
+            schedules: {
+                relation: Model.HasManyRelation,
+                modelClass: ClassCategorySchedule,
+                join: {
+                    from: 'class_category.uuid',
+                    to: 'class_category_schedule.class_category_uuid',
                 }
             }
         }
