@@ -21,24 +21,48 @@ class ClassCategoryParticipant extends Model {
 
     static get modifiers() {
         return {
-            baseAttributes(builder) {
-                builder.select('uuid', 'class_uuid', 'class_category_uuid', 'user_id')
-                    .withGraphFetched('user(baseAttributes)')
-            },
             withCategory(builder) {
                 builder.select('uuid', 'class_uuid', 'class_category_uuid', 'user_id')
-                    .withGraphFetched('user(baseAttributes)')
+                    .withGraphFetched('user(basic)')
                     .withGraphFetched('classCategory(list)');
-            },            
+            },
+            register(builder) {
+                builder.select('uuid', 'class_uuid', 'class_category_uuid', 'user_id')
+                    .withGraphFetched('class(register)')
+                    .withGraphFetched('classCategory(uuidAndTitle)')
+                    .withGraphFetched('user(basic)');
+            },
+            participant(builder) {
+                builder.select('uuid', 'user_id', 'class_uuid', 'class_category_uuid', 'month_utc', 'start')
+                    .withGraphFetched('user(basic)');
+            },
+            participantCheckIn(builder) {
+                builder.select('class_category_participant.uuid', 'user_id', 'class_uuid', 'class_category_uuid', 'month_utc', 'start', 'cps.is_check_in')
+                    .leftJoinRelated('categoryParticipantSession as cps')
+                    .withGraphFetched('user(basic)');
+            },
+            basic(builder) {
+                builder.select('uuid', 'user_id', 'class_uuid', 'class_category_uuid', 'month_utc', 'start')
+            },
         }
     }
 
     static get relationMappings() {
 
+        const Class = require('./Class');
         const ClassCategory = require('./ClassCategory');
         const User = require('../User');
+        const ClassCategoryParticipantSession = require('./ClassCategoryParticipantSession');
  
         return {
+            class: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Class,
+                join: {
+                    from: 'class_category_participant.class_uuid',
+                    to: 'class.uuid'
+                }
+            },
             classCategory: {
                 relation: Model.BelongsToOneRelation,
                 modelClass: ClassCategory,
@@ -53,6 +77,14 @@ class ClassCategoryParticipant extends Model {
                 join : {
                     from: 'class_category_participant.user_id',
                     to: 'euser.euserid',
+                }
+            },
+            categoryParticipantSession: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: ClassCategoryParticipantSession,
+                join: {
+                    from: 'class_category_participant.uuid',
+                    to: 'class_category_participant_session.class_category_participant_uuid',
                 }
             }
         }

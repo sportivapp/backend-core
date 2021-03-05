@@ -6,7 +6,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('class_media', t => {
     t.bigInteger('create_time').notNullable();
     t.integer('change_by');
     t.bigInteger('change_time');
-    t.boolean('delete_status').defaultTo(false);
+    t.bigInteger('delete_time');
 });
 
 exports.down = (knex, Promise) => knex.schema.dropTable('class_media');
