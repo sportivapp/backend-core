@@ -16,12 +16,16 @@
     PORT=5100
 
     # Token to sign JWT and compare with
+    # Do not change these token unless necessary
     ACCESS_TOKEN_SECRET='49252C05ACC5A15288A0C42D61A38C399343B8D19942B8AF58BEABBC93E9511B'
 
     # Change this to the folder where it stores the static files
+    # It is used to store all files uploaded by the user (profile pic, license, etc)
+    # Create your own directory and provide the directory to this environment variable
     TEMP_DIRECTORY='/opt/emtiv-backend/temp'
 
     # Token to encrypt forget password email
+    # Do not change these token unless necessary
     FORGET_SECRET='ajksbddhjadbhkadsbhkasdbhkasdsbkasdbhklabklasdbjkasdbjkasdbjkasdbkladsbjk'
 
     # Slack Webhook to log Errors
@@ -42,6 +46,7 @@
     FIREBASE_URL='https://sportiv-development.firebaseio.com'
 
     # Steam config
+    # Still unused, just leave this one as it is
     STEAM_REALM='127.0.0.1:3000'
     STEAM_RETURN_URL='127.0.0.1:3000/auth/steam/authenticate'
     STEAM_API_KEY='asd'
