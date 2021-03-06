@@ -7,6 +7,15 @@ const ErrorEnum = {
 
 const classCategoryCoachService = {};
 
+classCategoryCoachService.getCoachCategory = (userId, categoryUuid) => {
+
+    return ClassCategoryCoach.query()
+        .where('user_id', userId)
+        .andWhere('class_category_uuid', categoryUuid)
+        .first();
+
+}
+
 classCategoryCoachService.checkCoachCategory = (userId, categoryUuid) => {
 
     return ClassCategoryCoach.query()
