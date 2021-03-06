@@ -32,7 +32,7 @@ class ClassCategory extends Model {
             },
             userDetail(builder) {
                 builder.select('class_category.uuid', 'class_category.title', 'description', 'price', 'requirements')
-                    .withGraphFetched('coaches(baseAttributes)]')
+                    .withGraphFetched('coaches(baseAttributes)')
                     .withGraphFetched('participants(participant)')
                     .withGraphFetched('categorySessions(list)')
             },
