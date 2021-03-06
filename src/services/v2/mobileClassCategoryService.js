@@ -75,7 +75,7 @@ classCategoryService.getClassCategory = async (classCategoryUuid, user) => {
             return classCategory;
         })
 
-    const isCoach = await classCategoryCoachService.checkCoachCategory(user.sub, classCategoryUuid);
+    const isCoach = await classCategoryCoachService.getCoachCategory(user.sub, classCategoryUuid);
     classCategory.categorySessions = classCategoryService.groupSessions(classCategory.categorySessions);
     classCategory.isCoach = !!isCoach;
 
