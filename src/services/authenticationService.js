@@ -90,11 +90,7 @@ AuthenticationService.loginCompany = async(companyId, user) => {
 
     const token = await AuthenticationService.generateCustomJWTToken(singleUser, companyId);
 
-    let link = `org.quickplay.app/login-auto?token=${token}`;
-    if (process.env.NODE_ENV === 'production')
-        link = process.env.ORG_DOMAIN + `/login-auto?token=${token}`;
-
-    return link;
+    return process.env.ORG_DOMAIN + `/login-auto?token=${token}`
 
     // map randomKey:token save to DB
     // return https://organization.quickplay.app/login-auto?token=randomKey
