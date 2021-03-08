@@ -141,8 +141,8 @@ classCategoryService.extendSchedule = async (extendCategoryDTO, user) => {
     if (sessionDTO.length === 0)
         throw new UnsupportedOperationError(ErrorEnum.NO_SESSIONS);
 
-    await classCategorySessionService
-        .checkConflictScheduleByCategoryUuidAndSessions(extendCategoryDTO.uuid, sessionAndSchedule.session);
+    const upcomingSessions = await classCategorySessionService.getSessions(category.uuid, [sessionStatusEnum.UPCOMING]);
+    classCategorySessionService.checkConflictSession(upcomingSessions, sessionAndSchedule.session);
     
     return ClassCategory.transaction(async trx => {
 
@@ -295,7 +295,7 @@ classCategoryService.generateSessionAndScheduleFromCategorySchedules = (classUui
                 });
             }
             sessionStartDate.setDate(sessionStartDate.getDate() + 7);
-            sessionEndDate.setDate(sessionStartDate.getDate() + 7);
+            sessionEndDate.setDate(sessionEndDate.getDate() + 7);
         }
     });
 

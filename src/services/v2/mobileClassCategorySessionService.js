@@ -7,6 +7,7 @@ const classCategoryParticipantService = require('./mobileClassCategoryParticipan
 const ErrorEnum = {
     INVALID_SESSION: 'INVALID_SESSION',
     INVALID_ONGOING_SESSION: 'INVALID_ONGOING_SESSION',
+    SCHEDULE_CONFLICT: 'SCHEDULE_CONFLICT',
 }
 
 const classCategorySessionService = {};
@@ -119,6 +120,102 @@ classCategorySessionService.getSessionParticipants = async (classCategoryUuid, c
 
     const session = await classCategorySessionService.getSessionByUuid(classCategorySessionUuid);
     return classCategoryParticipantService.getSessionParticipants(session, isCheckIn);
+
+}
+
+classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepeat, user) => {
+
+    const session = await classCategorySessionService.findById(classCategorySessionDTO.uuid);
+    const upcomingSessions = await classCategorySessionService
+        .getSessions(classCategorySessionDTO.classCategoryUuid, [sessionStatusEnum.UPCOMING]);
+
+    if (!isRepeat) {
+
+        classCategorySessionService.checkConflictSession(upcomingSessions, [classCategorySessionDTO]);
+
+        return session.$query()
+            .updateByUserId(classCategorySessionDTO, user.sub)
+            .returning('*');
+
+    } else {
+
+        const startDiff = parseInt(classCategorySessionDTO.startDate) - parseInt(session.startDate);
+        const endDiff = parseInt(classCategorySessionDTO.endDate) - parseInt(session.endDate);
+
+        const updatedSessions = upcomingSessions.filter(upcomingSession => {
+            
+            const sessionDate = new Date(parseInt(session.startDate));
+            const upcomingSessionDate = new Date(parseInt(upcomingSession.startDate));
+
+            // Get all matched session by day & hour & minute
+            if (sessionDate.getDay() === upcomingSessionDate.getDay() &&
+            sessionDate.getHours() === upcomingSessionDate.getHours() &&
+            sessionDate.getMinutes() === upcomingSessionDate.getMinutes()) { 
+                upcomingSession.startDate = parseInt(upcomingSession.startDate);
+                upcomingSession.endDate = parseInt(upcomingSession.endDate);
+                return upcomingSession;
+            }
+        }).map(matchedUpcomingSession => {
+            return {
+                ...matchedUpcomingSession,
+                startDate: matchedUpcomingSession.startDate + startDiff,
+                endDate: matchedUpcomingSession.endDate + endDiff,
+            }
+        });
+
+        classCategorySessionService.checkConflictSession(upcomingSessions, updatedSessions);
+
+        const promises = updatedSessions.map(updatedSession => {
+            return ClassCategorySession.query()
+                .where('uuid', updatedSession.uuid)
+                .updateByUserId(updatedSession, user.sub)
+                .first()
+                .returning('*');
+        });
+
+        return Promise.all(promises);
+
+    }
+
+}
+
+classCategorySessionService.getSessions = async (classCategoryUuid, statuses, page, size) => {
+
+    statuses.forEach(status => {
+        if (!sessionStatusEnum[status])
+        throw new UnsupportedOperationError(ErrorEnum.INVALID_STATUS);
+    });
+
+    const query = ClassCategorySession.query()
+        .modify('list')
+        .where('class_category_uuid', classCategoryUuid)
+        .whereIn('status', statuses)
+
+    if (page && size) {
+        query = query.page(page, size)
+        .then(sessionPage => {
+            return ServiceHelper.toPageObj(page, size, sessionPage);
+        });
+    }
+
+    return query;
+
+}
+
+classCategorySessionService.checkConflictSession = (existingSessions, newSessions) => {
+
+    existingSessions.map(existingSession => {
+        existingSession.startDate = parseInt(existingSession.startDate);
+        existingSession.endDate = parseInt(existingSession.endDate);
+        newSessions.map(newSession => {
+            newSession.startDate = parseInt(newSession.startDate);
+            newSession.endDate = parseInt(newSession.endDate);
+            if (newSession.startDate >= existingSession.startDate && newSession.startDate <= existingSession.endDate ||
+                newSession.endDate >= existingSession.startDate && newSession.endDate <= existingSession.endDate) {
+                    throw new UnsupportedOperationError(ErrorEnum.SCHEDULE_CONFLICT);
+                }
+        });
+    });
 
 }
 

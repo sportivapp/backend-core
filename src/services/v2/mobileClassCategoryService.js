@@ -188,4 +188,13 @@ classCategoryService.endSession = async (classCategoryUuid, classCategorySession
 
 }
 
+classCategoryService.reschedule = async (classCategorySessionDTO, isRepeat, user) => {
+
+    await classCategoryCoachService.checkCoachCategory(user.sub, classCategorySessionDTO.classCategoryUuid);
+    const a = await classCategorySessionService.reschedule(classCategorySessionDTO, isRepeat, user);
+    console.log(a)
+    return a;
+
+}
+
 module.exports = classCategoryService;

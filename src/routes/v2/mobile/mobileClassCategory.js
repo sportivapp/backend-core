@@ -7,5 +7,6 @@ router.get(routes.classCategory.myCategory, auth.authenticateToken, controller.g
 router.get(routes.classCategory.idCoach, auth.authenticateToken, controller.getCoachCategory);
 router.get(routes.classCategory.startSession, auth.authenticateToken, controller.startSession);
 router.get(routes.classCategory.endSession, auth.authenticateToken, controller.endSession);
+router.put(routes.classCategory.reschedule, auth.authenticateToken, controller.reschedule);
 
 module.exports = router.expressRouter;
