@@ -101,7 +101,21 @@ classCategoryController.reschedule = async (req, res, next) => {
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
-        console.log(e);
+        next(e);
+    }
+
+}
+
+classCategoryController.getMyUnconfirmedSessions = async (req, res, next) => {
+
+    const { classCategoryUuid } = req.params;
+
+    try {
+
+        const result = await classCategoryService.getMyUnconfirmedSessions(classCategoryUuid, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
         next(e);
     }
 
