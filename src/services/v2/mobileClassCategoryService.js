@@ -75,7 +75,7 @@ classCategoryService.getClassCategory = async (classCategoryUuid, user) => {
             return classCategory;
         })
 
-    const isCoach = await classCategoryCoachService.checkCoachCategory(user.sub, classCategoryUuid);
+    const isCoach = await classCategoryCoachService.getCoachCategory(user.sub, classCategoryUuid);
     classCategory.categorySessions = classCategoryService.groupSessions(classCategory.categorySessions);
     classCategory.isCoach = !!isCoach;
 
@@ -173,7 +173,7 @@ classCategoryService.endSession = async (classCategoryUuid, classCategorySession
     const endedSession = await classCategorySessionService.endSession(classCategorySessionUuid, user);
 
     const upcomingSessions = await classCategorySessionService
-        .getSessionByCategoryUuidAndStatus(session.classCategoryUuid, sessionStatusEnum.UPCOMING);
+        .getSessionByCategoryUuidAndStatus(classCategoryUuid, sessionStatusEnum.UPCOMING);
 
     let onHold = false;
     if (upcomingSessions.length === 0)
