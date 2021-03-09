@@ -33,8 +33,8 @@ classCategorySessionService.findById = async (classCategorySessionUuid) => {
 
 classCategorySessionService.checkConflictSession = (existingSessions, newSessions) => {
 
-    existingSessions.map(existingSession => {
-        newSessions.map(newSession => {
+    existingSessions.forEach(existingSession => {
+        newSessions.forEach(newSession => {
             if (newSession.startDate >= existingSession.startDate && newSession.startDate <= existingSession.endDate ||
                 newSession.endDate >= existingSession.startDate && newSession.endDate <= existingSession.endDate)
                 throw new UnsupportedOperationError(ErrorEnum.SCHEDULE_CONFLICT);

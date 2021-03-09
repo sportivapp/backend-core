@@ -204,10 +204,10 @@ classCategorySessionService.getSessions = async (classCategoryUuid, statuses, pa
 
 classCategorySessionService.checkConflictSession = (existingSessions, newSessions) => {
 
-    existingSessions.map(existingSession => {
+    existingSessions.forEach(existingSession => {
         existingSession.startDate = parseInt(existingSession.startDate);
         existingSession.endDate = parseInt(existingSession.endDate);
-        newSessions.map(newSession => {
+        newSessions.forEach(newSession => {
             newSession.startDate = parseInt(newSession.startDate);
             newSession.endDate = parseInt(newSession.endDate);
             if (newSession.startDate >= existingSession.startDate && newSession.startDate <= existingSession.endDate ||
