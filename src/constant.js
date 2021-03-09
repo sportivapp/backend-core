@@ -175,6 +175,7 @@ module.exports = {
             id: '/class-category/:classCategoryUuid/class-category-session/:classCategorySessionUuid',
             participants: '/class-category/:classCategoryUuid/class-category-session/:classCategorySessionUuid/participants',
             absence: '/class-category/:classCategoryUuid/class-category-session/:classCategorySessionUuid/absence',
+            confirm: '/class-category-session/:classCategorySessionUuid/class-category-participant-session/:classCategoryParticipantSessionUuid/confirm',
         },
         classCategory: {
             list: '/category',

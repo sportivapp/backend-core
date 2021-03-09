@@ -92,6 +92,10 @@ class Class extends Model {
                     .withGraphFetched('city(baseAttributes)')
                     .withGraphFetched('classMedia(list)')
             },
+            categoriesTitleWithRating(builder) {
+                builder.select('uuid', 'title')
+                    .withGraphFetched('classCategories(titleWithRating)');
+            }
         }
     }
 
