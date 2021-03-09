@@ -137,12 +137,12 @@ classCategorySessionService.getSessions = async (classCategoryUuid, statuses, pa
         throw new UnsupportedOperationError(ErrorEnum.INVALID_STATUS);
     });
 
-    const query = ClassCategorySession.query()
+    let query = ClassCategorySession.query()
         .modify('list')
         .where('class_category_uuid', classCategoryUuid)
         .whereIn('status', statuses)
 
-    if (page && size) {
+    if (typeof(page) === 'number' && typeof(size) === 'number') {
         query = query.page(page, size)
         .then(sessionPage => {
             return ServiceHelper.toPageObj(page, size, sessionPage);
