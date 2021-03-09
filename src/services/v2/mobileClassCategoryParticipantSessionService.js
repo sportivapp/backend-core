@@ -51,4 +51,13 @@ classCategoryParticipantSessionService.getMyUnconfirmedSessionsByParticipantUuid
 
 }
 
+classCategoryParticipantSessionService.confirmParticipation = async (classCategoryParticipantSessionUuid, isConfirm) => {
+
+    return ClassCategoryParticipantSession.query()
+        .findById(classCategoryParticipantSessionUuid)
+        .updateByUserId('is_confirmed', isConfirm)
+        .returning('*');
+
+}
+
 module.exports = classCategoryParticipantSessionService;

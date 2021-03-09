@@ -35,4 +35,21 @@ classCategorySessionController.getSessionParticipants = async (req, res, next) =
 
 }
 
+classCategorySessionController.confirmParticipation = async (req, res, next) => {
+
+    const { classCategorySessionUuid, classCategoryParticipantSessionUuid } = req.params;
+    const { isConfirm } = req.query;
+
+    try {
+
+        const result = await classCategorySessionService
+            .confirmParticipation(classCategorySessionUuid, classCategoryParticipantSessionUuid, isConfirm);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = classCategorySessionController;

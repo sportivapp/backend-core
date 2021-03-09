@@ -215,4 +215,11 @@ classCategorySessionService.checkConflictSession = (existingSessions, newSession
 
 }
 
+classCategorySessionService.confirmParticipation = async (classCategorySessionUuid, classCategoryParticipantSessionUuid, isConfirm) => {
+
+    await classCategorySessionService.findById(classCategorySessionUuid)
+    return classCategoryParticipantSessionService.confirmParticipation(classCategoryParticipantSessionUuid, isConfirm);
+
+}
+
 module.exports = classCategorySessionService;
