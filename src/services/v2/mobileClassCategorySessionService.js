@@ -150,16 +150,12 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
             // Get all matched session by day & hour & minute
             if (sessionDate.getDay() === upcomingSessionDate.getDay() &&
             sessionDate.getHours() === upcomingSessionDate.getHours() &&
-            sessionDate.getMinutes() === upcomingSessionDate.getMinutes()) { 
-                upcomingSession.startDate = parseInt(upcomingSession.startDate);
-                upcomingSession.endDate = parseInt(upcomingSession.endDate);
-                return upcomingSession;
-            }
-        }).map(matchedUpcomingSession => {
-            return {
-                ...matchedUpcomingSession,
-                startDate: matchedUpcomingSession.startDate + startDiff,
-                endDate: matchedUpcomingSession.endDate + endDiff,
+            sessionDate.getMinutes() === upcomingSessionDate.getMinutes()) {
+                return {
+                    ...upcomingSession,
+                    startDate: upcomingSession + startDiff,
+                    endDate: upcomingSession + endDiff,
+                }
             }
         });
 
@@ -205,13 +201,13 @@ classCategorySessionService.getSessions = async (classCategoryUuid, statuses, pa
 classCategorySessionService.checkConflictSession = (existingSessions, newSessions) => {
 
     existingSessions.forEach(existingSession => {
-        existingSession.startDate = parseInt(existingSession.startDate);
-        existingSession.endDate = parseInt(existingSession.endDate);
+        const existingStartDate = parseInt(existingSession.startDate);
+        const existingendDate = parseInt(existingSession.endDate);
         newSessions.forEach(newSession => {
-            newSession.startDate = parseInt(newSession.startDate);
-            newSession.endDate = parseInt(newSession.endDate);
-            if (newSession.startDate >= existingSession.startDate && newSession.startDate <= existingSession.endDate ||
-                newSession.endDate >= existingSession.startDate && newSession.endDate <= existingSession.endDate) {
+            const newSessionStartDate = parseInt(newSession.startDate);
+            const newSessionEndDate = parseInt(newSession.endDate);
+            if (newSessionStartDate >= existingStartDate && newSessionStartDate <= existingendDate ||
+                newSessionEndDate >= existingStartDate && newSessionEndDate <= existingendDate) {
                     throw new UnsupportedOperationError(ErrorEnum.SCHEDULE_CONFLICT);
                 }
         });
