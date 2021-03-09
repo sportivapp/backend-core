@@ -157,4 +157,12 @@ classService.groupClassesByCategoryReplaceSessionsToSession = async (classes) =>
 
 }
 
+classService.getCategories = async (classUuid) => {
+
+    return Class.query()
+        .modify('categoriesTitleWithRating')
+        .findById(classUuid);
+
+}
+
 module.exports = classService;
