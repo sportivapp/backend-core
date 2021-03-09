@@ -28,6 +28,10 @@ class ClassCategoryParticipantSession extends Model {
                 builder.select('uuid', 'is_check_in')
                     .withGraphFetched('classCategoryParticipant(participant)');
             },
+            unconfirmedSession(builder) {
+                builder.select('uuid', 'class_category_session_uuid')
+                    .withGraphFetched('classCategorySession(basicStartEnd)');
+            }
         }
     }
 

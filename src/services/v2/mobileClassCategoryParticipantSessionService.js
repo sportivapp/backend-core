@@ -42,4 +42,13 @@ classCategoryParticipantSessionService.inputAbsence = async (classCategorySessio
 
 };
 
+classCategoryParticipantSessionService.getMyUnconfirmedSessionsByParticipantUuids = async (classCategoryParticipantUuids) => {
+
+    return ClassCategoryParticipantSession.query()
+        .modify('unconfirmedSession')
+        .where('is_confirmed', null)
+        .whereIn('class_category_participant_uuid', classCategoryParticipantUuids);
+
+}
+
 module.exports = classCategoryParticipantSessionService;

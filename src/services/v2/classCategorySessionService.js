@@ -31,33 +31,31 @@ classCategorySessionService.findById = async (classCategorySessionUuid) => {
 
 }
 
-classCategorySessionService.checkConflictScheduleByCategoryUuidAndSessions = async (classCategoryUuid, sessions) => {
+classCategorySessionService.checkConflictSession = (existingSessions, newSessions) => {
 
-    const promises = sessions.map(session => {
-        return ClassCategorySession.query()
-            .where('class_category_uuid', classCategoryUuid)
-            .whereBetween('start_date', [session.startDate, session.endDate])
-            .andWhereBetween('end_date', [session.startDate, session.endDate])
-            .first()
-            .then(foundSession => {
-                if (foundSession)
-                    throw new UnsupportedOperationError(ErrorEnum.SCHEDULE_CONFLICT);
-            });;
+    existingSessions.forEach(existingSession => {
+        existingSession.startDate = parseInt(existingSession.startDate);
+        existingSession.endDate = parseInt(existingSession.endDate);
+        newSessions.forEach(newSession => {
+            newSession.startDate = parseInt(newSession.startDate);
+            newSession.endDate = parseInt(newSession.endDate);
+            if (newSession.startDate >= existingSession.startDate && newSession.startDate <= existingSession.endDate ||
+                newSession.endDate >= existingSession.startDate && newSession.endDate <= existingSession.endDate)
+                throw new UnsupportedOperationError(ErrorEnum.SCHEDULE_CONFLICT);
+        });
     });
-
-    return Promise.all(promises);
 
 }
 
 classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepeat, user) => {
 
     const session = await classCategorySessionService.findById(classCategorySessionDTO.uuid);
+    const upcomingSessions = await classCategorySessionService
+        .getSessions(classCategorySessionDTO.classCategoryUuid, [sessionStatusEnum.UPCOMING]);
 
     if (!isRepeat) {
 
-        await classCategorySessionService
-            .checkConflictScheduleByCategoryUuidAndSessions(classCategorySessionDTO.classCategoryUuid, 
-                [classCategorySessionDTO]);
+        classCategorySessionService.checkConflictSession(upcomingSessions, [classCategorySessionDTO]);
 
         return session.$query()
             .updateByUserId(classCategorySessionDTO, user.sub)
@@ -65,38 +63,37 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
 
     } else {
 
-        const pagedSessions = await classCategorySessionService.getSessions(classCategorySessionDTO.classCategoryUuid, 
-            [sessionStatusEnum.UPCOMING], 0, Number.MAX_SAFE_INTEGER);
-        const upcomingSessions = pagedSessions.data;
         const startDiff = parseInt(classCategorySessionDTO.startDate) - parseInt(session.startDate);
         const endDiff = parseInt(classCategorySessionDTO.endDate) - parseInt(session.endDate);
 
         const updatedSessions = upcomingSessions.filter(upcomingSession => {
             
-            const sessionDay = new Date(parseInt(session.startDate)).getDay();
-            const upcomingSessionDay = new Date(parseInt(upcomingSession.startDate)).getDay();
+            const sessionDate = new Date(parseInt(session.startDate));
+            const upcomingSessionDate = new Date(parseInt(upcomingSession.startDate));
 
-            if (sessionDay === upcomingSessionDay) { 
+            // Get all matched session by day & hour & minute
+            if (sessionDate.getDay() === upcomingSessionDate.getDay() &&
+            sessionDate.getHours() === upcomingSessionDate.getHours() &&
+            sessionDate.getMinutes() === upcomingSessionDate.getMinutes()) { 
                 upcomingSession.startDate = parseInt(upcomingSession.startDate);
                 upcomingSession.endDate = parseInt(upcomingSession.endDate);
                 return upcomingSession;
             }
         }).map(matchedUpcomingSession => {
-
-            matchedUpcomingSession.startDate = matchedUpcomingSession.startDate + startDiff;
-            matchedUpcomingSession.endDate = matchedUpcomingSession.endDate + endDiff;
-
-            return matchedUpcomingSession;
+            return {
+                ...matchedUpcomingSession,
+                startDate: matchedUpcomingSession.startDate + startDiff,
+                endDate: matchedUpcomingSession.endDate + endDiff,
+            }
         });
 
-        await classCategorySessionService
-            .checkConflictScheduleByCategoryUuidAndSessions(classCategorySessionDTO.classCategoryUuid, 
-                updatedSessions);
+        classCategorySessionService.checkConflictSession(upcomingSessions, updatedSessions);
 
         const promises = updatedSessions.map(updatedSession => {
             return ClassCategorySession.query()
                 .where('uuid', updatedSession.uuid)
                 .updateByUserId(updatedSession, user.sub)
+                .first()
                 .returning('*');
         });
 
@@ -139,14 +136,19 @@ classCategorySessionService.getSessions = async (classCategoryUuid, statuses, pa
         throw new UnsupportedOperationError(ErrorEnum.INVALID_STATUS);
     });
 
-    return ClassCategorySession.query()
+    const query = ClassCategorySession.query()
         .modify('list')
         .where('class_category_uuid', classCategoryUuid)
         .whereIn('status', statuses)
-        .page(page, size)
+
+    if (page && size) {
+        query = query.page(page, size)
         .then(sessionPage => {
             return ServiceHelper.toPageObj(page, size, sessionPage);
         });
+    }
+
+    return query;
 
 }
 
