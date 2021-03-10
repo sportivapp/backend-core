@@ -43,7 +43,7 @@ classCategorySessionController.confirmParticipation = async (req, res, next) => 
     try {
 
         const result = await classCategorySessionService
-            .confirmParticipation(classCategorySessionUuid, classCategoryParticipantSessionUuid, isConfirm);
+            .confirmParticipation(classCategorySessionUuid, classCategoryParticipantSessionUuid, isConfirm, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {

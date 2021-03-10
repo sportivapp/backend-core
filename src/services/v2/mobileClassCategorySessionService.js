@@ -215,10 +215,10 @@ classCategorySessionService.checkConflictSession = (existingSessions, newSession
 
 }
 
-classCategorySessionService.confirmParticipation = async (classCategorySessionUuid, classCategoryParticipantSessionUuid, isConfirm) => {
+classCategorySessionService.confirmParticipation = async (classCategorySessionUuid, classCategoryParticipantSessionUuid, isConfirm, user) => {
 
     await classCategorySessionService.findById(classCategorySessionUuid)
-    return classCategoryParticipantSessionService.confirmParticipation(classCategoryParticipantSessionUuid, isConfirm);
+    return classCategoryParticipantSessionService.confirmParticipation(classCategoryParticipantSessionUuid, isConfirm, user);
 
 }
 

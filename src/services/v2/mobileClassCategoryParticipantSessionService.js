@@ -68,12 +68,14 @@ classCategoryParticipantSessionService.findById = async (classCategoryParticipan
 
 }
 
-classCategoryParticipantSessionService.confirmParticipation = async (classCategoryParticipantSessionUuid, isConfirm) => {
+classCategoryParticipantSessionService.confirmParticipation = async (classCategoryParticipantSessionUuid, isConfirm, user) => {
 
     const participantSession = await classCategoryParticipantSessionService.findById(classCategoryParticipantSessionUuid);
 
     return participantSession.$query()
-        .updateByUserId('is_confirmed', isConfirm)
+        .updateByUserId({
+            isConfirm: isConfirm,
+        }, user.sub)
         .returning('*');
 
 }
