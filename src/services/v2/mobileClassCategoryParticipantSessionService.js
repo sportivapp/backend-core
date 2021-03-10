@@ -63,6 +63,7 @@ classCategoryParticipantSessionService.findById = async (classCategoryParticipan
         .then(participantSession => {
             if (!participantSession)
                 throw new UnsupportedOperationError(ErrorEnum.INVALID_PARTICIPANT_SESSION);
+            return participantSession;
         });
 
 }
