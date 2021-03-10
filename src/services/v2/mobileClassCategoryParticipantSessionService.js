@@ -74,7 +74,7 @@ classCategoryParticipantSessionService.confirmParticipation = async (classCatego
 
     return participantSession.$query()
         .updateByUserId({
-            isConfirm: isConfirm,
+            isConfirmed: isConfirmed,
         }, user.sub)
         .returning('*');
 
