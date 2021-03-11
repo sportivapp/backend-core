@@ -1,4 +1,9 @@
+const { UnsupportedOperationError } = require('../../models/errors');
 const ClassCategoryParticipantSession = require('../../models/v2/ClassCategoryParticipantSession');
+
+const ErrorEnum = {
+    INVALID_PARTICIPANT_SESSION: 'INVALID_PARTICIPANT_SESSION',
+}
 
 const classCategoryParticipantSessionService = {};
 
@@ -41,5 +46,38 @@ classCategoryParticipantSessionService.inputAbsence = async (classCategorySessio
     return Promise.all(promises);
 
 };
+
+classCategoryParticipantSessionService.getMyUnconfirmedSessionsByParticipantUuids = async (classCategoryParticipantUuids) => {
+
+    return ClassCategoryParticipantSession.query()
+        .modify('unconfirmedSession')
+        .where('is_confirmed', null)
+        .whereIn('class_category_participant_uuid', classCategoryParticipantUuids);
+
+}
+
+classCategoryParticipantSessionService.findById = async (classCategoryParticipantSessionUuid) => {
+
+    return ClassCategoryParticipantSession.query()
+        .findById(classCategoryParticipantSessionUuid)
+        .then(participantSession => {
+            if (!participantSession)
+                throw new UnsupportedOperationError(ErrorEnum.INVALID_PARTICIPANT_SESSION);
+            return participantSession;
+        });
+
+}
+
+classCategoryParticipantSessionService.confirmParticipation = async (classCategoryParticipantSessionUuid, isConfirm, user) => {
+
+    const participantSession = await classCategoryParticipantSessionService.findById(classCategoryParticipantSessionUuid);
+
+    return participantSession.$query()
+        .updateByUserId({
+            isConfirmed: isConfirm,
+        }, user.sub)
+        .returning('*');
+
+}
 
 module.exports = classCategoryParticipantSessionService;

@@ -30,6 +30,9 @@ class ClassCategorySession extends Model {
                     .withGraphFetched('sessionParticipants(sessionParticipants)')
                     .withGraphFetched('classCategory(uuidAndTitle)');
             },
+            basicStartEnd(builder) {
+                builder.select('uuid', 'start_date', 'end_date');
+            }
         }
     }
 

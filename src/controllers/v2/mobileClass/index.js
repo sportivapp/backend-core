@@ -93,4 +93,19 @@ classController.getCoachClass = async (req, res, next) => {
 
 }
 
+classController.getCategories = async (req, res, next) => {
+
+    const { classUuid } = req.params;
+
+    try {
+
+        const result = await classService.getCategories(classUuid);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = classController;

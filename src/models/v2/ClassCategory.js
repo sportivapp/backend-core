@@ -69,6 +69,10 @@ class ClassCategory extends Model {
                             .orderBy('start_date', 'ASC');
                     });
             },
+            titleWithRating(builder) {
+                // TODO: Add rating later
+                builder.select('uuid', 'title');
+            }
         }
     }
 

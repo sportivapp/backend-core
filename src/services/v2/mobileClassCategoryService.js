@@ -6,6 +6,7 @@ const classCategorySessionService = require('./mobileClassCategorySessionService
 const codeToDayEnum = require('../../models/enum/CodeToDayEnum');
 const classCategoryParticipantService = require('./mobileClassCategoryParticipantService');
 const codeToMonthEnum = require('../../models/enum/CodeToMonthEnum');
+const classCategoryParticipantSessionService = require('./mobileClassCategoryParticipantSessionService');
 
 const ErrorEnum = {
     INVALID_STATUS: 'INVALID_STATUS',
@@ -153,7 +154,7 @@ classCategoryService.getMyCategory = async (classCategoryUuid, status, user) => 
         throw new UnsupportedOperationError(ErrorEnum.INVALID_STATUS);
 
     const participant = await classCategoryParticipantService
-        .getActiveParticipantByCategoryUuidAndUserId(classCategoryUuid, user.sub);
+        .getClosestActiveParticipantByCategoryUuidAndUserId(classCategoryUuid, user.sub);
 
     return ClassCategory.query()
         .findById(classCategoryUuid)
@@ -185,6 +186,23 @@ classCategoryService.endSession = async (classCategoryUuid, classCategorySession
         }, user.sub);
 
     return endedSession;
+
+}
+
+classCategoryService.reschedule = async (classCategorySessionDTO, isRepeat, user) => {
+
+    await classCategoryCoachService.checkCoachCategory(user.sub, classCategorySessionDTO.classCategoryUuid);
+    return classCategorySessionService.reschedule(classCategorySessionDTO, isRepeat, user);
+}
+
+classCategoryService.getMyUnconfirmedSessions = async (classCategoryUuid, user) => {
+
+    const participants = await classCategoryParticipantService
+        .getActiveParticipantsByCategoryUuidAndUserId(classCategoryUuid, user.sub);
+    const participantUuids = participants.map(participant => {
+        return participant.uuid;
+    });
+    return classCategoryParticipantSessionService.getMyUnconfirmedSessionsByParticipantUuids(participantUuids);
 
 }
 

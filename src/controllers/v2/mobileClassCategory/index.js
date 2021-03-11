@@ -1,5 +1,6 @@
 const classCategoryService = require('../../../services/v2/mobileClassCategoryService');
 const ResponseHelper = require('../../../helper/ResponseHelper');
+const classCategorySessionService = require('../../../services/v2/mobileClassCategorySessionService');
 
 const classCategoryController = {};
 
@@ -72,6 +73,46 @@ classCategoryController.endSession = async (req, res, next) => {
     try {
 
         const result = await classCategoryService.endSession(classCategoryUuid, classCategorySessionUuid, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classCategoryController.reschedule = async (req, res, next) => {
+
+    const { classCategoryUuid, classCategorySessionUuid } = req.params;
+    const { startDate, endDate } = req.body;
+    let { isRepeat } = req.query;
+    isRepeat = (isRepeat === 'true');
+
+    const classCategorySessionDTO = {
+        uuid: classCategorySessionUuid,
+        classCategoryUuid: classCategoryUuid,
+        startDate: startDate,
+        endDate: endDate,
+    }
+
+    try {
+
+        const result = await classCategoryService.reschedule(classCategorySessionDTO, isRepeat, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classCategoryController.getMyUnconfirmedSessions = async (req, res, next) => {
+
+    const { classCategoryUuid } = req.params;
+
+    try {
+
+        const result = await classCategoryService.getMyUnconfirmedSessions(classCategoryUuid, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
