@@ -105,7 +105,7 @@ classCategoryParticipantService.getActiveParticipantsByUserIdGroupByCategory = a
         
 }
 
-classCategoryParticipantService.getActiveParticipantByCategoryUuidAndUserId = async (classCategoryUuid, userId) => {
+classCategoryParticipantService.getClosestActiveParticipantByCategoryUuidAndUserId = async (classCategoryUuid, userId) => {
 
     const monthUtc = timeService.thisMonthTimestampUTC();
 
@@ -116,6 +116,19 @@ classCategoryParticipantService.getActiveParticipantByCategoryUuidAndUserId = as
         .where('user_id', userId)
         .orderBy('month_utc', 'ASC')
         .first();
+
+}
+
+classCategoryParticipantService.getActiveParticipantsByCategoryUuidAndUserId = async (classCategoryUuid, userId) => {
+
+    const monthUtc = timeService.thisMonthTimestampUTC();
+
+    return ClassCategoryParticipant.query()
+        .modify('basic')
+        .where('month_utc', '>=', monthUtc)
+        .where('class_category_uuid', classCategoryUuid)
+        .where('user_id', userId)
+        .orderBy('month_utc', 'ASC')
 
 }
 

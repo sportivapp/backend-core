@@ -8,6 +8,7 @@ const   express         = require('express'),
 
 require('dotenv').config();
 const app = express();
+const unprefixedRoutes = require('./routes/v0');
 const routes = require('./routes/v1');
 const secondRoutes = require('./routes/v2');
 const schedulerService = require('./services/schedulerService')
@@ -34,7 +35,7 @@ app.use(express.urlencoded({limit: '1000mb', extended: true }));
 app.use(morgan('dev'));
 app.use('/core', express.static(process.env.TEMP_DIRECTORY));
 
-app.use(routes, secondRoutes);
+app.use(unprefixedRoutes, routes, secondRoutes);
 
 app.use((_, __, ___) => {
     throw new PathNotFoundError('Path Not Found')
