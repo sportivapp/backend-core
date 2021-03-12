@@ -89,10 +89,10 @@ classCategoryParticipantSessionService.updateParticipantConfirmedExpiration = as
 
     const twoDays = timeService.getTimeInMilis(1, 1, 2, 1, 1, 1);
 
-    return ClassCategoryParticipantSession.query(trx)
+    return ClassCategoryParticipantSession.query()
         .where('class_category_session_uuid', classCategorySessionUuid)
         .patch({
-            confirmedExpiration = Date.now() + twoDays,
+            confirmedExpiration: Date.now() + twoDays,
         });
 
 }
