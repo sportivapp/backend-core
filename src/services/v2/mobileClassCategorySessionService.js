@@ -94,13 +94,19 @@ classCategorySessionService.endSession = async (classCategorySessionUuid, user) 
     if (upcomingSessions.length === 0)
         onHold = true;
 
-    session.$query()
+    return ClassCategorySession.transaction(async trx => {
+
+        await classCategoryParticipantSessionService.addParticipantConfirmedExpiration(classCategorySessionUuid, trx);
+
+        session.$query(trx)
         .updateByUserId({
             status: sessionStatusEnum.DONE,
             onHold: onHold,
             endTime: Date.now(),
             endBy: user.sub,
         }, user.sub);
+
+    });
 
 }
 
