@@ -92,7 +92,7 @@ classCategoryParticipantSessionService.updateParticipantConfirmedExpiration = as
     return ClassCategoryParticipantSession.query(trx)
         .where('class_category_session_uuid', classCategorySessionUuid)
         .patch({
-            confirmedExpiration = Date.now() + twoDays,
+            confirmedExpiration: Date.now() + twoDays,
         });
 
 }
