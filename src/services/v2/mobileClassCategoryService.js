@@ -171,21 +171,24 @@ classCategoryService.getMyCategory = async (classCategoryUuid, status, user) => 
 classCategoryService.endSession = async (classCategoryUuid, classCategorySessionUuid, user) => {
 
     await classCategoryCoachService.checkCoachCategory(user.sub, classCategoryUuid);
-    const endedSession = await classCategorySessionService.endSession(classCategorySessionUuid, user);
 
-    const upcomingSessions = await classCategorySessionService
-        .getSessionByCategoryUuidAndStatus(classCategoryUuid, sessionStatusEnum.UPCOMING);
+    return ClassCategory.transaction(async trx => {
 
-    let onHold = false;
-    if (upcomingSessions.length === 0)
-        onHold = true;
+        const upcomingSessions = await classCategorySessionService
+            .getSessionByCategoryUuidAndStatus(classCategoryUuid, sessionStatusEnum.UPCOMING);
 
-    await ClassCategory.query()
-        .updateByUserId({
-            onHold: onHold,
-        }, user.sub);
+        let onHold = false;
+        if (upcomingSessions.length === 0)
+            onHold = true;
 
-    return endedSession;
+        await ClassCategory.query(trx)
+            .updateByUserId({
+                onHold: onHold,
+            }, user.sub);
+
+        return classCategorySessionService.endSession(classCategorySessionUuid, user, trx);
+
+    });
 
 }
 

@@ -82,31 +82,19 @@ classCategorySessionService.getSessionByCategoryUuidAndStatus = async (classCate
 
 }
 
-classCategorySessionService.endSession = async (classCategorySessionUuid, user) => {
+classCategorySessionService.endSession = async (classCategorySessionUuid, user, trx) => {
 
     const session = await ClassCategorySession.query()
         .findById(classCategorySessionUuid);
 
-    const upcomingSessions = await classCategorySessionService
-        .getSessionByCategoryUuidAndStatus(session.classCategoryUuid, sessionStatusEnum.UPCOMING);
+    await classCategoryParticipantSessionService.updateParticipantConfirmedExpiration(classCategorySessionUuid, trx);
 
-    let onHold = false;
-    if (upcomingSessions.length === 0)
-        onHold = true;
-
-    return ClassCategorySession.transaction(async trx => {
-
-        await classCategoryParticipantSessionService.updateParticipantConfirmedExpiration(classCategorySessionUuid, trx);
-
-        return session.$query(trx)
-        .updateByUserId({
-            status: sessionStatusEnum.DONE,
-            onHold: onHold,
-            endTime: Date.now(),
-            endBy: user.sub,
-        }, user.sub);
-
-    });
+    return session.$query(trx)
+    .updateByUserId({
+        status: sessionStatusEnum.DONE,
+        endTime: Date.now(),
+        endBy: user.sub,
+    }, user.sub);
 
 }
 

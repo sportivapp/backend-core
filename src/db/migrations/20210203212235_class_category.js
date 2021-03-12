@@ -5,6 +5,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('class_category', t => {
     t.string('description').notNullable();
     t.decimal('price', 14, 2).notNullable();
     t.string('requirements');
+    t.boolean('on_hold').defaultTo(false);
     t.uuid('class_uuid').references('class.uuid');
     t.integer('create_by').notNullable();
     t.bigInteger('create_time').notNullable();
