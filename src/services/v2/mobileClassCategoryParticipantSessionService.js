@@ -87,7 +87,7 @@ classCategoryParticipantSessionService.confirmParticipation = async (classCatego
 
 classCategoryParticipantSessionService.updateParticipantConfirmedExpiration = async (classCategorySessionUuid, trx) => {
 
-    const twoDays = timeService.getTimeInMilis(1, 1, 2, 1, 1, 1);
+    const twoDays = 2 * 60 * 60 * 1000;
 
     return ClassCategoryParticipantSession.query(trx)
         .where('class_category_session_uuid', classCategorySessionUuid)
