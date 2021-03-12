@@ -14,7 +14,7 @@ exports.thisMonthTimestampUTC = () => {
 
 }
 
-exports.getTimeInMilis = async (year = 1, month = 1, day = 1, hour = 1, minute = 1, second = 1) => {
+exports.getTimeInMilis = (year = 1, month = 1, day = 1, hour = 1, minute = 1, second = 1) => {
 
     return year * month * day * hour * minute * second * 1000;
 
