@@ -188,6 +188,7 @@ module.exports = {
             extend: '/class-category/:classCategoryUuid/extend',
             reschedule: '/coach-category/:classCategoryUuid/class-category-session/:classCategorySessionUuid/reschedule',
             unconfirmed: '/my-class-category/:classCategoryUuid/unconfirmed',
+            schedule: '/class-category/:classCategoryUuid/schedule',
         },
         permit: {
             list: '/permit',
