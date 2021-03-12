@@ -98,7 +98,7 @@ classCategorySessionService.endSession = async (classCategorySessionUuid, user) 
 
         await classCategoryParticipantSessionService.addParticipantConfirmedExpiration(classCategorySessionUuid, trx);
 
-        session.$query(trx)
+        return session.$query(trx)
         .updateByUserId({
             status: sessionStatusEnum.DONE,
             onHold: onHold,
