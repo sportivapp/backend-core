@@ -5,6 +5,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('class_category_particip
     t.uuid('class_category_session_uuid');
     t.boolean('is_check_in');
     t.boolean('is_confirmed');
+    t.bigInteger('confirmed_expiration');
     t.integer('create_by').notNullable();
     t.bigInteger('create_time').notNullable();
     t.integer('change_by');

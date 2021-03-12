@@ -1,5 +1,6 @@
 const { UnsupportedOperationError } = require('../../models/errors');
 const ClassCategoryParticipantSession = require('../../models/v2/ClassCategoryParticipantSession');
+const timeService = require('../../helper/timeService');
 
 const ErrorEnum = {
     INVALID_PARTICIPANT_SESSION: 'INVALID_PARTICIPANT_SESSION',
@@ -49,9 +50,13 @@ classCategoryParticipantSessionService.inputAbsence = async (classCategorySessio
 
 classCategoryParticipantSessionService.getMyUnconfirmedSessionsByParticipantUuids = async (classCategoryParticipantUuids) => {
 
+    const now = Date.now();
+
     return ClassCategoryParticipantSession.query()
         .modify('unconfirmedSession')
         .where('is_confirmed', null)
+        .whereNot('confirmed_expiration', null)
+        .where('confirmed_expiration', '>=', now)
         .whereIn('class_category_participant_uuid', classCategoryParticipantUuids);
 
 }
@@ -77,6 +82,18 @@ classCategoryParticipantSessionService.confirmParticipation = async (classCatego
             isConfirmed: isConfirm,
         }, user.sub)
         .returning('*');
+
+}
+
+classCategoryParticipantSessionService.updateParticipantConfirmedExpiration = async (classCategorySessionUuid, trx) => {
+
+    const twoDays = timeService.getTimeInMilis(1, 1, 2, 1, 1, 1);
+
+    return ClassCategoryParticipantSession.query(trx)
+        .where('class_category_session_uuid', classCategorySessionUuid)
+        .patch({
+            confirmedExpiration = Date.now() + twoDays,
+        });
 
 }
 
