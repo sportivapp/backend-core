@@ -76,4 +76,27 @@ classCategorySessionController.rate = async (req, res, next) => {
 
 }
 
+classCategorySessionController.reason = async (req, res, next) => {
+
+    const { classUuid, classCategoryUuid, classCategorySessionUuid } = req.params;
+    const { reason } = req.body;
+    
+    const classReasonssDTO = {
+        classUuid: classUuid,
+        classCategoryUuid: classCategoryUuid,
+        classCategorySessionUuid: classCategorySessionUuid,
+        reason: reason,
+    }
+
+    try {
+
+        const result = await classCategorySessionService.reason(classReasonssDTO, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = classCategorySessionController;

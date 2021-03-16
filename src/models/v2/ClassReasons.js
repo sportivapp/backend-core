@@ -1,8 +1,8 @@
 const Model = require('./Model');
 
-class ClassRatings extends Model {
+class ClassReasons extends Model {
     static get tableName() {
-        return 'class_ratings';
+        return 'class_reasons';
     };
 
     static get idColumn() {
@@ -22,7 +22,7 @@ class ClassRatings extends Model {
     static get modifiers() {
         return {
             single(builder) {
-                builder.select('uuid', 'class_uuid', 'class_category_uuid', 'class_category_session_uuid', 'rating', 'review')
+                builder.select('uuid', 'class_uuid', 'class_category_uuid', 'class_category_session_uuid', 'reason')
                     .withGraphFetched('user(basic)');
             }
         }
@@ -34,14 +34,13 @@ class ClassRatings extends Model {
         const ClassCategory = require('./ClassCategory');
         const ClassCategorySession = require('./ClassCategorySession');
         const User = require('../User');
-        const ClassRatingImprovements = require('./ClassRatingImprovements');
  
         return {
             class: {
                 relation: Model.BelongsToOneRelation,
                 modelClass: Class,
                 join: {
-                    from: 'class_ratings.class_uuid',
+                    from: 'class_reasons.class_uuid',
                     to: 'class.uuid',
                 },
             },
@@ -49,7 +48,7 @@ class ClassRatings extends Model {
                 relation: Model.BelongsToOneRelation,
                 modelClass: ClassCategory,
                 join: {
-                    from: 'class_ratings.class_category_uuid',
+                    from: 'class_reasons.class_category_uuid',
                     to: 'class_category.uuid',
                 },
             },
@@ -57,7 +56,7 @@ class ClassRatings extends Model {
                 relation: Model.BelongsToOneRelation,
                 modelClass: ClassCategorySession,
                 join: {
-                    from: 'class_ratings.class_category_session_uuid',
+                    from: 'class_reasons.class_category_session_uuid',
                     to: 'class_category_session.uuid',
                 },
             },
@@ -65,20 +64,12 @@ class ClassRatings extends Model {
                 relation: Model.BelongsToOneRelation,
                 modelClass: User,
                 join: {
-                    from: 'class_ratings.create_by',
+                    from: 'class_reasons.create_by',
                     to: 'euser.euserid',
                 },
             },
-            improvements: {
-                relation: Model.HasManyRelation,
-                modelClass: ClassRatingImprovements,
-                join: {
-                    from: 'class_ratings.uuid',
-                    to: 'class_rating_improvements.class_rating_uuid',
-                },
-            }
         }
     }
 }
 
-module.exports = ClassRatings;
+module.exports = ClassReasons;

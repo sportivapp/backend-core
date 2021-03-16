@@ -21,8 +21,8 @@ class ClassRatingImprovements extends Model {
 
     static get modifiers() {
         return {
-            single(builder) {
-                
+            baseAttributes(builder) {
+                builder.select('uuid', 'class_rating_uuid', 'code');
             }
         }
     }

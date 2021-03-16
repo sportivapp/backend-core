@@ -7,5 +7,6 @@ router.post(routes.classCategorySession.absence, auth.authenticateToken, control
 router.get(routes.classCategorySession.participants, auth.authenticateToken, controller.getSessionParticipants);
 router.put(routes.classCategorySession.confirm, auth.authenticateToken, controller.confirmParticipation);
 router.post(routes.classCategorySession.rate, auth.authenticateToken, controller.rate);
+router.post(routes.classCategorySession.reason, auth.authenticateToken, controller.reason);
 
 module.exports = router.expressRouter;
