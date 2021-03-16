@@ -52,4 +52,47 @@ classCategorySessionController.confirmParticipation = async (req, res, next) => 
 
 }
 
+classCategorySessionController.rate = async (req, res, next) => {
+
+    const { classCategorySessionUuid } = req.params;
+    const { rating, review, improvementCodes } = req.body;
+    
+    const classRatingsDTO = {
+        classCategorySessionUuid: classCategorySessionUuid,
+        rating: rating,
+        review: review,
+    }
+
+    try {
+
+        const result = await classCategorySessionService.rate(classRatingsDTO, improvementCodes, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classCategorySessionController.reason = async (req, res, next) => {
+
+    const { classCategorySessionUuid } = req.params;
+    const { reason } = req.body;
+    
+    const classReasonssDTO = {
+        classCategorySessionUuid: classCategorySessionUuid,
+        reason: reason,
+    }
+
+    try {
+
+        const result = await classCategorySessionService.reason(classReasonssDTO, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = classCategorySessionController;
