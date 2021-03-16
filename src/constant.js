@@ -176,6 +176,7 @@ module.exports = {
             participants: '/class-category/:classCategoryUuid/class-category-session/:classCategorySessionUuid/participants',
             absence: '/class-category/:classCategoryUuid/class-category-session/:classCategorySessionUuid/absence',
             confirm: '/class-category-session/:classCategorySessionUuid/class-category-participant-session/:classCategoryParticipantSessionUuid/confirm',
+            rate: '/class-v2/:classUuid/class-category/:classCategoryUuid/class-category-session/:classCategorySessionUuid/rate',
         },
         classCategory: {
             list: '/category',

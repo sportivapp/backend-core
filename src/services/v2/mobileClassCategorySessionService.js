@@ -3,6 +3,7 @@ const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
 const classCategoryParticipantSessionService = require('./mobileClassCategoryParticipantSessionService');
 const { UnsupportedOperationError } = require('../../models/errors');
 const classCategoryParticipantService = require('./mobileClassCategoryParticipantService');
+const classRatingService = require('./mobileClassRatingsService');
 
 const ErrorEnum = {
     INVALID_SESSION: 'INVALID_SESSION',
@@ -213,6 +214,13 @@ classCategorySessionService.confirmParticipation = async (classCategorySessionUu
 
     await classCategorySessionService.findById(classCategorySessionUuid)
     return classCategoryParticipantSessionService.confirmParticipation(classCategoryParticipantSessionUuid, isConfirm, user);
+
+}
+
+classCategorySessionService.rate = async (classRatingsDTO, improvementCodes, user) => {
+
+    await classRatingService.checkExistUserRating(classRatingsDTO.classCategorySessionUuid, user);
+    return classRatingService.rate(classRatingsDTO, improvementCodes, user);
 
 }
 

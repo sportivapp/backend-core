@@ -6,5 +6,6 @@ const { routes } = require('../../../constant')
 router.post(routes.classCategorySession.absence, auth.authenticateToken, controller.inputAbsence);
 router.get(routes.classCategorySession.participants, auth.authenticateToken, controller.getSessionParticipants);
 router.put(routes.classCategorySession.confirm, auth.authenticateToken, controller.confirmParticipation);
+router.post(routes.classCategorySession.rate, auth.authenticateToken, controller.rate);
 
 module.exports = router.expressRouter;

@@ -1,0 +1,6 @@
+module.exports = {
+    LEARN_TIME: 'LEARN_TIME',
+    COACH: 'COACH',
+    LEARN_MATERIAL: 'LEARN_MATERIAL',
+    LOCATION: 'LOCATION',
+}
