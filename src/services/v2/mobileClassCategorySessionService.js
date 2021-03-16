@@ -232,7 +232,7 @@ classCategorySessionService.rate = async (classRatingsDTO, improvementCodes, use
 
 classCategorySessionService.reason = async (classReasonsDTO, user) => {
 
-    const session = await classCategorySessionService.getSessionByUuid(classRatingsDTO.classCategorySessionUuid);
+    const session = await classCategorySessionService.getSessionByUuid(classReasonsDTO.classCategorySessionUuid);
 
     classReasonsDTO.classUuid = session.classUuid;
     classReasonsDTO.classCategoryUuid = session.classCategoryUuid;
