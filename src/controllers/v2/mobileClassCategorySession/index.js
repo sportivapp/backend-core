@@ -54,12 +54,10 @@ classCategorySessionController.confirmParticipation = async (req, res, next) => 
 
 classCategorySessionController.rate = async (req, res, next) => {
 
-    const { classUuid, classCategoryUuid, classCategorySessionUuid } = req.params;
+    const { classCategorySessionUuid } = req.params;
     const { rating, review, improvementCodes } = req.body;
     
     const classRatingsDTO = {
-        classUuid: classUuid,
-        classCategoryUuid: classCategoryUuid,
         classCategorySessionUuid: classCategorySessionUuid,
         rating: rating,
         review: review,
@@ -78,12 +76,10 @@ classCategorySessionController.rate = async (req, res, next) => {
 
 classCategorySessionController.reason = async (req, res, next) => {
 
-    const { classUuid, classCategoryUuid, classCategorySessionUuid } = req.params;
+    const { classCategorySessionUuid } = req.params;
     const { reason } = req.body;
     
     const classReasonssDTO = {
-        classUuid: classUuid,
-        classCategoryUuid: classCategoryUuid,
         classCategorySessionUuid: classCategorySessionUuid,
         reason: reason,
     }

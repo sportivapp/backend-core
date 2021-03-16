@@ -220,12 +220,22 @@ classCategorySessionService.confirmParticipation = async (classCategorySessionUu
 
 classCategorySessionService.rate = async (classRatingsDTO, improvementCodes, user) => {
 
+    const session = await classCategorySessionService.getSessionByUuid(classRatingsDTO.classCategorySessionUuid);
+    
+    classRatingsDTO.classUuid = session.classUuid;
+    classRatingsDTO.classCategoryUuid = session.classCategoryUuid;
+
     await classRatingsService.checkExistUserRating(classRatingsDTO.classCategorySessionUuid, user);
     return classRatingsService.rate(classRatingsDTO, improvementCodes, user);
 
 }
 
 classCategorySessionService.reason = async (classReasonsDTO, user) => {
+
+    const session = await classCategorySessionService.getSessionByUuid(classRatingsDTO.classCategorySessionUuid);
+
+    classReasonsDTO.classUuid = session.classUuid;
+    classReasonsDTO.classCategoryUuid = session.classCategoryUuid;
 
     return classReasonsService.reason(classReasonsDTO, user);
 
