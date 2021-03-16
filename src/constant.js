@@ -178,6 +178,7 @@ module.exports = {
             confirm: '/class-category-session/:classCategorySessionUuid/class-category-participant-session/:classCategoryParticipantSessionUuid/confirm',
             rate: '/class-category-session/:classCategorySessionUuid/rate',
             reason: '/class-category-session/:classCategorySessionUuid/reason',
+            complaint: '/class-category-session/:classCategorySessionUuid/complaint',
         },
         classCategory: {
             list: '/category',

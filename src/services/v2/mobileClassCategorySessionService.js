@@ -5,11 +5,14 @@ const { UnsupportedOperationError } = require('../../models/errors');
 const classCategoryParticipantService = require('./mobileClassCategoryParticipantService');
 const classRatingsService = require('./mobileClassRatingsService');
 const classReasonsService = require('./mobileClassReasonsService');
+const classComplaintsService = require('./mobileClassComplaintService');
+const classComplaintEnum = require('../../models/enum/ClassComplaintEnum');
 
 const ErrorEnum = {
     INVALID_SESSION: 'INVALID_SESSION',
     INVALID_ONGOING_SESSION: 'INVALID_ONGOING_SESSION',
     SCHEDULE_CONFLICT: 'SCHEDULE_CONFLICT',
+    INVALID_COMPLAINT_CODE: 'INVALID_COMPLAINT_CODE',
 }
 
 const classCategorySessionService = {};
@@ -238,6 +241,20 @@ classCategorySessionService.reason = async (classReasonsDTO, user) => {
     classReasonsDTO.classCategoryUuid = session.classCategoryUuid;
 
     return classReasonsService.reason(classReasonsDTO, user);
+
+}
+
+classCategorySessionService.complaint = async (classComplaintsDTO, user) => {
+
+    if (!classComplaintEnum[classComplaintsDTO.code])
+        throw new UnsupportedOperationError(ErrorEnum.INVALID_COMPLAINT_CODE);
+
+    const session = await classCategorySessionService.getSessionByUuid(classComplaintsDTO.classCategorySessionUuid);
+
+    classComplaintsDTO.classUuid = session.classUuid;
+    classComplaintsDTO.classCategoryUuid = session.classCategoryUuid;
+
+    return classComplaintsService.complaint(classComplaintsDTO, user);
 
 }
 
