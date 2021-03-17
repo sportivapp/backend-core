@@ -4,9 +4,7 @@ const classCategoryCoachService = require('./classCategoryCoachService');
 const classCategorySessionService = require ('./classCategorySessionService');
 const dayToCodeEnum = require('../../models/enum/DayToCodeEnum');
 const codeToDayEnum = require('../../models/enum/CodeToDayEnum');
-const classCategoryParticipantService = require('./classCategoryParticipantService');
 const classCategoryScheduleService = require('./classCategoryScheduleService');
-const classCoachService = require('./classCoachService');
 const classCategoryPriceLogService = require('./classCategoryPriceLogService');
 
 const ErrorEnum = {

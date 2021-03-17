@@ -69,6 +69,10 @@ class ClassCategory extends Model {
             titleWithRating(builder) {
                 // TODO: Add rating later
                 builder.select('uuid', 'title');
+            },
+            book(builder) {
+                builder.select('uuid', 'title', 'price')
+                    .withGraphFetched('class(administrationFee)')
             }
         }
     }

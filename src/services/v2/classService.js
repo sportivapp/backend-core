@@ -5,7 +5,6 @@ const classCategoriesService = require('./classCategoryService');
 const { UnsupportedOperationError, NotFoundError } = require('../../models/errors');
 const ServiceHelper = require('../../helper/ServiceHelper');
 const classCategoryService = require('./classCategoryService');
-const classCategoryParticipantService = require('./classCategoryParticipantService');
 const classCategorySessionService = require('./classCategorySessionService');
 
 const ErrorEnum = {

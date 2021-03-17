@@ -2,7 +2,6 @@ const Class = require('../../models/v2/Class');
 const { UnsupportedOperationError, NotFoundError } = require('../../models/errors');
 const ServiceHelper = require('../../helper/ServiceHelper');
 const classCategoryService = require('./mobileClassCategoryService');
-const classCategoryParticipantService = require('./mobileClassCategoryParticipantService');
 const classCategoryParticipantSessionService = require('./mobileClassCategoryParticipantSessionService');
 const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
 const classCategorySessionService = require('./mobileClassCategorySessionService');

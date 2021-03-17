@@ -2,7 +2,6 @@ const ClassCategorySession = require('../../models/v2/ClassCategorySession');
 const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
 const classCategoryParticipantSessionService = require('./mobileClassCategoryParticipantSessionService');
 const { UnsupportedOperationError } = require('../../models/errors');
-const classCategoryParticipantService = require('./mobileClassCategoryParticipantService');
 const classRatingsService = require('./mobileClassRatingsService');
 const classReasonsService = require('./mobileClassReasonsService');
 const classComplaintsService = require('./mobileClassComplaintService');

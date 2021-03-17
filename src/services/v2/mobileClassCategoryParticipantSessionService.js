@@ -104,6 +104,17 @@ classCategoryParticipantSessionService.getMySessionUuids = async (user) => {
 
 }
 
+classCategoryParticipantSessionService.getMySessionUuidsByClassCategoryUuid = async (classCategoryUuid, user) => {
+
+    return ClassCategoryParticipantSession.query()
+        .where('user_id', user.sub)
+        .where('class_category_uuid', classCategoryUuid)
+        .then(participantSessions => participantSessions.map(participantSession =>  {
+            return participantSession.classCategorySessionUuid;
+        }));
+
+}
+
 classCategoryParticipantSessionService.getSessionParticipants = async (sessionUuid) => {
 
     return ClassCategoryParticipantSession.query()

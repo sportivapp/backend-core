@@ -4,12 +4,12 @@ const { UnsupportedOperationError, NotFoundError } = require('../../models/error
 const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
 const classCategorySessionService = require('./mobileClassCategorySessionService');
 const codeToDayEnum = require('../../models/enum/CodeToDayEnum');
-const classCategoryParticipantService = require('./mobileClassCategoryParticipantService');
 const codeToMonthEnum = require('../../models/enum/CodeToMonthEnum');
 const classCategoryParticipantSessionService = require('./mobileClassCategoryParticipantSessionService');
 
 const ErrorEnum = {
     INVALID_STATUS: 'INVALID_STATUS',
+    CATEGORY_NOT_FOUND: 'CATEGORY_NOT_FOUND',
 }
 
 const classCategoryService = {};
@@ -196,6 +196,46 @@ classCategoryService.reschedule = async (classCategorySessionDTO, isRepeat, user
 classCategoryService.getMyUnconfirmedSessions = async (classCategoryUuid, user) => {
 
     return classCategoryParticipantSessionService.getMyUnconfirmedSessions(classCategoryUuid, user);
+
+}
+
+classCategoryService.findById = async (classCategoryUuid) => {
+
+    return ClassCategory.query()
+        .findById(classCategoryUuid)
+        .then(category => {
+            if (!category)
+                throw new UnsupportedOperationError(ErrorEnum.CATEGORY_NOT_FOUND);
+            return category;
+        })
+
+}
+
+classCategoryService.book = async (classCategoryUuid, user) => {
+
+    const category = await ClassCategory.query()
+        .modify('book')
+        .findById(classCategoryUuid);
+
+    const categorySessions = await classCategorySessionService.getSessions(classCategoryUuid, [sessionStatusEnum.UPCOMING]);
+    const mySessionUuids = await classCategoryParticipantSessionService.getMySessionUuidsByClassCategoryUuid(classCategoryUuid, user);
+
+    const newSessions = [];
+    categorySessions.forEach(categorySession => {
+        if (mySessionUuids.includes(categorySession.uuid)) {
+            categorySession.isParticipated = true;
+        } else {
+            categorySession.isParticipated = false;
+        }
+        
+        newSessions.push(categorySession);
+
+    });
+
+    return {
+        ...category,
+        sessions: newSessions,
+    }
 
 }
 

@@ -9,5 +9,6 @@ router.get(routes.classCategory.startSession, auth.authenticateToken, controller
 router.get(routes.classCategory.endSession, auth.authenticateToken, controller.endSession);
 router.put(routes.classCategory.reschedule, auth.authenticateToken, controller.reschedule);
 router.get(routes.classCategory.unconfirmed, auth.authenticateToken, controller.getMyUnconfirmedSessions);
+router.get(routes.classCategory.book, auth.authenticateToken, controller.book);
 
 module.exports = router.expressRouter;

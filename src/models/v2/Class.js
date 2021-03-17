@@ -91,6 +91,9 @@ class Class extends Model {
             categoriesTitleWithRating(builder) {
                 builder.select('uuid', 'title')
                     .withGraphFetched('classCategories(titleWithRating)');
+            },
+            administrationFee(builder) {
+                builder.select('uuid', 'administration_fee');
             }
         }
     }
