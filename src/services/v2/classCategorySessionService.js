@@ -126,7 +126,7 @@ classCategorySessionService.getSessionByUuid = async (classCategorySessionUuid) 
 classCategorySessionService.getSessionParticipants = async (classCategoryUuid, classCategorySessionUuid) => {
 
     const session = await classCategorySessionService.getSessionByUuid(classCategorySessionUuid);
-    return classCategoryParticipantSessionService.getSessionParticipants(session);
+    return classCategoryParticipantSessionService.getSessionParticipants(classCategorySessionUuid);
 
 }
 

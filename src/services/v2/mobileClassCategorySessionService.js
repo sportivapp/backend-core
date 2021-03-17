@@ -47,7 +47,7 @@ classCategorySessionService.inputAbsence = async(classCategoryUuid, classCategor
     if (session.status !== sessionStatusEnum.ONGOING)
         throw new UnsupportedOperationError(ErrorEnum.INVALID_ONGOING_SESSION);
 
-    const absences = await classCategoryParticipantSessionService.inputAbsence(classCategorySessionUuid, participants, user);
+    const absences = await classCategoryParticipantSessionService.inputAbsence(participants, user);
 
     await session.$query()
         .updateByUserId({

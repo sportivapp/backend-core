@@ -1,3 +1,5 @@
+const ClassCategoryParticipantSession = require('../../models/v2/ClassCategoryParticipantSession');
+
 const classCategoryParticipantSessionService = {};
 
 classCategoryParticipantSessionService.getSessionParticipants = async (sessionUuid) => {

@@ -6,6 +6,7 @@ const dayToCodeEnum = require('../../models/enum/DayToCodeEnum');
 const codeToDayEnum = require('../../models/enum/CodeToDayEnum');
 const classCategoryScheduleService = require('./classCategoryScheduleService');
 const classCategoryPriceLogService = require('./classCategoryPriceLogService');
+const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
 
 const ErrorEnum = {
     CATEGORY_NOT_FOUND: 'CATEGORY_NOT_FOUND',
@@ -146,8 +147,9 @@ classCategoryService.extendSchedule = async (extendCategoryDTO, user) => {
 
     const sessionAndSchedule = classCategoryService
         .generateSessionAndScheduleFromCategorySchedules(category.classUuid, category.uuid, 
-            extendCategoryDTO.startMonth, extendCategoryDTO.endMonth, category.schedules);
+            extendCategoryDTO.startMonth, extendCategoryDTO.endMonth, extendCategoryDTO.schedules);
 
+    const sessionDTO = sessionAndSchedule.session;
     if (sessionDTO.length === 0)
         throw new UnsupportedOperationError(ErrorEnum.NO_SESSIONS);
 

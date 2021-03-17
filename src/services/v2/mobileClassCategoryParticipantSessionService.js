@@ -20,16 +20,16 @@ classCategoryParticipantSessionService.getSessionUuidsByUserId = async (userId) 
 
 }
 
-classCategoryParticipantSessionService.inputAbsence = async (classCategorySessionUuid, participants, user) => {
+classCategoryParticipantSessionService.inputAbsence = async (participants, user) => {
 
     const promises = participants.map(participant => {
 
         return ClassCategoryParticipantSession.query()
-            .insertToTable({
-                classCategorySessionUuid: classCategorySessionUuid,
-                classCategoryParticipantUuid: participant.uuid,
+            .findById(participant.uuid)
+            .updateByUserId({
                 isCheckIn: participant.isCheckIn,
-            }, user.sub);
+            }, user.sub)
+            .returning('*');
 
     });
 

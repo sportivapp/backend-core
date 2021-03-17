@@ -128,10 +128,6 @@ classService.getMyClass = async (status, user) => {
                 return Class.query()
                     .modify('myClass', session.uuid)
                     .first()
-                    .then(cls => {
-                        if (cls) cls.administrationFee = parseInt(cls.administrationFee);
-                        return cls;
-                    });
             });
             // Remove nulls
             // Why null happen? because when status defined as ONGOING and there is no ONGOING session, session would be null.
@@ -140,8 +136,7 @@ classService.getMyClass = async (status, user) => {
                 .then(cList => cList.filter(cls => !!cls));
         });
 
-    return classes
-    // return classService.groupClassesByCategoryReplaceSessionsToSession(classes); 
+    return classService.groupClassesByCategoryReplaceSessionsToSession(classes); 
 
 }
 

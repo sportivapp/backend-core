@@ -26,14 +26,13 @@ class ClassCategory extends Model {
                 builder.select('uuid', 'title', 'price')
             },
             adminDetail(builder) {
-                builder.select('uuid', 'title', 'description', 'price', 'requirements')
+                builder.select('uuid', 'title', 'description', 'price', 'requirements', 'is_recurring')
                     .withGraphFetched('categorySessions(list)')
                     .withGraphFetched('coaches(baseAttributes)');
             },
             userDetail(builder) {
-                builder.select('class_category.uuid', 'class_category.title', 'description', 'price', 'requirements')
+                builder.select('class_category.uuid', 'class_category.title', 'description', 'price', 'requirements', 'is_recurring')
                     .withGraphFetched('coaches(baseAttributes)')
-                    .withGraphFetched('participants(participant)')
                     .withGraphFetched('categorySessions(list)')
             },
             price(builder) {
@@ -82,7 +81,6 @@ class ClassCategory extends Model {
         const Class = require('./Class');
         const ClassCategorySession = require('./ClassCategorySession');
         const ClassCategoryCoach = require('./ClassCategoryCoach');
-        const ClassCategoryParticipant = require('./ClassCategoryParticipant');
         const ClassCategorySchedule = require('./ClassCategorySchedule');
  
         return {
@@ -108,14 +106,6 @@ class ClassCategory extends Model {
                 join: {
                     from: 'class_category.uuid',
                     to: 'class_category_coach.class_category_uuid',
-                }
-            },
-            participants: {
-                relation: Model.HasManyRelation,
-                modelClass: ClassCategoryParticipant,
-                join: {
-                    from: 'class_category.uuid',
-                    to: 'class_category_participant.class_category_uuid',
                 }
             },
             schedules: {

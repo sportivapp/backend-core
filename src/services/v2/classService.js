@@ -160,13 +160,9 @@ classService.deleteClass = async (classUuid, user) => {
 
     const cls = await classService.findById(classUuid);
 
-    if (totalParticipants !== 0)
-        throw new UnsupportedOperationError(ErrorEnum.PARTICIPANTS_EXISTED);
-    else {
-        return cls.$query()
-            .softDelete()
-            .then(rowsAffected => rowsAffected === 1);
-    }
+    return cls.$query()
+        .softDelete()
+        .then(rowsAffected => rowsAffected === 1);
 
 }
 

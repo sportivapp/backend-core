@@ -1,6 +1,5 @@
 const classCategoryService = require('../../../services/v2/mobileClassCategoryService');
 const ResponseHelper = require('../../../helper/ResponseHelper');
-const classCategorySessionService = require('../../../services/v2/mobileClassCategorySessionService');
 
 const classCategoryController = {};
 

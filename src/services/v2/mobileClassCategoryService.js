@@ -157,7 +157,6 @@ classCategoryService.getMyCategory = async (classCategoryUuid, status, user) => 
         .then(classCategory => {
             if (!classCategory)
                 throw new NotFoundError();
-            classCategory.price = parseInt(classCategory.price);
             return classCategory;
         });
 
