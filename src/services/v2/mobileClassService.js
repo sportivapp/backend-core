@@ -133,7 +133,8 @@ classService.getMyClass = async (status, user) => {
                 .then(cList => cList.filter(cls => !!cls));
         });
 
-    return classService.groupClassesByCategoryReplaceSessionsToSession(classes); 
+    return classes
+    // return classService.groupClassesByCategoryReplaceSessionsToSession(classes); 
 
 }
 
