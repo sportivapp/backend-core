@@ -5,12 +5,14 @@ const classCategoryService = require('./mobileClassCategoryService');
 const classCategoryParticipantService = require('./mobileClassCategoryParticipantService');
 const classCategoryParticipantSessionService = require('./mobileClassCategoryParticipantSessionService');
 const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
+const classCategorySessionService = require('./mobileClassCategorySessionService');
 
 const ErrorEnum = {
     INVALID_COACH_ID: 'INVALID_COACH_ID',
     INVALID_START_SESSION_DATE: 'INVALID_START_SESSION_DATE',
     USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY',
     INVALID_STATUS: 'INVALID_STATUS',
+    SESSION_REGISTERED: 'SESSION_REGISTERED',
 }
 
 const classService = {};
@@ -33,7 +35,6 @@ classService.getClasses = async (page, size, keyword, industryId, cityId) => {
         return {
             ...cls,
             priceRange: await classCategoryService.getClassCategoryPriceRangeByClassUuid(cls.uuid),
-            totalParticipants: await classCategoryParticipantService.getParticipantsCountByClassUuid(cls.uuid),
         }
     });
     
@@ -63,14 +64,9 @@ classService.getClass = async (classUuid, user) => {
 
     const clsCategoriesPromise = cls.classCategories.map(async category => {
         category.price = parseInt(category.price);
-        const totalParticipants = await classCategoryParticipantService
-            .getParticipantsCountByClassCategoryUuid(category.uuid);
-        category.totalParticipants = totalParticipants;
     })
 
     await Promise.all(clsCategoriesPromise);
-    cls.totalParticipants = await classCategoryParticipantService.getParticipantsCountByClassUuid(cls.uuid);
-    cls.wasRegistered = await classCategoryParticipantService.isUserRegisteredInClass(cls.uuid, user.sub);
 
     return cls;
 
@@ -95,9 +91,25 @@ classService.getClassCategory = async (classUuid, classCategoryUuid, user) => {
 
 }
 
-classService.register = async (classUuid, classCategoryUuid, user) => {
+classService.register = async (classUuid, classCategoryUuid, classCategorySessionUuids, user) => {
 
-    return classCategoryParticipantService.register(classUuid, classCategoryUuid, user);
+    // const registeredSessions = classCategoryParticipantSessionService.getUserSessions(classCategorySessionUuids, user);
+    // if (registeredSessions.length !== 0)
+    //     throw new UnsupportedOperationError(ErrorEnum.SESSION_REGISTERED);
+
+    // Generate Invoice
+
+    const participantSessionsDTOs = classCategorySessionUuids.map(classCategorySessionUuid => {
+        return {
+            classUuid: classUuid,
+            classCategoryUuid: classCategoryUuid,
+            classCategorySessionUuid: classCategorySessionUuid,
+            userId: user.sub,
+            // invoice: invoice,
+        }
+    });
+
+    return classCategoryParticipantSessionService.register(participantSessionsDTOs, user);
 
 }
 
@@ -106,16 +118,21 @@ classService.getMyClass = async (status, user) => {
     if (!sessionStatusEnum[status])
         throw new UnsupportedOperationError(ErrorEnum.INVALID_STATUS);
 
-    let classes = await classCategoryParticipantService.getActiveParticipantsByUserIdGroupByCategory(user.sub)
-        .then(participants => {
-            const promises = participants.map(participant => {
+    const sessionUuids = await classCategoryParticipantSessionService.getMySessionUuids(user);
+    if (sessionUuids.length === 0)
+        return [];
+
+    const classes = await classCategorySessionService
+        .getActiveClosestSessionsByStatusAndGroupByCategory(sessionUuids, status)
+        .then(sessions => {
+            const promises = sessions.map(session => {
                 return Class.query()
-                    .modify('myClass', participant, status)
-                        .first()
-                        .then(cls => {
-                            if (cls) cls.administrationFee = parseInt(cls.administrationFee);
-                            return cls;
-                        });
+                    .modify('myClass', session.uuid)
+                    .first()
+                    .then(cls => {
+                        if (cls) cls.administrationFee = parseInt(cls.administrationFee);
+                        return cls;
+                    });
             });
             // Remove nulls
             // Why null happen? because when status defined as ONGOING and there is no ONGOING session, session would be null.
@@ -124,7 +141,8 @@ classService.getMyClass = async (status, user) => {
                 .then(cList => cList.filter(cls => !!cls));
         });
 
-    return classService.groupClassesByCategoryReplaceSessionsToSession(classes); 
+    return classes
+    // return classService.groupClassesByCategoryReplaceSessionsToSession(classes); 
 
 }
 
@@ -145,8 +163,6 @@ classService.groupClassesByCategoryReplaceSessionsToSession = async (classes) =>
         const categoriesPromises = cls.classCategories.map(async category => {
             category.categorySession = category.categorySessions[0];
             delete category.categorySessions;
-            category.categorySession.totalParticipants = await classCategoryParticipantSessionService
-                .getParticipantsCountBySessionUuid(category.categorySession.uuid);
             return category;
         });
         await Promise.all(categoriesPromises);

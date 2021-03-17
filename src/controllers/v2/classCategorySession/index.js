@@ -6,11 +6,10 @@ const classCategorySessionController = {};
 classCategorySessionController.getSessionParticipants = async (req, res, next) => {
 
     const { classCategoryUuid, classCategorySessionUuid } = req.params;
-    const { isCheckIn } = req.query;
 
     try {
 
-        const result = await classCategorySessionService.getSessionParticipants(classCategoryUuid, classCategorySessionUuid, isCheckIn, req.user);
+        const result = await classCategorySessionService.getSessionParticipants(classCategoryUuid, classCategorySessionUuid, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {

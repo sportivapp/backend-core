@@ -72,13 +72,6 @@ classCategorySessionService.getSessionByUuid = async (classCategorySessionUuid) 
 
 }
 
-classCategorySessionService.getSessionParticipants = async (classCategoryUuid, classCategorySessionUuid, isCheckIn) => {
-
-    const session = await classCategorySessionService.getSessionByUuid(classCategorySessionUuid);
-    return classCategoryParticipantService.getSessionParticipants(session, isCheckIn);
-
-}
-
 classCategorySessionService.getSessionByCategoryUuidAndStatus = async (classCategoryUuid, status) => {
 
     return ClassCategorySession.query()
@@ -115,10 +108,10 @@ classCategorySessionService.getSessionByUuid = async (classCategorySessionUuid) 
 
 }
 
-classCategorySessionService.getSessionParticipants = async (classCategoryUuid, classCategorySessionUuid, isCheckIn) => {
+classCategorySessionService.getSessionParticipants = async (classCategoryUuid, classCategorySessionUuid) => {
 
     const session = await classCategorySessionService.getSessionByUuid(classCategorySessionUuid);
-    return classCategoryParticipantService.getSessionParticipants(session, isCheckIn);
+    return classCategoryParticipantSessionService.getSessionParticipants(classCategorySessionUuid);
 
 }
 
@@ -255,6 +248,50 @@ classCategorySessionService.complaint = async (classComplaintsDTO, user) => {
     classComplaintsDTO.classCategoryUuid = session.classCategoryUuid;
 
     return classComplaintsService.complaint(classComplaintsDTO, user);
+
+}
+
+classCategorySessionService.getActiveClosestSessionsByStatusAndGroupByCategory = async (sessionUuids, status) => {
+
+    return ClassCategorySession.query()
+        .where('status', status)
+        .whereIn('uuid', sessionUuids)
+        .where('start_date', '>=', Date.now())
+        .orderBy('start_date', 'ASC')
+        .then(sessions => {
+            let seen = {};
+            return sessions.filter(session => {
+                if (!seen[session.classCategoryUuid]) {
+                    seen[session.classCategoryUuid] = true;
+                    return true;
+                }
+                return false;
+            });
+        });
+
+}
+
+classCategorySessionService.getActiveSessionsByStatus = async (sessionUuids, status) => {
+
+    return ClassCategorySession.query()
+        .where('status', status)
+        .whereIn('uuid', sessionUuids)
+        .where('start_date', '>=', Date.now())
+        .orderBy('start_date', 'ASC');
+
+}
+
+classCategorySessionService.getMySessionUuidsByCategoryUuid = async (categoryUuid, status, user) => {
+
+    return ClassCategorySession.query()
+        .modify('my', user.sub)
+        .where('status', status)
+        .where('class_category_uuid', categoryUuid)
+        .where('start_date', '>=', Date.now())
+        .orderBy('start_date', 'ASC')
+        .then(sessions => sessions.map(session => {
+            return session.uuid;
+        }));
 
 }
 

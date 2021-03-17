@@ -83,7 +83,6 @@ classService.getClasses = async (page, size, keyword, industryId, user) => {
         return {
             ...cls,
             priceRange: await classCategoryService.getClassCategoryPriceRangeByClassUuid(cls.uuid),
-            totalParticipants: await classCategoryParticipantService.getParticipantsCountByClassUuid(cls.uuid),
         }
     });
     
@@ -116,8 +115,6 @@ classService.getClass = async (classUuid, user) => {
 
     const promises = cls.classCategories.map(async category => {
         category.price = parseInt(category.price);
-        category.totalParticipants = await classCategoryParticipantService
-            .getParticipantsCountByClassCategoryUuid(category.uuid)
         return category;
     });
 
@@ -126,7 +123,6 @@ classService.getClass = async (classUuid, user) => {
     return {
         ...cls,
         priceRange: await classCategoryService.getClassCategoryPriceRangeByClassUuid(cls.uuid),
-        totalParticipants: await classCategoryParticipantService.getParticipantsCountByClassUuid(cls.uuid),
     }
 
 }
@@ -164,7 +160,6 @@ classService.deleteClass = async (classUuid, user) => {
     await classService.checkUserInClassCompany(classUuid, user);
 
     const cls = await classService.findById(classUuid);
-    const totalParticipants = await classCategoryParticipantService.getParticipantsCountByClassUuid(cls.uuid);
 
     if (totalParticipants !== 0)
         throw new UnsupportedOperationError(ErrorEnum.PARTICIPANTS_EXISTED);

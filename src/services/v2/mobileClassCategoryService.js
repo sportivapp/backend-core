@@ -142,23 +142,18 @@ classCategoryService.startSession = async (classCategoryUuid, classCategorySessi
 
 }
 
-classCategoryService.getParticipants = async (classCategoryUuid) => {
-
-    return classCategoryParticipantService.getParticipants(classCategoryUuid);
-
-}
-
 classCategoryService.getMyCategory = async (classCategoryUuid, status, user) => {
 
     if (!sessionStatusEnum[status])
         throw new UnsupportedOperationError(ErrorEnum.INVALID_STATUS);
 
-    const participant = await classCategoryParticipantService
-        .getClosestActiveParticipantByCategoryUuidAndUserId(classCategoryUuid, user.sub);
+    const sessionUuids = await classCategorySessionService.getMySessionUuidsByCategoryUuid(classCategoryUuid, status, user);
+    if (sessionUuids.length === 0)
+        return [];
 
     return ClassCategory.query()
         .findById(classCategoryUuid)
-        .modify('myCategory', participant, status)
+        .modify('myCategory', sessionUuids)
         .then(classCategory => {
             if (!classCategory)
                 throw new NotFoundError();
@@ -200,12 +195,7 @@ classCategoryService.reschedule = async (classCategorySessionDTO, isRepeat, user
 
 classCategoryService.getMyUnconfirmedSessions = async (classCategoryUuid, user) => {
 
-    const participants = await classCategoryParticipantService
-        .getActiveParticipantsByCategoryUuidAndUserId(classCategoryUuid, user.sub);
-    const participantUuids = participants.map(participant => {
-        return participant.uuid;
-    });
-    return classCategoryParticipantSessionService.getMyUnconfirmedSessionsByParticipantUuids(participantUuids);
+    return classCategoryParticipantSessionService.getMyUnconfirmedSessions(classCategoryUuid, user);
 
 }
 

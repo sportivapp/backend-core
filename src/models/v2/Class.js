@@ -73,18 +73,14 @@ class Class extends Model {
                         .where('classCategories:categorySessions.status', status)
                         .orderBy('classCategories:categorySessions.start_date', 'ASC');
             },
-            myClass(builder, participant, status) {
+            myClass(builder, sessionUuid) {
                 builder.select('class.uuid', 'class.title')
                     .withGraphFetched('industry(baseAttributes)')
                     .withGraphFetched('city(baseAttributes)')
                     .withGraphFetched('classMedia(list).[file(baseAttributes)]')
                     .withGraphFetched('company(baseAttributes)')    
                     .withGraphJoined('classCategories(uuidAndTitle).[categorySessions(list)]')
-                        .where('classCategories.uuid', participant.classCategoryUuid)
-                        .where('classCategories:categorySessions.start_date', '>=', Date.now())
-                        .where('classCategories:categorySessions.start_date', '>=', participant.start)
-                        .where('classCategories:categorySessions.status', status)
-                        .orderBy('classCategories:categorySessions.start_date', 'ASC');
+                        .where('classCategories:categorySessions.uuid', sessionUuid);
             },
             basic(builder) {
                 builder.select('uuid', 'title')

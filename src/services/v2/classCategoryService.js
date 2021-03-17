@@ -27,6 +27,7 @@ classCategoryService.initCategories = async (categories, user, trx) => {
         newCategory.description = category.description;
         newCategory.price = category.price;
         newCategory.requirements = category.requirements;
+        newCategory.isRecurring = category.isRecurring;
 
         return classCategories = ClassCategory.query(trx)
             .insertToTable(newCategory, user.sub)
@@ -45,22 +46,34 @@ classCategoryService.initCategories = async (categories, user, trx) => {
                     price: classCategory.price,
                 }
 
-                const sessionAndSchedule = classCategoryService
-                    .generateSessionAndScheduleFromCategorySchedules(classCategory.classUuid, classCategory.uuid, 
-                        category.startMonth, category.endMonth, category.schedules);
+                let sessionsDTO = [];
+                if (classCategory.isRecurring) {
 
-                if (sessionAndSchedule.session.length === 0)
-                    throw new UnsupportedOperationError(ErrorEnum.NO_SESSIONS);
+                    const sessionAndSchedule = classCategoryService
+                        .generateSessionAndScheduleFromCategorySchedules(classCategory.classUuid, classCategory.uuid, 
+                            category.startMonth, category.endMonth, category.schedules);
+                    await classCategoryScheduleService.initSchedules(sessionAndSchedule.schedule, user, trx);
+                    sessionsDTO = sessionAndSchedule.session;
+
+                } else {
+
+                    // Non recurring logic here
+                    // sessionsDTO = result
+
+                }
+
+                if (sessionsDTO.length === 0)
+                        throw new UnsupportedOperationError(ErrorEnum.NO_SESSIONS);
+                
+                const classCategorySession = await classCategorySessionService.initCategorySession(sessionsDTO, user, trx);
                 const classCategoryCoach = await classCategoryCoachService.initCategoryCoach(categoryCoachDTO, user, trx);
-                const classCategorySession = await classCategorySessionService.initCategorySession(sessionAndSchedule.session, user, trx);
-                const classCategorySchedule = await classCategoryScheduleService.initSchedules(sessionAndSchedule.schedule, user, trx);
+                
                 await classCategoryPriceLogService.addPriceLog(priceLogDTO, user, trx);
 
                 return {
                     ...classCategory,
                     classCategoryCoach: classCategoryCoach,
                     classCategorySession: classCategorySession,
-                    classCategorySchedule: classCategorySchedule,
                 }
             });
 
@@ -83,7 +96,6 @@ classCategoryService.getClassCategory = async (classCategoryUuid) => {
 
     return {
         ...category,
-        totalParticipants: await classCategoryParticipantService.getParticipantsCountByClassCategoryUuid(classCategoryUuid),
     }
 
 }
@@ -194,16 +206,9 @@ classCategoryService.deleteCategory = async (classCategoryUuid) => {
 
     const category = await classCategoryService.findById(classCategoryUuid);
 
-    const totalParticipants = await classCategoryParticipantService
-        .getParticipantsCountByClassCategoryUuid(classCategoryUuid);
-
-    if (totalParticipants !== 0)
-        throw new UnsupportedOperationError(ErrorEnum.PARTICIPANTS_EXISTED);
-    else {
-        return category.$query()
-            .softDelete()
-            .then(rowsAffected => rowsAffected === 1);
-    }
+    return category.$query()
+        .softDelete()
+        .then(rowsAffected => rowsAffected === 1);
 
 }
 

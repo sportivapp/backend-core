@@ -42,15 +42,12 @@ class ClassCategory extends Model {
             uuidAndTitle(builder) {
                 builder.select('uuid', 'title');
             },
-            myCategory(builder, participant, status) {
+            myCategory(builder, sessionUuids) {
                 builder.select('uuid', 'title')
                     .withGraphFetched('class(basic)')
                     .withGraphFetched('categorySessions(list)')
                     .modifyGraph('categorySessions', builder => {
-                        builder.where('start_date', '>=', Date.now())
-                            .where('start_date', '>=', participant.start)
-                            .where('status', status)
-                            .orderBy('start_date', 'ASC');
+                        builder.whereIn('uuid', sessionUuids);
                     });
             },
             coachCategory(builder) {

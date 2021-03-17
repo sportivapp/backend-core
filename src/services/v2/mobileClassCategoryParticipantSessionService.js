@@ -8,17 +8,6 @@ const ErrorEnum = {
 
 const classCategoryParticipantSessionService = {};
 
-classCategoryParticipantSessionService.getParticipantsCountBySessionUuid = async (sessionUuid) => {
-
-    return ClassCategoryParticipantSession.query()
-        .where('class_category_session_uuid', sessionUuid)
-        .count()
-        .then(count => {
-            return parseInt(count[0].count);
-        })
-
-}
-
 classCategoryParticipantSessionService.getSessionUuidsByUserId = async (userId) => {
 
     return ClassCategoryParticipantSession.query()
@@ -48,7 +37,7 @@ classCategoryParticipantSessionService.inputAbsence = async (classCategorySessio
 
 };
 
-classCategoryParticipantSessionService.getMyUnconfirmedSessionsByParticipantUuids = async (classCategoryParticipantUuids) => {
+classCategoryParticipantSessionService.getMyUnconfirmedSessions = async (classCategoryUuid, user) => {
 
     const now = Date.now();
 
@@ -57,7 +46,8 @@ classCategoryParticipantSessionService.getMyUnconfirmedSessionsByParticipantUuid
         .where('is_confirmed', null)
         .whereNot('confirmed_expiration', null)
         .where('confirmed_expiration', '>=', now)
-        .whereIn('class_category_participant_uuid', classCategoryParticipantUuids);
+        .where('class_category_uuid', classCategoryUuid)
+        .where('user_id', user.sub);
 
 }
 
@@ -94,6 +84,32 @@ classCategoryParticipantSessionService.updateParticipantConfirmedExpiration = as
         .patch({
             confirmedExpiration: Date.now() + twoDays,
         });
+
+}
+
+classCategoryParticipantSessionService.register = async (participantSessionDTOs, user) => {
+
+    return ClassCategoryParticipantSession.query()
+        .insertToTable(participantSessionDTOs, user.sub);
+
+}
+
+classCategoryParticipantSessionService.getMySessionUuids = async (user) => {
+
+    return ClassCategoryParticipantSession.query()
+        .where('user_id', user.sub)
+        .then(participantSessions => participantSessions.map(participantSession =>  {
+            return participantSession.classCategorySessionUuid;
+        }));
+
+}
+
+classCategoryParticipantSessionService.getSessionParticipants = async (sessionUuid) => {
+
+    return ClassCategoryParticipantSession.query()
+        .modify('participants')
+        .where('class_category_session_uuid', sessionUuid)
+        .where('is_check_in', null);
 
 }
 

@@ -22,33 +22,28 @@ class ClassCategoryParticipantSession extends Model {
     static get modifiers() {
         return {
             baseAttributes(builder) {
-                builder.select('uuid', 'class_category_participant_uuid', 'class_category_session_uuid');
+                builder.select('uuid', 'class_category_session_uuid');
             },
             sessionParticipants(builder) {
-                builder.select('uuid', 'is_check_in')
-                    .withGraphFetched('classCategoryParticipant(participant)');
+                builder.select('uuid', 'user_id', 'is_check_in');
             },
             unconfirmedSession(builder) {
                 builder.select('uuid', 'class_category_session_uuid')
                     .withGraphFetched('classCategorySession(basicStartEnd)');
+            },
+            participants(builder) {
+                builder.select('uuid', 'user_id', 'class_uuid', 'class_category_uuid', 'is_check_in')
+                    .withGraphFetched('user(basic)');
             }
         }
     }
 
     static get relationMappings() {
 
-        const ClassCategoryParticipant = require('./ClassCategoryParticipant');
         const ClassCategorySession = require('./ClassCategorySession');
+        const User = require('../User');
  
         return {
-            classCategoryParticipant: {
-                relation: Model.BelongsToOneRelation,
-                modelClass: ClassCategoryParticipant,
-                join: {
-                    from: 'class_category_participant_session.class_category_participant_uuid',
-                    to: 'class_category_participant.uuid'
-                }
-            },
             classCategorySession: {
                 relation: Model.BelongsToOneRelation,
                 modelClass: ClassCategorySession,
@@ -57,6 +52,14 @@ class ClassCategoryParticipantSession extends Model {
                     to: 'class_category_session.uuid',
                 }
             },
+            user: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: User,
+                join: {
+                    from: 'class_category_participant_session.user_id',
+                    to: 'euser.euserid',
+                }
+            }
         }
     }
 }

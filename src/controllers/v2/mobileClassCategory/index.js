@@ -34,22 +34,6 @@ classCategoryController.startSession = async (req, res, next) => {
 
 }
 
-// Might be used later for getting participants by category, also by month, just add month params
-classCategoryController.getParticipants = async (req, res, next) => {
-
-    const { classCategoryUuid } = req.params;
-
-    try {
-
-        const result = await classCategoryService.getParticipants(classCategoryUuid, req.user);
-        return res.status(200).json(ResponseHelper.toBaseResponse(result));
-
-    } catch(e) {
-        next(e);
-    }
-
-}
-
 classCategoryController.getMyCategory = async (req, res, next) => {
 
     const { classCategoryUuid } = req.params;
@@ -61,6 +45,7 @@ classCategoryController.getMyCategory = async (req, res, next) => {
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
+        console.log(e);
         next(e);
     }
 
