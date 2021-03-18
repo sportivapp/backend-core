@@ -194,6 +194,10 @@ module.exports = {
             schedule: '/class-category/:classCategoryUuid/schedule',
             book: '/class-category/:classCategoryUuid/book',
         },
+        classComplaint: {
+            myComplaints: '/class-complaints',
+            coachComplaints: '/coach-complaints',
+        },
         permit: {
             list: '/permit',
             id: '/permit/:permitId',

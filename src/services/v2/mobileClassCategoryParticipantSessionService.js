@@ -124,4 +124,14 @@ classCategoryParticipantSessionService.getSessionParticipants = async (sessionUu
 
 }
 
+classCategoryParticipantSessionService.getSingleParticipantWithSession = async (sessionUuid, userId) => {
+
+    return ClassCategoryParticipantSession.query()
+        .modify('withSession')
+        .where('class_category_session_uuid', sessionUuid)
+        .where('user_id', userId)
+        .first();
+
+}
+
 module.exports = classCategoryParticipantSessionService;

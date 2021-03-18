@@ -34,7 +34,13 @@ class ClassCategoryParticipantSession extends Model {
             participants(builder) {
                 builder.select('uuid', 'user_id', 'class_uuid', 'class_category_uuid', 'is_check_in')
                     .withGraphFetched('user(basic)');
-            }
+            },
+            withSession(builder) {
+                builder.withGraphFetched('classCategorySession(single)')
+            },
+            complaint(builder) {
+                builder.select('uuid', 'is_check_in', 'is_confirmed'); //Invoice aswell
+            },
         }
     }
 

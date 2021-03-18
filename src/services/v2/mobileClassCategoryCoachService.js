@@ -30,4 +30,15 @@ classCategoryCoachService.checkCoachCategory = (userId, categoryUuid) => {
 
 }
 
+classCategoryCoachService.getCoachCategoryUuidsByUserId = (userId) => {
+
+    return ClassCategoryCoach.query()
+        .where('user_id', userId)
+        .then(categoryCoaches => categoryCoaches.map(categoryCoach => {
+            return categoryCoach.classCategoryUuid;
+        }));
+
+}
+
+
 module.exports = classCategoryCoachService;
