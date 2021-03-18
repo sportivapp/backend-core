@@ -22,11 +22,10 @@ classCategorySessionController.inputAbsence = async (req, res, next) => {
 classCategorySessionController.getSessionParticipants = async (req, res, next) => {
 
     const { classCategoryUuid, classCategorySessionUuid } = req.params;
-    const { isCheckIn } = req.query;
 
     try {
 
-        const result = await classCategorySessionService.getSessionParticipants(classCategoryUuid, classCategorySessionUuid, isCheckIn, req.user);
+        const result = await classCategorySessionService.getSessionParticipants(classCategoryUuid, classCategorySessionUuid, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
@@ -79,14 +78,36 @@ classCategorySessionController.reason = async (req, res, next) => {
     const { classCategorySessionUuid } = req.params;
     const { reason } = req.body;
     
-    const classReasonssDTO = {
+    const classReasonsDTO = {
         classCategorySessionUuid: classCategorySessionUuid,
         reason: reason,
     }
 
     try {
 
-        const result = await classCategorySessionService.reason(classReasonssDTO, req.user);
+        const result = await classCategorySessionService.reason(classReasonsDTO, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classCategorySessionController.complaintSession = async (req, res, next) => {
+
+    const { classCategorySessionUuid } = req.params;
+    const { complaint, complaintCode } = req.body;
+    
+    const classComplaintsDTO = {
+        classCategorySessionUuid: classCategorySessionUuid,
+        complaint: complaint,
+        code: complaintCode,
+    }
+
+    try {
+
+        const result = await classCategorySessionService.complaintSession(classComplaintsDTO, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {

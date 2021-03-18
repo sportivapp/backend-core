@@ -178,6 +178,7 @@ module.exports = {
             confirm: '/class-category-session/:classCategorySessionUuid/class-category-participant-session/:classCategoryParticipantSessionUuid/confirm',
             rate: '/class-category-session/:classCategorySessionUuid/rate',
             reason: '/class-category-session/:classCategorySessionUuid/reason',
+            complaint: '/class-category-session/:classCategorySessionUuid/complaint',
         },
         classCategory: {
             list: '/category',
@@ -191,6 +192,7 @@ module.exports = {
             reschedule: '/coach-category/:classCategoryUuid/class-category-session/:classCategorySessionUuid/reschedule',
             unconfirmed: '/my-class-category/:classCategoryUuid/unconfirmed',
             schedule: '/class-category/:classCategoryUuid/schedule',
+            book: '/class-category/:classCategoryUuid/book',
         },
         permit: {
             list: '/permit',

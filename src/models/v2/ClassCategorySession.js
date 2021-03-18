@@ -32,6 +32,10 @@ class ClassCategorySession extends Model {
             },
             basicStartEnd(builder) {
                 builder.select('uuid', 'start_date', 'end_date');
+            },
+            mySessions(builder, userId) {
+                builder.withGraphJoined('participantSession(sessionParticipants)')
+                    .where('participantSession.user_id', userId)
             }
         }
     }
@@ -59,7 +63,7 @@ class ClassCategorySession extends Model {
                     to: 'class_category.uuid',
                 }
             },
-            sessionParticipants: {
+            participantSession: {
                 relation: Model.HasManyRelation,
                 modelClass: ClassCategoryParticipantSession,
                 join: {

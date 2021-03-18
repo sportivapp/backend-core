@@ -1,6 +1,5 @@
 const classCategoryService = require('../../../services/v2/mobileClassCategoryService');
 const ResponseHelper = require('../../../helper/ResponseHelper');
-const classCategorySessionService = require('../../../services/v2/mobileClassCategorySessionService');
 
 const classCategoryController = {};
 
@@ -26,22 +25,6 @@ classCategoryController.startSession = async (req, res, next) => {
     try {
 
         const result = await classCategoryService.startSession(classCategoryUuid, classCategorySessionUuid, req.user);
-        return res.status(200).json(ResponseHelper.toBaseResponse(result));
-
-    } catch(e) {
-        next(e);
-    }
-
-}
-
-// Might be used later for getting participants by category, also by month, just add month params
-classCategoryController.getParticipants = async (req, res, next) => {
-
-    const { classCategoryUuid } = req.params;
-
-    try {
-
-        const result = await classCategoryService.getParticipants(classCategoryUuid, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
@@ -113,6 +96,21 @@ classCategoryController.getMyUnconfirmedSessions = async (req, res, next) => {
     try {
 
         const result = await classCategoryService.getMyUnconfirmedSessions(classCategoryUuid, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classCategoryController.getSessionsToBook = async (req, res, next) => {
+
+    const { classCategoryUuid } = req.params;
+
+    try {
+
+        const result = await classCategoryService.getSessionsToBook(classCategoryUuid, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {

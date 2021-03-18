@@ -1,6 +1,6 @@
 const { NotFoundError, UnsupportedOperationError } = require('../../models/errors');
 const ClassCategorySession = require('../../models/v2/ClassCategorySession');
-const classCategoryParticipantService = require('./classCategoryParticipantService');
+const classCategoryParticipantSessionService = require('./classCategoryParticipantSessionService');
 const ServiceHelper = require('../../helper/ServiceHelper');
 const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
 
@@ -123,10 +123,10 @@ classCategorySessionService.getSessionByUuid = async (classCategorySessionUuid) 
 
 }
 
-classCategorySessionService.getSessionParticipants = async (classCategoryUuid, classCategorySessionUuid, isCheckIn) => {
+classCategorySessionService.getSessionParticipants = async (classCategoryUuid, classCategorySessionUuid) => {
 
     const session = await classCategorySessionService.getSessionByUuid(classCategorySessionUuid);
-    return classCategoryParticipantService.getSessionParticipants(session, isCheckIn);
+    return classCategoryParticipantSessionService.getSessionParticipants(classCategorySessionUuid);
 
 }
 

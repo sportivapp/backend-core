@@ -51,10 +51,11 @@ classController.getClassCategory = async (req, res, next) => {
 classController.register = async (req, res, next) => {
 
     const { classUuid, classCategoryUuid } = req.params;
+    const { classCategorySessionUuids } = req.body;
 
     try {
 
-        const result = await classService.register(classUuid, classCategoryUuid, req.user);
+        const result = await classService.register(classUuid, classCategoryUuid, classCategorySessionUuids, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
