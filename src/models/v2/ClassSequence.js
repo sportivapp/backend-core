@@ -1,6 +1,6 @@
 const Model = require('./Model');
 
-class ClassSequence extends Model {
+class ClassTransactionSequence extends Model {
 
     sequenceName = 'class_transaction_seq';
 
@@ -9,10 +9,10 @@ class ClassSequence extends Model {
     }
 
     static getNextVal() {
-        return ClassSequence.knex().raw(`SELECT nextval('${sequenceName}')`)
+        return ClassTransactionSequence.knex().raw(`SELECT nextval('${sequenceName}')`)
             .then(result => result.rows[0].nextval)
     }
 
 }
 
-module.exports = ClassSequence;
+module.exports = ClassTransactionSequence;

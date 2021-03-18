@@ -210,7 +210,7 @@ classCategoryService.findById = async (classCategoryUuid) => {
 
 }
 
-classCategoryService.book = async (classCategoryUuid, user) => {
+classCategoryService.getSessionsToBook = async (classCategoryUuid, user) => {
 
     const category = await ClassCategory.query()
         .modify('book')

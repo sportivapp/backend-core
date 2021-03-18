@@ -92,10 +92,7 @@ classService.getClassCategory = async (classUuid, classCategoryUuid, user) => {
 
 classService.register = async (classUuid, classCategoryUuid, classCategorySessionUuids, user) => {
 
-    // const registeredSessions = classCategoryParticipantSessionService.getUserSessions(classCategorySessionUuids, user);
-    // if (registeredSessions.length !== 0)
-    //     throw new UnsupportedOperationError(ErrorEnum.SESSION_REGISTERED);
-
+    // Add checking whether user registered to the session here
     // Generate Invoice
 
     const participantSessionsDTOs = classCategorySessionUuids.map(classCategorySessionUuid => {

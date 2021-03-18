@@ -94,7 +94,7 @@ classCategorySessionController.reason = async (req, res, next) => {
 
 }
 
-classCategorySessionController.complaint = async (req, res, next) => {
+classCategorySessionController.complaintSession = async (req, res, next) => {
 
     const { classCategorySessionUuid } = req.params;
     const { complaint, complaintCode } = req.body;
@@ -107,7 +107,7 @@ classCategorySessionController.complaint = async (req, res, next) => {
 
     try {
 
-        const result = await classCategorySessionService.complaint(classComplaintsDTO, req.user);
+        const result = await classCategorySessionService.complaintSession(classComplaintsDTO, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {

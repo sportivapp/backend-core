@@ -236,7 +236,7 @@ classCategorySessionService.reason = async (classReasonsDTO, user) => {
 
 }
 
-classCategorySessionService.complaint = async (classComplaintsDTO, user) => {
+classCategorySessionService.complaintSession = async (classComplaintsDTO, user) => {
 
     if (!classComplaintEnum[classComplaintsDTO.code])
         throw new UnsupportedOperationError(ErrorEnum.INVALID_COMPLAINT_CODE);
@@ -246,7 +246,7 @@ classCategorySessionService.complaint = async (classComplaintsDTO, user) => {
     classComplaintsDTO.classUuid = session.classUuid;
     classComplaintsDTO.classCategoryUuid = session.classCategoryUuid;
 
-    return classComplaintsService.complaint(classComplaintsDTO, user);
+    return classComplaintsService.complaintSession(classComplaintsDTO, user);
 
 }
 
