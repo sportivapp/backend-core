@@ -283,7 +283,7 @@ classCategorySessionService.getActiveSessionsByStatus = async (sessionUuids, sta
 classCategorySessionService.getMySessionUuidsByCategoryUuid = async (categoryUuid, status, user) => {
 
     return ClassCategorySession.query()
-        .modify('my', user.sub)
+        .modify('mySessions', user.sub)
         .where('status', status)
         .where('class_category_uuid', categoryUuid)
         .where('start_date', '>=', Date.now())
