@@ -192,7 +192,7 @@ module.exports = {
             reschedule: '/coach-category/:classCategoryUuid/class-category-session/:classCategorySessionUuid/reschedule',
             unconfirmed: '/my-class-category/:classCategoryUuid/unconfirmed',
             schedule: '/class-category/:classCategoryUuid/schedule',
-            book: '/class-category/:classCategoryUuid/book',
+            bookSessions: '/class-category/:classCategoryUuid/book',
         },
         permit: {
             list: '/permit',
