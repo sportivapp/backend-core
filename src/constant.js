@@ -197,6 +197,8 @@ module.exports = {
         classComplaint: {
             myComplaints: '/class-complaints',
             coachComplaints: '/coach-complaints',
+            coachAcceptComplaint: '/coach-complaints/:classComplaintUuid/accept',
+            coachRejectComplaint: '/coach-complaints/:classComplaintUuid/reject',
         },
         permit: {
             list: '/permit',
