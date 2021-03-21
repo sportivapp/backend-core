@@ -119,4 +119,20 @@ classCategoryController.getSessionsToBook = async (req, res, next) => {
 
 }
 
+classCategoryController.mySessionHistory = async (req, res, next) => {
+    
+    const { classCategoryUuid } = req.params;
+
+    try {
+
+        const result = await classCategoryService.mySessionHistory(classCategoryUuid, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        console.log(e);
+        next(e);
+    }
+
+}
+
 module.exports = classCategoryController;

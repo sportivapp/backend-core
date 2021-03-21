@@ -1,6 +1,5 @@
 const { UnsupportedOperationError } = require('../../models/errors');
 const ClassCategoryParticipantSession = require('../../models/v2/ClassCategoryParticipantSession');
-const timeService = require('../../helper/timeService');
 
 const ErrorEnum = {
     INVALID_PARTICIPANT_SESSION: 'INVALID_PARTICIPANT_SESSION',
@@ -132,6 +131,13 @@ classCategoryParticipantSessionService.getSingleParticipantWithSession = async (
         .where('user_id', userId)
         .first();
 
+}
+
+classCategoryParticipantSessionService.mySessionHistoryByCategoryUuidAndUserId = async(classCategoryUuid, userId) => {
+
+    return ClassCategoryParticipantSession.query()
+        .modify('mySessionHistory', classCategoryUuid, userId);
+        
 }
 
 module.exports = classCategoryParticipantSessionService;

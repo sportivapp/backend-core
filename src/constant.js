@@ -193,6 +193,7 @@ module.exports = {
             unconfirmed: '/my-class-category/:classCategoryUuid/unconfirmed',
             schedule: '/class-category/:classCategoryUuid/schedule',
             book: '/class-category/:classCategoryUuid/book',
+            myHistory: '/my-history-class-category/:classCategoryUuid',
         },
         classComplaint: {
             myComplaints: '/class-complaints',
