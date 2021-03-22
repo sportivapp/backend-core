@@ -73,7 +73,7 @@ class ClassCategory extends Model {
                 builder.select('uuid', 'title');
             },
             book(builder) {
-                builder.select('uuid', 'title', 'price')
+                builder.select('uuid', 'title', 'price', 'is_recurring')
                     .withGraphFetched('class(administrationFee)')
             },
             notDeleted(builder) {

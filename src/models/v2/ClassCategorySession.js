@@ -1,4 +1,5 @@
 const SessionStatusEnum = require('../enum/SessionStatusEnum');
+const timeService = require('../../helper/timeService');
 const Model = require('./Model');
 
 class ClassCategorySession extends Model {
@@ -44,6 +45,19 @@ class ClassCategorySession extends Model {
             finishedSessions(builder) {
                 builder.select('uuid', 'start_date', 'end_date')
                     .where('status', SessionStatusEnum.DONE)
+            },
+            bookableSessions(builder, classCategoryUuid, year, userId) {
+                const { start, end } = timeService.getYearRange(year);
+
+                builder.select('class_category_session.uuid', 'start_date', 'end_date')
+                    .where('class_category_uuid', classCategoryUuid)
+                    .where('status', SessionStatusEnum.UPCOMING)
+                    .where('start_date', '>=', start)
+                    .where('end_date', '<=', end)
+                    .withGraphFetched('participantSession(sessionParticipants)')
+                    .modifyGraph('participantSession', builder => {
+                        builder.where('user_id', userId);
+                    });
             }
         }
     }
