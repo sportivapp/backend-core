@@ -94,6 +94,9 @@ class Class extends Model {
             },
             administrationFee(builder) {
                 builder.select('uuid', 'administration_fee');
+            },
+            uuidAndTitle(builder) {
+                builder.select('uuid', 'title');
             }
         }
     }

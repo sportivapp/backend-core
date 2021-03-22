@@ -1,3 +1,4 @@
+const ClassStatusEnum = require('../enum/SessionStatusEnum');
 const Model = require('./Model');
 
 class ClassCategoryParticipantSession extends Model {
@@ -34,6 +35,20 @@ class ClassCategoryParticipantSession extends Model {
             participants(builder) {
                 builder.select('uuid', 'user_id', 'class_uuid', 'class_category_uuid', 'is_check_in')
                     .withGraphFetched('user(basic)');
+            },
+            withSession(builder) {
+                builder.withGraphFetched('classCategorySession(single)')
+            },
+            complaint(builder) {
+                builder.select('uuid', 'is_check_in', 'is_confirmed'); //Invoice aswell
+            },
+            mySessionHistory(builder, classCategoryUuid, userId) {
+                builder.select('class_category_participant_session.uuid', 'is_check_in', 'is_confirmed') //Invoice aswell
+                    .withGraphFetched('classRating(basic)')
+                    .withGraphJoined('classCategorySession(basicStartEnd)')
+                    .where('class_category_uuid', classCategoryUuid)
+                    .where('user_id', userId)
+                    .where('classCategorySession.status', ClassStatusEnum.DONE);
             }
         }
     }
@@ -42,6 +57,9 @@ class ClassCategoryParticipantSession extends Model {
 
         const ClassCategorySession = require('./ClassCategorySession');
         const User = require('../User');
+        const ClassRatings = require('./ClassRatings');
+        const ClassComplaints = require('./ClassComplaints');
+        const ClassReasons = require('./ClassReasons');
  
         return {
             classCategorySession: {
@@ -59,7 +77,31 @@ class ClassCategoryParticipantSession extends Model {
                     from: 'class_category_participant_session.user_id',
                     to: 'euser.euserid',
                 }
-            }
+            },
+            classRating: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: ClassRatings,
+                join: {
+                    from: 'class_category_participant_session.uuid',
+                    to: 'class_ratings.class_category_participant_session_uuid',
+                }
+            },
+            classComplaint: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: ClassComplaints,
+                join: {
+                    from: 'class_category_participant_session.uuid',
+                    to: 'class_complaints.class_category_participant_session_uuid',
+                }
+            },
+            classReason: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: ClassReasons,
+                join: {
+                    from: 'class_category_participant_session.uuid',
+                    to: 'class_reasons.class_category_participant_session_uuid',
+                }
+            },
         }
     }
 }

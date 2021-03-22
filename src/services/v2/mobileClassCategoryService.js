@@ -238,4 +238,21 @@ classCategoryService.getSessionsToBook = async (classCategoryUuid, user) => {
 
 }
 
+classCategoryService.mySessionHistory = async (classCategoryUuid, user) => {
+
+    const category = await ClassCategory.query()
+        .findById(classCategoryUuid)
+        .modify('uuidAndTitle')
+        .withGraphFetched('class(basic)')
+
+    const participantSessions = await classCategoryParticipantSessionService
+        .mySessionHistoryByCategoryUuidAndUserId(category.uuid, user.sub);
+
+    return {
+        ...category,
+        classCategoryParticipantSessions: participantSessions,
+    }
+
+}
+
 module.exports = classCategoryService;

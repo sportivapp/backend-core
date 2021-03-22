@@ -31,12 +31,15 @@ class ClassCategorySession extends Model {
                     .withGraphFetched('classCategory(uuidAndTitle)');
             },
             basicStartEnd(builder) {
-                builder.select('uuid', 'start_date', 'end_date');
+                builder.select('uuid', 'start_date', 'end_date', 'status');
             },
             mySessions(builder, userId) {
                 builder.withGraphJoined('participantSession(sessionParticipants)')
                     .where('participantSession.user_id', userId)
-            }
+            },
+            single(builder) {
+                builder.select('uuid', 'class_category_uuid', 'month_utc', 'start_date', 'end_date', 'start_time', 'absence_time', 'status');
+            },
         }
     }
 

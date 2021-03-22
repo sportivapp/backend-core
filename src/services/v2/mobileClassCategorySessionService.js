@@ -4,7 +4,7 @@ const classCategoryParticipantSessionService = require('./mobileClassCategoryPar
 const { UnsupportedOperationError } = require('../../models/errors');
 const classRatingsService = require('./mobileClassRatingsService');
 const classReasonsService = require('./mobileClassReasonsService');
-const classComplaintsService = require('./mobileClassComplaintService');
+const classComplaintsService = require('./mobileClassComplaintsService');
 const classComplaintEnum = require('../../models/enum/ClassComplaintEnum');
 
 const ErrorEnum = {
@@ -215,10 +215,12 @@ classCategorySessionService.confirmParticipation = async (classCategorySessionUu
 
 classCategorySessionService.rate = async (classRatingsDTO, improvementCodes, user) => {
 
-    const session = await classCategorySessionService.getSessionByUuid(classRatingsDTO.classCategorySessionUuid);
+    const participantSession = await classCategoryParticipantSessionService
+        .getSingleParticipantWithSession(classRatingsDTO.classCategorySessionUuid, user.sub);
     
-    classRatingsDTO.classUuid = session.classUuid;
-    classRatingsDTO.classCategoryUuid = session.classCategoryUuid;
+    classRatingsDTO.classUuid = participantSession.classUuid;
+    classRatingsDTO.classCategoryUuid = participantSession.classCategoryUuid;
+    classRatingsDTO.classCategoryParticipantSessionUuid = participantSession.uuid;
 
     await classRatingsService.checkExistUserRating(classRatingsDTO.classCategorySessionUuid, user);
     return classRatingsService.rate(classRatingsDTO, improvementCodes, user);
@@ -227,11 +229,14 @@ classCategorySessionService.rate = async (classRatingsDTO, improvementCodes, use
 
 classCategorySessionService.reason = async (classReasonsDTO, user) => {
 
-    const session = await classCategorySessionService.getSessionByUuid(classReasonsDTO.classCategorySessionUuid);
+    const participantSession = await classCategoryParticipantSessionService
+        .getSingleParticipantWithSession(classReasonsDTO.classCategorySessionUuid, user.sub);
 
-    classReasonsDTO.classUuid = session.classUuid;
-    classReasonsDTO.classCategoryUuid = session.classCategoryUuid;
+    classReasonsDTO.classUuid = participantSession.classUuid;
+    classReasonsDTO.classCategoryUuid = participantSession.classCategoryUuid;
+    classReasonsDTO.classCategoryParticipantSessionUuid = participantSession.uuid;
 
+    await classReasonsService.checkExistUserReason(classReasonsDTO.classCategorySessionUuid, user);
     return classReasonsService.reason(classReasonsDTO, user);
 
 }
@@ -241,11 +246,14 @@ classCategorySessionService.complaintSession = async (classComplaintsDTO, user) 
     if (!classComplaintEnum[classComplaintsDTO.code])
         throw new UnsupportedOperationError(ErrorEnum.INVALID_COMPLAINT_CODE);
 
-    const session = await classCategorySessionService.getSessionByUuid(classComplaintsDTO.classCategorySessionUuid);
+    const participantSession = await classCategoryParticipantSessionService
+        .getSingleParticipantWithSession(classComplaintsDTO.classCategorySessionUuid, user.sub);
 
-    classComplaintsDTO.classUuid = session.classUuid;
-    classComplaintsDTO.classCategoryUuid = session.classCategoryUuid;
+    classComplaintsDTO.classUuid = participantSession.classUuid;
+    classComplaintsDTO.classCategoryUuid = participantSession.classCategoryUuid;
+    classComplaintsDTO.classCategoryParticipantSessionUuid = participantSession.uuid;
 
+    await classComplaintsService.checkExistUserComplaint(classComplaintsDTO.classCategorySessionUuid, user);
     return classComplaintsService.complaintSession(classComplaintsDTO, user);
 
 }
@@ -284,6 +292,50 @@ classCategorySessionService.getMySessionUuidsByCategoryUuid = async (categoryUui
 
     return ClassCategorySession.query()
         .modify('mySessions', user.sub)
+        .where('status', status)
+        .where('class_category_uuid', categoryUuid)
+        .where('start_date', '>=', Date.now())
+        .orderBy('start_date', 'ASC')
+        .then(sessions => sessions.map(session => {
+            return session.uuid;
+        }));
+
+}
+
+classCategorySessionService.getActiveClosestSessionsByStatusAndGroupByCategory = async (sessionUuids, status) => {
+
+    return ClassCategorySession.query()
+        .where('status', status)
+        .whereIn('uuid', sessionUuids)
+        .where('start_date', '>=', Date.now())
+        .orderBy('start_date', 'ASC')
+        .then(sessions => {
+            let seen = {};
+            return sessions.filter(session => {
+                if (!seen[session.classCategoryUuid]) {
+                    seen[session.classCategoryUuid] = true;
+                    return true;
+                }
+                return false;
+            });
+        });
+
+}
+
+classCategorySessionService.getActiveSessionsByStatus = async (sessionUuids, status) => {
+
+    return ClassCategorySession.query()
+        .where('status', status)
+        .whereIn('uuid', sessionUuids)
+        .where('start_date', '>=', Date.now())
+        .orderBy('start_date', 'ASC');
+
+}
+
+classCategorySessionService.getMySessionUuidsByCategoryUuid = async (categoryUuid, status, user) => {
+
+    return ClassCategorySession.query()
+        .modify('my', user.sub)
         .where('status', status)
         .where('class_category_uuid', categoryUuid)
         .where('start_date', '>=', Date.now())
