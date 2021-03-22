@@ -172,4 +172,11 @@ classService.getCategories = async (classUuid) => {
 
 }
 
+classService.getMyClassHistory = async (user) => {
+
+    return Class.query()
+        .modify('myClassHistory', user.sub);
+
+}
+
 module.exports = classService;

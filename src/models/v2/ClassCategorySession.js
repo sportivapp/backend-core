@@ -1,3 +1,4 @@
+const SessionStatusEnum = require('../enum/SessionStatusEnum');
 const Model = require('./Model');
 
 class ClassCategorySession extends Model {
@@ -40,6 +41,10 @@ class ClassCategorySession extends Model {
             single(builder) {
                 builder.select('uuid', 'class_category_uuid', 'month_utc', 'start_date', 'end_date', 'start_time', 'absence_time', 'status');
             },
+            finishedSessions(builder) {
+                builder.select('uuid', 'start_date', 'end_date')
+                    .where('status', SessionStatusEnum.DONE)
+            }
         }
     }
 

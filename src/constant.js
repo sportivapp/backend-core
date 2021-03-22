@@ -169,6 +169,7 @@ module.exports = {
             myClass: '/my-class-v2',
             coachClass: '/coach-class-v2',
             coaches: '/class-v2/:classUuid/coaches',
+            myClassHistory: '/my-history-class-v2',
         },
         classCategorySession: {
             list: '/class-category/:classCategoryUuid/class-category-session',

@@ -109,4 +109,17 @@ classController.getCategories = async (req, res, next) => {
 
 }
 
+classController.getMyClassHistory = async (req, res, next) => {
+
+    try {
+
+        const result = await classService.getMyClassHistory(req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = classController;

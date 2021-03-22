@@ -1,4 +1,4 @@
-const ClassStatusEnum = require('../enum/SessionStatusEnum');
+const SessionStatusEnum = require('../enum/SessionStatusEnum');
 const Model = require('./Model');
 
 class ClassCategoryParticipantSession extends Model {
@@ -48,7 +48,7 @@ class ClassCategoryParticipantSession extends Model {
                     .withGraphJoined('classCategorySession(basicStartEnd)')
                     .where('class_category_uuid', classCategoryUuid)
                     .where('user_id', userId)
-                    .where('classCategorySession.status', ClassStatusEnum.DONE);
+                    .where('classCategorySession.status', SessionStatusEnum.DONE);
             }
         }
     }
