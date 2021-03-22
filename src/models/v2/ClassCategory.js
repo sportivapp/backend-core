@@ -24,14 +24,17 @@ class ClassCategory extends Model {
         return {
             list(builder) {
                 builder.select('uuid', 'title', 'price')
+                    .modify('notDeleted');
             },
             adminDetail(builder) {
                 builder.select('uuid', 'title', 'description', 'price', 'requirements', 'is_recurring')
+                    .modify('notDeleted')
                     .withGraphFetched('categorySessions(list)')
                     .withGraphFetched('coaches(baseAttributes)');
             },
             userDetail(builder) {
                 builder.select('class_category.uuid', 'class_category.title', 'description', 'price', 'requirements', 'is_recurring')
+                    .modify('notDeleted')
                     .withGraphFetched('coaches(baseAttributes)')
                     .withGraphFetched('categorySessions(list)')
             },
@@ -72,7 +75,10 @@ class ClassCategory extends Model {
             book(builder) {
                 builder.select('uuid', 'title', 'price')
                     .withGraphFetched('class(administrationFee)')
-            }
+            },
+            notDeleted(builder) {
+                builder.whereRaw('delete_time IS NULL');
+            },
         }
     }
 
