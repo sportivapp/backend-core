@@ -8,6 +8,7 @@ const classComplaintsService = require('./mobileClassComplaintsService');
 const classComplaintEnum = require('../../models/enum/ClassComplaintEnum');
 const codeToDayEnum = require('../../models/enum/CodeToDayEnum');
 const codeToMonthEnum = require('../../models/enum/CodeToMonthEnum');
+const timeService = require('../../helper/timeService');
 
 const ErrorEnum = {
     INVALID_SESSION: 'INVALID_SESSION',
@@ -350,8 +351,10 @@ classCategorySessionService.getMySessionUuidsByCategoryUuid = async (categoryUui
 
 classCategorySessionService.getBookableSessions = async (classCategoryUuid, year, userId) => {
 
+    const { start, end } = timeService.getYearRange(year);
+
     return ClassCategorySession.query()
-        .modify('bookableSessions', classCategoryUuid, year, userId);
+        .modify('bookableSessions', classCategoryUuid, start, end, userId);
 
 }
 

@@ -128,4 +128,10 @@ classCategoryParticipantSessionService.mySessionHistoryByCategoryUuidAndUserId =
         
 }
 
+classCategoryParticipantSessionService.getCategoryComplaints = async (classCategoryUuid) => {
+
+    
+
+}
+
 module.exports = classCategoryParticipantSessionService;

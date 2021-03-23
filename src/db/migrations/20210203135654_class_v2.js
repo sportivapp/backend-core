@@ -2,7 +2,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('class', t => {
     t.specificType('id', 'serial');
     t.uuid('uuid').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     t.string('title').notNullable();
-    t.string('description', 1025).notNullable();
+    t.text('description').notNullable();
     t.string('address').notNullable();
     t.string('address_name');
     t.string('pic_id');

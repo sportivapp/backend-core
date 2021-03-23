@@ -2,7 +2,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('class_category', t => {
     t.specificType('id', 'serial');
     t.uuid('uuid').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     t.string('title').notNullable();
-    t.string('description').notNullable();
+    t.text('description').notNullable();
     t.decimal('price', 14, 2).notNullable();
     t.string('requirements');
     t.boolean('on_hold').defaultTo(false);

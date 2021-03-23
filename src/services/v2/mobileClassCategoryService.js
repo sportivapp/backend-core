@@ -194,4 +194,10 @@ classCategoryService.mySessionHistory = async (classCategoryUuid, user) => {
 
 }
 
+classCategoryService.getCategoryComplaints = async (classCategoryUuid, user) => {
+
+    return classCategoryParticipantSessionService.getCategoryComplaints(classCategoryUuid);
+
+}
+
 module.exports = classCategoryService;

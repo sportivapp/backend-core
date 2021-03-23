@@ -135,4 +135,19 @@ classCategoryController.mySessionHistory = async (req, res, next) => {
 
 }
 
+classCategoryController.getCategoryComplaints = async (req, res, next) => {
+
+    const { classCategoryUuid } = req.params;
+
+    try {
+
+        const result = await classCategoryService.getCategoryComplaints(classCategoryUuid, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = classCategoryController;
