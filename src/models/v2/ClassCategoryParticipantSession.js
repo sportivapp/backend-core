@@ -34,7 +34,9 @@ class ClassCategoryParticipantSession extends Model {
             },
             participants(builder) {
                 builder.select('uuid', 'user_id', 'class_uuid', 'class_category_uuid', 'is_check_in')
-                    .withGraphFetched('user(basic)');
+                    .withGraphFetched('user(basic)')
+                    .withGraphFetched('classRating(basic)')
+                    .withGraphFetched('classReason(basic)');
             },
             withSession(builder) {
                 builder.withGraphFetched('classCategorySession(single)')
