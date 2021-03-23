@@ -168,7 +168,7 @@ classCategoryService.getBookableSessions = async (classCategoryUuid, year, user)
         .getBookableSessions(classCategoryUuid, year, user.sub);
 
     if (category.isRecurring)
-        bookableSessions = classCategorySessionService.groupRecurringSessions(bookableSessions);
+        bookableSessions = classCategorySessionService.groupOrderedRecurringSessions(bookableSessions);
 
     return {
         ...category,

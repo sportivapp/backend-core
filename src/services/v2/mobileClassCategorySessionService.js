@@ -355,6 +355,7 @@ classCategorySessionService.getBookableSessions = async (classCategoryUuid, year
 
 }
 
+// Alternate
 classCategorySessionService.groupRecurringSessions = (sessions) => {
 
     let item,
@@ -382,7 +383,65 @@ classCategorySessionService.groupRecurringSessions = (sessions) => {
         groups[month][day].push(session);
     }
 
-    return groups
+    return groups;
+
+}
+
+classCategorySessionService.groupOrderedRecurringSessions = (sessions) => {
+
+    let foundMonth = {};
+    let monthIndex = -1;
+    const grouped = [];
+
+    let dayCodeIndexMapped = {};
+    let dayIndex = 0;
+
+    sessions.forEach(session => {
+
+        const startDate = new Date(parseInt(session.startDate));
+        const monthCode = startDate.getMonth();
+        const month = codeToMonthEnum[monthCode];
+        const dayCode = startDate.getDay();
+        const day = codeToDayEnum[dayCode];
+
+        if (!foundMonth[month]) {
+            foundMonth[month] = true;
+            dayCodeIndexMapped = {};
+            dayIndex = 0;
+
+            monthIndex++;
+            dayCodeIndexMapped[dayCode] = dayIndex;
+            grouped[monthIndex] = {
+                name: month,
+                // To state whether user can book this month's sessions
+                isParticipated: session.participantSession.length !== 0,
+                days: [
+                    {
+                        day: day,
+                        sessions: [session],
+                    }
+                ]
+            };
+
+        } else {
+
+            if (dayCodeIndexMapped[dayCode] === undefined) {
+                dayIndex++;
+                dayCodeIndexMapped[dayCode] = dayIndex;
+                grouped[monthIndex].days[dayCodeIndexMapped[dayCode]] = {
+                    day: day,
+                    sessions: [session],
+                };
+            } else {
+                grouped[monthIndex].days[dayCodeIndexMapped[dayCode]].sessions.push(session);
+            }
+
+        }
+        console.log(grouped)
+
+    });
+
+    return grouped;
 
 }
 
