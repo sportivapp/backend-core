@@ -195,6 +195,7 @@ module.exports = {
             schedule: '/class-category/:classCategoryUuid/schedule',
             bookable: '/class-category/:classCategoryUuid/bookable',
             myHistory: '/my-history-class-category/:classCategoryUuid',
+            complaints: '/coach-category/:classCategoryUuid/complaints',
         },
         classComplaint: {
             myComplaints: '/class-complaints',

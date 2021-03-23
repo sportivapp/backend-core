@@ -98,6 +98,10 @@ class Class extends Model {
             uuidAndTitle(builder) {
                 builder.select('uuid', 'title');
             },
+            uuidAndTitleWithPicture(builder) {
+                builder.select('uuid', 'title')
+                    .withGraphFetched('classMedia(list)');
+            },
             myClassHistory(builder, userId) {
                 builder.select('class.uuid', 'class.title')
                     .withGraphFetched('industry(baseAttributes)')

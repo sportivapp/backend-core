@@ -1,4 +1,5 @@
 const { UnsupportedOperationError } = require('../../models/errors');
+const ClassCategory = require('../../models/v2/ClassCategory');
 const ClassCategoryParticipantSession = require('../../models/v2/ClassCategoryParticipantSession');
 
 const ErrorEnum = {
@@ -130,7 +131,8 @@ classCategoryParticipantSessionService.mySessionHistoryByCategoryUuidAndUserId =
 
 classCategoryParticipantSessionService.getCategoryComplaints = async (classCategoryUuid) => {
 
-    
+    return ClassCategoryParticipantSession.query()
+        .modify('categoryComplaints', classCategoryUuid);
 
 }
 
