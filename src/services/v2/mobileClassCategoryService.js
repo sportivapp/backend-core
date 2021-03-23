@@ -4,7 +4,7 @@ const { UnsupportedOperationError, NotFoundError } = require('../../models/error
 const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
 const classCategorySessionService = require('./mobileClassCategorySessionService');
 const classCategoryParticipantSessionService = require('./mobileClassCategoryParticipantSessionService');
-const mobileClassComplaintService = require('./mobileClassComplaintsService');
+const classComplaintService = require('./mobileClassComplaintsService');
 
 const ErrorEnum = {
     INVALID_STATUS: 'INVALID_STATUS',
@@ -203,7 +203,7 @@ classCategoryService.mySessionHistory = async (classCategoryUuid, user) => {
 
 classCategoryService.getCategoryComplaints = async (classCategoryUuid, user) => {
 
-    return mobileClassComplaintService.getCategoryComplaints(classCategoryUuid);
+    return classComplaintService.getCategoryComplaints(classCategoryUuid);
 
 }
 
