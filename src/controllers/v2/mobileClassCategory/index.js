@@ -104,13 +104,14 @@ classCategoryController.getMyUnconfirmedSessions = async (req, res, next) => {
 
 }
 
-classCategoryController.getSessionsToBook = async (req, res, next) => {
+classCategoryController.getBookableSessions = async (req, res, next) => {
 
     const { classCategoryUuid } = req.params;
+    const { year } = req.query;
 
     try {
 
-        const result = await classCategoryService.getSessionsToBook(classCategoryUuid, req.user);
+        const result = await classCategoryService.getBookableSessions(classCategoryUuid, parseInt(year), req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
@@ -126,6 +127,21 @@ classCategoryController.mySessionHistory = async (req, res, next) => {
     try {
 
         const result = await classCategoryService.mySessionHistory(classCategoryUuid, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classCategoryController.getCategoryComplaints = async (req, res, next) => {
+
+    const { classCategoryUuid } = req.params;
+
+    try {
+
+        const result = await classCategoryService.getCategoryComplaints(classCategoryUuid, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {

@@ -6,8 +6,7 @@ classCategoryParticipantSessionService.getSessionParticipants = async (sessionUu
 
     return ClassCategoryParticipantSession.query()
         .modify('participants')
-        .where('class_category_session_uuid', sessionUuid)
-        .where('is_check_in', null);
+        .where('class_category_session_uuid', sessionUuid);
 
 }
 

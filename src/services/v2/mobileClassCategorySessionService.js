@@ -6,6 +6,9 @@ const classRatingsService = require('./mobileClassRatingsService');
 const classReasonsService = require('./mobileClassReasonsService');
 const classComplaintsService = require('./mobileClassComplaintsService');
 const classComplaintEnum = require('../../models/enum/ClassComplaintEnum');
+const codeToDayEnum = require('../../models/enum/CodeToDayEnum');
+const codeToMonthEnum = require('../../models/enum/CodeToMonthEnum');
+const timeService = require('../../helper/timeService');
 
 const ErrorEnum = {
     INVALID_SESSION: 'INVALID_SESSION',
@@ -344,6 +347,155 @@ classCategorySessionService.getMySessionUuidsByCategoryUuid = async (categoryUui
             return session.uuid;
         }));
 
+}
+
+classCategorySessionService.getBookableSessions = async (classCategoryUuid, year, userId) => {
+
+    const { start, end } = timeService.getYearRange(year);
+
+    return ClassCategorySession.query()
+        .modify('bookableSessions', classCategoryUuid, start, end, userId);
+
+}
+
+// Alternate
+classCategorySessionService.groupRecurringSessions = (sessions) => {
+
+    let item,
+        i = 0,
+        groups = {},
+        month, day, monthCode, dayCode;
+    while (session = sessions[i++]) {
+        item = new Date(parseInt(session.startDate));
+        monthCode = item.getMonth();
+        month = codeToMonthEnum[monthCode];
+        dayCode = item.getDay();
+        day = codeToDayEnum[dayCode];
+        if (!groups[month]) {
+            if (session.participantSession.length !== 0) {
+                groups[month] = {
+                    isParticipated: true
+                }
+            } else {
+                groups[month] = {
+                    isParticipated: false
+                }
+            }
+        } // exists OR create {}
+        groups[month][day] || (groups[month][day] = []);  // exists OR create []
+        groups[month][day].push(session);
+    }
+
+    return groups;
+
+}
+
+classCategorySessionService.groupOrderedRecurringSessions = (sessions) => {
+
+    let foundMonth = {};
+    let monthIndex = -1;
+    const grouped = [];
+
+    let dayCodeIndexMapped = {};
+    let dayIndex = 0;
+
+    sessions.forEach(session => {
+
+        const startDate = new Date(parseInt(session.startDate));
+        const monthCode = startDate.getMonth();
+        const month = codeToMonthEnum[monthCode];
+        const dayCode = startDate.getDay();
+        const day = codeToDayEnum[dayCode];
+
+        if (!foundMonth[month]) {
+            foundMonth[month] = true;
+            dayCodeIndexMapped = {};
+            dayIndex = 0;
+
+            monthIndex++;
+            dayCodeIndexMapped[dayCode] = dayIndex;
+            grouped[monthIndex] = {
+                name: month,
+                // To state whether user can book this month's sessions
+                isParticipated: session.participantSession.length !== 0,
+                days: [
+                    {
+                        day: day,
+                        sessions: [session],
+                    }
+                ]
+            };
+
+        } else {
+
+            if (dayCodeIndexMapped[dayCode] === undefined) {
+                dayIndex++;
+                dayCodeIndexMapped[dayCode] = dayIndex;
+                grouped[monthIndex].days[dayCodeIndexMapped[dayCode]] = {
+                    day: day,
+                    sessions: [session],
+                };
+            } else {
+                grouped[monthIndex].days[dayCodeIndexMapped[dayCode]].sessions.push(session);
+            }
+
+        }
+        console.log(grouped)
+
+    });
+
+    return grouped;
+
+}
+
+classCategorySessionService.groupSessions = (sessions) => {
+
+    const grouped = [];
+    
+    let mappedMonthCode = {};
+    let mappedDayCode = {};
+    let monthIndex = 0;
+    let dayIndex = 0;
+    sessions.forEach(session => {
+        const startDate = new Date(parseInt(session.startDate));
+        const monthCode = startDate.getMonth();
+        const month = codeToMonthEnum[monthCode];
+        const dayCode = startDate.getDay();
+        const day = codeToDayEnum[dayCode];
+        if (grouped[mappedMonthCode[monthCode]]) {
+            if (grouped[mappedMonthCode[monthCode]].days[mappedDayCode[dayCode]]) {
+                grouped[mappedMonthCode[monthCode]].days[mappedDayCode[dayCode]].sessions.push(session);
+            } else {
+                if (mappedDayCode[dayCode] || mappedDayCode[dayCode] === undefined) {
+                    mappedDayCode[dayCode] = dayIndex;
+                    dayIndex++;
+                }
+
+                grouped[mappedMonthCode[monthCode]].days[mappedDayCode[dayCode]] = {
+                    name: day,
+                    sessions: [session],
+                }
+            }
+        } else {
+            if (mappedDayCode[dayCode] || mappedDayCode[dayCode] === undefined) {
+                mappedDayCode[dayCode] = dayIndex;
+                dayIndex++;
+            }
+            mappedMonthCode[monthCode] = monthIndex;
+            monthIndex++;
+            
+            grouped[mappedMonthCode[monthCode]] = {
+                name: month,
+                days: [],
+            }
+            grouped[mappedMonthCode[monthCode]].days[mappedDayCode[dayCode]] = {
+                name: day,
+                sessions: [session],
+            };
+        }
+    });
+
+    return grouped;
 }
 
 module.exports = classCategorySessionService;

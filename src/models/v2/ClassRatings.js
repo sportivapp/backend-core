@@ -26,7 +26,7 @@ class ClassRatings extends Model {
                     .withGraphFetched('user(basic)');
             },
             basic(builder) {
-                builder.select('uuid', 'rating', 'review');
+                builder.select('uuid', 'rating', 'review', 'create_time');
             }
         }
     }

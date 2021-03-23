@@ -169,6 +169,7 @@ module.exports = {
             myClass: '/my-class-v2',
             coachClass: '/coach-class-v2',
             coaches: '/class-v2/:classUuid/coaches',
+            myClassHistory: '/my-history-class-v2',
         },
         classCategorySession: {
             list: '/class-category/:classCategoryUuid/class-category-session',
@@ -192,7 +193,7 @@ module.exports = {
             reschedule: '/coach-category/:classCategoryUuid/class-category-session/:classCategorySessionUuid/reschedule',
             unconfirmed: '/my-class-category/:classCategoryUuid/unconfirmed',
             schedule: '/class-category/:classCategoryUuid/schedule',
-            book: '/class-category/:classCategoryUuid/book',
+            bookable: '/class-category/:classCategoryUuid/bookable',
             myHistory: '/my-history-class-category/:classCategoryUuid',
         },
         classComplaint: {

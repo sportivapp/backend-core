@@ -9,7 +9,7 @@ router.get(routes.classCategory.startSession, auth.authenticateToken, controller
 router.get(routes.classCategory.endSession, auth.authenticateToken, controller.endSession);
 router.put(routes.classCategory.reschedule, auth.authenticateToken, controller.reschedule);
 router.get(routes.classCategory.unconfirmed, auth.authenticateToken, controller.getMyUnconfirmedSessions);
-router.get(routes.classCategory.book, auth.authenticateToken, controller.getSessionsToBook);
+router.get(routes.classCategory.bookable, auth.authenticateToken, controller.getBookableSessions);
 router.get(routes.classCategory.myHistory, auth.authenticateToken, controller.mySessionHistory);
 
 module.exports = router.expressRouter;

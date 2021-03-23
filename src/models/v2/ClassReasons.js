@@ -24,6 +24,9 @@ class ClassReasons extends Model {
             single(builder) {
                 builder.select('uuid', 'class_uuid', 'class_category_uuid', 'class_category_session_uuid', 'reason')
                     .withGraphFetched('user(basic)');
+            },
+            basic(builder) {
+                builder.select('uuid', 'reason', 'create_time');
             }
         }
     }

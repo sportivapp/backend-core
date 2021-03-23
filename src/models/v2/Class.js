@@ -97,7 +97,14 @@ class Class extends Model {
             },
             uuidAndTitle(builder) {
                 builder.select('uuid', 'title');
-            }
+            },
+            myClassHistory(builder, userId) {
+                builder.select('class.uuid', 'class.title')
+                    .withGraphFetched('industry(baseAttributes)')
+                    .withGraphFetched('city(baseAttributes)')
+                    .withGraphJoined(`classCategories(uuidAndTitle).[categorySessions(finishedSessions).[participantSession(sessionParticipants)]]`)
+                    .where('classCategories:categorySessions:participantSession.user_id', userId)
+            },
         }
     }
 

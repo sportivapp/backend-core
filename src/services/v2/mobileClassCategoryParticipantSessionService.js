@@ -103,23 +103,11 @@ classCategoryParticipantSessionService.getMySessionUuids = async (user) => {
 
 }
 
-classCategoryParticipantSessionService.getMySessionUuidsByClassCategoryUuid = async (classCategoryUuid, user) => {
-
-    return ClassCategoryParticipantSession.query()
-        .where('user_id', user.sub)
-        .where('class_category_uuid', classCategoryUuid)
-        .then(participantSessions => participantSessions.map(participantSession =>  {
-            return participantSession.classCategorySessionUuid;
-        }));
-
-}
-
 classCategoryParticipantSessionService.getSessionParticipants = async (sessionUuid) => {
 
     return ClassCategoryParticipantSession.query()
         .modify('participants')
-        .where('class_category_session_uuid', sessionUuid)
-        .where('is_check_in', null);
+        .where('class_category_session_uuid', sessionUuid);
 
 }
 
@@ -138,6 +126,12 @@ classCategoryParticipantSessionService.mySessionHistoryByCategoryUuidAndUserId =
     return ClassCategoryParticipantSession.query()
         .modify('mySessionHistory', classCategoryUuid, userId);
         
+}
+
+classCategoryParticipantSessionService.getCategoryComplaints = async (classCategoryUuid) => {
+
+    
+
 }
 
 module.exports = classCategoryParticipantSessionService;

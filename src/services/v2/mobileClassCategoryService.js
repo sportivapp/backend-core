@@ -3,8 +3,6 @@ const classCategoryCoachService = require('./mobileClassCategoryCoachService');
 const { UnsupportedOperationError, NotFoundError } = require('../../models/errors');
 const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
 const classCategorySessionService = require('./mobileClassCategorySessionService');
-const codeToDayEnum = require('../../models/enum/CodeToDayEnum');
-const codeToMonthEnum = require('../../models/enum/CodeToMonthEnum');
 const classCategoryParticipantSessionService = require('./mobileClassCategoryParticipantSessionService');
 
 const ErrorEnum = {
@@ -13,56 +11,6 @@ const ErrorEnum = {
 }
 
 const classCategoryService = {};
-
-classCategoryService.groupSessions = (sessions) => {
-
-    const grouped = [];
-    
-    let mappedMonthCode = {};
-    let mappedDayCode = {};
-    let monthIndex = 0;
-    let dayIndex = 0;
-    sessions.forEach(session => {
-        const startDate = new Date(parseInt(session.startDate));
-        const monthCode = startDate.getMonth();
-        const month = codeToMonthEnum[monthCode];
-        const dayCode = startDate.getDay();
-        const day = codeToDayEnum[dayCode];
-        if (grouped[mappedMonthCode[monthCode]]) {
-            if (grouped[mappedMonthCode[monthCode]].days[mappedDayCode[dayCode]]) {
-                grouped[mappedMonthCode[monthCode]].days[mappedDayCode[dayCode]].sessions.push(session);
-            } else {
-                if (mappedDayCode[dayCode] || mappedDayCode[dayCode] === undefined) {
-                    mappedDayCode[dayCode] = dayIndex;
-                    dayIndex++;
-                }
-
-                grouped[mappedMonthCode[monthCode]].days[mappedDayCode[dayCode]] = {
-                    name: day,
-                    sessions: [session],
-                }
-            }
-        } else {
-            if (mappedDayCode[dayCode] || mappedDayCode[dayCode] === undefined) {
-                mappedDayCode[dayCode] = dayIndex;
-                dayIndex++;
-            }
-            mappedMonthCode[monthCode] = monthIndex;
-            monthIndex++;
-            
-            grouped[mappedMonthCode[monthCode]] = {
-                name: month,
-                days: [],
-            }
-            grouped[mappedMonthCode[monthCode]].days[mappedDayCode[dayCode]] = {
-                name: day,
-                sessions: [session],
-            };
-        }
-    });
-
-    return grouped;
-}
 
 classCategoryService.getClassCategory = async (classCategoryUuid, user) => {
 
@@ -77,7 +25,7 @@ classCategoryService.getClassCategory = async (classCategoryUuid, user) => {
         })
 
     const isCoach = await classCategoryCoachService.getCoachCategory(user.sub, classCategoryUuid);
-    classCategory.categorySessions = classCategoryService.groupSessions(classCategory.categorySessions);
+    classCategory.categorySessions = classCategorySessionService.groupSessions(classCategory.categorySessions);
     classCategory.isCoach = !!isCoach;
 
     return classCategory;
@@ -210,30 +158,21 @@ classCategoryService.findById = async (classCategoryUuid) => {
 
 }
 
-classCategoryService.getSessionsToBook = async (classCategoryUuid, user) => {
+classCategoryService.getBookableSessions = async (classCategoryUuid, year, user) => {
 
     const category = await ClassCategory.query()
         .modify('book')
         .findById(classCategoryUuid);
 
-    const categorySessions = await classCategorySessionService.getSessions(classCategoryUuid, [sessionStatusEnum.UPCOMING]);
-    const mySessionUuids = await classCategoryParticipantSessionService.getMySessionUuidsByClassCategoryUuid(classCategoryUuid, user);
+    let bookableSessions = await classCategorySessionService
+        .getBookableSessions(classCategoryUuid, year, user.sub);
 
-    const newSessions = [];
-    categorySessions.forEach(categorySession => {
-        if (mySessionUuids.includes(categorySession.uuid)) {
-            categorySession.isParticipated = true;
-        } else {
-            categorySession.isParticipated = false;
-        }
-        
-        newSessions.push(categorySession);
-
-    });
+    if (category.isRecurring)
+        bookableSessions = classCategorySessionService.groupOrderedRecurringSessions(bookableSessions);
 
     return {
         ...category,
-        sessions: newSessions,
+        categorySessions: bookableSessions,
     }
 
 }
@@ -252,6 +191,12 @@ classCategoryService.mySessionHistory = async (classCategoryUuid, user) => {
         ...category,
         classCategoryParticipantSessions: participantSessions,
     }
+
+}
+
+classCategoryService.getCategoryComplaints = async (classCategoryUuid, user) => {
+
+    return classCategoryParticipantSessionService.getCategoryComplaints(classCategoryUuid);
 
 }
 
