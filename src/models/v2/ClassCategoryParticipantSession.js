@@ -35,7 +35,7 @@ class ClassCategoryParticipantSession extends Model {
             participants(builder) {
                 builder.select('uuid', 'user_id', 'class_uuid', 'class_category_uuid', 'is_check_in')
                     .withGraphFetched('user(basic)')
-                    .withGraphFetched('classRating(basic)')
+                    .withGraphFetched('classRating(basicWithImprovements)')
                     .withGraphFetched('classReason(basic)');
             },
             withSession(builder) {
@@ -51,12 +51,14 @@ class ClassCategoryParticipantSession extends Model {
                     .where('class_category_uuid', classCategoryUuid)
                     .where('user_id', userId)
                     .where('classCategorySession.status', SessionStatusEnum.DONE);
-            }
+            },
         }
     }
 
     static get relationMappings() {
 
+        const Class = require('./Class');
+        const ClassCategory = require('./ClassCategory');
         const ClassCategorySession = require('./ClassCategorySession');
         const User = require('../User');
         const ClassRatings = require('./ClassRatings');
@@ -64,6 +66,22 @@ class ClassCategoryParticipantSession extends Model {
         const ClassReasons = require('./ClassReasons');
  
         return {
+            class: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Class,
+                join: {
+                    from: 'class_category_participant_session.class_uuid',
+                    to: 'class.uuid',
+                }
+            },
+            classCategory: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: ClassCategory,
+                join: {
+                    from: 'class_category_participant_session.class_category_uuid',
+                    to: 'class_category.uuid',
+                }
+            },
             classCategorySession: {
                 relation: Model.BelongsToOneRelation,
                 modelClass: ClassCategorySession,

@@ -38,6 +38,13 @@ class ClassComplaints extends Model {
                     .withGraphFetched('classCategoryParticipantSession(complaint)')
                     .withGraphFetched('classCategorySession(basicStartEnd).[classCategory(uuidAndTitle).[class(uuidAndTitle)]]')
                     .withGraphFetched('user(basic)');
+            },
+            fullComplaint(builder) {
+                builder.select('uuid', 'complaint', 'code', 'coach_accept', 'coach_reason')
+                    .withGraphFetched('classCategorySession(basicStartEnd)')
+                    .withGraphFetched('class(uuidAndTitleWithPicture)')
+                    .withGraphFetched('classCategory(uuidAndTitle)')
+                    .withGraphFetched('user(basic)');
             }
         }
     }

@@ -4,6 +4,7 @@ const { UnsupportedOperationError, NotFoundError } = require('../../models/error
 const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
 const classCategorySessionService = require('./mobileClassCategorySessionService');
 const classCategoryParticipantSessionService = require('./mobileClassCategoryParticipantSessionService');
+const classComplaintService = require('./mobileClassComplaintsService');
 
 const ErrorEnum = {
     INVALID_STATUS: 'INVALID_STATUS',
@@ -162,7 +163,13 @@ classCategoryService.getBookableSessions = async (classCategoryUuid, year, user)
 
     const category = await ClassCategory.query()
         .modify('book')
-        .findById(classCategoryUuid);
+        .findById(classCategoryUuid)
+        .then(category => {
+            if (!category)
+                throw new UnsupportedOperationError(ErrorEnum.CATEGORY_NOT_FOUND);
+            category.price = parseInt(category.price);
+            return category;
+        });
 
     let bookableSessions = await classCategorySessionService
         .getBookableSessions(classCategoryUuid, year, user.sub);
@@ -196,7 +203,7 @@ classCategoryService.mySessionHistory = async (classCategoryUuid, user) => {
 
 classCategoryService.getCategoryComplaints = async (classCategoryUuid, user) => {
 
-    return classCategoryParticipantSessionService.getCategoryComplaints(classCategoryUuid);
+    return classComplaintService.getCategoryComplaints(classCategoryUuid);
 
 }
 

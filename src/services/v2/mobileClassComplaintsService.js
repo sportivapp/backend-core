@@ -89,4 +89,12 @@ mobileClassComplaintService.coachRejectComplaint = async (classComplaintUuid, co
 
 }
 
+mobileClassComplaintService.getCategoryComplaints = (classCategoryUuid) => {
+
+    return ClassComplaints.query()
+        .modify('fullComplaint')
+        .where('class_category_uuid', classCategoryUuid)
+
+}
+
 module.exports = mobileClassComplaintService;

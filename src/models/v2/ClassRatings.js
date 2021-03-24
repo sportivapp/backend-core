@@ -27,6 +27,10 @@ class ClassRatings extends Model {
             },
             basic(builder) {
                 builder.select('uuid', 'rating', 'review', 'create_time');
+            },
+            basicWithImprovements(builder) {
+                builder.select('uuid', 'rating', 'review', 'create_time')
+                    .withGraphFetched('improvements(baseAttributes)');
             }
         }
     }
