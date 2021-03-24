@@ -426,7 +426,6 @@ classCategorySessionService.groupOrderedRecurringSessions = (sessions) => {
             }
 
         }
-        console.log(grouped)
 
     });
 
