@@ -335,20 +335,6 @@ classCategorySessionService.getActiveSessionsByStatus = async (sessionUuids, sta
 
 }
 
-classCategorySessionService.getMySessionUuidsByCategoryUuid = async (categoryUuid, status, user) => {
-
-    return ClassCategorySession.query()
-        .modify('my', user.sub)
-        .where('status', status)
-        .where('class_category_uuid', categoryUuid)
-        .where('start_date', '>=', Date.now())
-        .orderBy('start_date', 'ASC')
-        .then(sessions => sessions.map(session => {
-            return session.uuid;
-        }));
-
-}
-
 classCategorySessionService.getBookableSessions = async (classCategoryUuid, year, userId) => {
 
     const { start, end } = timeService.getYearRange(year);
