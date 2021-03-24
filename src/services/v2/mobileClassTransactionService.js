@@ -110,6 +110,11 @@ classTransactionService.generateFreeTransaction = async (cls, category, sessions
         const participantSessionDTOs = classTransactionService.generateParticipantSessionDTOs(detailTransactions);
         await classCategoryParticipantSessionService.register(participantSessionDTOs, user, trx);
 
+        return {
+            ...classTransaction,
+            details: detailTransactions,
+        }
+
     });
 
 }
@@ -132,6 +137,11 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
             .generateDetailTransactionDTOs(classTransaction, cls, category, sessions, null, user);
         await classTransactionDetailService
             .generateTransactionDetail(transactionDetailDTOs, user, trx);
+
+        return {
+            ...classTransaction,
+            details: detailTransactions,
+        }
 
     });
         
