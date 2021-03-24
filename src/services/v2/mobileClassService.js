@@ -5,6 +5,7 @@ const classCategoryService = require('./mobileClassCategoryService');
 const classCategoryParticipantSessionService = require('./mobileClassCategoryParticipantSessionService');
 const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
 const classCategorySessionService = require('./mobileClassCategorySessionService');
+const classTransactionService = require('./mobileClassTransactionService');
 
 const ErrorEnum = {
     INVALID_COACH_ID: 'INVALID_COACH_ID',
@@ -92,20 +93,18 @@ classService.getClassCategory = async (classUuid, classCategoryUuid, user) => {
 
 classService.register = async (classUuid, classCategoryUuid, classCategorySessionUuids, user) => {
 
-    // Add checking whether user registered to the session here
-    // Generate Invoice
+    await classCategoryParticipantSessionService.checkUserRegisteredToSessions(classCategorySessionUuids, user.sub);
+    const cls = await classService.findById(classUuid);
+    const category = await classCategoryService.findById(classCategoryUuid);
+    const sessions = await classCategorySessionService.findSessions(classCategorySessionUuids);
 
-    const participantSessionsDTOs = classCategorySessionUuids.map(classCategorySessionUuid => {
-        return {
-            classUuid: classUuid,
-            classCategoryUuid: classCategoryUuid,
-            classCategorySessionUuid: classCategorySessionUuid,
-            userId: user.sub,
-            // invoice: invoice,
-        }
-    });
-
-    return classCategoryParticipantSessionService.register(participantSessionsDTOs, user);
+    // for now everything is free!!! TODO: Change this!!!
+    // if (parseInt(category.price) === 0) {
+    if (true) {
+        return classTransactionService.generateFreeTransaction(cls, category, sessions, user);
+    } else {
+        return classTransactionService.generatePaidTransaction(cls, category, sessions, user);
+    }
 
 }
 

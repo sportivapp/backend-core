@@ -484,4 +484,11 @@ classCategorySessionService.groupSessions = (sessions) => {
     return grouped;
 }
 
+classCategorySessionService.findSessions = (sessionUuids) => {
+
+    return ClassCategorySession.query()
+        .whereIn('uuid', sessionUuids);
+    
+}
+
 module.exports = classCategorySessionService;
