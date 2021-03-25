@@ -35,6 +35,7 @@ classService.getClasses = async (page, size, keyword, industryId, cityId) => {
         return {
             ...cls,
             priceRange: await classCategoryService.getClassCategoryPriceRangeByClassUuid(cls.uuid),
+            totalParticipants: await classCategoryParticipantSessionService.getTotalParticipantsByClassUuid(cls.uuid),
         }
     });
     
