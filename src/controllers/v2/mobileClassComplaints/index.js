@@ -5,9 +5,11 @@ mobileClassComplaintController = {};
 
 mobileClassComplaintController.getMyComplaints = async (req, res, next) => {
 
+    const { status } = req.query;
+
     try {
 
-        const result = await classComplaintsService.getMyComplaints(req.user);
+        const result = await classComplaintsService.getMyComplaints(req.user, status);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
@@ -18,9 +20,11 @@ mobileClassComplaintController.getMyComplaints = async (req, res, next) => {
 
 mobileClassComplaintController.getCoachComplaints = async (req, res, next) => {
 
+    const { status } = req.query;
+
     try {
 
-        const result = await classComplaintsService.getCoachComplaints(req.user);
+        const result = await classComplaintsService.getCoachComplaints(req.user, status);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {

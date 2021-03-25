@@ -130,13 +130,6 @@ classCategoryParticipantSessionService.mySessionHistoryByCategoryUuidAndUserId =
         
 }
 
-classCategoryParticipantSessionService.getCategoryComplaints = async (classCategoryUuid) => {
-
-    return ClassCategoryParticipantSession.query()
-        .modify('categoryComplaints', classCategoryUuid);
-
-}
-
 classCategoryParticipantSessionService.checkUserRegisteredToSessions = async (sessionUuids, userId) => {
 
     return ClassCategoryParticipantSession.query()

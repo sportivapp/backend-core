@@ -201,9 +201,9 @@ classCategoryService.mySessionHistory = async (classCategoryUuid, user) => {
 
 }
 
-classCategoryService.getCategoryComplaints = async (classCategoryUuid, user) => {
+classCategoryService.getCategoryComplaints = async (classCategoryUuid, status, user) => {
 
-    return classComplaintService.getCategoryComplaints(classCategoryUuid);
+    return classComplaintService.getCategoryComplaints(classCategoryUuid, status);
 
 }
 

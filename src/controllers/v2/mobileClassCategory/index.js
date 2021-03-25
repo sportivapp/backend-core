@@ -138,10 +138,11 @@ classCategoryController.mySessionHistory = async (req, res, next) => {
 classCategoryController.getCategoryComplaints = async (req, res, next) => {
 
     const { classCategoryUuid } = req.params;
+    const { status } = req.query;
 
     try {
 
-        const result = await classCategoryService.getCategoryComplaints(classCategoryUuid, req.user);
+        const result = await classCategoryService.getCategoryComplaints(classCategoryUuid, status, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
