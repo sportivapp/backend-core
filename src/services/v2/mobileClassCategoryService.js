@@ -70,7 +70,7 @@ classCategoryService.getCoachCategory = async (classCategoryUuid, user) => {
         let isToday = false;
         // Only for the first upcoming session
         if (index === 0) {
-            isToday = new Date(parseInt(session.startDate)).getDate === new Date().getDate();
+            isToday = new Date(parseInt(session.startDate)).getDate() === new Date().getDate();
         }
 
         return {
