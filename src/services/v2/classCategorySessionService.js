@@ -67,7 +67,8 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
         const startDiff = parseInt(classCategorySessionDTO.startDate) - parseInt(session.startDate);
         const endDiff = parseInt(classCategorySessionDTO.endDate) - parseInt(session.endDate);
 
-        const updatedSessions = upcomingSessions.filter(upcomingSession => {
+        const updatedSessions = [];
+        upcomingSessions.forEach(upcomingSession => {
             
             const sessionDate = new Date(parseInt(session.startDate));
             const upcomingSessionDate = new Date(parseInt(upcomingSession.startDate));
@@ -75,16 +76,12 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
             // Get all matched session by day & hour & minute
             if (sessionDate.getDay() === upcomingSessionDate.getDay() &&
             sessionDate.getHours() === upcomingSessionDate.getHours() &&
-            sessionDate.getMinutes() === upcomingSessionDate.getMinutes()) { 
-                upcomingSession.startDate = parseInt(upcomingSession.startDate);
-                upcomingSession.endDate = parseInt(upcomingSession.endDate);
-                return upcomingSession;
-            }
-        }).map(matchedUpcomingSession => {
-            return {
-                ...matchedUpcomingSession,
-                startDate: matchedUpcomingSession.startDate + startDiff,
-                endDate: matchedUpcomingSession.endDate + endDiff,
+            sessionDate.getMinutes() === upcomingSessionDate.getMinutes()) {
+                updatedSessions.push({
+                    uuid: upcomingSession.uuid,
+                    startDate: parseInt(upcomingSession.startDate) + startDiff,
+                    endDate: parseInt(upcomingSession.endDate) + endDiff,
+                });
             }
         });
 
