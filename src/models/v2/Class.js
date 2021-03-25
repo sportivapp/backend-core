@@ -63,6 +63,7 @@ class Class extends Model {
             },
             coachClass(builder, userId, status) {
                 builder.select('class.uuid', 'class.title')
+                    .modify('notDeleted')
                     .withGraphFetched('industry(baseAttributes)')
                     .withGraphFetched('city(baseAttributes)')
                     .withGraphFetched('classMedia(list).[file(baseAttributes)]')
