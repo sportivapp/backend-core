@@ -59,11 +59,13 @@ classService.getClass = async (classUuid, user) => {
         .then(async cls => {
             if (!cls)
                 throw new NotFoundError();
+            cls.totalParticipants = await classCategoryParticipantSessionService.getTotalParticipantsByClassUuid(cls.uuid);
             cls.administrationFee = parseInt(cls.administrationFee);
             return cls;
         });
 
     const clsCategoriesPromise = cls.classCategories.map(async category => {
+        category.totalParticipants = await classCategorySessionService.getTotalParticipantsByCategoryUuid(category.uuid);
         category.price = parseInt(category.price);
     })
 
@@ -152,6 +154,7 @@ classService.groupClassesByCategoryReplaceSessionsToSession = async (classes) =>
 
     const classPromises = classes.map(async cls => {
         const categoriesPromises = cls.classCategories.map(async category => {
+            category.totalParticipants = await classCategorySessionService.getTotalParticipantsByCategoryUuid(category.uuid);
             category.categorySession = category.categorySessions[0];
             delete category.categorySessions;
             return category;

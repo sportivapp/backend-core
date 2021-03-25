@@ -153,4 +153,15 @@ classCategoryParticipantSessionService.getTotalParticipantsByClassUuid = async (
 
 }
 
+classCategoryParticipantSessionService.getTotalParticipantsBySessionUuids = async (sessionUuids) => {
+
+    return ClassCategoryParticipantSession.query()
+        .whereIn('class_category_session_uuid', sessionUuids)
+        .countDistinct('user_id')
+        .then(count => {
+            return parseInt(count[0].count);
+        });
+
+}
+
 module.exports = classCategoryParticipantSessionService;

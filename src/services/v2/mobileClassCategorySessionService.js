@@ -493,4 +493,25 @@ classCategorySessionService.findSessions = (sessionUuids) => {
     
 }
 
+classCategorySessionService.getActiveSessionUuidsByCategoryUuid = async (categoryUuid) => {
+
+    return ClassCategorySession.query()
+        .where('class_category_uuid', categoryUuid)
+        .whereIn('status', [sessionStatusEnum.UPCOMING, sessionStatusEnum.ONGOING])
+        .then(sessions => {
+            return sessions.map(session => {
+                return session.uuid;
+            });
+        });
+
+}
+
+classCategorySessionService.getTotalParticipantsByCategoryUuid = async (categoryUuid) => {
+
+    const sessionUuids = await classCategorySessionService.getActiveSessionUuidsByCategoryUuid(categoryUuid);
+
+    return classCategoryParticipantSessionService.getTotalParticipantsBySessionUuids(sessionUuids);
+
+}
+
 module.exports = classCategorySessionService;
