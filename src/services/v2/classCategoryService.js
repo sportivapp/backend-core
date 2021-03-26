@@ -7,6 +7,7 @@ const codeToDayEnum = require('../../models/enum/CodeToDayEnum');
 const classCategoryScheduleService = require('./classCategoryScheduleService');
 const classCategoryPriceLogService = require('./classCategoryPriceLogService');
 const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
+const classComplaintService = require('./classComplaintsService');
 
 const ErrorEnum = {
     CATEGORY_NOT_FOUND: 'CATEGORY_NOT_FOUND',
@@ -309,7 +310,12 @@ classCategoryService.generateSessionAndScheduleFromCategorySchedules = (classUui
         schedule: scheduleDTO,
     }
 
-    
+}
+
+classCategoryService.getCategoryComplaints = async (classCategoryUuid, status, user) => {
+
+    return classComplaintService.getCategoryComplaints(classCategoryUuid, status);
+
 }
 
 module.exports = classCategoryService;
