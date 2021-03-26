@@ -462,7 +462,7 @@ classCategorySessionService.groupSessions = (sessions) => {
                 name: month,
                 days: [
                     {
-                        day: day,
+                        name: day,
                         sessions: [session],
                     }
                 ]
@@ -474,7 +474,7 @@ classCategorySessionService.groupSessions = (sessions) => {
                 dayIndex++;
                 dayCodeIndexMapped[dayCode] = dayIndex;
                 grouped[monthIndex].days[dayCodeIndexMapped[dayCode]] = {
-                    day: day,
+                    name: day,
                     sessions: [session],
                 };
             } else {
