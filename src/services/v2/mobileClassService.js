@@ -5,6 +5,7 @@ const classCategoryService = require('./mobileClassCategoryService');
 const classCategoryParticipantSessionService = require('./mobileClassCategoryParticipantSessionService');
 const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
 const classCategorySessionService = require('./mobileClassCategorySessionService');
+const classTransactionService = require('./mobileClassTransactionService');
 
 const ErrorEnum = {
     INVALID_COACH_ID: 'INVALID_COACH_ID',
@@ -34,6 +35,7 @@ classService.getClasses = async (page, size, keyword, industryId, cityId) => {
         return {
             ...cls,
             priceRange: await classCategoryService.getClassCategoryPriceRangeByClassUuid(cls.uuid),
+            totalParticipants: await classCategoryParticipantSessionService.getTotalParticipantsByClassUuid(cls.uuid),
         }
     });
     
@@ -57,11 +59,13 @@ classService.getClass = async (classUuid, user) => {
         .then(async cls => {
             if (!cls)
                 throw new NotFoundError();
+            cls.totalParticipants = await classCategoryParticipantSessionService.getTotalParticipantsByClassUuid(cls.uuid);
             cls.administrationFee = parseInt(cls.administrationFee);
             return cls;
         });
 
     const clsCategoriesPromise = cls.classCategories.map(async category => {
+        category.totalParticipants = await classCategorySessionService.getTotalParticipantsByCategoryUuid(category.uuid);
         category.price = parseInt(category.price);
     })
 
@@ -92,20 +96,12 @@ classService.getClassCategory = async (classUuid, classCategoryUuid, user) => {
 
 classService.register = async (classUuid, classCategoryUuid, classCategorySessionUuids, user) => {
 
-    // Add checking whether user registered to the session here
-    // Generate Invoice
+    await classCategoryParticipantSessionService.checkUserRegisteredToSessions(classCategorySessionUuids, user.sub);
+    const cls = await classService.findById(classUuid);
+    const category = await classCategoryService.findById(classCategoryUuid);
+    const sessions = await classCategorySessionService.findSessions(classCategorySessionUuids);
 
-    const participantSessionsDTOs = classCategorySessionUuids.map(classCategorySessionUuid => {
-        return {
-            classUuid: classUuid,
-            classCategoryUuid: classCategoryUuid,
-            classCategorySessionUuid: classCategorySessionUuid,
-            userId: user.sub,
-            // invoice: invoice,
-        }
-    });
-
-    return classCategoryParticipantSessionService.register(participantSessionsDTOs, user);
+    return classTransactionService.generateTransaction(cls, category, sessions, user);
 
 }
 
@@ -152,6 +148,7 @@ classService.groupClassesByCategoryReplaceSessionsToSession = async (classes) =>
 
     const classPromises = classes.map(async cls => {
         const categoriesPromises = cls.classCategories.map(async category => {
+            category.totalParticipants = await classCategorySessionService.getTotalParticipantsByCategoryUuid(category.uuid);
             category.categorySession = category.categorySessions[0];
             delete category.categorySessions;
             return category;

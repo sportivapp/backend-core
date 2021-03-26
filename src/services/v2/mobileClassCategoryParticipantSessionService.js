@@ -1,9 +1,10 @@
 const { UnsupportedOperationError } = require('../../models/errors');
-const ClassCategory = require('../../models/v2/ClassCategory');
 const ClassCategoryParticipantSession = require('../../models/v2/ClassCategoryParticipantSession');
 
 const ErrorEnum = {
     INVALID_PARTICIPANT_SESSION: 'INVALID_PARTICIPANT_SESSION',
+    REGISTERED_TO_SESSION: 'REGISTERED_TO_SESSION',
+    INVALID_ONE_OR_MORE_SESSION: 'INVALID_ONE_OR_MORE_SESSION',
 }
 
 const classCategoryParticipantSessionService = {};
@@ -87,9 +88,9 @@ classCategoryParticipantSessionService.updateParticipantConfirmedExpiration = as
 
 }
 
-classCategoryParticipantSessionService.register = async (participantSessionDTOs, user) => {
+classCategoryParticipantSessionService.register = async (participantSessionDTOs, user, trx) => {
 
-    return ClassCategoryParticipantSession.query()
+    return ClassCategoryParticipantSession.query(trx)
         .insertToTable(participantSessionDTOs, user.sub);
 
 }
@@ -129,10 +130,37 @@ classCategoryParticipantSessionService.mySessionHistoryByCategoryUuidAndUserId =
         
 }
 
-classCategoryParticipantSessionService.getCategoryComplaints = async (classCategoryUuid) => {
+classCategoryParticipantSessionService.checkUserRegisteredToSessions = async (sessionUuids, userId) => {
 
     return ClassCategoryParticipantSession.query()
-        .modify('categoryComplaints', classCategoryUuid);
+        .whereIn('class_category_session_uuid', sessionUuids)
+        .where('user_id', userId)
+        .then(participants => {
+            if (participants.length !== 0)
+                throw new UnsupportedOperationError(ErrorEnum.REGISTERED_TO_SESSION);
+        });
+
+}
+
+classCategoryParticipantSessionService.getTotalParticipantsByClassUuid = async (classUuid) => {
+
+    return ClassCategoryParticipantSession.query()
+        .where('class_uuid', classUuid)
+        .countDistinct('user_id')
+        .then(count => {
+            return parseInt(count[0].count);
+        });
+
+}
+
+classCategoryParticipantSessionService.getTotalParticipantsBySessionUuids = async (sessionUuids) => {
+
+    return ClassCategoryParticipantSession.query()
+        .whereIn('class_category_session_uuid', sessionUuids)
+        .countDistinct('user_id')
+        .then(count => {
+            return parseInt(count[0].count);
+        });
 
 }
 

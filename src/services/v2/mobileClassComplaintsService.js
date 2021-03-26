@@ -2,9 +2,11 @@ const ClassComplaints = require('../../models/v2/ClassComplaints');
 const { UnsupportedOperationError } = require('../../models/errors');
 const classCategoryCoachService = require('./mobileClassCategoryCoachService');
 const classComplaintMediaService = require('./mobileClassComplaintMediasService');
+const classComplaintStatusEnum = require('../../models/enum/ClassComplaintStatusEnum');
 
 const ErrorEnum = {
     DOUBLE_COMPLAINT: 'DOUBLE_COMPLAINT',
+    INVALID_STATUS: 'INVALID_STATUS',
 }
 
 const mobileClassComplaintService = {};
@@ -30,15 +32,22 @@ mobileClassComplaintService.complaintSession = async (classComplaintsDTO, user) 
 
 }
 
-mobileClassComplaintService.getMyComplaints = async (user) => {
+mobileClassComplaintService.getMyComplaints = async (user, status) => {
+
+    if (!classComplaintStatusEnum[status])
+        throw new UnsupportedOperationError(ErrorEnum.INVALID_STATUS);
 
     return ClassComplaints.query()
         .modify('myComplaints')
-        .where('create_by', user.sub);
+        .where('create_by', user.sub)
+        .where('status', status);
 
 }
 
-mobileClassComplaintService.getCoachComplaints = async (user) => {
+mobileClassComplaintService.getCoachComplaints = async (user, status) => {
+
+    if (!classComplaintStatusEnum[status])
+        throw new UnsupportedOperationError(ErrorEnum.INVALID_STATUS);
 
     const categoryUuids = await classCategoryCoachService.getCoachCategoryUuidsByUserId(user.sub);
 
@@ -47,7 +56,8 @@ mobileClassComplaintService.getCoachComplaints = async (user) => {
 
     return ClassComplaints.query()
         .modify('coachComplaints')
-        .whereIn('class_category_uuid', categoryUuids);
+        .whereIn('class_category_uuid', categoryUuids)
+        .where('status', status);
 
 }
 
@@ -57,6 +67,7 @@ mobileClassComplaintService.coachAcceptComplaint = async (classComplaintUuid, us
         .findById(classComplaintUuid)
         .updateByUserId({
             coachAccept: true,
+            status: classComplaintStatusEnum.ON_PROGRESS,
         }, user.sub)
         .returning('*');
 
@@ -71,6 +82,7 @@ mobileClassComplaintService.coachRejectComplaint = async (classComplaintUuid, co
             .updateByUserId({
                 coachAccept: false,
                 coachReason: coachReason,
+                status: classComplaintStatusEnum.ON_PROGRESS,
             }, user.sub)
             .returning('*');
 
@@ -89,11 +101,15 @@ mobileClassComplaintService.coachRejectComplaint = async (classComplaintUuid, co
 
 }
 
-mobileClassComplaintService.getCategoryComplaints = (classCategoryUuid) => {
+mobileClassComplaintService.getCategoryComplaints = (classCategoryUuid, status) => {
+    
+    if (!classComplaintStatusEnum[status])
+        throw new UnsupportedOperationError(ErrorEnum.INVALID_STATUS);
 
     return ClassComplaints.query()
         .modify('fullComplaint')
         .where('class_category_uuid', classCategoryUuid)
+        .where('status', status);
 
 }
 

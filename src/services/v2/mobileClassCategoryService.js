@@ -13,23 +13,24 @@ const ErrorEnum = {
 
 const classCategoryService = {};
 
-classCategoryService.getClassCategory = async (classCategoryUuid, user) => {
+classCategoryService.getClassCategory = async (categoryUuid, user) => {
 
-    const classCategory = await ClassCategory.query()
+    const category = await ClassCategory.query()
         .modify('userDetail')
-        .findById(classCategoryUuid)
-        .then(classCategory => {
-            if (!classCategory)
+        .findById(categoryUuid)
+        .then(async category => {
+            if (!category)
                 throw new NotFoundError();
-            classCategory.price = parseInt(classCategory.price);
-            return classCategory;
+                category.totalParticipants = await classCategorySessionService.getTotalParticipantsByCategoryUuid(category.uuid);
+                category.price = parseInt(category.price);
+            return category;
         })
 
-    const isCoach = await classCategoryCoachService.getCoachCategory(user.sub, classCategoryUuid);
-    classCategory.categorySessions = classCategorySessionService.groupSessions(classCategory.categorySessions);
-    classCategory.isCoach = !!isCoach;
+    const isCoach = await classCategoryCoachService.getCoachCategory(user.sub, categoryUuid);
+    category.categorySessions = classCategorySessionService.groupSessions(category.categorySessions);
+    category.isCoach = !!isCoach;
 
-    return classCategory;
+    return category;
 
 }
 
@@ -70,7 +71,7 @@ classCategoryService.getCoachCategory = async (classCategoryUuid, user) => {
         let isToday = false;
         // Only for the first upcoming session
         if (index === 0) {
-            isToday = new Date(parseInt(session.startDate)).getDate === new Date().getDate();
+            isToday = new Date(parseInt(session.startDate)).getDate() === new Date().getDate();
         }
 
         return {
@@ -201,9 +202,9 @@ classCategoryService.mySessionHistory = async (classCategoryUuid, user) => {
 
 }
 
-classCategoryService.getCategoryComplaints = async (classCategoryUuid, user) => {
+classCategoryService.getCategoryComplaints = async (classCategoryUuid, status, user) => {
 
-    return classComplaintService.getCategoryComplaints(classCategoryUuid);
+    return classComplaintService.getCategoryComplaints(classCategoryUuid, status);
 
 }
 

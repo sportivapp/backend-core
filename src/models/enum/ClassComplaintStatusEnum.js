@@ -1,0 +1,5 @@
+module.exports = {
+    AWAITING_CONFIRMATION: 'AWAITING_CONFIRMATION',
+    ON_PROGRESS: 'ON_PROGRESS',
+    DONE: 'DONE',
+}
