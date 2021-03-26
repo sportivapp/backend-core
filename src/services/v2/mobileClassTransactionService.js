@@ -144,8 +144,19 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
         }
 
     });
-        
-        
+  
+}
+
+classTransactionService.generateTransaction = async (cls, category, sessions, user) => {
+
+    // for now everything is free!!! TODO: Change this!!!
+    // if (parseInt(category.price) === 0) {
+    if (true) {
+        return classTransactionService.generateFreeTransaction(cls, category, sessions, user);
+    } else {
+        return classTransactionService.generatePaidTransaction(cls, category, sessions, user);
+    }
+
 }
 
 module.exports = classTransactionService;

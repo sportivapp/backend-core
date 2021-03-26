@@ -101,13 +101,7 @@ classService.register = async (classUuid, classCategoryUuid, classCategorySessio
     const category = await classCategoryService.findById(classCategoryUuid);
     const sessions = await classCategorySessionService.findSessions(classCategorySessionUuids);
 
-    // for now everything is free!!! TODO: Change this!!!
-    // if (parseInt(category.price) === 0) {
-    if (true) {
-        return classTransactionService.generateFreeTransaction(cls, category, sessions, user);
-    } else {
-        return classTransactionService.generatePaidTransaction(cls, category, sessions, user);
-    }
+    return classTransactionService.generateTransaction(cls, category, sessions, user);
 
 }
 
