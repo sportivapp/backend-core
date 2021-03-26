@@ -436,52 +436,57 @@ classCategorySessionService.groupOrderedRecurringSessions = (sessions) => {
 
 classCategorySessionService.groupSessions = (sessions) => {
 
+    let foundMonth = {};
+    let monthIndex = -1;
     const grouped = [];
-    
-    let mappedMonthCode = {};
-    let mappedDayCode = {};
-    let monthIndex = 0;
+
+    let dayCodeIndexMapped = {};
     let dayIndex = 0;
+
     sessions.forEach(session => {
+
         const startDate = new Date(parseInt(session.startDate));
         const monthCode = startDate.getMonth();
         const month = codeToMonthEnum[monthCode];
         const dayCode = startDate.getDay();
         const day = codeToDayEnum[dayCode];
-        if (grouped[mappedMonthCode[monthCode]]) {
-            if (grouped[mappedMonthCode[monthCode]].days[mappedDayCode[dayCode]]) {
-                grouped[mappedMonthCode[monthCode]].days[mappedDayCode[dayCode]].sessions.push(session);
-            } else {
-                if (mappedDayCode[dayCode] || mappedDayCode[dayCode] === undefined) {
-                    mappedDayCode[dayCode] = dayIndex;
-                    dayIndex++;
-                }
 
-                grouped[mappedMonthCode[monthCode]].days[mappedDayCode[dayCode]] = {
-                    name: day,
-                    sessions: [session],
-                }
-            }
-        } else {
-            if (mappedDayCode[dayCode] || mappedDayCode[dayCode] === undefined) {
-                mappedDayCode[dayCode] = dayIndex;
-                dayIndex++;
-            }
-            mappedMonthCode[monthCode] = monthIndex;
+        if (!foundMonth[month]) {
+            foundMonth[month] = true;
+            dayCodeIndexMapped = {};
+            dayIndex = 0;
+
             monthIndex++;
-            
-            grouped[mappedMonthCode[monthCode]] = {
+            dayCodeIndexMapped[dayCode] = dayIndex;
+            grouped[monthIndex] = {
                 name: month,
-                days: [],
-            }
-            grouped[mappedMonthCode[monthCode]].days[mappedDayCode[dayCode]] = {
-                name: day,
-                sessions: [session],
+                days: [
+                    {
+                        day: day,
+                        sessions: [session],
+                    }
+                ]
             };
+
+        } else {
+
+            if (dayCodeIndexMapped[dayCode] === undefined) {
+                dayIndex++;
+                dayCodeIndexMapped[dayCode] = dayIndex;
+                grouped[monthIndex].days[dayCodeIndexMapped[dayCode]] = {
+                    day: day,
+                    sessions: [session],
+                };
+            } else {
+                grouped[monthIndex].days[dayCodeIndexMapped[dayCode]].sessions.push(session);
+            }
+
         }
+
     });
 
     return grouped;
+
 }
 
 classCategorySessionService.findSessions = (sessionUuids) => {
