@@ -52,6 +52,7 @@ class ClassCategorySession extends Model {
                     .where('status', SessionStatusEnum.UPCOMING)
                     .where('start_date', '>=', start)
                     .where('end_date', '<=', end)
+                    .orderBy('start_date', 'ASC')
                     .withGraphFetched('participantSession(sessionParticipants)')
                     .modifyGraph('participantSession', builder => {
                         builder.where('user_id', userId);
