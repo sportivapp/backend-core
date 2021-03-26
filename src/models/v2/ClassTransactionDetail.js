@@ -22,7 +22,7 @@ class ClassTransactionDetail extends Model {
     static get modifiers() {
         return {
             baseAttributes(builder) {
-                builder.select('uuid', 'paid_start_date', 'paid_end_date');
+                builder.select('uuid', 'class_session_start_date', 'class_session_end_date');
             }
         }
     }
