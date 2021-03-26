@@ -27,7 +27,9 @@ classCategoryService.getClassCategory = async (categoryUuid, user) => {
         })
 
     const isCoach = await classCategoryCoachService.getCoachCategory(user.sub, categoryUuid);
-    category.categorySessions = classCategorySessionService.groupSessions(category.categorySessions);
+    if (category.isRecurring) {
+        category.categorySessions = classCategorySessionService.groupOrderedRecurringSessions(category.categorySessions);
+    }
     category.isCoach = !!isCoach;
 
     return category;
