@@ -17,7 +17,7 @@ const ErrorEnum = {
 
 const classService = {};
 
-classService.getClasses = async (page, size, keyword, industryId, cityId) => {
+classService.getClasses = async (page, size, keyword, industryId, cityId, companyId) => {
 
     let clsPromise = Class.query()
         .modify('adminList')
@@ -28,6 +28,9 @@ classService.getClasses = async (page, size, keyword, industryId, cityId) => {
 
     if (cityId)
         clsPromise = clsPromise.where('city_id', cityId);
+
+    if (companyId)
+        clsPromise = clsPromise.where('company_id', companyId);
 
     const pageObj = await clsPromise.page(page, size);
 
