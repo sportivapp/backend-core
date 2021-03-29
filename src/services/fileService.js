@@ -18,7 +18,8 @@ FileService.createFile = async (file, user) => {
         efilesize: file.size
     }
     
-    return File.query().insertToTable(fileDTO, user.sub);
+    return File.query()
+        .insertToTable(fileDTO, user.sub);
 
 }
 
@@ -27,19 +28,12 @@ FileService.createMultipleFiles = async (files, user) => {
     const fileDTOs = files.map(file => ({
         efilename: file.filename,
         efilepath: file.path,
-        efiletype: file.mimetype
-    }))
+        efiletype: file.mimetype,
+        efilesize: file.size,
+    }));
 
-    const uploadFiles = await File.query()
-    .insertToTable(fileDTOs, user.sub)
-    .then(uploadFile => {
-        return uploadFile.map(file => {
-            return file.efileid
-        })
-    })
-
-    return uploadFiles
-
+    return File.query()
+        .insertToTable(fileDTOs, user.sub);
 }
 
 FileService.getFilesByCompanyId = async (page, size, companyId, keyword) => {
