@@ -210,4 +210,33 @@ classCategoryService.getCategoryComplaints = async (classCategoryUuid, status, u
 
 }
 
+classCategoryService.getMonthPicker = async (classCategoryUuid) => {
+
+    const sessions = await classCategorySessionService.getOrderedActiveAndUpcomingSessions(classCategoryUuid);
+
+    let foundYear = {};
+    let grouped = [];
+    let groupedIndex = 0;
+    sessions.forEach(session => {
+
+        const year = new Date(parseInt(session.startDate)).getFullYear();
+        const month = new Date(parseInt(session.startDate)).getMonth();
+
+        if (!foundYear[year]) {
+            foundYear[year] = true;
+            grouped.push({
+                year: year,
+                months: [month],
+            });
+            groupedIndex++;
+        } else {
+            grouped[groupedIndex].months.push(month);
+        }
+
+    });
+
+    return grouped;
+
+}
+
 module.exports = classCategoryService;

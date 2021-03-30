@@ -517,4 +517,14 @@ classCategorySessionService.getTotalParticipantsByCategoryUuid = async (category
 
 }
 
+classCategorySessionService.getOrderedActiveAndUpcomingSessions = async (categoryUuid) => {
+
+    return ClassCategorySession.query()
+        .where('class_category_uuid', categoryUuid)
+        .where('status', sessionStatusEnum.UPCOMING)
+        .where('start_date', '>', Date.now())
+        .orderBy('start_date');
+
+}
+
 module.exports = classCategorySessionService;
