@@ -175,7 +175,19 @@ classService.getCategories = async (classUuid) => {
 classService.getMyClassHistory = async (user) => {
 
     return Class.query()
-        .modify('myClassHistory', user.sub);
+        .modify('myClassHistory', user.sub)
+        .then(classes => classes.filter(cls => {
+            let isDone = true;
+            cls.classCategories.forEach(category => {
+                category.categorySessions.forEach(session => {
+                    if (session.status !== sessionStatusEnum.DONE) {
+                        isDone = false;
+                        return;
+                    }
+                });
+            });
+            return isDone;
+        }));
 
 }
 

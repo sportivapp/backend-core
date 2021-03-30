@@ -1,3 +1,4 @@
+const SessionStatusEnum = require('../enum/SessionStatusEnum');
 const Model = require('./Model');
 
 class Class extends Model {
@@ -107,7 +108,7 @@ class Class extends Model {
                 builder.select('class.uuid', 'class.title')
                     .withGraphFetched('industry(baseAttributes)')
                     .withGraphFetched('city(baseAttributes)')
-                    .withGraphJoined(`classCategories(uuidAndTitle).[categorySessions(finishedSessions).[participantSession(sessionParticipants)]]`)
+                    .withGraphJoined(`classCategories(uuidAndTitle).[categorySessions(basicStartEnd).[participantSession(sessionParticipants)]]`)
                     .where('classCategories:categorySessions:participantSession.user_id', userId)
             },
         }
