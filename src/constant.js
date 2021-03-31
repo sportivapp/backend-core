@@ -297,6 +297,9 @@ module.exports = {
         },
         verifyV2: {
             token: '/verify/token'
+        },
+        masterBank: {
+            list: '/banks'
         }
     }
 }
