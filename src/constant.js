@@ -299,7 +299,12 @@ module.exports = {
             token: '/verify/token'
         },
         masterBank: {
-            list: '/banks'
+            list: '/banks',
+        },
+        organizationBank: {
+            list: '/company-banks',
+            main: '/company-banks/:companyBankUuid/main',
+            id: '/company-banks/:companyBankUuid',
         }
     }
 }
