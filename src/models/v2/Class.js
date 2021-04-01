@@ -111,6 +111,10 @@ class Class extends Model {
                     .withGraphJoined(`classCategories(uuidAndTitle).[categorySessions(basicStartEnd).[participantSession(sessionParticipants)]]`)
                     .where('classCategories:categorySessions:participantSession.user_id', userId)
             },
+            prices(builder) {
+                builder.select('uuid')
+                    .withGraphFetched('classCategories(list).[classCategorySessions(price)]');
+            },
         }
     }
 

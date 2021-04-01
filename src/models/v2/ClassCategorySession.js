@@ -53,6 +53,9 @@ class ClassCategorySession extends Model {
                     .modifyGraph('participantSession', builder => {
                         builder.where('user_id', userId);
                     });
+            },
+            price(builder) {
+                builder.select('price');
             }
         }
     }

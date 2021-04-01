@@ -3,6 +3,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('class_category_session'
     t.uuid('uuid').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     t.uuid('class_uuid');
     t.uuid('class_category_uuid').references('class_category.uuid');
+    t.decimal('price', 14, 2).defaultTo(0);
     t.bigInteger('month_utc');
     t.enum('status', ['UPCOMING', 'ONGOING', 'DONE']).defaultTo('UPCOMING');
     t.bigInteger('init_start_date').notNullable();
