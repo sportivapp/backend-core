@@ -113,7 +113,16 @@ class Class extends Model {
             },
             prices(builder) {
                 builder.select('uuid')
-                    .withGraphFetched('classCategories(list).[classCategorySessions(price)]');
+                    .withGraphFetched('classCategories(list).[categorySessions(price)]');
+            },
+            landingList(builder) {
+                builder.select('uuid', 'title')
+                    .modify('notDeleted')
+                    .withGraphFetched('industry(baseAttributes)')
+                    .withGraphFetched('city(baseAttributes)')
+                    .withGraphFetched('classMedia(list)')
+                    .withGraphFetched('company(baseAttributes)')
+                    .withGraphFetched('creator(basic)');
             },
         }
     }
@@ -211,6 +220,14 @@ class Class extends Model {
                     to: 'estate.estateid',
                 }
             },
+            creator: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: User,
+                join : {
+                    from: 'class.create_by',
+                    to: 'euser.euserid',
+                }
+            }
         }
     }
 }

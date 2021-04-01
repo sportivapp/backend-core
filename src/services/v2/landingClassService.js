@@ -1,5 +1,6 @@
 const Class = require('../../models/v2/Class');
 const ServiceHelper = require('../../helper/ServiceHelper');
+const classCategoryParticipantSessionService = require('./landingClassCategoryParticipantSessionService');
 
 const ErrorEnum = {
     PARTICIPANTS_EXISTED: 'PARTICIPANTS_EXISTED',
@@ -10,7 +11,7 @@ const classService = {};
 classService.getClasses = async (page, size, keyword, industryId, cityId, companyId) => {
 
     let clsPromise = Class.query()
-        .modify('adminList')
+        .modify('landingList')
         .whereRaw(`LOWER("title") LIKE LOWER('%${keyword}%')`)
 
     if (industryId)
@@ -27,7 +28,7 @@ classService.getClasses = async (page, size, keyword, industryId, cityId, compan
     const resultPromise = pageObj.results.map(async cls => {
         return {
             ...cls,
-            priceRange: await classCategoryService.getClassCategoryPriceRangeByClassUuid(cls.uuid),
+            startFrom: await classService.getClassStartFromPrice(cls.uuid),
             totalParticipants: await classCategoryParticipantSessionService.getTotalParticipantsByClassUuid(cls.uuid),
         }
     });
@@ -41,6 +42,28 @@ classService.getClasses = async (page, size, keyword, industryId, cityId, compan
             return pageObj;
         })
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj));
+
+}
+
+classService.getClassStartFromPrice = async (classUuid) => {
+
+    const startFrom = await Class.query()
+        .findById(classUuid)
+        .modify('prices')
+        .then(cls => {
+            let lowestPrice = Number.MAX_VALUE;
+            cls.classCategories.map(category => {
+                if (category.price < lowestPrice)
+                    lowestPrice = category.price;
+                category.categorySessions.map(session => {
+                    if (session.price < lowestPrice)
+                        lowestPrice = session.price;
+                });
+            });
+            return lowestPrice;
+        });
+
+    return parseInt(startFrom);
 
 }
 
