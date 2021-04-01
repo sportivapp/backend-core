@@ -345,38 +345,6 @@ classCategorySessionService.getBookableSessions = async (classCategoryUuid, year
 
 }
 
-// Alternate
-classCategorySessionService.groupRecurringSessions = (sessions) => {
-
-    let item,
-        i = 0,
-        groups = {},
-        month, day, monthCode, dayCode;
-    while (session = sessions[i++]) {
-        item = new Date(parseInt(session.startDate));
-        monthCode = item.getMonth();
-        month = codeToMonthEnum[monthCode];
-        dayCode = item.getDay();
-        day = codeToDayEnum[dayCode];
-        if (!groups[month]) {
-            if (session.participantSession.length !== 0) {
-                groups[month] = {
-                    isParticipated: true
-                }
-            } else {
-                groups[month] = {
-                    isParticipated: false
-                }
-            }
-        } // exists OR create {}
-        groups[month][day] || (groups[month][day] = []);  // exists OR create []
-        groups[month][day].push(session);
-    }
-
-    return groups;
-
-}
-
 classCategorySessionService.groupOrderedRecurringSessions = (sessions) => {
 
     let foundMonth = {};
@@ -514,6 +482,16 @@ classCategorySessionService.getTotalParticipantsByCategoryUuid = async (category
     const sessionUuids = await classCategorySessionService.getActiveSessionUuidsByCategoryUuid(categoryUuid);
 
     return classCategoryParticipantSessionService.getTotalParticipantsBySessionUuids(sessionUuids);
+
+}
+
+classCategorySessionService.getOrderedActiveAndUpcomingSessions = async (categoryUuid) => {
+
+    return ClassCategorySession.query()
+        .where('class_category_uuid', categoryUuid)
+        .where('status', sessionStatusEnum.UPCOMING)
+        .where('start_date', '>', Date.now())
+        .orderBy('start_date');
 
 }
 

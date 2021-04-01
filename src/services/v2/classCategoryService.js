@@ -274,6 +274,8 @@ classCategoryService.generateSessionAndScheduleFromCategorySchedules = (classUui
         scheduleDTO.push({
             classUuid: classUuid,
             classCategoryUuid: classCategoryUuid,
+            startMonth: startMonth,
+            endMonth: endMonth,
             day: codeToDayEnum[requestedDay],
             dayCode: requestedDay,
             startHour: schedule.startHour,

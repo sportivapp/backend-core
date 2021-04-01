@@ -3,6 +3,8 @@ exports.up = (knex, Promise) => knex.schema.createTable('class_category_schedule
     t.uuid('uuid').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     t.uuid('class_uuid').references('class.uuid');
     t.uuid('class_category_uuid').references('class_category.uuid');
+    t.bigInteger('start_month');
+    t.bigInteger('end_month');
     t.string('day');
     t.integer('day_code');
     t.integer('start_hour');

@@ -17,7 +17,7 @@ const ErrorEnum = {
 
 const classService = {};
 
-classService.getClasses = async (page, size, keyword, industryId, cityId) => {
+classService.getClasses = async (page, size, keyword, industryId, cityId, companyId) => {
 
     let clsPromise = Class.query()
         .modify('adminList')
@@ -28,6 +28,9 @@ classService.getClasses = async (page, size, keyword, industryId, cityId) => {
 
     if (cityId)
         clsPromise = clsPromise.where('city_id', cityId);
+
+    if (companyId)
+        clsPromise = clsPromise.where('company_id', companyId);
 
     const pageObj = await clsPromise.page(page, size);
 
@@ -172,7 +175,19 @@ classService.getCategories = async (classUuid) => {
 classService.getMyClassHistory = async (user) => {
 
     return Class.query()
-        .modify('myClassHistory', user.sub);
+        .modify('myClassHistory', user.sub)
+        .then(classes => classes.filter(cls => {
+            let isDone = true;
+            cls.classCategories.forEach(category => {
+                category.categorySessions.forEach(session => {
+                    if (session.status !== sessionStatusEnum.DONE) {
+                        isDone = false;
+                        return;
+                    }
+                });
+            });
+            return isDone;
+        }));
 
 }
 

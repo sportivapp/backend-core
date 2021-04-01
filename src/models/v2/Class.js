@@ -1,3 +1,4 @@
+const SessionStatusEnum = require('../enum/SessionStatusEnum');
 const Model = require('./Model');
 
 class Class extends Model {
@@ -107,8 +108,21 @@ class Class extends Model {
                 builder.select('class.uuid', 'class.title')
                     .withGraphFetched('industry(baseAttributes)')
                     .withGraphFetched('city(baseAttributes)')
-                    .withGraphJoined(`classCategories(uuidAndTitle).[categorySessions(finishedSessions).[participantSession(sessionParticipants)]]`)
+                    .withGraphJoined(`classCategories(uuidAndTitle).[categorySessions(basicStartEnd).[participantSession(sessionParticipants)]]`)
                     .where('classCategories:categorySessions:participantSession.user_id', userId)
+            },
+            prices(builder) {
+                builder.select('uuid')
+                    .withGraphFetched('classCategories(list).[categorySessions(price)]');
+            },
+            landingList(builder) {
+                builder.select('uuid', 'title')
+                    .modify('notDeleted')
+                    .withGraphFetched('industry(baseAttributes)')
+                    .withGraphFetched('city(baseAttributes)')
+                    .withGraphFetched('classMedia(list)')
+                    .withGraphFetched('company(baseAttributes)')
+                    .withGraphFetched('creator(basic)');
             },
         }
     }
@@ -206,6 +220,14 @@ class Class extends Model {
                     to: 'estate.estateid',
                 }
             },
+            creator: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: User,
+                join : {
+                    from: 'class.create_by',
+                    to: 'euser.euserid',
+                }
+            }
         }
     }
 }
