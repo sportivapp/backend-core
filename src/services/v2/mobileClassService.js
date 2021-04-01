@@ -36,10 +36,9 @@ classService.getClasses = async (page, size, keyword, industryId, cityId, compan
     const pageObj = await clsPromise.page(page, size);
 
     const resultPromise = pageObj.results.map(async cls => {
-
         return {
             ...cls,
-            startFrom: await classService.getClassStartFromPrice(cls.uuid),
+            priceRange: await classCategoryService.getClassCategoryPriceRangeByClassUuid(cls.uuid),
             totalParticipants: await classCategoryParticipantSessionService.getTotalParticipantsByClassUuid(cls.uuid),
         }
     });
@@ -53,28 +52,6 @@ classService.getClasses = async (page, size, keyword, industryId, cityId, compan
             return pageObj;
         })
         .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj));
-
-}
-
-classService.getClassStartFromPrice = async (classUuid) => {
-
-    const startFrom = await Class.query()
-        .findById(classUuid)
-        .modify('price')
-        .then(cls => {
-            let lowestPrice = Number.MAX_VALUE;
-            cls.classCategories.map(category => {
-                if (category.price < lowestPrice)
-                    lowestPrice = category.price;
-                category.categorySessions.map(session => {
-                    if (session.price < lowestPrice)
-                        lowestPrice = session.price;
-                });
-            });
-            return lowestPrice;
-        });
-
-    return startFrom;
 
 }
 
