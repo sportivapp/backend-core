@@ -297,6 +297,14 @@ module.exports = {
         },
         verifyV2: {
             token: '/verify/token'
+        },
+        masterBank: {
+            list: '/banks',
+        },
+        organizationBank: {
+            list: '/company-banks',
+            main: '/company-banks/:companyBankUuid/main',
+            id: '/company-banks/:companyBankUuid',
         }
     }
 }
