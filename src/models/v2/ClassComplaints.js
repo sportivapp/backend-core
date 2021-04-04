@@ -28,7 +28,7 @@ class ClassComplaints extends Model {
                     .where('status', status);
             },
             myComplaints(builder) {
-                builder.select('uuid', 'complaint', 'code')
+                builder.select('uuid', 'complaint', 'code', 'complaint_id')
                     .withGraphFetched('classCategoryParticipantSession(complaint)')
                     .withGraphFetched('classCategorySession(basicStartEnd).[classCategory(uuidAndTitle).[class(uuidAndTitle)]]');
             },
@@ -40,7 +40,7 @@ class ClassComplaints extends Model {
                     .withGraphFetched('user(basic)');
             },
             fullComplaint(builder) {
-                builder.select('uuid', 'complaint', 'code', 'coach_accept', 'coach_reason')
+                builder.select('uuid', 'complaint', 'code', 'coach_accept', 'coach_reason', 'complaint_id')
                     .withGraphFetched('classCategorySession(basicStartEnd)')
                     .withGraphFetched('class(uuidAndTitleWithPicture)')
                     .withGraphFetched('classCategory(uuidAndTitle)')
