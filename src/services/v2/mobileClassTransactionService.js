@@ -4,6 +4,8 @@ const { moduleTransactionEnum, moduleEnum } = require('../../models/enum/ModuleT
 const classTransactionStatusEnum = require('../../models/enum/ClassTransactionStatusEnum');
 const classCategoryParticipantSessionService = require('./mobileClassCategoryParticipantSessionService');
 const classTransactionDetailService = require('./mobileClassTransactionDetailService');
+const dateFormatter = require('../../helper/zeroPrefixHelper');
+const dateFormatter = require('../../helper/dateFormatter');
 
 const classTransactionService = {};
 
@@ -89,9 +91,9 @@ classTransactionService.generateParticipantSessionDTOs = (detailTransactions) =>
 
 classTransactionService.generateFreeTransaction = async (cls, category, sessions, user) => {
 
-    const now = new Date();
     const invoiceCode = await ClassTransactionSequence.getNextVal();
-    const invoice = `INV/${now.getFullYear()}${now.getMonth()+1}${now.getDate()}/${moduleTransactionEnum[moduleEnum.CLASS]}/${invoiceCode}`;
+    const prefixedCode = zeroPrefixHelper.zeroPrefixCodeByLength(invoiceCode, 9);
+    const invoice = `INV/${dateFormatter.formatDateToYYYYMMDD(new Date())}/${moduleTransactionEnum[moduleEnum.CLASS]}/${prefixedCode}`;
 
     const classTransactionDTO = classTransactionService
         .generateClassTransactionDTO(cls, category, invoice, invoiceCode, 0, classTransactionStatusEnum.DONE, user);
