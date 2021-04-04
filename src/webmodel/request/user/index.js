@@ -13,7 +13,7 @@ userSchemas[routes.user.login] = UserLoginRequest
 userSchemas[routes.user.forgot] = ForgotPasswordRequest
 userSchemas[routes.user.list] = CreateUserRequest
 userSchemas[routes.user.password] = ChangePasswordRequest
-userSchemas[routes.user.update] = UpdateUserRequest
+// userSchemas[routes.user.update] = UpdateUserRequest
 userSchemas[routes.user.approval] = AddApprovalUserRequest
 userSchemas[routes.user.coach] = UpdateUserCoachRequest
 
