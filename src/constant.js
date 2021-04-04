@@ -169,6 +169,7 @@ module.exports = {
             myClass: '/my-class-v2',
             coachClass: '/coach-class-v2',
             coaches: '/class-v2/:classUuid/coaches',
+            myClassHistory: '/my-history-class-v2',
         },
         classCategorySession: {
             list: '/class-category/:classCategoryUuid/class-category-session',
@@ -176,6 +177,9 @@ module.exports = {
             participants: '/class-category/:classCategoryUuid/class-category-session/:classCategorySessionUuid/participants',
             absence: '/class-category/:classCategoryUuid/class-category-session/:classCategorySessionUuid/absence',
             confirm: '/class-category-session/:classCategorySessionUuid/class-category-participant-session/:classCategoryParticipantSessionUuid/confirm',
+            rate: '/class-category-session/:classCategorySessionUuid/rate',
+            reason: '/class-category-session/:classCategorySessionUuid/reason',
+            complaint: '/class-category-session/:classCategorySessionUuid/complaint',
         },
         classCategory: {
             list: '/category',
@@ -188,6 +192,17 @@ module.exports = {
             extend: '/class-category/:classCategoryUuid/extend',
             reschedule: '/coach-category/:classCategoryUuid/class-category-session/:classCategorySessionUuid/reschedule',
             unconfirmed: '/my-class-category/:classCategoryUuid/unconfirmed',
+            schedule: '/class-category/:classCategoryUuid/schedule',
+            bookable: '/class-category/:classCategoryUuid/bookable',
+            myHistory: '/my-history-class-category/:classCategoryUuid',
+            complaints: '/coach-category/:classCategoryUuid/complaints',
+            monthPicker: '/class-category/:classCategoryUuid/month-picker',
+        },
+        classComplaint: {
+            myComplaints: '/class-complaints',
+            coachComplaints: '/coach-complaints',
+            coachAcceptComplaint: '/coach-complaints/:classComplaintUuid/accept',
+            coachRejectComplaint: '/coach-complaints/:classComplaintUuid/reject',
         },
         permit: {
             list: '/permit',
@@ -282,6 +297,14 @@ module.exports = {
         },
         verifyV2: {
             token: '/verify/token'
+        },
+        masterBank: {
+            list: '/banks',
+        },
+        organizationBank: {
+            list: '/company-banks',
+            main: '/company-banks/:companyBankUuid/main',
+            id: '/company-banks/:companyBankUuid',
         }
     }
 }

@@ -3,20 +3,11 @@ const ClassCategoryParticipantSession = require('../../models/v2/ClassCategoryPa
 
 const ErrorEnum = {
     INVALID_PARTICIPANT_SESSION: 'INVALID_PARTICIPANT_SESSION',
+    REGISTERED_TO_SESSION: 'REGISTERED_TO_SESSION',
+    INVALID_ONE_OR_MORE_SESSION: 'INVALID_ONE_OR_MORE_SESSION',
 }
 
 const classCategoryParticipantSessionService = {};
-
-classCategoryParticipantSessionService.getParticipantsCountBySessionUuid = async (sessionUuid) => {
-
-    return ClassCategoryParticipantSession.query()
-        .where('class_category_session_uuid', sessionUuid)
-        .count()
-        .then(count => {
-            return parseInt(count[0].count);
-        })
-
-}
 
 classCategoryParticipantSessionService.getSessionUuidsByUserId = async (userId) => {
 
@@ -30,16 +21,16 @@ classCategoryParticipantSessionService.getSessionUuidsByUserId = async (userId) 
 
 }
 
-classCategoryParticipantSessionService.inputAbsence = async (classCategorySessionUuid, participants, user) => {
+classCategoryParticipantSessionService.inputAbsence = async (participants, user) => {
 
     const promises = participants.map(participant => {
 
         return ClassCategoryParticipantSession.query()
-            .insertToTable({
-                classCategorySessionUuid: classCategorySessionUuid,
-                classCategoryParticipantUuid: participant.uuid,
+            .findById(participant.uuid)
+            .updateByUserId({
                 isCheckIn: participant.isCheckIn,
-            }, user.sub);
+            }, user.sub)
+            .returning('*');
 
     });
 
@@ -47,12 +38,17 @@ classCategoryParticipantSessionService.inputAbsence = async (classCategorySessio
 
 };
 
-classCategoryParticipantSessionService.getMyUnconfirmedSessionsByParticipantUuids = async (classCategoryParticipantUuids) => {
+classCategoryParticipantSessionService.getMyUnconfirmedSessions = async (classCategoryUuid, user) => {
+
+    const now = Date.now();
 
     return ClassCategoryParticipantSession.query()
         .modify('unconfirmedSession')
         .where('is_confirmed', null)
-        .whereIn('class_category_participant_uuid', classCategoryParticipantUuids);
+        .whereNot('confirmed_expiration', null)
+        .where('confirmed_expiration', '>=', now)
+        .where('class_category_uuid', classCategoryUuid)
+        .where('user_id', user.sub);
 
 }
 
@@ -77,6 +73,94 @@ classCategoryParticipantSessionService.confirmParticipation = async (classCatego
             isConfirmed: isConfirm,
         }, user.sub)
         .returning('*');
+
+}
+
+classCategoryParticipantSessionService.updateParticipantConfirmedExpiration = async (classCategorySessionUuid, trx) => {
+
+    const twoDays = 2 * 60 * 60 * 1000;
+
+    return ClassCategoryParticipantSession.query(trx)
+        .where('class_category_session_uuid', classCategorySessionUuid)
+        .patch({
+            confirmedExpiration: Date.now() + twoDays,
+        });
+
+}
+
+classCategoryParticipantSessionService.register = async (participantSessionDTOs, user, trx) => {
+
+    return ClassCategoryParticipantSession.query(trx)
+        .insertToTable(participantSessionDTOs, user.sub);
+
+}
+
+classCategoryParticipantSessionService.getMySessionUuids = async (user) => {
+
+    return ClassCategoryParticipantSession.query()
+        .where('user_id', user.sub)
+        .then(participantSessions => participantSessions.map(participantSession =>  {
+            return participantSession.classCategorySessionUuid;
+        }));
+
+}
+
+classCategoryParticipantSessionService.getSessionParticipants = async (sessionUuid) => {
+
+    return ClassCategoryParticipantSession.query()
+        .modify('participants')
+        .where('class_category_session_uuid', sessionUuid);
+
+}
+
+classCategoryParticipantSessionService.getSingleParticipantWithSession = async (sessionUuid, userId) => {
+
+    return ClassCategoryParticipantSession.query()
+        .modify('withSession')
+        .where('class_category_session_uuid', sessionUuid)
+        .where('user_id', userId)
+        .first();
+
+}
+
+classCategoryParticipantSessionService.mySessionHistoryByCategoryUuidAndUserId = async(classCategoryUuid, userId) => {
+
+    return ClassCategoryParticipantSession.query()
+        .modify('mySessionHistory', classCategoryUuid, userId);
+        
+}
+
+classCategoryParticipantSessionService.checkUserRegisteredToSessions = async (sessionUuids, userId) => {
+
+    return ClassCategoryParticipantSession.query()
+        .whereIn('class_category_session_uuid', sessionUuids)
+        .where('user_id', userId)
+        .then(participants => {
+            if (participants.length !== 0)
+                throw new UnsupportedOperationError(ErrorEnum.REGISTERED_TO_SESSION);
+        });
+
+}
+
+classCategoryParticipantSessionService.getTotalParticipantsByClassUuid = async (classUuid) => {
+
+    return ClassCategoryParticipantSession.query()
+        .where('class_uuid', classUuid)
+        .countDistinct('user_id')
+        .then(count => {
+            return parseInt(count[0].count);
+        });
+
+}
+
+classCategoryParticipantSessionService.getTotalParticipantsBySessionUuids = async (sessionUuids) => {
+
+    return ClassCategoryParticipantSession.query()
+        .whereIn('class_category_session_uuid', sessionUuids)
+        .countDistinct('user_id')
+        .then(count => {
+            return parseInt(count[0].count);
+        });
 
 }
 

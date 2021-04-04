@@ -24,16 +24,18 @@ class ClassCategory extends Model {
         return {
             list(builder) {
                 builder.select('uuid', 'title', 'price')
+                    .modify('notDeleted');
             },
             adminDetail(builder) {
-                builder.select('uuid', 'title', 'description', 'price', 'requirements')
+                builder.select('uuid', 'title', 'description', 'price', 'requirements', 'is_recurring')
+                    .modify('notDeleted')
                     .withGraphFetched('categorySessions(list)')
                     .withGraphFetched('coaches(baseAttributes)');
             },
             userDetail(builder) {
-                builder.select('class_category.uuid', 'class_category.title', 'description', 'price', 'requirements')
+                builder.select('class_category.uuid', 'class_category.title', 'description', 'price', 'requirements', 'is_recurring')
+                    .modify('notDeleted')
                     .withGraphFetched('coaches(baseAttributes)')
-                    .withGraphFetched('participants(participant)')
                     .withGraphFetched('categorySessions(list)')
             },
             price(builder) {
@@ -42,15 +44,12 @@ class ClassCategory extends Model {
             uuidAndTitle(builder) {
                 builder.select('uuid', 'title');
             },
-            myCategory(builder, participant, status) {
+            myCategory(builder, sessionUuids) {
                 builder.select('uuid', 'title')
                     .withGraphFetched('class(basic)')
                     .withGraphFetched('categorySessions(list)')
                     .modifyGraph('categorySessions', builder => {
-                        builder.where('start_date', '>=', Date.now())
-                            .where('start_date', '>=', participant.start)
-                            .where('status', status)
-                            .orderBy('start_date', 'ASC');
+                        builder.whereIn('uuid', sessionUuids);
                     });
             },
             coachCategory(builder) {
@@ -72,7 +71,14 @@ class ClassCategory extends Model {
             titleWithRating(builder) {
                 // TODO: Add rating later
                 builder.select('uuid', 'title');
-            }
+            },
+            book(builder) {
+                builder.select('uuid', 'title', 'price', 'is_recurring')
+                    .withGraphFetched('class(administrationFee)')
+            },
+            notDeleted(builder) {
+                builder.whereRaw('delete_time IS NULL');
+            },
         }
     }
 
@@ -81,7 +87,6 @@ class ClassCategory extends Model {
         const Class = require('./Class');
         const ClassCategorySession = require('./ClassCategorySession');
         const ClassCategoryCoach = require('./ClassCategoryCoach');
-        const ClassCategoryParticipant = require('./ClassCategoryParticipant');
         const ClassCategorySchedule = require('./ClassCategorySchedule');
  
         return {
@@ -107,14 +112,6 @@ class ClassCategory extends Model {
                 join: {
                     from: 'class_category.uuid',
                     to: 'class_category_coach.class_category_uuid',
-                }
-            },
-            participants: {
-                relation: Model.HasManyRelation,
-                modelClass: ClassCategoryParticipant,
-                join: {
-                    from: 'class_category.uuid',
-                    to: 'class_category_participant.class_category_uuid',
                 }
             },
             schedules: {

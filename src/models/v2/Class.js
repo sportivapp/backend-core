@@ -1,3 +1,4 @@
+const SessionStatusEnum = require('../enum/SessionStatusEnum');
 const Model = require('./Model');
 
 class Class extends Model {
@@ -63,6 +64,7 @@ class Class extends Model {
             },
             coachClass(builder, userId, status) {
                 builder.select('class.uuid', 'class.title')
+                    .modify('notDeleted')
                     .withGraphFetched('industry(baseAttributes)')
                     .withGraphFetched('city(baseAttributes)')
                     .withGraphFetched('classMedia(list).[file(baseAttributes)]')
@@ -73,18 +75,14 @@ class Class extends Model {
                         .where('classCategories:categorySessions.status', status)
                         .orderBy('classCategories:categorySessions.start_date', 'ASC');
             },
-            myClass(builder, participant, status) {
+            myClass(builder, sessionUuid) {
                 builder.select('class.uuid', 'class.title')
                     .withGraphFetched('industry(baseAttributes)')
                     .withGraphFetched('city(baseAttributes)')
                     .withGraphFetched('classMedia(list).[file(baseAttributes)]')
                     .withGraphFetched('company(baseAttributes)')    
                     .withGraphJoined('classCategories(uuidAndTitle).[categorySessions(list)]')
-                        .where('classCategories.uuid', participant.classCategoryUuid)
-                        .where('classCategories:categorySessions.start_date', '>=', Date.now())
-                        .where('classCategories:categorySessions.start_date', '>=', participant.start)
-                        .where('classCategories:categorySessions.status', status)
-                        .orderBy('classCategories:categorySessions.start_date', 'ASC');
+                        .where('classCategories:categorySessions.uuid', sessionUuid);
             },
             basic(builder) {
                 builder.select('uuid', 'title')
@@ -95,7 +93,37 @@ class Class extends Model {
             categoriesTitleWithRating(builder) {
                 builder.select('uuid', 'title')
                     .withGraphFetched('classCategories(titleWithRating)');
-            }
+            },
+            administrationFee(builder) {
+                builder.select('uuid', 'administration_fee');
+            },
+            uuidAndTitle(builder) {
+                builder.select('uuid', 'title');
+            },
+            uuidAndTitleWithPicture(builder) {
+                builder.select('uuid', 'title')
+                    .withGraphFetched('classMedia(list)');
+            },
+            myClassHistory(builder, userId) {
+                builder.select('class.uuid', 'class.title')
+                    .withGraphFetched('industry(baseAttributes)')
+                    .withGraphFetched('city(baseAttributes)')
+                    .withGraphJoined(`classCategories(uuidAndTitle).[categorySessions(basicStartEnd).[participantSession(sessionParticipants)]]`)
+                    .where('classCategories:categorySessions:participantSession.user_id', userId)
+            },
+            prices(builder) {
+                builder.select('uuid')
+                    .withGraphFetched('classCategories(list).[categorySessions(price)]');
+            },
+            landingList(builder) {
+                builder.select('uuid', 'title')
+                    .modify('notDeleted')
+                    .withGraphFetched('industry(baseAttributes)')
+                    .withGraphFetched('city(baseAttributes)')
+                    .withGraphFetched('classMedia(list)')
+                    .withGraphFetched('company(baseAttributes)')
+                    .withGraphFetched('creator(basic)');
+            },
         }
     }
 
@@ -192,6 +220,14 @@ class Class extends Model {
                     to: 'estate.estateid',
                 }
             },
+            creator: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: User,
+                join : {
+                    from: 'class.create_by',
+                    to: 'euser.euserid',
+                }
+            }
         }
     }
 }

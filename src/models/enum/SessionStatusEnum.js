@@ -1,7 +1,7 @@
-const ClassStatusEnum = {
+const SessionStatusEnum = {
     UPCOMING: 'UPCOMING',
     ONGOING: 'ONGOING',
     DONE: 'DONE',
 }
 
-module.exports = ClassStatusEnum;
+module.exports = SessionStatusEnum;

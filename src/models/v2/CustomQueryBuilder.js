@@ -41,7 +41,7 @@ class CustomQueryBuilder extends QueryBuilder {
     unDelete() {
         const patchedAttributes = {}
         //patch operation
-        patchedAttributes['deleteTime'] = Date.now()
+        patchedAttributes['deleteTime'] = null;
         return this.patch(patchedAttributes)
     }
 }

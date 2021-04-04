@@ -2,20 +2,22 @@ const Class = require('../../models/v2/Class');
 const { UnsupportedOperationError, NotFoundError } = require('../../models/errors');
 const ServiceHelper = require('../../helper/ServiceHelper');
 const classCategoryService = require('./mobileClassCategoryService');
-const classCategoryParticipantService = require('./mobileClassCategoryParticipantService');
 const classCategoryParticipantSessionService = require('./mobileClassCategoryParticipantSessionService');
 const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
+const classCategorySessionService = require('./mobileClassCategorySessionService');
+const classTransactionService = require('./mobileClassTransactionService');
 
 const ErrorEnum = {
     INVALID_COACH_ID: 'INVALID_COACH_ID',
     INVALID_START_SESSION_DATE: 'INVALID_START_SESSION_DATE',
     USER_NOT_IN_COMPANY: 'USER_NOT_IN_COMPANY',
     INVALID_STATUS: 'INVALID_STATUS',
+    SESSION_REGISTERED: 'SESSION_REGISTERED',
 }
 
 const classService = {};
 
-classService.getClasses = async (page, size, keyword, industryId, cityId) => {
+classService.getClasses = async (page, size, keyword, industryId, cityId, companyId) => {
 
     let clsPromise = Class.query()
         .modify('adminList')
@@ -27,13 +29,16 @@ classService.getClasses = async (page, size, keyword, industryId, cityId) => {
     if (cityId)
         clsPromise = clsPromise.where('city_id', cityId);
 
+    if (companyId)
+        clsPromise = clsPromise.where('company_id', companyId);
+
     const pageObj = await clsPromise.page(page, size);
 
     const resultPromise = pageObj.results.map(async cls => {
         return {
             ...cls,
             priceRange: await classCategoryService.getClassCategoryPriceRangeByClassUuid(cls.uuid),
-            totalParticipants: await classCategoryParticipantService.getParticipantsCountByClassUuid(cls.uuid),
+            totalParticipants: await classCategoryParticipantSessionService.getTotalParticipantsByClassUuid(cls.uuid),
         }
     });
     
@@ -57,20 +62,17 @@ classService.getClass = async (classUuid, user) => {
         .then(async cls => {
             if (!cls)
                 throw new NotFoundError();
+            cls.totalParticipants = await classCategoryParticipantSessionService.getTotalParticipantsByClassUuid(cls.uuid);
             cls.administrationFee = parseInt(cls.administrationFee);
             return cls;
         });
 
     const clsCategoriesPromise = cls.classCategories.map(async category => {
+        category.totalParticipants = await classCategorySessionService.getTotalParticipantsByCategoryUuid(category.uuid);
         category.price = parseInt(category.price);
-        const totalParticipants = await classCategoryParticipantService
-            .getParticipantsCountByClassCategoryUuid(category.uuid);
-        category.totalParticipants = totalParticipants;
     })
 
     await Promise.all(clsCategoriesPromise);
-    cls.totalParticipants = await classCategoryParticipantService.getParticipantsCountByClassUuid(cls.uuid);
-    cls.wasRegistered = await classCategoryParticipantService.isUserRegisteredInClass(cls.uuid, user.sub);
 
     return cls;
 
@@ -95,9 +97,14 @@ classService.getClassCategory = async (classUuid, classCategoryUuid, user) => {
 
 }
 
-classService.register = async (classUuid, classCategoryUuid, user) => {
+classService.register = async (classUuid, classCategoryUuid, classCategorySessionUuids, user) => {
 
-    return classCategoryParticipantService.register(classUuid, classCategoryUuid, user);
+    await classCategoryParticipantSessionService.checkUserRegisteredToSessions(classCategorySessionUuids, user.sub);
+    const cls = await classService.findById(classUuid);
+    const category = await classCategoryService.findById(classCategoryUuid);
+    const sessions = await classCategorySessionService.findSessions(classCategorySessionUuids);
+
+    return classTransactionService.generateTransaction(cls, category, sessions, user);
 
 }
 
@@ -106,16 +113,17 @@ classService.getMyClass = async (status, user) => {
     if (!sessionStatusEnum[status])
         throw new UnsupportedOperationError(ErrorEnum.INVALID_STATUS);
 
-    let classes = await classCategoryParticipantService.getActiveParticipantsByUserIdGroupByCategory(user.sub)
-        .then(participants => {
-            const promises = participants.map(participant => {
+    const sessionUuids = await classCategoryParticipantSessionService.getMySessionUuids(user);
+    if (sessionUuids.length === 0)
+        return [];
+
+    const classes = await classCategorySessionService
+        .getActiveClosestSessionsByStatusAndGroupByCategory(sessionUuids, status)
+        .then(sessions => {
+            const promises = sessions.map(session => {
                 return Class.query()
-                    .modify('myClass', participant, status)
-                        .first()
-                        .then(cls => {
-                            if (cls) cls.administrationFee = parseInt(cls.administrationFee);
-                            return cls;
-                        });
+                    .modify('myClass', session.uuid)
+                    .first()
             });
             // Remove nulls
             // Why null happen? because when status defined as ONGOING and there is no ONGOING session, session would be null.
@@ -143,10 +151,9 @@ classService.groupClassesByCategoryReplaceSessionsToSession = async (classes) =>
 
     const classPromises = classes.map(async cls => {
         const categoriesPromises = cls.classCategories.map(async category => {
+            category.totalParticipants = await classCategorySessionService.getTotalParticipantsByCategoryUuid(category.uuid);
             category.categorySession = category.categorySessions[0];
             delete category.categorySessions;
-            category.categorySession.totalParticipants = await classCategoryParticipantSessionService
-                .getParticipantsCountBySessionUuid(category.categorySession.uuid);
             return category;
         });
         await Promise.all(categoriesPromises);
@@ -162,6 +169,25 @@ classService.getCategories = async (classUuid) => {
     return Class.query()
         .modify('categoriesTitleWithRating')
         .findById(classUuid);
+
+}
+
+classService.getMyClassHistory = async (user) => {
+
+    return Class.query()
+        .modify('myClassHistory', user.sub)
+        .then(classes => classes.filter(cls => {
+            let isDone = true;
+            cls.classCategories.forEach(category => {
+                category.categorySessions.forEach(session => {
+                    if (session.status !== sessionStatusEnum.DONE) {
+                        isDone = false;
+                        return;
+                    }
+                });
+            });
+            return isDone;
+        }));
 
 }
 
