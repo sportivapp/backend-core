@@ -415,6 +415,7 @@ classCategorySessionService.groupOrderedNonRecurringSessions = (sessions) => {
 
         // To state whether user can book this session
         session.isParticipated = session.participantSession.length !== 0;
+        session.price = parseInt(session.price);
         const startDate = new Date(parseInt(session.startDate));
         const monthCode = startDate.getMonth();
         const month = codeToMonthEnum[monthCode];
