@@ -4,7 +4,7 @@ const { moduleTransactionEnum, moduleEnum } = require('../../models/enum/ModuleT
 const classTransactionStatusEnum = require('../../models/enum/ClassTransactionStatusEnum');
 const classCategoryParticipantSessionService = require('./mobileClassCategoryParticipantSessionService');
 const classTransactionDetailService = require('./mobileClassTransactionDetailService');
-const dateFormatter = require('../../helper/zeroPrefixHelper');
+const zeroPrefixHelper = require('../../helper/zeroPrefixHelper');
 const dateFormatter = require('../../helper/dateFormatter');
 
 const classTransactionService = {};
