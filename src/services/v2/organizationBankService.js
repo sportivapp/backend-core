@@ -28,15 +28,16 @@ organizationBankService.createCompanyBank = async (companyBankDTO, user) => {
 
 organizationBankService.softDeleteCompanyBank = async (companyId, companyBankUuid) => {
 
-    const organizationBank = OrganizationBank.query()
+    const organizationBank = await OrganizationBank.query()
         .findById(companyBankUuid)
-        .where('company_id', companyId)
-        .softDelete();
+        .where('company_id', companyId);
 
     if (organizationBank.isMain)
         throw new UnsupportedOperationError(ErrorEnum.MAIN_BANK);
 
-    return organizationBank;
+    return organizationBank.$query()
+        .softDelete()
+        .then(rowsAffected => rowsAffected === 1);
 
 }
 
