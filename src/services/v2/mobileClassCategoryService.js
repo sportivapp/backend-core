@@ -187,20 +187,10 @@ classCategoryService.getBookableSessions = async (classCategoryUuid, year, user)
 
 }
 
-classCategoryService.mySessionHistory = async (classCategoryUuid, user) => {
+classCategoryService.mySessionsHistory = async (classCategoryUuid, user) => {
 
-    const category = await ClassCategory.query()
-        .findById(classCategoryUuid)
-        .modify('uuidAndTitle')
-        .withGraphFetched('class(basic)')
-
-    const participantSessions = await classCategoryParticipantSessionService
-        .mySessionHistoryByCategoryUuidAndUserId(category.uuid, user.sub);
-
-    return {
-        ...category,
-        classCategoryParticipantSessions: participantSessions,
-    }
+    return classCategoryParticipantSessionService
+        .mySessionsHistoryByCategoryUuidAndUserId(classCategoryUuid, user.sub);
 
 }
 

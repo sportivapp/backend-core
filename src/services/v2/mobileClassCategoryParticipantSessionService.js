@@ -123,10 +123,10 @@ classCategoryParticipantSessionService.getSingleParticipantWithSession = async (
 
 }
 
-classCategoryParticipantSessionService.mySessionHistoryByCategoryUuidAndUserId = async(classCategoryUuid, userId) => {
+classCategoryParticipantSessionService.mySessionsHistoryByCategoryUuidAndUserId = async(classCategoryUuid, userId) => {
 
     return ClassCategoryParticipantSession.query()
-        .modify('mySessionHistory', classCategoryUuid, userId);
+        .modify('mySessionsHistory', classCategoryUuid, userId);
         
 }
 
