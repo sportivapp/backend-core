@@ -402,6 +402,63 @@ classCategorySessionService.groupOrderedRecurringSessions = (sessions) => {
 
 }
 
+classCategorySessionService.groupOrderedNonRecurringSessions = (sessions) => {
+
+    let foundMonth = {};
+    let monthIndex = -1;
+    const grouped = [];
+
+    let dayCodeIndexMapped = {};
+    let dayIndex = 0;
+
+    sessions.forEach(session => {
+
+        // To state whether user can book this session
+        session.isParticipated = session.participantSession.length !== 0;
+        const startDate = new Date(parseInt(session.startDate));
+        const monthCode = startDate.getMonth();
+        const month = codeToMonthEnum[monthCode];
+        const dayCode = startDate.getDay();
+        const day = codeToDayEnum[dayCode];
+
+        if (!foundMonth[month]) {
+            foundMonth[month] = true;
+            dayCodeIndexMapped = {};
+            dayIndex = 0;
+
+            monthIndex++;
+            dayCodeIndexMapped[dayCode] = dayIndex;
+            grouped[monthIndex] = {
+                name: month,
+                days: [
+                    {
+                        day: day,
+                        sessions: [session],
+                    }
+                ]
+            };
+
+        } else {
+
+            if (dayCodeIndexMapped[dayCode] === undefined) {
+                dayIndex++;
+                dayCodeIndexMapped[dayCode] = dayIndex;
+                grouped[monthIndex].days[dayCodeIndexMapped[dayCode]] = {
+                    day: day,
+                    sessions: [session],
+                };
+            } else {
+                grouped[monthIndex].days[dayCodeIndexMapped[dayCode]].sessions.push(session);
+            }
+
+        }
+
+    });
+
+    return grouped;
+
+}
+
 classCategorySessionService.groupSessions = (sessions) => {
 
     let foundMonth = {};
