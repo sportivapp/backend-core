@@ -214,23 +214,26 @@ classCategoryService.getMonthPicker = async (classCategoryUuid) => {
 
     const sessions = await classCategorySessionService.getOrderedActiveAndUpcomingSessions(classCategoryUuid);
 
-    let foundYear = {};
+    let currYear = -1;
+    let currMonth = -1;
+
     let grouped = [];
-    let groupedIndex = 0;
     sessions.forEach(session => {
 
-        const year = new Date(parseInt(session.startDate)).getFullYear();
-        const month = new Date(parseInt(session.startDate)).getMonth();
+        const newYear = new Date(parseInt(session.startDate)).getFullYear();
+        const newMonth = new Date(parseInt(session.startDate)).getMonth();
 
-        if (!foundYear[year]) {
-            foundYear[year] = true;
+        if (currYear !== newYear) {
+            currYear = newYear;
+            currMonth = newMonth;
             grouped.push({
-                year: year,
-                months: [month],
-            });
-            groupedIndex++;
+                year: newYear,
+                months: [newMonth],
+            })
         } else {
-            grouped[groupedIndex].months.push(month);
+            if (currMonth !== newMonth) {
+                grouped[grouped.length-1].months.push(month);
+            }
         }
 
     });
