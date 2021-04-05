@@ -24,7 +24,7 @@ class ClassCategorySchedule extends Model {
             latest(builder) {
                 builder.select('uuid', 'class_uuid', 'class_category_uuid', 'start_month', 'end_month', 
                 'day', 'start_hour', 'start_minute', 'end_hour', 'end_minute')
-                    .orderBy('create_time')
+                    .orderBy('create_time', 'DESC')
                     .first();
             },
         }

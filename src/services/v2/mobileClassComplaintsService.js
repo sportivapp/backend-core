@@ -3,6 +3,10 @@ const { UnsupportedOperationError } = require('../../models/errors');
 const classCategoryCoachService = require('./mobileClassCategoryCoachService');
 const classComplaintMediaService = require('./mobileClassComplaintMediasService');
 const classComplaintStatusEnum = require('../../models/enum/ClassComplaintStatusEnum');
+const zeroPrefixHelper = require('../../helper/zeroPrefixHelper');
+const ClassTransactionSequence = require('../../models/v2/ClassComplaintSequence');
+const { moduleTransactionEnum, moduleEnum } = require('../../models/enum/ModuleTransactionEnum');
+const dateFormatter = require('../../helper/dateFormatter');
 
 const ErrorEnum = {
     DOUBLE_COMPLAINT: 'DOUBLE_COMPLAINT',
@@ -26,6 +30,13 @@ mobileClassComplaintService.checkExistUserComplaint = async (classCategorySessio
 }
 
 mobileClassComplaintService.complaintSession = async (classComplaintsDTO, user) => {
+
+    const complaintIdCode = await ClassTransactionSequence.getNextVal();
+    const prefixedCode = zeroPrefixHelper.zeroPrefixCodeByLength(complaintIdCode, 9);
+    const complaintId = `CMP/${dateFormatter.formatDateToYYYYMMDD(new Date())}/${moduleTransactionEnum[moduleEnum.CLASS]}/${prefixedCode}`;
+
+    classComplaintsDTO.complaintId = complaintId;
+    classComplaintsDTO.complaintIdCode = complaintIdCode;
 
     return ClassComplaints.query()
         .insertToTable(classComplaintsDTO, user.sub);

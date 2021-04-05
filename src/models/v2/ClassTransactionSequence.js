@@ -8,7 +8,7 @@ class ClassTransactionSequence extends Model {
 
     static getNextVal() {
         return ClassTransactionSequence.knex().raw(`SELECT nextval('class_transaction_seq')`)
-            .then(result => result.rows[0].nextval)
+            .then(result => parseInt(result.rows[0].nextval))
     }
 
 }
