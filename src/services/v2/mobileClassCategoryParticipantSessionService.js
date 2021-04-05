@@ -168,6 +168,13 @@ classCategoryParticipantSessionService.categorySessionsHistoryByCategoryUuid = a
         
 }
 
+classCategoryParticipantSessionService.categorySessionsHistoryByCategoryUuid = async(classCategoryUuid) => {
+
+    return ClassCategoryParticipantSession.query()
+        .modify('categorySessionsHistory', classCategoryUuid);
+        
+}
+
 classCategoryParticipantSessionService.checkUserRegisteredToSessions = async (sessionUuids, userId) => {
 
     return ClassCategoryParticipantSession.query()
