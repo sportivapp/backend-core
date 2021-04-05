@@ -1,4 +1,3 @@
-const SessionStatusEnum = require('../enum/SessionStatusEnum');
 const Model = require('./Model');
 
 class Class extends Model {

@@ -1,12 +1,56 @@
 const Class = require('../../models/v2/Class');
 const ServiceHelper = require('../../helper/ServiceHelper');
 const classCategoryParticipantSessionService = require('./landingClassCategoryParticipantSessionService');
+const classCategoriesService = require('./landingClassCategoriesService');
+const classCoachService = require('./landingClassCoachService');
+const classMediaService = require('./landingClassMediaService');
 
 const ErrorEnum = {
     PARTICIPANTS_EXISTED: 'PARTICIPANTS_EXISTED',
 }
 
 const classService = {};
+
+classService.createClass = async (classDTO, fileIds, categories, user) => {
+
+    return Class.transaction(async trx => {
+
+        const cls = await Class.query(trx)
+            .insertToTable(classDTO, user.sub);
+
+        const mediaDTO = fileIds.map(fileId => {
+            return {
+                classUuid: cls.uuid,
+                fileId: fileId,
+            }
+        });
+
+        const classCoachDTO = {
+            classUuid: cls.uuid,
+            userId: user.sub,
+        };
+
+        categories = categories.map(category => {
+            return {
+                classUuid: cls.uuid,
+                ...category,
+            }
+        });
+
+        const classMedia = await classMediaService.initMedia(mediaDTO, user, trx);
+        const classCoaches = await classCoachService.initClassCoach(classCoachDTO, user, trx);
+        const classCategory = await classCategoriesService.initCategories(categories, user, trx);
+
+        return {
+            ...cls,
+            classMedia: classMedia,
+            classCoaches: classCoaches,
+            classCategory: classCategory,
+        };
+
+    });
+
+};
 
 classService.getClasses = async (page, size, keyword, industryId, cityId, companyId) => {
 

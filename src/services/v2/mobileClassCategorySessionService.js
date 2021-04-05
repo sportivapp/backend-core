@@ -9,6 +9,7 @@ const classComplaintEnum = require('../../models/enum/ClassComplaintEnum');
 const codeToDayEnum = require('../../models/enum/CodeToDayEnum');
 const codeToMonthEnum = require('../../models/enum/CodeToMonthEnum');
 const timeService = require('../../helper/timeService');
+const classCategoryCoachService = require('./mobileClassCategoryCoachService');
 
 const ErrorEnum = {
     INVALID_SESSION: 'INVALID_SESSION',
@@ -45,6 +46,7 @@ classCategorySessionService.findById = async(classCategorySessionUuid) => {
 
 classCategorySessionService.inputAbsence = async(classCategoryUuid, classCategorySessionUuid, participants, user) => {
 
+    await classCategoryCoachService.checkCoachCategory(user.sub, classCategoryUuid);
     const session = await classCategorySessionService.findById(classCategorySessionUuid);
 
     if (session.status !== sessionStatusEnum.ONGOING)
@@ -415,6 +417,7 @@ classCategorySessionService.groupOrderedNonRecurringSessions = (sessions) => {
 
         // To state whether user can book this session
         session.isParticipated = session.participantSession.length !== 0;
+        session.price = parseInt(session.price);
         const startDate = new Date(parseInt(session.startDate));
         const monthCode = startDate.getMonth();
         const month = codeToMonthEnum[monthCode];

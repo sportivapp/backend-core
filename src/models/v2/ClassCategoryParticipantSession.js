@@ -44,12 +44,22 @@ class ClassCategoryParticipantSession extends Model {
             complaint(builder) {
                 builder.select('uuid', 'is_check_in', 'is_confirmed'); //Invoice aswell
             },
-            mySessionHistory(builder, classCategoryUuid, userId) {
+            mySessionsHistory(builder, classCategoryUuid, userId) {
                 builder.select('class_category_participant_session.uuid', 'is_check_in', 'is_confirmed') //Invoice aswell
                     .withGraphFetched('classRating(basic)')
+                    .withGraphFetched('classReason(basic)')
                     .withGraphJoined('classCategorySession(basicStartEnd)')
                     .where('class_category_uuid', classCategoryUuid)
                     .where('user_id', userId)
+                    .where('classCategorySession.status', SessionStatusEnum.DONE);
+            },
+            categorySessionsHistory(builder, classCategoryUuid) {
+                builder.select('class_category_participant_session.uuid', 'is_check_in', 'is_confirmed')
+                    .withGraphFetched('classRating(basic)')
+                    .withGraphFetched('classReason(basic)')
+                    .withGraphFetched('user(basic)')
+                    .withGraphJoined('classCategorySession(basicStartEnd)')
+                    .where('class_category_uuid', classCategoryUuid)
                     .where('classCategorySession.status', SessionStatusEnum.DONE);
             },
         }
