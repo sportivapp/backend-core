@@ -201,6 +201,13 @@ classCategoryService.categorySessionsHistory = async (classCategoryUuid) => {
 
 }
 
+classCategoryService.categorySessionsHistory = async (classCategoryUuid) => {
+
+    return classCategoryParticipantSessionService
+        .categorySessionsHistoryByCategoryUuid(classCategoryUuid);
+
+}
+
 classCategoryService.getCategoryComplaints = async (classCategoryUuid, status, user) => {
 
     return classComplaintService.getCategoryComplaints(classCategoryUuid, status);
