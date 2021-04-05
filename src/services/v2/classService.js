@@ -34,7 +34,7 @@ classService.createClass = async (classDTO, fileIds, classCoachUserIds, categori
                 fileId: fileId,
             }
         });
-
+        
         const classCoachDTO = classCoachUserIds.map(classCoachUserId => {
             return {
                 classUuid: cls.uuid,
