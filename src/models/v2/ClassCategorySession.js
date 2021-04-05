@@ -42,8 +42,7 @@ class ClassCategorySession extends Model {
                 builder.select('uuid', 'class_category_uuid', 'month_utc', 'start_date', 'end_date', 'start_time', 'absence_time', 'status');
             },
             bookableSessions(builder, classCategoryUuid, start, end, userId) {
-
-                builder.select('class_category_session.uuid', 'start_date', 'end_date')
+                builder.select('class_category_session.uuid', 'start_date', 'end_date', 'title', 'price')
                     .where('class_category_uuid', classCategoryUuid)
                     .where('status', SessionStatusEnum.UPCOMING)
                     .where('start_date', '>=', start)
