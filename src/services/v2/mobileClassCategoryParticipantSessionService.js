@@ -1,5 +1,7 @@
 const { UnsupportedOperationError } = require('../../models/errors');
 const ClassCategoryParticipantSession = require('../../models/v2/ClassCategoryParticipantSession');
+const notificationService = require('../notificationService');
+const NotificationEnum = require('../../models/enum/NotificationEnum');
 
 const ErrorEnum = {
     INVALID_PARTICIPANT_SESSION: 'INVALID_PARTICIPANT_SESSION',
@@ -68,11 +70,31 @@ classCategoryParticipantSessionService.confirmParticipation = async (classCatego
 
     const participantSession = await classCategoryParticipantSessionService.findById(classCategoryParticipantSessionUuid);
 
-    return participantSession.$query()
+    const updatedData = await participantSession.$query()
         .updateByUserId({
             isConfirmed: isConfirm,
         }, user.sub)
         .returning('*');
+    const foundUser = await participantSession.$relatedQuery('user');
+    const session = await participantSession.$relatedQuery('classCategorySession');
+    const category = await participantSession.$relatedQuery('classCategory');
+    const cls = await participantSession.$relatedQuery('class');
+    const sessionDate = new Date(session.start_date);
+    const coaches = await category.$relatedQuery('coaches');
+
+    const notifAction = NotificationEnum.classSession.actions.sessionConfirmed;
+
+    const notificationObj = notificationService.buildNotificationEntity(
+        participantSession.class_category_session_uuid,
+        NotificationEnum.classSession.type,
+        notifAction.title(cls.title, category.title),
+        notifAction.message(`Sesi ${sessionDate.getDate()} ${sessionDate.getMonth()} ${sessionDate.getFullYear()}`, foundUser.eusername),
+        notifAction.code
+    );
+
+    notificationService.saveNotification(notificationObj, participantSession.user_id, coaches.map(coach => coach.user_id));
+
+    return updatedData;
 
 }
 
@@ -90,9 +112,29 @@ classCategoryParticipantSessionService.updateParticipantConfirmedExpiration = as
 
 classCategoryParticipantSessionService.register = async (participantSessionDTOs, user, trx) => {
 
-    return ClassCategoryParticipantSession.query(trx)
+    const participants = await ClassCategoryParticipantSession.query(trx)
         .insertToTable(participantSessionDTOs, user.sub);
 
+    const notifAction = NotificationEnum.classCategory.actions.registerSuccess;
+
+    const participantMap = [];
+
+    const notificationPromiseList = participants.map(async participant => {
+        const classCategory = await participant.$relatedQuery('classCategory');
+        const cls = await participant.$relatedQuery('class');
+        const coaches = await classCategory.$relatedQuery('coaches');
+        const notificationObj = notificationService.buildNotificationEntity(
+            participant.class_category_uuid,
+            NotificationEnum.classCategory.type,
+            notifAction.title(cls.title, classCategory.title),
+            notifAction.message(),
+            notifAction.code
+        );
+        return notificationService.saveNotification(notificationObj, coaches[0].user_id, participant.user_id);
+    });
+
+    Promise.all(notificationPromiseList);
+    return participants;
 }
 
 classCategoryParticipantSessionService.getMySessionUuids = async (user) => {

@@ -10,6 +10,8 @@ const codeToDayEnum = require('../../models/enum/CodeToDayEnum');
 const codeToMonthEnum = require('../../models/enum/CodeToMonthEnum');
 const timeService = require('../../helper/timeService');
 const classCategoryCoachService = require('./mobileClassCategoryCoachService');
+const notificationService = require('../notificationService');
+const NotificationEnum = require('../../models/enum/NotificationEnum');
 
 const ErrorEnum = {
     INVALID_SESSION: 'INVALID_SESSION',
@@ -22,13 +24,35 @@ const classCategorySessionService = {};
 
 classCategorySessionService.startSession = async (classCategorySessionUuid, user) => {
 
-    return ClassCategorySession.query()
-        .findById(classCategorySessionUuid)
+    const session = await ClassCategorySession.query()
+        .findById(classCategorySessionUuid);
+
+    const updatedSession = await session.$query()
         .updateByUserId({
             status: sessionStatusEnum.ONGOING,
             startTime: Date.now(),
             startBy: user.sub,
-        }, user.sub);
+        }, user.sub)
+        .returning("*");
+
+    const sessionParticipantIds = await session.$relatedQuery('participantSession')
+        .then(participants => participants.map(participant => participant.user_id));
+
+    const category = await session.$relatedQuery('classCategory');
+    const cls = await session.$relatedQuery('class');
+
+    const notificationAction = NotificationEnum.classSession.actions.start;
+
+    const notification = notificationService.buildNotificationEntity(
+        session.id,
+        NotificationEnum.classSession,
+        notificationAction.title(cls.title, category.title),
+        notificationAction.message(),
+        notificationAction.code);
+
+    notificationService.saveNotification(notification, user, sessionParticipantIds);
+
+    return updatedSession;
 
 }
 
@@ -91,12 +115,59 @@ classCategorySessionService.endSession = async (classCategorySessionUuid, user, 
 
     await classCategoryParticipantSessionService.updateParticipantConfirmedExpiration(classCategorySessionUuid, trx);
 
-    return session.$query(trx)
+    const updatedSession = await session.$query(trx)
     .updateByUserId({
         status: sessionStatusEnum.DONE,
         endTime: Date.now(),
         endBy: user.sub,
     }, user.sub);
+
+    const sessionParticipantIds = await session.$relatedQuery('participantSession')
+        .then(participants => participants.map(participant => participant.user_id));
+
+    const category = await session.$relatedQuery('classCategory');
+    const cls = await session.$relatedQuery('class');
+    const upcomingSessions = await category.$relatedQuery('classCategorySession').where('start_date', '>', Date.now());
+
+    const notifPromiseList = [];
+    if (upcomingSessions.length === 0) {
+        const classDoneAction = NotificationEnum.classCategory.actions.finished;
+        const classDoneNotifObj = notificationService.buildNotificationEntity(
+            category.id,
+            NotificationEnum.classCategory.type,
+            classDoneAction.title(cls.title, category.title),
+            classDoneAction.message(),
+            classDoneAction.code
+        );
+        notifPromiseList.push(notificationService.saveNotification(classDoneNotifObj, user, sessionParticipantIds));
+    }
+
+    const sessionDate = new Date(session.start_date);
+    const sessionTitle = `Sesi ${sessionDate.getDate()} ${sessionDate.getMonth()} ${sessionDate.getFullYear()}`;
+
+    const endSessionAction = NotificationEnum.classSession.actions.end;
+    const requireConfirmationAction = NotificationEnum.classSession.actions.requireConfirmation;
+
+    const endSessionNotifObj = notificationService.buildNotificationEntity(
+        session.id,
+        NotificationEnum.classSession.type,
+        endSessionAction.title(cls.title, category.title),
+        endSessionAction.message(sessionTitle),
+        endSessionAction.code);
+
+    const requireConfirmationNotifObj = notificationService.buildNotificationEntity(
+        session.id,
+        NotificationEnum.classSession.type,
+        requireConfirmationAction.title(cls.title, category.title),
+        requireConfirmationAction.message(sessionTitle),
+        requireConfirmationAction.code);
+
+    notifPromiseList.push(notificationService.saveNotification(endSessionNotifObj, user, sessionParticipantIds));
+    notifPromiseList.push(notificationService.saveNotification(requireConfirmationNotifObj, user, sessionParticipantIds));
+
+    Promise.all(notifPromiseList);
+
+    return updatedSession;
 
 }
 

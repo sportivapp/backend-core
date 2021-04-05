@@ -150,4 +150,22 @@ classCategorySessionService.getSessions = async (classCategoryUuid, statuses, pa
 
 }
 
+classCategorySessionService.getAllUpcomingSessions = async () => {
+
+    return ClassCategorySession.query()
+        .where('status', sessionStatusEnum.UPCOMING)
+        .where('start_date', '>', Date.now())
+        .orderBy('start_date', 'ASC');
+
+}
+
+classCategorySessionService.getAllFinishedSessions = async () => {
+
+    return ClassCategorySession.query()
+        .where('status', sessionStatusEnum.DONE)
+        .orderBy('start_date', 'ASC');
+
+}
+
+
 module.exports = classCategorySessionService;

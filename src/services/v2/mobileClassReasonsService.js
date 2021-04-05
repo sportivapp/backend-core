@@ -1,4 +1,6 @@
 const ClassReasons = require('../../models/v2/ClassReasons');
+const notificationService = require('../notificationService');
+const NotificationEnum = require('../../models/enum/NotificationEnum');
 const { UnsupportedOperationError } = require('../../models/errors');
 
 const ErrorEnum = {
@@ -23,8 +25,13 @@ mobileClassReasonsService.checkExistUserReason = async (classCategorySessionUuid
 
 mobileClassReasonsService.reason = async (classReasonsDTO, user) => {
 
-    return ClassReasons.query()
+    const notifAction = NotificationEnum.classSession.actions.reason;
+
+    const reason = await ClassReasons.query()
         .insertToTable(classReasonsDTO, user.sub);
+
+    const cls = reason.$relatedQuery('class');
+    const session = reason.$relatedQuery('classCategorySession')
 
 }
 

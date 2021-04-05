@@ -12,6 +12,8 @@ const ErrorEnum = {
     DOUBLE_COMPLAINT: 'DOUBLE_COMPLAINT',
     INVALID_STATUS: 'INVALID_STATUS',
 }
+const DAY_IN_MILLIS = 86400000;
+const MINUTE_IN_MILLIS = 60000;
 
 const mobileClassComplaintService = {};
 
@@ -40,6 +42,34 @@ mobileClassComplaintService.complaintSession = async (classComplaintsDTO, user) 
 
     return ClassComplaints.query()
         .insertToTable(classComplaintsDTO, user.sub);
+
+}
+
+mobileClassComplaintService.checkNewComplaints = async (sessions) => {
+
+    const promises = sessions.map(async session => {
+        const cls = await session.$relatedQuery('class');
+        const category = await session.$relatedQuery('classCategory');
+        const complaints = await ClassComplaints.query()
+            .where('class_category_session_uuid', session.uuid)
+            .then(complaints => complaints.filter(complaint => Date.now() - complaint.create_time <= MINUTE_IN_MILLIS));
+        const sessionDate = new Date(session.start_date);
+        const userName = await complaints.length === 1 ? complaints[0].$relatedQuery('user') : null;
+        const action = complaints.length > 1 ? NotificationEnum.classSession.actions.newComplaints : NotificationEnum.classSession.actions.newComplaint;
+        const additionalInfo = {
+            param1: complaints.length > 1 ? complaints.length : userName,
+            param2: `Sesi ${sessionDate.getDate()} ${sessionDate.getMonth()} ${sessionDate.getFullYear()}`
+        }
+        const notificationObj = notificationService.buildNotificationEntity(
+            session.uuid,
+            NotificationEnum.classSession,
+            action.title(cls.title, category.title),
+            action.message(...additionalInfo),
+            action.code);
+        return notificationService.saveNotification(notificationObj, complaints.map(complaint => complaint.create_by));
+    })
+
+    return Promise.all(promises);
 
 }
 
