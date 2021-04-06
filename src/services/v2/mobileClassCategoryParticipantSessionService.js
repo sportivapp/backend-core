@@ -75,24 +75,6 @@ classCategoryParticipantSessionService.confirmParticipation = async (classCatego
             isConfirmed: isConfirm,
         }, user.sub)
         .returning('*');
-    const foundUser = await participantSession.$relatedQuery('user');
-    const session = await participantSession.$relatedQuery('classCategorySession');
-    const category = await participantSession.$relatedQuery('classCategory');
-    const cls = await participantSession.$relatedQuery('class');
-    const sessionDate = new Date(session.start_date);
-    const coaches = await category.$relatedQuery('coaches');
-
-    const notifAction = NotificationEnum.classSession.actions.sessionConfirmed;
-
-    const notificationObj = notificationService.buildNotificationEntity(
-        participantSession.class_category_session_uuid,
-        NotificationEnum.classSession.type,
-        notifAction.title(cls.title, category.title),
-        notifAction.message(`Sesi ${sessionDate.getDate()} ${sessionDate.getMonth()} ${sessionDate.getFullYear()}`, foundUser.eusername),
-        notifAction.code
-    );
-
-    notificationService.saveNotification(notificationObj, participantSession.user_id, coaches.map(coach => coach.user_id));
 
     return updatedData;
 
@@ -117,20 +99,18 @@ classCategoryParticipantSessionService.register = async (participantSessionDTOs,
 
     const notifAction = NotificationEnum.classCategory.actions.registerSuccess;
 
-    const participantMap = [];
-
     const notificationPromiseList = participants.map(async participant => {
         const classCategory = await participant.$relatedQuery('classCategory');
         const cls = await participant.$relatedQuery('class');
         const coaches = await classCategory.$relatedQuery('coaches');
-        const notificationObj = notificationService.buildNotificationEntity(
-            participant.class_category_uuid,
+        const notificationObj = await notificationService.buildNotificationEntity(
+            participant.classCategoryUuid,
             NotificationEnum.classCategory.type,
             notifAction.title(cls.title, classCategory.title),
             notifAction.message(),
             notifAction.code
         );
-        return notificationService.saveNotification(notificationObj, coaches[0].user_id, participant.user_id);
+        return notificationService.saveNotification(notificationObj, { sub: coaches[0].userId }, [participant.userId]);
     });
 
     Promise.all(notificationPromiseList);

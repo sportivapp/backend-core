@@ -60,16 +60,11 @@ const NotificationEnum = {
             }
         }
     },
-    class: {
-        type: 'CLASS',
-        actions: {
-        }
-    },
     classCategory: {
         type: 'CLASS_CATEGORY',
         actions: {
             registerSuccess: {
-                title: (title) => `Registrasi ${title}`,
+                title: (classTitle, categoryTitle) => `Registrasi Kelas ${classTitle} Kategori ${categoryTitle}`,
                 code: 'CLASS_CATEGORY_REGISTRATION_SUCCESS',
                 message: () => `Registrasi kelas sukses! Cek jadwal kelasmu disini.`
             },
@@ -91,7 +86,7 @@ const NotificationEnum = {
             end: {
                 title: (classTitle, categoryTitle) => `Sesi Kelas ${classTitle} Kategori ${categoryTitle} Selesai`,
                 code: 'CLASS_SESSION_FINISHED',
-                message: (sessionTitle) => `Wah hebat! Anda telah menyelesaikan Sesi ${sessionTitle}`
+                message: (sessionTitle) => `Wah hebat! Anda telah menyelesaikan ${sessionTitle}`
             },
             requireConfirmation: {
                 title: (classTitle, categoryTitle) => `Konfirmasi Sesi Kelas ${classTitle} Kategori ${categoryTitle}`,
@@ -101,7 +96,12 @@ const NotificationEnum = {
             sessionConfirmed: {
                 title: (classTitle, categoryTitle) => `Konfirmasi Sesi Kelas ${classTitle} Kategori ${categoryTitle}`,
                 code: 'CLASS_SESSION_USER_CONFIRMED',
-                message: (sessionTitle, userName) => `${sessionTitle} telah di konfirmasi oleh ${userName}`
+                message: (userName, sessionTitle) => `${sessionTitle} telah di konfirmasi oleh ${userName}`
+            },
+            sessionsConfirmed: {
+                title: (classTitle, categoryTitle) => `Konfirmasi Sesi Kelas ${classTitle} Kategori ${categoryTitle}`,
+                code: 'CLASS_SESSION_USERS_CONFIRMED',
+                message: (userCount, sessionTitle) => `${sessionTitle} telah di konfirmasi oleh ${userCount} peserta!`
             },
             reminder: {
                 title: (classTitle, categoryTitle) => `Reminder kelas ${classTitle} Kategori ${categoryTitle}`,
@@ -132,6 +132,11 @@ const NotificationEnum = {
                 title: (classTitle, categoryTitle) => `Komplain Kelas ${classTitle} Kategori ${categoryTitle}`,
                 code: 'CLASS_SESSION_NEW_COMPLAINT',
                 message: (userName, sessionTitle) => `Anda mendapatkan komplain untuk ${sessionTitle} dari ${userName}!`
+            },
+            reschedule: {
+                title: (classTitle, categoryTitle) => `Reschedule Kelas ${classTitle} Kategori ${categoryTitle}`,
+                code: 'CLASS_SESSION_RESCHEDULE',
+                message: (sessionTitle) => `${sessionTitle} telah di reschedule! cek jadwal baru disini!`
             }
         }
     }

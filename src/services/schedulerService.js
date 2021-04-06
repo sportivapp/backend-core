@@ -8,9 +8,14 @@ const schedulerService = {}
 
 schedulerService.initialize = () => {
     publishScheduledNews();
-    remindClassSession();
+    remindClassSessionBy15Minute();
+    remindClassSessionBy30Minute();
+    remindClassSessionByOneHour();
+    remindClassSessionByTwoHour();
+    remindClassSessionByOneDay();
     checkNewClassSessionParticipants();
     checkNewClassSessionComplaints();
+    checkNewClassSessionConfirmations();
 }
 
 function publishScheduledNews()  {
@@ -19,10 +24,38 @@ function publishScheduledNews()  {
     })
 }
 
-function remindClassSession() {
-    schedule.scheduleJob('* * * * *', async function() {
+function remindClassSessionBy15Minute() {
+    schedule.scheduleJob('*/15 * * * *', async function() {
         const sessions = await classCategorySessionService.getAllUpcomingSessions();
-        await classCategoryParticipantSessionService.remindUpcomingSessions(sessions);
+        await classCategoryParticipantSessionService.remindUpcomingSessionsByMinute(sessions, 15);
+    })
+}
+
+function remindClassSessionBy30Minute() {
+    schedule.scheduleJob('*/30 * * * *', async function() {
+        const sessions = await classCategorySessionService.getAllUpcomingSessions();
+        await classCategoryParticipantSessionService.remindUpcomingSessionsByMinute(sessions, 30);
+    })
+}
+
+function remindClassSessionByOneHour() {
+    schedule.scheduleJob('0 * * * *', async function() {
+        const sessions = await classCategorySessionService.getAllUpcomingSessions();
+        await classCategoryParticipantSessionService.remindUpcomingSessionsByHour(sessions, 1);
+    })
+}
+
+function remindClassSessionByTwoHour() {
+    schedule.scheduleJob('0 */2 * * *', async function() {
+        const sessions = await classCategorySessionService.getAllUpcomingSessions();
+        await classCategoryParticipantSessionService.remindUpcomingSessionsByHour(sessions, 2);
+    })
+}
+
+function remindClassSessionByOneDay() {
+    schedule.scheduleJob('0 0 * * *', async function() {
+        const sessions = await classCategorySessionService.getAllUpcomingSessions();
+        await classCategoryParticipantSessionService.remindUpcomingSessionsByDay(sessions, 1);
     })
 }
 
@@ -35,8 +68,16 @@ function checkNewClassSessionParticipants() {
 
 function checkNewClassSessionComplaints() {
     schedule.scheduleJob('* * * * *', async function() {
+        console.log('checking complaints');
         const sessions = await classCategorySessionService.getAllFinishedSessions();
         await mobileClassComplaintService.checkNewComplaints(sessions);
+    })
+}
+
+function checkNewClassSessionConfirmations() {
+    schedule.scheduleJob('* * * * *', async function() {
+        const sessions = await classCategorySessionService.getAllFinishedSessions();
+        await classCategoryParticipantSessionService.checkNewConfirmations(sessions);
     })
 }
 

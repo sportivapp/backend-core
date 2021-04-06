@@ -7,6 +7,9 @@ const zeroPrefixHelper = require('../../helper/zeroPrefixHelper');
 const ClassTransactionSequence = require('../../models/v2/ClassComplaintSequence');
 const { moduleTransactionEnum, moduleEnum } = require('../../models/enum/ModuleTransactionEnum');
 const dateFormatter = require('../../helper/dateFormatter');
+const notificationService = require('../notificationService');
+const NotificationEnum = require('../../models/enum/NotificationEnum');
+const CodeToTextMonthEnum = require('../../models/enum/CodeToTextMonthEnum');
 
 const ErrorEnum = {
     DOUBLE_COMPLAINT: 'DOUBLE_COMPLAINT',
@@ -50,23 +53,25 @@ mobileClassComplaintService.checkNewComplaints = async (sessions) => {
     const promises = sessions.map(async session => {
         const cls = await session.$relatedQuery('class');
         const category = await session.$relatedQuery('classCategory');
+        const coaches = await category.$relatedQuery('coaches');
         const complaints = await ClassComplaints.query()
             .where('class_category_session_uuid', session.uuid)
-            .then(complaints => complaints.filter(complaint => Date.now() - complaint.create_time <= MINUTE_IN_MILLIS));
-        const sessionDate = new Date(session.start_date);
-        const userName = await complaints.length === 1 ? complaints[0].$relatedQuery('user') : null;
+            .then(complaints => complaints.filter(complaint => Date.now() - complaint.createTime <= MINUTE_IN_MILLIS));
+        if (complaints.length <= 0) return null;
+        const sessionDate = new Date(parseInt(session.startDate));
+        const user = await complaints[0].$relatedQuery('user');
         const action = complaints.length > 1 ? NotificationEnum.classSession.actions.newComplaints : NotificationEnum.classSession.actions.newComplaint;
         const additionalInfo = {
-            param1: complaints.length > 1 ? complaints.length : userName,
-            param2: `Sesi ${sessionDate.getDate()} ${sessionDate.getMonth()} ${sessionDate.getFullYear()}`
+            param1: complaints.length > 1 ? complaints.length : user.eusername,
+            param2: `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`
         }
-        const notificationObj = notificationService.buildNotificationEntity(
+        const notificationObj = await notificationService.buildNotificationEntity(
             session.uuid,
-            NotificationEnum.classSession,
+            NotificationEnum.classSession.type,
             action.title(cls.title, category.title),
-            action.message(...additionalInfo),
+            action.message(additionalInfo.param1, additionalInfo.param2),
             action.code);
-        return notificationService.saveNotification(notificationObj, complaints.map(complaint => complaint.create_by));
+        return notificationService.saveNotification(notificationObj, { sub: user.euserid }, coaches.map(coach => coach.userId));
     })
 
     return Promise.all(promises);

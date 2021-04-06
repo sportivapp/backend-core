@@ -3,6 +3,9 @@ const ClassCategorySession = require('../../models/v2/ClassCategorySession');
 const classCategoryParticipantSessionService = require('./classCategoryParticipantSessionService');
 const ServiceHelper = require('../../helper/ServiceHelper');
 const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
+const notificationService = require('../notificationService');
+const NotificationEnum = require('../../models/enum/NotificationEnum');
+const CodeToTextMonthEnum = require('../../models/enum/CodeToTextMonthEnum');
 
 const ErrorEnum = {
     INVALID_SESSION: 'INVALID_SESSION',
@@ -50,7 +53,7 @@ classCategorySessionService.checkConflictSession = (existingSessions, newSession
 
 classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepeat, user) => {
 
-    const session = await classCategorySessionService.findById(classCategorySessionDTO.uuid);
+    const updatedSession = await classCategorySessionService.findById(classCategorySessionDTO.uuid);
     const upcomingSessions = await classCategorySessionService
         .getSessions(classCategorySessionDTO.classCategoryUuid, [sessionStatusEnum.UPCOMING]);
 
@@ -58,19 +61,41 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
 
         classCategorySessionService.checkConflictSession(upcomingSessions, [classCategorySessionDTO]);
 
-        return session.$query()
+        const updateSession = await updatedSession.$query()
             .updateByUserId(classCategorySessionDTO, user.sub)
             .returning('*');
 
+        const cls = await updatedSession.$relatedQuery('class');
+        const category = await updatedSession.$relatedQuery('classCategory');
+        const participants = await updatedSession.$relatedQuery('participantSession')
+            .then(participants => participants.map(participant => participant.userId));
+        console.log(participants);
+        const sessionDate = new Date(parseInt(updatedSession.startDate));
+        const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
+
+        const notifAction = NotificationEnum.classSession.actions.reschedule;
+
+        const notifObj = await notificationService.buildNotificationEntity(
+            updatedSession.uuid,
+            NotificationEnum.classSession.type,
+            notifAction.title(cls.title, category.title),
+            notifAction.message(sessionTitle),
+            notifAction.code
+        );
+
+        notificationService.saveNotification(notifObj, user, participants);
+
+        return updateSession;
+
     } else {
 
-        const startDiff = parseInt(classCategorySessionDTO.startDate) - parseInt(session.startDate);
-        const endDiff = parseInt(classCategorySessionDTO.endDate) - parseInt(session.endDate);
+        const startDiff = parseInt(classCategorySessionDTO.startDate) - parseInt(updatedSession.startDate);
+        const endDiff = parseInt(classCategorySessionDTO.endDate) - parseInt(updatedSession.endDate);
 
         const updatedSessions = [];
         upcomingSessions.forEach(upcomingSession => {
             
-            const sessionDate = new Date(parseInt(session.startDate));
+            const sessionDate = new Date(parseInt(updatedSession.startDate));
             const upcomingSessionDate = new Date(parseInt(upcomingSession.startDate));
 
             // Get all matched session by day & hour & minute
@@ -87,12 +112,33 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
 
         classCategorySessionService.checkConflictSession(upcomingSessions, updatedSessions);
 
-        const promises = updatedSessions.map(updatedSession => {
-            return ClassCategorySession.query()
+        const promises = updatedSessions.map(async updatedSession => {
+            const updateSession = await ClassCategorySession.query()
                 .where('uuid', updatedSession.uuid)
                 .updateByUserId(updatedSession, user.sub)
                 .first()
                 .returning('*');
+
+            const cls = await updateSession.$relatedQuery('class');
+            const category = await updateSession.$relatedQuery('classCategory');
+            const participants = await updateSession.$relatedQuery('participantSession')
+                .then(participants => participants.map(participant => participant.userId));
+            const sessionDate = new Date(parseInt(updateSession.initStartDate));
+            const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
+
+            const notifAction = NotificationEnum.classSession.actions.reschedule;
+
+            const notifObj = await notificationService.buildNotificationEntity(
+                updateSession.uuid,
+                NotificationEnum.classSession.type,
+                notifAction.title(cls.title, category.title),
+                notifAction.message(sessionTitle),
+                notifAction.code
+            );
+
+            notificationService.saveNotification(notifObj, user, participants);
+
+            return updateSession;
         });
 
         return Promise.all(promises);
