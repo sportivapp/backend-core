@@ -3,13 +3,14 @@ const ResponseHelper = require('../../../helper/ResponseHelper');
 
 mobileClassComplaintController = {};
 
-mobileClassComplaintController.getMyComplaints = async (req, res, next) => {
+mobileClassComplaintController.getMyCategoryComplaints = async (req, res, next) => {
 
+    const { classCategoryUuid } = req.params;
     const { status } = req.query;
 
     try {
 
-        const result = await classComplaintsService.getMyComplaints(req.user, status);
+        const result = await classComplaintsService.getMyCategoryComplaints(classCategoryUuid, status, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {

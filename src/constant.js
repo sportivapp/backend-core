@@ -200,7 +200,7 @@ module.exports = {
             monthPicker: '/class-category/:classCategoryUuid/month-picker',
         },
         classComplaint: {
-            myComplaints: '/class-complaints',
+            myCategoryComplaints: '/my-category/:classCategoryUuid/complaints',
             coachComplaints: '/coach-complaints',
             coachAcceptComplaint: '/coach-complaints/:classComplaintUuid/accept',
             coachRejectComplaint: '/coach-complaints/:classComplaintUuid/reject',
