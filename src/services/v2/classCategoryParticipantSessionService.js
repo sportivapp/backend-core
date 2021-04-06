@@ -93,7 +93,7 @@ classCategoryParticipantSessionService.remindUpcomingSessionsByMinute = async (s
         const diff = startTime.getTime() - now.getTime();
         return diff <= HOUR_IN_MILLIS;
     }).map(async session => {
-        const participantIds = classCategoryParticipantSessionService.getSessionParticipants(session.uuid)
+        const participantIds = await classCategoryParticipantSessionService.getSessionParticipants(session.uuid)
             .then(participants => participants.map(participant => participant.userId));
         if (participantIds.length <= 0) return null;
         const cls = await session.$relatedQuery('class');
@@ -102,7 +102,7 @@ classCategoryParticipantSessionService.remindUpcomingSessionsByMinute = async (s
         const now = new Date();
         const sessionDate = new Date(parseInt(session.startDate));
         const minuteDiff = sessionDate.getMinutes() - now.getMinutes();
-        if (minuteDiff > targetMinute) return null;
+        if (minuteDiff !== targetMinute) return null;
         const timeDescription = `${targetMinute} ${TimeMap.MINUTE}`
         const action = NotificationEnum.classSession.actions.reminder;
         const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
@@ -128,7 +128,7 @@ classCategoryParticipantSessionService.remindUpcomingSessionsByHour = async (ses
         const diff = startTime.getTime() - now.getTime();
         return diff <= DAY_IN_MILLIS;
     }).map(async session => {
-        const participantIds = classCategoryParticipantSessionService.getSessionParticipants(session.uuid)
+        const participantIds = await classCategoryParticipantSessionService.getSessionParticipants(session.uuid)
             .then(participants => participants.map(participant => participant.userId));
         if (participantIds.length <= 0) return null;
         const cls = await session.$relatedQuery('class');
@@ -137,7 +137,7 @@ classCategoryParticipantSessionService.remindUpcomingSessionsByHour = async (ses
         const now = new Date();
         const sessionDate = new Date(parseInt(session.startDate));
         const diff = sessionDate.getHours() - now.getHours();
-        if (diff > targetHour) return null;
+        if (diff !== targetHour) return null;
         const timeDescription = `${targetHour} ${TimeMap.HOUR}`
         const action = NotificationEnum.classSession.actions.reminder;
         const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
@@ -163,7 +163,7 @@ classCategoryParticipantSessionService.remindUpcomingSessionsByDay = async (sess
         const diff = startTime.getTime() - now.getTime();
         return diff <= DAY_IN_MILLIS * (targetDay + 1);
     }).map(async session => {
-        const participantIds = classCategoryParticipantSessionService.getSessionParticipants(session.uuid)
+        const participantIds = await classCategoryParticipantSessionService.getSessionParticipants(session.uuid)
             .then(participants => participants.map(participant => participant.userId));
         if (participantIds.length <= 0) return null;
         const cls = await session.$relatedQuery('class');
@@ -172,7 +172,7 @@ classCategoryParticipantSessionService.remindUpcomingSessionsByDay = async (sess
         const now = new Date();
         const sessionDate = new Date(parseInt(session.startDate));
         const diff = sessionDate.getDate() - now.getDate();
-        if (diff > targetDay) return null;
+        if (diff !== targetDay) return null;
         const timeDescription = `${targetDay} ${TimeMap.DAY}`
         const action = NotificationEnum.classSession.actions.reminder;
         const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;

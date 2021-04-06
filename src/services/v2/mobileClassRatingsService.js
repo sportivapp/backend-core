@@ -2,6 +2,9 @@ const ClassRatings = require('../../models/v2/ClassRatings');
 const ratingImprovementEnum = require('../../models/enum/RatingImprovementEnum');
 const { UnsupportedOperationError } = require('../../models/errors');
 const classRatingImprovementsService = require('./mobileClassRatingImprovement');
+const notificationService = require('../notificationService');
+const NotificationEnum = require('../../models/enum/NotificationEnum');
+const CodeToTextMonthEnum = require('../../models/enum/CodeToTextMonthEnum');
 
 const ErrorEnum = {
     INVALID_IMPROVEMENT_CODE: 'INVALID_IMPROVEMENT_CODE',
@@ -51,6 +54,36 @@ mobileClassRatingsService.rate = async (classRatingsDTO, improvementCodes, user)
         }
 
     });
+
+}
+
+mobileClassRatingsService.checkNewRatings = async (sessions) => {
+
+    const promises = sessions.map(async session => {
+        const cls = await session.$relatedQuery('class');
+        const category = await session.$relatedQuery('classCategory');
+        const coaches = await category.$relatedQuery('coaches');
+        const ratings = await ClassRatings.query()
+            .where('class_category_session_uuid', session.uuid)
+            .then(ratings => ratings.filter(rating => Date.now() - rating.createTime <= MINUTE_IN_MILLIS));
+        if (ratings.length <= 0) return null;
+        const sessionDate = new Date(parseInt(session.startDate));
+        const user = await ratings[0].$relatedQuery('user');
+        const action = ratings.length > 1 ? NotificationEnum.classSession.actions.newRatings : NotificationEnum.classSession.actions.newRating;
+        const additionalInfo = {
+            param1: ratings.length > 1 ? ratings.length : user.eusername,
+            param2: `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`
+        }
+        const notificationObj = await notificationService.buildNotificationEntity(
+            session.uuid,
+            NotificationEnum.classSession.type,
+            action.title(cls.title, category.title),
+            action.message(additionalInfo.param1, additionalInfo.param2),
+            action.code);
+        return notificationService.saveNotification(notificationObj, { sub: user.euserid }, coaches.map(coach => coach.userId));
+    })
+
+    return Promise.all(promises);
 
 }
 

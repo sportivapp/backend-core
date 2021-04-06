@@ -126,9 +126,11 @@ classCategorySessionService.endSession = async (classCategorySessionUuid, user, 
     const sessionParticipantIds = await session.$relatedQuery('participantSession')
         .then(participants => participants.map(participant => participant.userId));
 
+    if (sessionParticipantIds.length < 1) return updatedSession;
+
     const category = await session.$relatedQuery('classCategory');
     const cls = await session.$relatedQuery('class');
-    const upcomingSessions = await category.$relatedQuery('categorySessions').where('start_date', '>', Date.now());
+    const upcomingSessions = await classCategorySessionService.getSessionByCategoryUuidAndStatus(category.uuid, sessionStatusEnum.UPCOMING);
 
     const notifPromiseList = [];
     if (upcomingSessions.length === 0) {
@@ -201,9 +203,30 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
 
         classCategorySessionService.checkConflictSession(upcomingSessions, [classCategorySessionDTO]);
 
-        return session.$query()
+        const updateSession = await session.$query()
             .updateByUserId(classCategorySessionDTO, user.sub)
             .returning('*');
+
+        const cls = await session.$relatedQuery('class');
+        const category = await session.$relatedQuery('classCategory');
+        const participants = await session.$relatedQuery('participantSession')
+            .then(participants => participants.map(participant => participant.userId));
+        const sessionDate = new Date(parseInt(session.startDate));
+        const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
+
+        const notifAction = NotificationEnum.classSession.actions.reschedule;
+
+        const notifObj = await notificationService.buildNotificationEntity(
+            session.uuid,
+            NotificationEnum.classSession.type,
+            notifAction.title(cls.title, category.title),
+            notifAction.message(sessionTitle),
+            notifAction.code
+        );
+
+        notificationService.saveNotification(notifObj, user, participants);
+
+        return updateSession;
 
     } else {
 
@@ -228,14 +251,35 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
             }
         });
 
-        classCategorySessionService.checkConflictSession(upcomingSessions, updatedSessions);
+        classCategorySessionService.checkConflictSession(upcomingSessions, session);
 
-        const promises = updatedSessions.map(updatedSession => {
-            return ClassCategorySession.query()
+        const promises = session.map(async updatedSession => {
+            const updateSession = await ClassCategorySession.query()
                 .where('uuid', updatedSession.uuid)
                 .updateByUserId(updatedSession, user.sub)
                 .first()
                 .returning('*');
+
+            const cls = await updateSession.$relatedQuery('class');
+            const category = await updateSession.$relatedQuery('classCategory');
+            const participants = await updateSession.$relatedQuery('participantSession')
+                .then(participants => participants.map(participant => participant.userId));
+            const sessionDate = new Date(parseInt(updateSession.initStartDate));
+            const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
+
+            const notifAction = NotificationEnum.classSession.actions.reschedule;
+
+            const notifObj = await notificationService.buildNotificationEntity(
+                updateSession.uuid,
+                NotificationEnum.classSession.type,
+                notifAction.title(cls.title, category.title),
+                notifAction.message(sessionTitle),
+                notifAction.code
+            );
+
+            notificationService.saveNotification(notifObj, user, participants);
+
+            return updateSession;
         });
 
         return Promise.all(promises);

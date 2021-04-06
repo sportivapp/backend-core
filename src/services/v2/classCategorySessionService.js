@@ -6,6 +6,7 @@ const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
 const notificationService = require('../notificationService');
 const NotificationEnum = require('../../models/enum/NotificationEnum');
 const CodeToTextMonthEnum = require('../../models/enum/CodeToTextMonthEnum');
+const { raw } = require('objection');
 
 const ErrorEnum = {
     INVALID_SESSION: 'INVALID_SESSION',
@@ -59,7 +60,7 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
 
     if (!isRepeat) {
 
-        classCategorySessionService.checkConflictSession(upcomingSessions, [classCategorySessionDTO]);
+        // classCategorySessionService.checkConflictSession(upcomingSessions, [classCategorySessionDTO]);
 
         const updateSession = await updatedSession.$query()
             .updateByUserId(classCategorySessionDTO, user.sub)
@@ -69,7 +70,6 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
         const category = await updatedSession.$relatedQuery('classCategory');
         const participants = await updatedSession.$relatedQuery('participantSession')
             .then(participants => participants.map(participant => participant.userId));
-        console.log(participants);
         const sessionDate = new Date(parseInt(updatedSession.startDate));
         const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
 
@@ -211,6 +211,36 @@ classCategorySessionService.getAllFinishedSessions = async () => {
         .where('status', sessionStatusEnum.DONE)
         .orderBy('start_date', 'ASC');
 
+}
+
+classCategorySessionService.checkLastSession = async () => {
+    const lastSessions = await ClassCategorySession.query()
+        .distinctOn('class_category_uuid')
+        .modify('list')
+        .where('status', sessionStatusEnum.UPCOMING)
+        .orderBy(['class_category_uuid', { column: 'start_date', order: 'DESC' }]);
+    const promises = lastSessions.map(async session => {
+        const cls = await session.$relatedQuery('class');
+        const category = await session.$relatedQuery('classCategory');
+        const coaches = await category.$relatedQuery('coaches');
+        const now = new Date();
+        const sessionDate = new Date(parseInt(session.startDate));
+        if (sessionDate.getDate() !== now.getDate() ||
+            sessionDate.getMonth() !== now.getMonth() ||
+            sessionDate.getFullYear() !== now.getFullYear())
+            return null;
+        const notifAction = NotificationEnum.classCategory.actions.extend;
+        const notifObj = await notificationService.buildNotificationEntity(
+            category.uuid,
+            NotificationEnum.classCategory.type,
+            notifAction.title(cls.title, category.title),
+            notifAction.message(),
+            notifAction.code
+        );
+        return notificationService.saveNotification(notifObj, { sub: coaches[0].userId }, coaches.map(coach => coach.userId));
+    }).filter(promise => !!promise);
+
+    return Promise.all(promises);
 }
 
 

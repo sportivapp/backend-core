@@ -109,13 +109,35 @@ mobileClassComplaintService.getCoachComplaints = async (user, status) => {
 
 mobileClassComplaintService.coachAcceptComplaint = async (classComplaintUuid, user) => {
 
-    return ClassComplaints.query()
+    const updatedData = await ClassComplaints.query()
         .findById(classComplaintUuid)
         .updateByUserId({
             coachAccept: true,
             status: classComplaintStatusEnum.ON_PROGRESS,
         }, user.sub)
         .returning('*');
+
+    const session = await updatedData.$relatedQuery('classCategorySession');
+    const participants = await session.$relatedQuery('participantSession');
+    const category = await updatedData.$relatedQuery('classCategory');
+    const cls = await updatedData.$relatedQuery('class');
+    const sessionDate = new Date(parseInt(session.startDate));
+
+    const notifAction = NotificationEnum.classSession.actions.acceptComplaint;
+
+    const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
+
+    const notificationObj = await notificationService.buildNotificationEntity(
+        updatedData.classCategorySessionUuid,
+        NotificationEnum.classSession.type,
+        notifAction.title(cls.title, category.title),
+        notifAction.message(sessionTitle),
+        notifAction.code
+    );
+
+    notificationService.saveNotification(notificationObj, user, participants.map(participant => participant.userId));
+
+    return updatedData;
 
 }
 
@@ -140,6 +162,26 @@ mobileClassComplaintService.coachRejectComplaint = async (classComplaintUuid, co
         });
 
         await classComplaintMediaService.insertComplaintMedias(complaintMediaDTOs, user, trx);
+
+        const session = await complaint.$relatedQuery('classCategorySession');
+        const participants = await session.$relatedQuery('participantSession');
+        const category = await complaint.$relatedQuery('classCategory');
+        const cls = await complaint.$relatedQuery('class');
+        const sessionDate = new Date(parseInt(session.startDate));
+
+        const notifAction = NotificationEnum.classSession.actions.rejectComplaint;
+
+        const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
+
+        const notificationObj = await notificationService.buildNotificationEntity(
+            complaint.classCategorySessionUuid,
+            NotificationEnum.classSession.type,
+            notifAction.title(cls.title, category.title),
+            notifAction.message(sessionTitle),
+            notifAction.code
+        );
+
+        notificationService.saveNotification(notificationObj, user, participants.map(participant => participant.userId));
 
         return complaint;
 

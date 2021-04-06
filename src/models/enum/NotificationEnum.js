@@ -72,6 +72,11 @@ const NotificationEnum = {
                 title: (classTitle, categoryTitle) => `Kelas ${classTitle} Kategori ${categoryTitle} Selesai`,
                 code: 'CLASS_CATEGORY_FINISHED',
                 message: () => `Anda telah menyelesaikan semua kelas yang diikuti. Sampai jumpa kembali!`
+            },
+            extend: {
+                title: (classTitle, categoryTitle) => `Extend Kelas ${classTitle} Kategori ${categoryTitle}`,
+                code: 'CLASS_CATEGORY_EXTEND_OPTION',
+                message: () => `Masa berlangsung jadwal akan segera berakhir! Perbarui jadwal anda di web.`
             }
         }
     },
@@ -137,6 +142,26 @@ const NotificationEnum = {
                 title: (classTitle, categoryTitle) => `Reschedule Kelas ${classTitle} Kategori ${categoryTitle}`,
                 code: 'CLASS_SESSION_RESCHEDULE',
                 message: (sessionTitle) => `${sessionTitle} telah di reschedule! cek jadwal baru disini!`
+            },
+            acceptComplaint: {
+                title: (classTitle, categoryTitle) => `Komplain Kelas ${classTitle} Kategori ${categoryTitle}`,
+                code: 'CLASS_COMPLAINT_ACCEPTED',
+                message: (sessionTitle) => `Komplain Anda untuk ${sessionTitle} diterima.`
+            },
+            rejectComplaint: {
+                title: (classTitle, categoryTitle) => `Komplain Kelas ${classTitle} Kategori ${categoryTitle}`,
+                code: 'CLASS_COMPLAINT_REJECTED',
+                message: (sessionTitle) => `Komplain Anda untuk ${sessionTitle} ditolak.`
+            },
+            newRating: {
+                title: (classTitle, categoryTitle) => `Ulasan Kelas ${classTitle} Kategori ${categoryTitle}`,
+                code: 'CLASS_SESSION_NEW_RATING',
+                message: (userName, sessionTitle) => `${userName} telah memberi ulasan untuk ${sessionTitle}.`
+            },
+            newRatings: {
+                title: (classTitle, categoryTitle) => `Ulasan Kelas ${classTitle} Kategori ${categoryTitle}`,
+                code: 'CLASS_SESSION_NEW_RATINGS',
+                message: (userCount, sessionTitle) => `${userCount} peserta telah memberi ulasan untuk ${sessionTitle}.`
             }
         }
     }
