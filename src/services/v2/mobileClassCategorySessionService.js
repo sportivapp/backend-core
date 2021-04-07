@@ -10,6 +10,9 @@ const codeToDayEnum = require('../../models/enum/CodeToDayEnum');
 const codeToMonthEnum = require('../../models/enum/CodeToMonthEnum');
 const timeService = require('../../helper/timeService');
 const classCategoryCoachService = require('./mobileClassCategoryCoachService');
+const notificationService = require('../notificationService');
+const NotificationEnum = require('../../models/enum/NotificationEnum');
+const CodeToTextMonthEnum = require('../../models/enum/CodeToTextMonthEnum');
 
 const ErrorEnum = {
     INVALID_SESSION: 'INVALID_SESSION',
@@ -22,13 +25,36 @@ const classCategorySessionService = {};
 
 classCategorySessionService.startSession = async (classCategorySessionUuid, user) => {
 
-    return ClassCategorySession.query()
-        .findById(classCategorySessionUuid)
+    const session = await ClassCategorySession.query()
+        .findById(classCategorySessionUuid);
+
+    const updatedSession = await session.$query()
         .updateByUserId({
             status: sessionStatusEnum.ONGOING,
             startTime: Date.now(),
             startBy: user.sub,
-        }, user.sub);
+        }, user.sub)
+        .returning("*");
+
+    const completeSession = await session.$query().withGraphFetched('[participantSession, class, classCategory]');
+
+    const sessionParticipantIds = completeSession.participantSession.map(participant => participant.userId);
+
+    const category = completeSession.classCategory;
+    const cls = completeSession.class;
+
+    const notificationAction = NotificationEnum.classSession.actions.start;
+
+    const notification = await notificationService.buildNotificationEntity(
+        session.uuid,
+        NotificationEnum.classSession.type,
+        notificationAction.title(cls.title, category.title),
+        notificationAction.message(),
+        notificationAction.code);
+
+    notificationService.saveNotification(notification, user, sessionParticipantIds);
+
+    return updatedSession;
 
 }
 
@@ -54,11 +80,27 @@ classCategorySessionService.inputAbsence = async(classCategoryUuid, classCategor
 
     const absences = await classCategoryParticipantSessionService.inputAbsence(participants, user);
 
-    await session.$query()
+    const updatedSession = await session.$query()
         .updateByUserId({
             absenceTime: Date.now(),
             absenceBy: user.sub,
         }, user.sub);
+
+    const completeSession = await updatedSession.$query().withGraphFetched('[class, classCategory, classCategory]');
+    const cls = completeSession.class;
+    const category = completeSession.classCategory;
+
+    const notifAction = NotificationEnum.classSession.actions.finishedAttendance;
+
+    const notificationObj = await notificationService.buildNotificationEntity(
+        completeSession.uuid,
+        NotificationEnum.classSession.type,
+        notifAction.title(cls.title, category.title),
+        notifAction.message(),
+        notifAction.code
+    );
+
+    notificationService.saveNotification(notificationObj, user, absences.map(absence => absence.userId));
 
     return absences;
 
@@ -91,12 +133,62 @@ classCategorySessionService.endSession = async (classCategorySessionUuid, user, 
 
     await classCategoryParticipantSessionService.updateParticipantConfirmedExpiration(classCategorySessionUuid, trx);
 
-    return session.$query(trx)
+    const updatedSession = await session.$query(trx)
     .updateByUserId({
         status: sessionStatusEnum.DONE,
         endTime: Date.now(),
         endBy: user.sub,
     }, user.sub);
+
+    const completeSession = await session.$query().withGraphFetched('[participantSession, class, classCategory]');
+
+    const sessionParticipantIds = completeSession.participantSession.map(participant => participant.userId);
+
+    if (sessionParticipantIds.length < 1) return updatedSession;
+
+    const category = completeSession.classCategory;
+    const cls = completeSession.class;
+    const upcomingSessions = await classCategorySessionService.getSessionByCategoryUuidAndStatus(category.uuid, sessionStatusEnum.UPCOMING);
+
+    const notifPromiseList = [];
+    if (upcomingSessions.length === 0) {
+        const classDoneAction = NotificationEnum.classCategory.actions.finished;
+        const classDoneNotifObj = await notificationService.buildNotificationEntity(
+            category.uuid,
+            NotificationEnum.classCategory.type,
+            classDoneAction.title(cls.title, category.title),
+            classDoneAction.message(),
+            classDoneAction.code
+        );
+        notifPromiseList.push(notificationService.saveNotification(classDoneNotifObj, user, sessionParticipantIds));
+    }
+
+    const sessionDate = new Date(parseInt(session.startDate));
+    const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
+
+    const endSessionAction = NotificationEnum.classSession.actions.end;
+    const requireConfirmationAction = NotificationEnum.classSession.actions.requireConfirmation;
+
+    const endSessionNotifObj = await notificationService.buildNotificationEntity(
+        session.uuid,
+        NotificationEnum.classSession.type,
+        endSessionAction.title(cls.title, category.title),
+        endSessionAction.message(sessionTitle),
+        endSessionAction.code);
+
+    const requireConfirmationNotifObj = await notificationService.buildNotificationEntity(
+        session.uuid,
+        NotificationEnum.classSession.type,
+        requireConfirmationAction.title(cls.title, category.title),
+        requireConfirmationAction.message(sessionTitle),
+        requireConfirmationAction.code);
+
+    notifPromiseList.push(notificationService.saveNotification(endSessionNotifObj, user, sessionParticipantIds));
+    notifPromiseList.push(notificationService.saveNotification(requireConfirmationNotifObj, user, sessionParticipantIds));
+
+    Promise.all(notifPromiseList);
+
+    return updatedSession;
 
 }
 
@@ -129,9 +221,31 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
 
         classCategorySessionService.checkConflictSession(upcomingSessions, [classCategorySessionDTO]);
 
-        return session.$query()
+        const updateSession = await session.$query()
             .updateByUserId(classCategorySessionDTO, user.sub)
             .returning('*');
+
+        const completeSession = await updateSession.$query().withGraphFetched('[class, classCategory, participantSession]');
+
+        const cls = completeSession.class;
+        const category = completeSession.classCategory;
+        const participants = completeSession.participantSession.map(participant => participant.userId);
+        const sessionDate = new Date(parseInt(session.startDate));
+        const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
+
+        const notifAction = NotificationEnum.classSession.actions.reschedule;
+
+        const notifObj = await notificationService.buildNotificationEntity(
+            session.uuid,
+            NotificationEnum.classSession.type,
+            notifAction.title(cls.title, category.title),
+            notifAction.message(sessionTitle),
+            notifAction.code
+        );
+
+        notificationService.saveNotification(notifObj, user, participants);
+
+        return updateSession;
 
     } else {
 
@@ -149,21 +263,50 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
             sessionDate.getHours() === upcomingSessionDate.getHours() &&
             sessionDate.getMinutes() === upcomingSessionDate.getMinutes()) {
                 updatedSessions.push({
-                    uuid: upcomingSession.uuid,
-                    startDate: parseInt(upcomingSession.startDate) + startDiff,
-                    endDate: parseInt(upcomingSession.endDate) + endDiff,
+                    updatedSession: {
+                        uuid: upcomingSession.uuid,
+                        startDate: parseInt(upcomingSession.startDate) + startDiff,
+                        endDate: parseInt(upcomingSession.endDate) + endDiff,
+                    },
+                    previous: {
+                        startDate: parseInt(upcomingSession.startDate),
+                        endDate: parseInt(upcomingSession.endDate),
+                    }
                 });
             }
         });
 
         classCategorySessionService.checkConflictSession(upcomingSessions, updatedSessions);
 
-        const promises = updatedSessions.map(updatedSession => {
-            return ClassCategorySession.query()
+        const promises = updatedSessions.map(async ({ updatedSession, previous }) => {
+            const updateSession = await ClassCategorySession.query()
                 .where('uuid', updatedSession.uuid)
                 .updateByUserId(updatedSession, user.sub)
                 .first()
                 .returning('*');
+
+            const completeSession = await updateSession.$query().withGraphFetched('[class, classCategory, participantSession]');
+
+            const cls = completeSession.class;
+            const category = completeSession.classCategory;
+            const participants = completeSession.participantSession.map(participant => participant.userId);
+
+            const sessionDate = new Date(previous.startDate);
+            const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
+
+            const notifAction = NotificationEnum.classSession.actions.reschedule;
+
+            const notifObj = await notificationService.buildNotificationEntity(
+                updateSession.uuid,
+                NotificationEnum.classSession.type,
+                notifAction.title(cls.title, category.title),
+                notifAction.message(sessionTitle),
+                notifAction.code
+            );
+
+            notificationService.saveNotification(notifObj, user, participants);
+
+            return updateSession;
         });
 
         return Promise.all(promises);

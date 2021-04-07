@@ -1,4 +1,7 @@
 const ClassReasons = require('../../models/v2/ClassReasons');
+const notificationService = require('../notificationService');
+const NotificationEnum = require('../../models/enum/NotificationEnum');
+const CodeToTextMonthEnum = require('../../models/enum/CodeToTextMonthEnum');
 const { UnsupportedOperationError } = require('../../models/errors');
 
 const ErrorEnum = {
@@ -23,8 +26,34 @@ mobileClassReasonsService.checkExistUserReason = async (classCategorySessionUuid
 
 mobileClassReasonsService.reason = async (classReasonsDTO, user) => {
 
-    return ClassReasons.query()
+    const notifAction = NotificationEnum.classSession.actions.reason;
+
+    const reason = await ClassReasons.query()
         .insertToTable(classReasonsDTO, user.sub);
+
+    const completeReason = await reason.$query().withGraphFetched('[class, classCategory.coaches, classCategorySession, user]')
+
+    const cls = completeReason.class;
+    const session = completeReason.classCategorySession;
+    const category = completeReason.classCategory;
+    const coaches = completeReason.classCategory.coaches;
+    const foundUser = completeReason.user;
+
+    const sessionDate = new Date(parseInt(session.startDate));
+
+    const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
+
+    const notificationObj = await notificationService.buildNotificationEntity(
+        session.uuid,
+        NotificationEnum.classSession.type,
+        notifAction.title(cls.title, category.title),
+        notifAction.message(foundUser.eusername, sessionTitle),
+        notifAction.code
+    )
+
+    notificationService.saveNotification(notificationObj, user, coaches.map(coach => coach.userId));
+
+    return reason;
 
 }
 
