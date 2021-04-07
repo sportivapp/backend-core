@@ -269,9 +269,9 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
             }
         });
 
-        classCategorySessionService.checkConflictSession(upcomingSessions, session);
+        classCategorySessionService.checkConflictSession(upcomingSessions, updatedSessions);
 
-        const promises = session.map(async updatedSession => {
+        const promises = updatedSessions.map(async updatedSession => {
             const updateSession = await ClassCategorySession.query()
                 .where('uuid', updatedSession.uuid)
                 .updateByUserId(updatedSession, user.sub)
