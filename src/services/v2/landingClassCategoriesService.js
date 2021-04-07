@@ -22,6 +22,8 @@ classCategoryService.initCategories = async (categories, user, trx) => {
         newCategory.price = category.price;
         newCategory.requirements = category.requirements;
         newCategory.isRecurring = category.isRecurring;
+        newCategory.minParticipant = category.minParticipant;
+        newCategory.maxParticipant = category.maxParticipant;
 
         return classCategories = ClassCategory.query(trx)
             .insertToTable(newCategory, user.sub)
