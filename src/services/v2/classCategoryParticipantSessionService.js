@@ -176,8 +176,8 @@ classCategoryParticipantSessionService.remindUpcomingSessionsByDay = async (sess
         const coachIds = completeSession.classCategory.coaches.map(coach => coach.userId);
         const now = new Date();
         const sessionDate = new Date(parseInt(session.startDate));
-        const diff = sessionDate.getDate() - now.getDate();
-        if (diff !== targetDay) return null;
+        const diff = sessionDate.getTime() - now.getTime();
+        if (diff !== DAY_IN_MILLIS) return null;
         const timeDescription = `${targetDay} ${TimeMap.DAY}`
         const action = NotificationEnum.classSession.actions.reminder;
         const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
