@@ -208,6 +208,8 @@ classService.getCoachClassHistory = async (user) => {
                         return;
                     }
                 });
+                category.categorySession = category.categorySessions[0];
+                delete category.categorySessions;
             });
             return isDone;
         }));
