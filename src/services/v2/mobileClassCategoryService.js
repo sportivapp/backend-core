@@ -103,7 +103,7 @@ classCategoryService.getMyCategory = async (classCategoryUuid, status, user) => 
 
     return ClassCategory.query()
         .findById(classCategoryUuid)
-        .modify('myCategory', sessionUuids)
+        .modify('myCategory', user.sub, sessionUuids)
         .then(classCategory => {
             if (!classCategory)
                 throw new NotFoundError();
