@@ -213,7 +213,7 @@ classCategoryService.categoryParticipantsHistory = async (classCategoryUuid) => 
 classCategoryService.categorySessionsHistory = async (classCategoryUuid) => {
 
     return classCategoryParticipantSessionService
-        .categorySessionsHistoryByCategoryUuid(classCategoryUuid);
+        .categoryParticipantHistoryByCategoryUuid(classCategoryUuid);
 
 }
 

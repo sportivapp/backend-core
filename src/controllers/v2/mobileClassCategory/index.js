@@ -156,7 +156,7 @@ classCategoryController.categorySessionsHistory = async (req, res, next) => {
 
     try {
 
-        const result = await classCategoryService.categorySessionsHistory(classCategoryUuid);
+        const result = await classCategoryService.categoryParticipantsHistory(classCategoryUuid);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
