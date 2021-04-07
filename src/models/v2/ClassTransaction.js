@@ -25,7 +25,7 @@ class ClassTransaction extends Model {
                 builder.select('uuid', 'class_title', 'category_title');
             },
             invoice(builder) {
-                builder.select('invoice');
+                builder.select('invoice', 'create_time');
             }
         }
     }

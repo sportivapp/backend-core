@@ -83,6 +83,14 @@ class ClassCategory extends Model {
             notDeleted(builder) {
                 builder.whereRaw('delete_time IS NULL');
             },
+            categoryDetailWithInvoices(builder, userId) {
+                builder.select('uuid', 'title')
+                    .withGraphFetched('class(basic)')
+                    .withGraphFetched('transactions(invoice)')
+                    .modifyGraph('transactions', builder => {
+                        builder.where('user_id', userId);
+                    });
+            },
         }
     }
 
