@@ -162,6 +162,11 @@ const NotificationEnum = {
                 title: (classTitle, categoryTitle) => `Ulasan Kelas ${classTitle} Kategori ${categoryTitle}`,
                 code: 'CLASS_SESSION_NEW_RATINGS',
                 message: (userCount, sessionTitle) => `${userCount} peserta telah memberi ulasan untuk ${sessionTitle}.`
+            },
+            finishedAttendance: {
+                title: (classTitle, categoryTitle) => `Absensi Kelas ${classTitle} Kategori ${categoryTitle}`,
+                code: 'CLASS_SESSION_FINISHED_ATTENDANCE',
+                message: () => `Pelatihmu sudah selesai melakukan absensi! Cek status kehadiranmu.`
             }
         }
     }

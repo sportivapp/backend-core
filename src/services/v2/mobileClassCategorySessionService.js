@@ -79,11 +79,27 @@ classCategorySessionService.inputAbsence = async(classCategoryUuid, classCategor
 
     const absences = await classCategoryParticipantSessionService.inputAbsence(participants, user);
 
-    await session.$query()
+    const updatedSession = await session.$query()
         .updateByUserId({
             absenceTime: Date.now(),
             absenceBy: user.sub,
         }, user.sub);
+
+    const completeSession = await updatedSession.$query().withGraphFetched('[class, classCategory, classCategory]');
+    const cls = completeSession.class;
+    const category = completeSession.classCategory;
+
+    const notifAction = NotificationEnum.classSession.actions.finishedAttendance;
+
+    const notificationObj = await notificationService.buildNotificationEntity(
+        completeSession.uuid,
+        NotificationEnum.classSession.type,
+        notifAction.title(cls.title, category.title),
+        notifAction.message(),
+        notifAction.code
+    );
+
+    notificationService.saveNotification(notificationObj, user, absences.map(absence => absence.userId));
 
     return absences;
 
