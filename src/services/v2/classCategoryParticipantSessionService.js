@@ -29,9 +29,10 @@ classCategoryParticipantSessionService.checkNewParticipants = async (sessions) =
             .where('class_category_session_uuid', session.uuid)
             .then(participants => participants.filter(participant => Date.now() - participant.createTime <= MINUTE_IN_MILLIS));
         if (participants.length <= 0) return null;
-        const cls = await session.$relatedQuery('class');
-        const category = await session.$relatedQuery('classCategory');
-        const coaches = await category.$relatedQuery('coaches');
+        const completeSession = await session.$query().withGraphFetched('[class, classCategory.coaches]');
+        const category = completeSession.classCategory;
+        const cls = completeSession.class;
+        const coaches = completeSession.classCategory.coaches;
         const sessionDate = new Date(parseInt(session.startDate));
         const user = await participants[0].$relatedQuery('user');
         const action = participants.length > 1 ? NotificationEnum.classSession.actions.newParticipants : NotificationEnum.classSession.actions.newParticipant;
@@ -61,9 +62,10 @@ classCategoryParticipantSessionService.checkNewConfirmations = async (sessions) 
             .where('is_confirmed', true)
             .then(confirmations => confirmations.filter(confirmation => Date.now() - confirmation.changeTime <= MINUTE_IN_MILLIS));
         if (confirmations.length <= 0) return null;
-        const category = await session.$relatedQuery('classCategory');
-        const cls = await session.$relatedQuery('class');
-        const coaches = await category.$relatedQuery('coaches');
+        const completeSession = await session.$query().withGraphFetched('[class, classCategory.coaches]');
+        const category = completeSession.classCategory;
+        const cls = completeSession.class;
+        const coaches = completeSession.classCategory.coaches;
         const sessionDate = new Date(parseInt(session.startDate));
         const user = await confirmations[0].$relatedQuery('user');
         const action = confirmations.length > 1 ? NotificationEnum.classSession.actions.sessionsConfirmed : NotificationEnum.classSession.actions.sessionConfirmed;
@@ -96,9 +98,10 @@ classCategoryParticipantSessionService.remindUpcomingSessionsByMinute = async (s
         const participantIds = await classCategoryParticipantSessionService.getSessionParticipants(session.uuid)
             .then(participants => participants.map(participant => participant.userId));
         if (participantIds.length <= 0) return null;
-        const cls = await session.$relatedQuery('class');
-        const category = await session.$relatedQuery('classCategory');
-        const coachIds = await category.$relatedQuery('coaches').then(coaches => coaches.map(coach => coach.userId));
+        const completeSession = await session.$query().withGraphFetched('[class, classCategory.coaches]');
+        const category = completeSession.classCategory;
+        const cls = completeSession.class;
+        const coachIds = completeSession.classCategory.coaches.map(coach => coach.userId);
         const now = new Date();
         const sessionDate = new Date(parseInt(session.startDate));
         const minuteDiff = sessionDate.getMinutes() - now.getMinutes();
@@ -109,7 +112,7 @@ classCategoryParticipantSessionService.remindUpcomingSessionsByMinute = async (s
         const notificationObj = await notificationService.buildNotificationEntity(
             session.uuid,
             NotificationEnum.classSession.type,
-            action.title(cls.title),
+            action.title(cls.title, category.title),
             action.message(sessionTitle, timeDescription),
             action.code);
         return notificationService.saveNotification(notificationObj, { sub: coachIds.length > 0 ? coachIds[0] : participantIds[0] }, participantIds.concat(coachIds));
@@ -131,9 +134,10 @@ classCategoryParticipantSessionService.remindUpcomingSessionsByHour = async (ses
         const participantIds = await classCategoryParticipantSessionService.getSessionParticipants(session.uuid)
             .then(participants => participants.map(participant => participant.userId));
         if (participantIds.length <= 0) return null;
-        const cls = await session.$relatedQuery('class');
-        const category = await session.$relatedQuery('classCategory');
-        const coachIds = await category.$relatedQuery('coaches').then(coaches => coaches.map(coach => coach.userId));
+        const completeSession = await session.$query().withGraphFetched('[class, classCategory.coaches]');
+        const category = completeSession.classCategory;
+        const cls = completeSession.class;
+        const coachIds = completeSession.classCategory.coaches.map(coach => coach.userId);
         const now = new Date();
         const sessionDate = new Date(parseInt(session.startDate));
         const diff = sessionDate.getHours() - now.getHours();
@@ -144,7 +148,7 @@ classCategoryParticipantSessionService.remindUpcomingSessionsByHour = async (ses
         const notificationObj = await notificationService.buildNotificationEntity(
             session.uuid,
             NotificationEnum.classSession.type,
-            action.title(cls.title),
+            action.title(cls.title, category.title),
             action.message(sessionTitle, timeDescription),
             action.code);
         return notificationService.saveNotification(notificationObj, { sub: coachIds.length > 0 ? coachIds[0] : participantIds[0] }, participantIds.concat(coachIds));
@@ -166,9 +170,10 @@ classCategoryParticipantSessionService.remindUpcomingSessionsByDay = async (sess
         const participantIds = await classCategoryParticipantSessionService.getSessionParticipants(session.uuid)
             .then(participants => participants.map(participant => participant.userId));
         if (participantIds.length <= 0) return null;
-        const cls = await session.$relatedQuery('class');
-        const category = await session.$relatedQuery('classCategory');
-        const coachIds = await category.$relatedQuery('coaches').then(coaches => coaches.map(coach => coach.userId));
+        const completeSession = await session.$query().withGraphFetched('[class, classCategory.coaches]');
+        const category = completeSession.classCategory;
+        const cls = completeSession.class;
+        const coachIds = completeSession.classCategory.coaches.map(coach => coach.userId);
         const now = new Date();
         const sessionDate = new Date(parseInt(session.startDate));
         const diff = sessionDate.getDate() - now.getDate();
@@ -179,7 +184,7 @@ classCategoryParticipantSessionService.remindUpcomingSessionsByDay = async (sess
         const notificationObj = await notificationService.buildNotificationEntity(
             session.uuid,
             NotificationEnum.classSession.type,
-            action.title(cls.title),
+            action.title(cls.title, category.title),
             action.message(sessionTitle, timeDescription),
             action.code);
         return notificationService.saveNotification(notificationObj, { sub: coachIds.length > 0 ? coachIds[0] : participantIds[0] }, participantIds.concat(coachIds));

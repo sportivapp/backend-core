@@ -51,9 +51,10 @@ mobileClassComplaintService.complaintSession = async (classComplaintsDTO, user) 
 mobileClassComplaintService.checkNewComplaints = async (sessions) => {
 
     const promises = sessions.map(async session => {
-        const cls = await session.$relatedQuery('class');
-        const category = await session.$relatedQuery('classCategory');
-        const coaches = await category.$relatedQuery('coaches');
+        const completeSession = await session.$query().withGraphFetched('[class, classCategory.coaches]');
+        const category = completeSession.classCategory;
+        const cls = completeSession.class;
+        const coaches = completeSession.classCategory.coaches;
         const complaints = await ClassComplaints.query()
             .where('class_category_session_uuid', session.uuid)
             .then(complaints => complaints.filter(complaint => Date.now() - complaint.createTime <= MINUTE_IN_MILLIS));
@@ -117,10 +118,13 @@ mobileClassComplaintService.coachAcceptComplaint = async (classComplaintUuid, us
         }, user.sub)
         .returning('*');
 
-    const session = await updatedData.$relatedQuery('classCategorySession');
-    const participants = await session.$relatedQuery('participantSession');
-    const category = await updatedData.$relatedQuery('classCategory');
-    const cls = await updatedData.$relatedQuery('class');
+    const completeComplaint = await updatedData.$query().withGraphFetched('[classCategorySession.participantSession, classCategory, class]');
+
+    const session = completeComplaint.classCategorySession;
+    const participants = session.participantSession;
+    const category = completeComplaint.classCategory;
+    const cls = completeComplaint.class;
+
     const sessionDate = new Date(parseInt(session.startDate));
 
     const notifAction = NotificationEnum.classSession.actions.acceptComplaint;
@@ -163,10 +167,13 @@ mobileClassComplaintService.coachRejectComplaint = async (classComplaintUuid, co
 
         await classComplaintMediaService.insertComplaintMedias(complaintMediaDTOs, user, trx);
 
-        const session = await complaint.$relatedQuery('classCategorySession');
-        const participants = await session.$relatedQuery('participantSession');
-        const category = await complaint.$relatedQuery('classCategory');
-        const cls = await complaint.$relatedQuery('class');
+        const completeComplaint = await complaint.$query().withGraphFetched('[classCategorySession.participantSession, classCategory, class]')
+
+        const session = completeComplaint.classCategorySession;
+        const participants = session.participantSession;
+        const category = completeComplaint.classCategory;
+        const cls = completeComplaint.class;
+
         const sessionDate = new Date(parseInt(session.startDate));
 
         const notifAction = NotificationEnum.classSession.actions.rejectComplaint;

@@ -31,11 +31,13 @@ mobileClassReasonsService.reason = async (classReasonsDTO, user) => {
     const reason = await ClassReasons.query()
         .insertToTable(classReasonsDTO, user.sub);
 
-    const cls = await reason.$relatedQuery('class');
-    const session = await reason.$relatedQuery('classCategorySession');
-    const category = await session.$relatedQuery('classCategory');
-    const coaches = await category.$relatedQuery('coaches');
-    const foundUser = await reason.$relatedQuery('user');
+    const completeReason = await reason.$query().withGraphFetched('[class, classCategory.coaches, classCategorySession, user]')
+
+    const cls = completeReason.class;
+    const session = completeReason.classCategorySession;
+    const category = completeReason.classCategory;
+    const coaches = completeReason.classCategory.coaches;
+    const foundUser = completeReason.user;
 
     const sessionDate = new Date(parseInt(session.startDate));
 

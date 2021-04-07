@@ -60,9 +60,10 @@ mobileClassRatingsService.rate = async (classRatingsDTO, improvementCodes, user)
 mobileClassRatingsService.checkNewRatings = async (sessions) => {
 
     const promises = sessions.map(async session => {
-        const cls = await session.$relatedQuery('class');
-        const category = await session.$relatedQuery('classCategory');
-        const coaches = await category.$relatedQuery('coaches');
+        const completeSession = await session.$query().withGraphFetched('[class, classCategory.coaches]')
+        const cls = completeSession.class;
+        const category = completeSession.classCategory;
+        const coaches = category.coaches;
         const ratings = await ClassRatings.query()
             .where('class_category_session_uuid', session.uuid)
             .then(ratings => ratings.filter(rating => Date.now() - rating.createTime <= MINUTE_IN_MILLIS));

@@ -100,9 +100,11 @@ classCategoryParticipantSessionService.register = async (participantSessionDTOs,
     const notifAction = NotificationEnum.classCategory.actions.registerSuccess;
 
     const notificationPromiseList = participants.map(async participant => {
-        const classCategory = await participant.$relatedQuery('classCategory');
-        const cls = await participant.$relatedQuery('class');
-        const coaches = await classCategory.$relatedQuery('coaches');
+        const completeParticipant = await participant.$query().withGraphFetched('[class, classCategory.coaches]');
+        console.log(completeParticipant);
+        const classCategory = completeParticipant.classCategory;
+        const cls = completeParticipant.class;
+        const coaches = completeParticipant.classCategory.coaches;
         const notificationObj = await notificationService.buildNotificationEntity(
             participant.classCategoryUuid,
             NotificationEnum.classCategory.type,

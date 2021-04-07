@@ -36,11 +36,12 @@ classCategorySessionService.startSession = async (classCategorySessionUuid, user
         }, user.sub)
         .returning("*");
 
-    const sessionParticipantIds = await session.$relatedQuery('participantSession')
-        .then(participants => participants.map(participant => participant.userId));
+    const completeSession = await session.$query().withGraphFetched('[participantSession, class, classCategory]');
 
-    const category = await session.$relatedQuery('classCategory');
-    const cls = await session.$relatedQuery('class');
+    const sessionParticipantIds = completeSession.participantSession.map(participant => participant.userId);
+
+    const category = completeSession.classCategory;
+    const cls = completeSession.class;
 
     const notificationAction = NotificationEnum.classSession.actions.start;
 
@@ -139,13 +140,14 @@ classCategorySessionService.endSession = async (classCategorySessionUuid, user, 
         endBy: user.sub,
     }, user.sub);
 
-    const sessionParticipantIds = await session.$relatedQuery('participantSession')
-        .then(participants => participants.map(participant => participant.userId));
+    const completeSession = await session.$query().withGraphFetched('[participantSession, class, classCategory]');
+
+    const sessionParticipantIds = completeSession.participantSession.map(participant => participant.userId);
 
     if (sessionParticipantIds.length < 1) return updatedSession;
 
-    const category = await session.$relatedQuery('classCategory');
-    const cls = await session.$relatedQuery('class');
+    const category = completeSession.classCategory;
+    const cls = completeSession.class;
     const upcomingSessions = await classCategorySessionService.getSessionByCategoryUuidAndStatus(category.uuid, sessionStatusEnum.UPCOMING);
 
     const notifPromiseList = [];

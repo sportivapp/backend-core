@@ -110,12 +110,12 @@ const NotificationEnum = {
             },
             reminder: {
                 title: (classTitle, categoryTitle) => `Reminder kelas ${classTitle} Kategori ${categoryTitle}`,
-                code: 'CLASS_START_REMINDER',
+                code: 'CLASS_SESSION_START_REMINDER',
                 message: (sessionTitle, timeDescription) => `${sessionTitle} akan dimulai dalam waktu ${timeDescription} lagi. Persiapkan diri anda! Semangat!`
             },
             reason: {
                 title: (classTitle, categoryTitle) => `Absensi Kelas ${classTitle} Kategori ${categoryTitle}`,
-                code: 'CLASS_SESSION_REASON',
+                code: 'CLASS_SESSION_NEW_REASON',
                 message: (userName, sessionTitle) => `${userName} telah memberi alasan atas ketidakhadirannya di ${sessionTitle}.`
             },
             newParticipants: {
@@ -145,12 +145,12 @@ const NotificationEnum = {
             },
             acceptComplaint: {
                 title: (classTitle, categoryTitle) => `Komplain Kelas ${classTitle} Kategori ${categoryTitle}`,
-                code: 'CLASS_COMPLAINT_ACCEPTED',
+                code: 'CLASS_SESSION_COMPLAINT_ACCEPTED',
                 message: (sessionTitle) => `Komplain Anda untuk ${sessionTitle} diterima.`
             },
             rejectComplaint: {
                 title: (classTitle, categoryTitle) => `Komplain Kelas ${classTitle} Kategori ${categoryTitle}`,
-                code: 'CLASS_COMPLAINT_REJECTED',
+                code: 'CLASS_SESSION_COMPLAINT_REJECTED',
                 message: (sessionTitle) => `Komplain Anda untuk ${sessionTitle} ditolak.`
             },
             newRating: {
