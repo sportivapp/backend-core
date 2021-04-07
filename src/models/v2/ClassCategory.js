@@ -91,6 +91,10 @@ class ClassCategory extends Model {
                         builder.where('user_id', userId);
                     });
             },
+            categoryDetailWithoutInvoices(builder) {
+                builder.select('uuid', 'title')
+                    .withGraphFetched('class(basic)')
+            },
         }
     }
 

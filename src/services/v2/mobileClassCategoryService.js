@@ -203,10 +203,10 @@ classCategoryService.mySessionsHistory = async (classCategoryUuid, user) => {
 
 }
 
-classCategoryService.categorySessionsHistory = async (classCategoryUuid) => {
+classCategoryService.categoryParticipantsHistory = async (classCategoryUuid) => {
 
     return classCategoryParticipantSessionService
-        .categorySessionsHistoryByCategoryUuid(classCategoryUuid);
+        .categoryParticipantHistoryByCategoryUuid(classCategoryUuid);
 
 }
 
@@ -252,6 +252,22 @@ classCategoryService.getMonthPicker = async (classCategoryUuid) => {
     });
 
     return grouped;
+
+}
+
+classCategoryService.getCategoryHistory = async (classCategoryUuid) => {
+
+    const category = await ClassCategory.query()
+        .findById(classCategoryUuid)
+        .modify('categoryDetailWithoutInvoices');
+
+    const participants = await classCategoryParticipantSessionService
+        .categoryParticipantHistoryByCategoryUuid(classCategoryUuid);
+
+    return {
+        ...category,
+        participants: participants,
+    }
 
 }
 

@@ -154,7 +154,7 @@ classCategoryParticipantSessionService.mySessionsHistoryByCategoryUuidAndUserId 
         
 }
 
-classCategoryParticipantSessionService.categorySessionsHistoryByCategoryUuid = async(classCategoryUuid) => {
+classCategoryParticipantSessionService.categoryParticipantHistoryByCategoryUuid = async(classCategoryUuid) => {
 
     return ClassCategoryParticipantSession.query()
         .modify('categorySessionsHistory', classCategoryUuid);

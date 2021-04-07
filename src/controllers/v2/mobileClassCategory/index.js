@@ -135,13 +135,13 @@ classCategoryController.mySessionsHistory = async (req, res, next) => {
 
 }
 
-classCategoryController.categorySessionsHistory = async (req, res, next) => {
+classCategoryController.categoryParticipantsHistory = async (req, res, next) => {
     
     const { classCategoryUuid } = req.params;
 
     try {
 
-        const result = await classCategoryService.categorySessionsHistory(classCategoryUuid);
+        const result = await classCategoryService.categoryParticipantsHistory(classCategoryUuid);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
@@ -191,6 +191,22 @@ classCategoryController.getMonthPicker = async (req, res, next) => {
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
+        next(e);
+    }
+
+}
+
+classCategoryController.getCategoryHistory = async (req, res, next) => {
+
+    const { classCategoryUuid } = req.params;
+
+    try {
+
+        const result = await classCategoryService.getCategoryHistory(classCategoryUuid);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        console.log(e);
         next(e);
     }
 
