@@ -131,7 +131,7 @@ class Class extends Model {
                     .withGraphFetched('city(baseAttributes)')
                     .withGraphFetched('classMedia(list)')
                     .withGraphFetched('company(baseAttributes)')
-                    .withGraphFetched(`classCategories(uuidAndTitle).[categorySessions(basicStartEnd).[participantSession(sessionParticipants)]]`);
+                    .withGraphFetched(`classCategories(uuidAndTitle).[categorySessions(basicStartEnd)]`);
             },
         }
     }
