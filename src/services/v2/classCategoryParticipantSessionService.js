@@ -176,6 +176,10 @@ classCategoryParticipantSessionService.remindUpcomingSessionsByDay = async (sess
         const coachIds = completeSession.classCategory.coaches.map(coach => coach.userId);
         const now = new Date();
         const sessionDate = new Date(parseInt(session.startDate));
+        sessionDate.setSeconds(0);
+        sessionDate.setMinutes(0);
+        now.setSeconds(0);
+        now.setMinutes(0);
         const diff = sessionDate.getTime() - now.getTime();
         if (diff !== DAY_IN_MILLIS) return null;
         const timeDescription = `${targetDay} ${TimeMap.DAY}`
