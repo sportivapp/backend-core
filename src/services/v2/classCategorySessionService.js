@@ -60,7 +60,7 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
 
     if (!isRepeat) {
 
-        // classCategorySessionService.checkConflictSession(upcomingSessions, [classCategorySessionDTO]);
+        classCategorySessionService.checkConflictSession(upcomingSessions, [classCategorySessionDTO]);
 
         const updateSession = await updatedSession.$query()
             .updateByUserId(classCategorySessionDTO, user.sub)
