@@ -133,7 +133,7 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
             const category = completeSession.classCategory;
             const participants = completeSession.participantSession.map(participant => participant.userId);
 
-            const sessionDate = new Date(parseInt(previous.startDate));
+            const sessionDate = new Date(previous.startDate);
             const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
 
             const notifAction = NotificationEnum.classSession.actions.reschedule;

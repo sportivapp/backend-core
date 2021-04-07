@@ -225,10 +225,11 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
             .updateByUserId(classCategorySessionDTO, user.sub)
             .returning('*');
 
-        const cls = await session.$relatedQuery('class');
-        const category = await session.$relatedQuery('classCategory');
-        const participants = await session.$relatedQuery('participantSession')
-            .then(participants => participants.map(participant => participant.userId));
+        const completeSession = await updateSession.$query().withGraphFetched('[class, classCategory, participantSession]');
+
+        const cls = completeSession.class;
+        const category = completeSession.classCategory;
+        const participants = completeSession.participantSession.map(participant => participant.userId);
         const sessionDate = new Date(parseInt(session.startDate));
         const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
 
@@ -262,27 +263,35 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
             sessionDate.getHours() === upcomingSessionDate.getHours() &&
             sessionDate.getMinutes() === upcomingSessionDate.getMinutes()) {
                 updatedSessions.push({
-                    uuid: upcomingSession.uuid,
-                    startDate: parseInt(upcomingSession.startDate) + startDiff,
-                    endDate: parseInt(upcomingSession.endDate) + endDiff,
+                    updatedSession: {
+                        uuid: upcomingSession.uuid,
+                        startDate: parseInt(upcomingSession.startDate) + startDiff,
+                        endDate: parseInt(upcomingSession.endDate) + endDiff,
+                    },
+                    previous: {
+                        startDate: parseInt(upcomingSession.startDate),
+                        endDate: parseInt(upcomingSession.endDate),
+                    }
                 });
             }
         });
 
         classCategorySessionService.checkConflictSession(upcomingSessions, updatedSessions);
 
-        const promises = updatedSessions.map(async updatedSession => {
+        const promises = updatedSessions.map(async ({ updatedSession, previous }) => {
             const updateSession = await ClassCategorySession.query()
                 .where('uuid', updatedSession.uuid)
                 .updateByUserId(updatedSession, user.sub)
                 .first()
                 .returning('*');
 
-            const cls = await updateSession.$relatedQuery('class');
-            const category = await updateSession.$relatedQuery('classCategory');
-            const participants = await updateSession.$relatedQuery('participantSession')
-                .then(participants => participants.map(participant => participant.userId));
-            const sessionDate = new Date(parseInt(updateSession.initStartDate));
+            const completeSession = await updateSession.$query().withGraphFetched('[class, classCategory, participantSession]');
+
+            const cls = completeSession.class;
+            const category = completeSession.classCategory;
+            const participants = completeSession.participantSession.map(participant => participant.userId);
+
+            const sessionDate = new Date(previous.startDate);
             const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
 
             const notifAction = NotificationEnum.classSession.actions.reschedule;
