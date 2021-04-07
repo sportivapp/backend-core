@@ -44,12 +44,16 @@ class ClassCategory extends Model {
             uuidAndTitle(builder) {
                 builder.select('uuid', 'title');
             },
-            myCategory(builder, sessionUuids) {
+            myCategory(builder, userId, sessionUuids) {
                 builder.select('uuid', 'title')
                     .withGraphFetched('class(basic)')
                     .withGraphFetched('categorySessions(list)')
                     .modifyGraph('categorySessions', builder => {
                         builder.whereIn('uuid', sessionUuids);
+                    })
+                    .withGraphFetched('transactions(invoice)')
+                    .modifyGraph('transactions', builder => {
+                        builder.where('user_id', userId);
                     });
             },
             coachCategory(builder) {
@@ -79,6 +83,18 @@ class ClassCategory extends Model {
             notDeleted(builder) {
                 builder.whereRaw('delete_time IS NULL');
             },
+            categoryDetailWithInvoices(builder, userId) {
+                builder.select('uuid', 'title')
+                    .withGraphFetched('class(basic)')
+                    .withGraphFetched('transactions(invoice)')
+                    .modifyGraph('transactions', builder => {
+                        builder.where('user_id', userId);
+                    });
+            },
+            categoryDetailWithoutInvoices(builder) {
+                builder.select('uuid', 'title')
+                    .withGraphFetched('class(basic)')
+            },
         }
     }
 
@@ -88,6 +104,7 @@ class ClassCategory extends Model {
         const ClassCategorySession = require('./ClassCategorySession');
         const ClassCategoryCoach = require('./ClassCategoryCoach');
         const ClassCategorySchedule = require('./ClassCategorySchedule');
+        const ClassTransaction = require('./ClassTransaction');
  
         return {
             class: {
@@ -120,6 +137,14 @@ class ClassCategory extends Model {
                 join: {
                     from: 'class_category.uuid',
                     to: 'class_category_schedule.class_category_uuid',
+                }
+            },
+            transactions: {
+                relation: Model.HasManyRelation,
+                modelClass: ClassTransaction,
+                join: {
+                    from: 'class_category.uuid',
+                    to: 'class_transaction.class_category_uuid',
                 }
             }
         }

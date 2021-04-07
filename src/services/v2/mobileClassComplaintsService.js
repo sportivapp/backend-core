@@ -79,13 +79,14 @@ mobileClassComplaintService.checkNewComplaints = async (sessions) => {
 
 }
 
-mobileClassComplaintService.getMyComplaints = async (user, status) => {
+mobileClassComplaintService.getMyCategoryComplaints = async (classCategoryUuid, status, user) => {
 
     if (!classComplaintStatusEnum[status])
         throw new UnsupportedOperationError(ErrorEnum.INVALID_STATUS);
 
     return ClassComplaints.query()
-        .modify('myComplaints')
+        .modify('myCategoryComplaints')
+        .where('class_category_uuid', classCategoryUuid)
         .where('create_by', user.sub)
         .where('status', status);
 

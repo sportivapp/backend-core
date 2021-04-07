@@ -27,7 +27,7 @@ class ClassComplaints extends Model {
                     .withGraphFetched('classCategorySession(basicStartEnd).[classCategory(uuidAndTitle)]')
                     .where('status', status);
             },
-            myComplaints(builder) {
+            myCategoryComplaints(builder) {
                 builder.select('uuid', 'complaint', 'code', 'complaint_id')
                     .withGraphFetched('classCategoryParticipantSession(complaint)')
                     .withGraphFetched('classCategorySession(basicStartEnd).[classCategory(uuidAndTitle).[class(uuidAndTitle)]]');

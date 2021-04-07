@@ -103,7 +103,7 @@ classCategoryService.getMyCategory = async (classCategoryUuid, status, user) => 
 
     return ClassCategory.query()
         .findById(classCategoryUuid)
-        .modify('myCategory', sessionUuids)
+        .modify('myCategory', user.sub, sessionUuids)
         .then(classCategory => {
             if (!classCategory)
                 throw new NotFoundError();
@@ -189,8 +189,24 @@ classCategoryService.getBookableSessions = async (classCategoryUuid, year, user)
 
 classCategoryService.mySessionsHistory = async (classCategoryUuid, user) => {
 
-    return classCategoryParticipantSessionService
+    const categoryDetailWithInvoices = await ClassCategory.query()
+        .findById(classCategoryUuid)
+        .modify('categoryDetailWithInvoices', user.sub);
+
+    const sessions = await classCategoryParticipantSessionService
         .mySessionsHistoryByCategoryUuidAndUserId(classCategoryUuid, user.sub);
+
+    return {
+        ...categoryDetailWithInvoices,
+        sessions: sessions,
+    }
+
+}
+
+classCategoryService.categoryParticipantsHistory = async (classCategoryUuid) => {
+
+    return classCategoryParticipantSessionService
+        .categoryParticipantHistoryByCategoryUuid(classCategoryUuid);
 
 }
 
@@ -236,6 +252,22 @@ classCategoryService.getMonthPicker = async (classCategoryUuid) => {
     });
 
     return grouped;
+
+}
+
+classCategoryService.getCategoryHistory = async (classCategoryUuid) => {
+
+    const category = await ClassCategory.query()
+        .findById(classCategoryUuid)
+        .modify('categoryDetailWithoutInvoices');
+
+    const participants = await classCategoryParticipantSessionService
+        .categoryParticipantHistoryByCategoryUuid(classCategoryUuid);
+
+    return {
+        ...category,
+        participants: participants,
+    }
 
 }
 

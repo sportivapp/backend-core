@@ -170,6 +170,7 @@ module.exports = {
             coachClass: '/coach-class-v2',
             coaches: '/class-v2/:classUuid/coaches',
             myClassHistory: '/my-history-class-v2',
+            coachHistory: '/history-coach-class-v2'
         },
         classCategorySession: {
             list: '/class-category/:classCategoryUuid/class-category-session',
@@ -196,11 +197,12 @@ module.exports = {
             bookable: '/class-category/:classCategoryUuid/bookable',
             myHistory: '/my-history-class-category/:classCategoryUuid',
             history: '/history-class-category/:classCategoryUuid',
+            participantsHistory: '/history-class-category/:classCategoryUuid/participants',
             complaints: '/coach-category/:classCategoryUuid/complaints',
             monthPicker: '/class-category/:classCategoryUuid/month-picker',
         },
         classComplaint: {
-            myComplaints: '/class-complaints',
+            myCategoryComplaints: '/my-category/:classCategoryUuid/complaints',
             coachComplaints: '/coach-complaints',
             coachAcceptComplaint: '/coach-complaints/:classComplaintUuid/accept',
             coachRejectComplaint: '/coach-complaints/:classComplaintUuid/reject',

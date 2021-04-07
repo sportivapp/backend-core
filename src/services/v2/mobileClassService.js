@@ -6,6 +6,7 @@ const classCategoryParticipantSessionService = require('./mobileClassCategoryPar
 const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
 const classCategorySessionService = require('./mobileClassCategorySessionService');
 const classTransactionService = require('./mobileClassTransactionService');
+const coachCategoryService = require('./mobileClassCategoryCoachService');
 
 const ErrorEnum = {
     INVALID_COACH_ID: 'INVALID_COACH_ID',
@@ -189,6 +190,30 @@ classService.getMyClassHistory = async (user) => {
             return isDone;
         }));
 
+}
+
+classService.getCoachClassHistory = async (user) => {
+
+    const classUuids = await coachCategoryService.getCoachClassUuidsByUserId(user.sub);
+
+    return Class.query()
+        .modify('coachClassHistory')
+        .whereIn('uuid', classUuids)
+        .then(classes => classes.filter(cls => {
+            let isDone = true;
+            cls.classCategories.forEach(category => {
+                category.categorySessions.forEach(session => {
+                    if (session.status !== sessionStatusEnum.DONE) {
+                        isDone = false;
+                        return;
+                    }
+                });
+                category.categorySession = category.categorySessions[0];
+                delete category.categorySessions;
+            });
+            return isDone;
+        }));
+        
 }
 
 module.exports = classService;

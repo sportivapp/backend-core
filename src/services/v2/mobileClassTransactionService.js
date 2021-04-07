@@ -25,6 +25,14 @@ classTransactionService.recurringPrice = (category, sessions) => {
 
 }
 
+classTransactionService.nonRecurringPrice = (sessions) => {
+
+    return sessions.reduce((acc, curr) => {
+        return acc.price + curr.price;
+    });
+
+}
+
 // May be used later for normal booking (not recurring or packaged)
 classTransactionService.normalPrice = (category, sessions) => {
 
@@ -124,8 +132,11 @@ classTransactionService.generateFreeTransaction = async (cls, category, sessions
 classTransactionService.generatePaidTransaction = async (cls, category, sessions, user) => {
 
     let price = 0;
-    if (category.isRecurring)
-        price = classTransactionService.recurringPrice(sessions);
+    if (category.isRecurring) {
+        price = classTransactionService.recurringPrice(category, sessions);
+    } else {
+        price = classTransactionService.nonRecurringPrice(sessions);
+    }
 
     const classTransactionDTO = classTransactionService
         .generateClassTransactionDTO(cls, category, null, null, price, classTransactionStatusEnum.ONGOING, user);
