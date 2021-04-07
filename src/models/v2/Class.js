@@ -107,6 +107,8 @@ class Class extends Model {
                 builder.select('class.uuid', 'class.title')
                     .withGraphFetched('industry(baseAttributes)')
                     .withGraphFetched('city(baseAttributes)')
+                    .withGraphFetched('classMedia(list)')
+                    .withGraphFetched('company(baseAttributes)')
                     .withGraphJoined(`classCategories(uuidAndTitle).[categorySessions(basicStartEnd).[participantSession(sessionParticipants)]]`)
                     .where('classCategories:categorySessions:participantSession.user_id', userId)
             },
@@ -122,6 +124,14 @@ class Class extends Model {
                     .withGraphFetched('classMedia(list)')
                     .withGraphFetched('company(baseAttributes)')
                     .withGraphFetched('creator(basic)');
+            },
+            coachClassHistory(builder) {
+                builder.select('class.uuid', 'class.title')
+                    .withGraphFetched('industry(baseAttributes)')
+                    .withGraphFetched('city(baseAttributes)')
+                    .withGraphFetched('classMedia(list)')
+                    .withGraphFetched('company(baseAttributes)')
+                    .withGraphFetched(`classCategories(uuidAndTitle).[categorySessions(basicStartEnd).[participantSession(sessionParticipants)]]`);
             },
         }
     }
