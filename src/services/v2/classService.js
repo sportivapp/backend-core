@@ -51,7 +51,7 @@ classService.createClass = async (classDTO, fileIds, classCoachUserIds, categori
 
         const classMedia = await classMediaService.initMedia(mediaDTO, user, trx);
         const classCoaches = await classCoachService.initClassCoach(classCoachDTO, user, trx);
-        const classCategory = await classCategoriesService.initCategories(categories, user, trx);
+        const classCategory = await classCategoriesService.initCategories(categories, classDTO.cityId, user, trx);
 
         return {
             ...cls,
@@ -206,7 +206,12 @@ classService.deleteCategory = async (classUuid, classCategoryUuid, user) => {
 classService.addCategory = async (startMonth, endMonth, category, user) => {
 
     await classService.checkUserInClassCompany(category.classUuid, user);
-    return classCategoryService.addCategory(startMonth, endMonth, category, user);
+
+    const cls = Class.query()
+        .findById(category.classUuid)
+        .withGraphFetched('city(baseAttributes');
+
+    return classCategoryService.addCategory(startMonth, endMonth, category, cls.city.ecityid, user);
 
 }
 
