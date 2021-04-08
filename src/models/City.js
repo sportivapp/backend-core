@@ -13,6 +13,10 @@ class City extends Model {
     return {
         baseAttributes(builder) {
             builder.select('ecityid', 'ecityname')
+        },
+        timezone(builder) {
+          builder.select('ecityid', 'ecityname')
+            .withGraphFetched('state(timezone)')
         }
     }
 }
@@ -26,6 +30,23 @@ class City extends Model {
       }
     };
   }
+
+  static get relationMappings() {
+
+    const State = require('./State')
+
+    return {
+      state: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: State,
+        join: {
+          from: 'ecity.estateestateid',
+          to: 'estate.estateid'
+        }
+      }
+    }
+  }
+
 }
 
 module.exports = City;

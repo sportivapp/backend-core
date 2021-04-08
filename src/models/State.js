@@ -13,6 +13,9 @@ class State extends Model {
     return {
       baseAttributes(builder) {
           builder.select('estateid', 'estatename')
+      },
+      timezone(builder) {
+        builder.select('estateid', 'estatename', 'estatetimezone');
       }
     }
   }

@@ -95,6 +95,9 @@ class ClassCategory extends Model {
                 builder.select('uuid', 'title')
                     .withGraphFetched('class(basic)')
             },
+            classCity(builder) {
+                builder.withGraphFetched('class(uuidAndTitle).[city(baseAttributes)]')
+            }
         }
     }
 
