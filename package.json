@@ -45,8 +45,7 @@
     "pg": "^8.3.0",
     "read-excel-file": "^4.0.6",
     "shortid": "^2.2.15",
-    "swagger-jsdoc": "^4.0.0",
-    "tz-offset": "0.0.2"
+    "swagger-jsdoc": "^4.0.0"
   },
   "devDependencies": {
     "cz-conventional-changelog": "^3.3.0"

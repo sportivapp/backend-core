@@ -8,7 +8,6 @@ const classCategoryScheduleService = require('./classCategoryScheduleService');
 const classCategoryPriceLogService = require('./classCategoryPriceLogService');
 const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
 const classComplaintService = require('./classComplaintsService');
-const tzOffset = require("tz-offset");
 const cityService = require('../cityService');
 const luxon = require("luxon");
 
