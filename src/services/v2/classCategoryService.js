@@ -10,6 +10,7 @@ const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
 const classComplaintService = require('./classComplaintsService');
 const tzOffset = require("tz-offset");
 const cityService = require('../cityService');
+const luxon = require("luxon");
 
 const ErrorEnum = {
     CATEGORY_NOT_FOUND: 'CATEGORY_NOT_FOUND',
@@ -273,7 +274,7 @@ classCategoryService.generateSessionAndScheduleFromCategorySchedules = (classUui
     let sessionDTO = [];
     let scheduleDTO = [];
     schedules.map(schedule => {
-        const categoryStartDate = tzOffset.timeAt(new Date(startMonth), timezone);
+        const categoryStartDate = luxon.DateTime.fromMillis(startMonth).setZone(timezone).toJSDate();
         const day = categoryStartDate.getDay();
         const requestedDay = dayToCodeEnum[schedule.day];
         if (day !== requestedDay) {
@@ -292,8 +293,24 @@ classCategoryService.generateSessionAndScheduleFromCategorySchedules = (classUui
             startMinute: schedule.startMinute,
             endMinute: schedule.endMinute,
         });
-        let sessionStartDate = tzOffset.timeAt(new Date(categoryStartDate.getFullYear(), categoryStartDate.getMonth(), categoryStartDate.getDate(), schedule.startHour, schedule.startMinute), timezone);
-        let sessionEndDate = tzOffset.timeAt(new Date(categoryStartDate.getFullYear(), categoryStartDate.getMonth(), categoryStartDate.getDate(), schedule.endHour, schedule.endMinute), timezone);
+        let sessionStartDate = luxon.DateTime.fromObject({
+            year: categoryStartDate.getFullYear(),
+            // Why +1? js date start from 0 while luxon start from 1
+            month: categoryStartDate.getMonth() + 1,
+            day: categoryStartDate.getDate(),
+            hour: schedule.startHour,
+            minute: schedule.startMinute,
+            zone: timezone,
+        }).toJSDate();
+        let sessionEndDate = luxon.DateTime.fromObject({
+            year: categoryStartDate.getFullYear(),
+            // Why +1? js date start from 0 while luxon start from 1
+            month: categoryStartDate.getMonth() + 1,
+            day: categoryStartDate.getDate(),
+            hour: schedule.endHour,
+            minute: schedule.endMinute,
+            zone: timezone,
+        }).toJSDate();
         const now = Date.now();
         // Loop to increase 7days per schedule from startDate to endDate
         while (sessionStartDate.getTime() < endMonth) {
