@@ -13,6 +13,14 @@ const UnsupportedOperationErrorEnum = {
     NOTIFICATION_WAS_CLICKED: 'NOTIFICATION_WAS_CLICKED',
 }
 
+const NotificationType = {
+    FORUM: 'FORUM',
+    CLASS: 'CLASS',
+    NEWS: 'NEWS',
+    TOURNAMENT: 'TOURNAMENT',
+    ALL: 'ALL'
+}
+
 const notificationService = {};
 
 notificationService.buildNotificationEntity = async (entityId, entityType, title, message, action) => {
@@ -34,9 +42,30 @@ notificationService.checkUserInDB = async (userId) => {
 
 }
 
-notificationService.getNotificationCount = async (user) => {
+notificationService.getNotificationCount = async (type = NotificationType.ALL, user) => {
 
-    return Notification.query()
+    let subQuery = NotificationBody.query();
+
+    if (type !== NotificationType.ALL && type !== '' && NotificationType[type]) {
+
+        const enumTypes = [];
+
+        if (type === NotificationType.FORUM) {
+            enumTypes.push(NotificationEnum.forum.type);
+            enumTypes.push(NotificationEnum.forumPostReply.type);
+            enumTypes.push(NotificationEnum.forumPost.type);
+        } else if (type === NotificationType.NEWS) {
+            enumTypes.push(NotificationEnum.news.type);
+        } else if (type === NotificationType.CLASS) {
+            enumTypes.push(NotificationEnum.classCategory.type);
+            enumTypes.push(NotificationEnum.classSession.type);
+        }
+
+        subQuery = subQuery.whereIn('enotificationbodyentitytype', enumTypes);
+    }
+
+    return NotificationBody.relatedQuery('notifications')
+        .for(subQuery)
         .where('eusereuserid', user.sub)
         .andWhere('enotificationisread', false)
         .count()
@@ -47,6 +76,7 @@ notificationService.getNotificationCount = async (user) => {
         });
 
 }
+
 
 notificationService.clickNotification = async (notificationId, user) => {
 
@@ -70,29 +100,47 @@ notificationService.clickNotification = async (notificationId, user) => {
 
 }
 
-notificationService.readNotifications = async (userId) => {
+notificationService.readNotifications = async (enumTypes, userId) => {
 
-    return Notification.query()
+    return NotificationBody.relatedQuery('notifications')
+        .for(NotificationBody.query().whereIn('enotificationbodyentitytype', enumTypes))
+        .where('eusereuserid', userId)
         .patch({
             enotificationisread: true,
             enotificationchangeby: userId,
             enotificationchangetime: Date.now()
-        })
-        .where('eusereuserid', userId);
+        });
 
 }
 
-notificationService.getAllNotification = async (page, size, user) => {
+notificationService.getAllNotification = async (page, size, type, user) => {
+
+    if (!NotificationType[type]) return ServiceHelper.toEmptyPage(page, size);
 
     const userInDB = await notificationService.checkUserInDB(user.sub)
 
     if(!userInDB)
         return ServiceHelper.toEmptyPage(page, size);
-    await notificationService.readNotifications(user.sub);
+
+    const enumTypes = [];
+
+    if (type === NotificationType.FORUM) {
+        enumTypes.push(NotificationEnum.forum.type);
+        enumTypes.push(NotificationEnum.forumPostReply.type);
+        enumTypes.push(NotificationEnum.forumPost.type);
+    } else if (type === NotificationType.NEWS) {
+        enumTypes.push(NotificationEnum.news.type);
+    } else if (type === NotificationType.CLASS) {
+        enumTypes.push(NotificationEnum.classCategory.type);
+        enumTypes.push(NotificationEnum.classSession.type);
+    }
+
+    await notificationService.readNotifications(enumTypes, user.sub);
 
     const notificationPage = await Notification.relatedQuery('notificationBody')
     .modify('baseAttributes')
     .for(Notification.query().where('eusereuserid', user.sub))
+    .whereIn('enotificationbodyentitytype', enumTypes)
     .withGraphFetched('sender(idAndName).file(baseAttributes)')
     .orderBy('enotificationbodycreatetime', 'DESC')
     .page(page, size)
