@@ -101,7 +101,6 @@ classCategoryParticipantSessionService.register = async (participantSessionDTOs,
 
     const notificationPromiseList = participants.map(async participant => {
         const completeParticipant = await participant.$query().withGraphFetched('[class, classCategory.coaches]');
-        console.log(completeParticipant);
         const classCategory = completeParticipant.classCategory;
         const cls = completeParticipant.class;
         const coaches = completeParticipant.classCategory.coaches;
