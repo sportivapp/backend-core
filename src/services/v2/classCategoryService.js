@@ -148,7 +148,7 @@ classCategoryService.findById = async (classCategoryUuid) => {
 
 classCategoryService.extendSchedule = async (extendCategoryDTO, user) => {
 
-    const category = await ClassCategory
+    const category = await ClassCategory.query()
         .modify('classCity')
         .findById(extendCategoryDTO.uuid);
     const timezone = await cityService.getTimezoneFromCityId(category.class.city.ecityid);
