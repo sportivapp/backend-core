@@ -6,12 +6,13 @@ mobileClassComplaintController = {};
 mobileClassComplaintController.getMyCategoryComplaints = async (req, res, next) => {
 
     const { classCategoryUuid } = req.params;
-    const { status } = req.query;
+    const { page = '0', size = '10', status } = req.query;
 
     try {
 
-        const result = await classComplaintsService.getMyCategoryComplaints(classCategoryUuid, status, req.user);
-        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+        const pageObj = await classComplaintsService
+            .getMyCategoryComplaints(classCategoryUuid, parseInt(page), parseInt(size), status, req.user);
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
 
     } catch(e) {
         next(e);
