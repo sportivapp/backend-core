@@ -181,6 +181,7 @@ module.exports = {
             rate: '/class-category-session/:classCategorySessionUuid/rate',
             reason: '/class-category-session/:classCategorySessionUuid/reason',
             complaint: '/class-category-session/:classCategorySessionUuid/complaint',
+            generate: '/class-category-session-generate',
         },
         classCategory: {
             list: '/category',
