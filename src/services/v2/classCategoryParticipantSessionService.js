@@ -141,7 +141,8 @@ classCategoryParticipantSessionService.remindUpcomingSessionsByHour = async (ses
         const now = new Date();
         const sessionDate = new Date(parseInt(session.startDate));
         const diff = sessionDate.getHours() - now.getHours();
-        if (diff !== targetHour) return null;
+        const minuteDiff = sessionDate.getMinutes() - now.getMinutes();
+        if (diff !== targetHour || minuteDiff !== 0) return null;
         const timeDescription = `${targetHour} ${TimeMap.HOUR}`
         const action = NotificationEnum.classSession.actions.reminder;
         const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;

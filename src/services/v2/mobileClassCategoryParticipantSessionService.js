@@ -99,24 +99,24 @@ classCategoryParticipantSessionService.register = async (participantSessionDTOs,
 
     const notifAction = NotificationEnum.classCategory.actions.registerSuccess;
 
-    const notificationPromiseList = participants.map(async participant => {
-        const completeParticipant = await participant.$query().withGraphFetched('[class, classCategory.coaches]');
-        const classCategory = completeParticipant.classCategory;
-        const cls = completeParticipant.class;
-        const coaches = completeParticipant.classCategory.coaches;
-        const notificationObj = await notificationService.buildNotificationEntity(
-            participant.classCategoryUuid,
-            NotificationEnum.classCategory.type,
-            notifAction.title(cls.title, classCategory.title),
-            notifAction.message(),
-            notifAction.code
-        );
-        return notificationService.saveNotification(notificationObj, { sub: coaches[0].userId }, [participant.userId]);
-    });
+    const participant = participants[0];
 
-    Promise.all(notificationPromiseList);
+    const completeParticipant = await participant.$query().withGraphFetched('[class, classCategory.coaches]');
+    const classCategory = completeParticipant.classCategory;
+    const cls = completeParticipant.class;
+    const coaches = completeParticipant.classCategory.coaches;
+    const notificationObj = await notificationService.buildNotificationEntity(
+        participant.classCategoryUuid,
+        NotificationEnum.classCategory.type,
+        notifAction.title(cls.title, classCategory.title),
+        notifAction.message(),
+        notifAction.code
+    );
+    notificationService.saveNotification(notificationObj, { sub: coaches[0].userId }, [participant.userId]);
+
     return participants;
 }
+
 
 classCategoryParticipantSessionService.getMySessionUuids = async (user) => {
 
