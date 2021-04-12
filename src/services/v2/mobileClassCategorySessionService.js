@@ -84,9 +84,10 @@ classCategorySessionService.inputAbsence = async(classCategoryUuid, classCategor
         .updateByUserId({
             absenceTime: Date.now(),
             absenceBy: user.sub,
-        }, user.sub);
+        }, user.sub)
+        .returning('*');
 
-    const completeSession = await updatedSession.$query().withGraphFetched('[class, classCategory, classCategory]');
+    const completeSession = await updatedSession.$query().withGraphFetched('[class, classCategory]');
     const cls = completeSession.class;
     const category = completeSession.classCategory;
 
@@ -665,6 +666,12 @@ classCategorySessionService.getOrderedActiveAndUpcomingSessions = async (categor
         .where('status', sessionStatusEnum.UPCOMING)
         .where('start_date', '>', Date.now())
         .orderBy('start_date');
+
+}
+
+classCategorySessionService.sessionParticipantsHistoryBySessionUuid = async (sessionUuid) => {
+
+    return classCategoryParticipantSessionService.sessionParticipantsHistoryBySessionUuid(sessionUuid);
 
 }
 

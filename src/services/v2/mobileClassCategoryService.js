@@ -203,20 +203,6 @@ classCategoryService.mySessionsHistory = async (classCategoryUuid, user) => {
 
 }
 
-classCategoryService.categoryParticipantsHistory = async (classCategoryUuid) => {
-
-    return classCategoryParticipantSessionService
-        .categoryParticipantHistoryByCategoryUuid(classCategoryUuid);
-
-}
-
-classCategoryService.categorySessionsHistory = async (classCategoryUuid) => {
-
-    return classCategoryParticipantSessionService
-        .categoryParticipantHistoryByCategoryUuid(classCategoryUuid);
-
-}
-
 classCategoryService.categorySessionsHistory = async (classCategoryUuid) => {
 
     return classCategoryParticipantSessionService

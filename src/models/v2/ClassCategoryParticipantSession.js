@@ -53,13 +53,12 @@ class ClassCategoryParticipantSession extends Model {
                     .where('user_id', userId)
                     .where('classCategorySession.status', SessionStatusEnum.DONE);
             },
-            categorySessionsHistory(builder, classCategoryUuid) {
+            sessionsHistory(builder) {
                 builder.select('class_category_participant_session.uuid', 'is_check_in', 'is_confirmed')
                     .withGraphFetched('classRating(basic)')
                     .withGraphFetched('classReason(basic)')
                     .withGraphFetched('user(basic)')
                     .withGraphJoined('classCategorySession(basicStartEnd)')
-                    .where('class_category_uuid', classCategoryUuid)
                     .where('classCategorySession.status', SessionStatusEnum.DONE);
             },
         }

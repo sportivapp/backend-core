@@ -153,24 +153,11 @@ classCategoryParticipantSessionService.mySessionsHistoryByCategoryUuidAndUserId 
         
 }
 
-classCategoryParticipantSessionService.categoryParticipantHistoryByCategoryUuid = async(classCategoryUuid) => {
+classCategoryParticipantSessionService.sessionParticipantsHistoryBySessionUuid = async(classCategorySessionUuid) => {
 
     return ClassCategoryParticipantSession.query()
-        .modify('categorySessionsHistory', classCategoryUuid);
-        
-}
-
-classCategoryParticipantSessionService.categorySessionsHistoryByCategoryUuid = async(classCategoryUuid) => {
-
-    return ClassCategoryParticipantSession.query()
-        .modify('categorySessionsHistory', classCategoryUuid);
-        
-}
-
-classCategoryParticipantSessionService.categorySessionsHistoryByCategoryUuid = async(classCategoryUuid) => {
-
-    return ClassCategoryParticipantSession.query()
-        .modify('categorySessionsHistory', classCategoryUuid);
+        .where('class_category_session_uuid', classCategorySessionUuid)
+        .modify('sessionsHistory', classCategorySessionUuid);
         
 }
 

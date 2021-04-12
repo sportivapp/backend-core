@@ -182,6 +182,7 @@ module.exports = {
             reason: '/class-category-session/:classCategorySessionUuid/reason',
             complaint: '/class-category-session/:classCategorySessionUuid/complaint',
             generate: '/class-category-session-generate',
+            participantsHistory: '/history-class-category-session/:classCategorySessionUuid/participants',
         },
         classCategory: {
             list: '/category',
@@ -198,7 +199,6 @@ module.exports = {
             bookable: '/class-category/:classCategoryUuid/bookable',
             myHistory: '/my-history-class-category/:classCategoryUuid',
             history: '/history-class-category/:classCategoryUuid',
-            participantsHistory: '/history-class-category/:classCategoryUuid/participants',
             complaints: '/coach-category/:classCategoryUuid/complaints',
             monthPicker: '/class-category/:classCategoryUuid/month-picker',
         },

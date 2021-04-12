@@ -11,7 +11,6 @@ router.put(routes.classCategory.reschedule, auth.authenticateToken, controller.r
 router.get(routes.classCategory.unconfirmed, auth.authenticateToken, controller.getMyUnconfirmedSessions);
 router.get(routes.classCategory.bookable, auth.authenticateToken, controller.getBookableSessions);
 router.get(routes.classCategory.myHistory, auth.authenticateToken, controller.mySessionsHistory);
-router.get(routes.classCategory.participantsHistory, auth.authenticateToken, controller.categoryParticipantsHistory);
 router.get(routes.classCategory.complaints, auth.authenticateToken, controller.getCategoryComplaints);
 router.get(routes.classCategory.monthPicker, auth.authenticateToken, controller.getMonthPicker);
 router.get(routes.classCategory.history, auth.authenticateToken, controller.getCategoryHistory);
