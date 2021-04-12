@@ -451,36 +451,6 @@ classCategorySessionService.getMySessionUuidsByCategoryUuid = async (categoryUui
 
 }
 
-classCategorySessionService.getActiveClosestSessionsByStatusAndGroupByCategory = async (sessionUuids, status) => {
-
-    return ClassCategorySession.query()
-        .where('status', status)
-        .whereIn('uuid', sessionUuids)
-        .where('start_date', '>=', Date.now())
-        .orderBy('start_date', 'ASC')
-        .then(sessions => {
-            let seen = {};
-            return sessions.filter(session => {
-                if (!seen[session.classCategoryUuid]) {
-                    seen[session.classCategoryUuid] = true;
-                    return true;
-                }
-                return false;
-            });
-        });
-
-}
-
-classCategorySessionService.getActiveSessionsByStatus = async (sessionUuids, status) => {
-
-    return ClassCategorySession.query()
-        .where('status', status)
-        .whereIn('uuid', sessionUuids)
-        .where('start_date', '>=', Date.now())
-        .orderBy('start_date', 'ASC');
-
-}
-
 classCategorySessionService.getBookableSessions = async (classCategoryUuid, year, userId) => {
 
     const { start, end } = timeService.getYearRange(year);
