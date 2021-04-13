@@ -121,14 +121,6 @@ classCategorySessionService.getSessionByUuid = async (classCategorySessionUuid) 
 
 }
 
-classCategorySessionService.getSessionByCategoryUuidAndStatus = async (classCategoryUuid, status) => {
-
-    return ClassCategorySession.query()
-        .where('class_category_uuid', classCategoryUuid)
-        .where('status', status);
-
-}
-
 classCategorySessionService.endSession = async (classCategorySessionUuid, user, trx) => {
 
     const session = await ClassCategorySession.query()
@@ -151,7 +143,7 @@ classCategorySessionService.endSession = async (classCategorySessionUuid, user, 
 
     const category = completeSession.classCategory;
     const cls = completeSession.class;
-    const upcomingSessions = await classCategorySessionService.getSessionByCategoryUuidAndStatus(category.uuid, sessionStatusEnum.UPCOMING);
+    const upcomingSessions = await classCategorySessionService.getUpcomingSessions(category.uuid, sessionStatusEnum.UPCOMING);
 
     const notifPromiseList = [];
     if (upcomingSessions.length === 0) {
@@ -218,7 +210,7 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
 
     const session = await classCategorySessionService.findById(classCategorySessionDTO.uuid);
     const upcomingSessions = await classCategorySessionService
-        .getUpcomingSessions(classCategorySessionDTO.classCategoryUuid, [sessionStatusEnum.UPCOMING]);
+        .getUpcomingSessions(classCategorySessionDTO.classCategoryUuid);
 
     if (!isRepeat) {
 
