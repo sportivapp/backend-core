@@ -13,6 +13,7 @@ const classCategoryCoachService = require('./mobileClassCategoryCoachService');
 const notificationService = require('../notificationService');
 const NotificationEnum = require('../../models/enum/NotificationEnum');
 const CodeToTextMonthEnum = require('../../models/enum/CodeToTextMonthEnum');
+const ServiceHelper = require('../../helper/ServiceHelper');
 
 const ErrorEnum = {
     INVALID_SESSION: 'INVALID_SESSION',
@@ -672,6 +673,12 @@ classCategorySessionService.getOrderedActiveAndUpcomingSessions = async (categor
 classCategorySessionService.sessionParticipantsHistoryBySessionUuid = async (sessionUuid) => {
 
     return classCategoryParticipantSessionService.sessionParticipantsHistoryBySessionUuid(sessionUuid);
+
+}
+
+classCategorySessionService.getFinishedSessions = async (classCategoryUuid, page, size) => {
+
+    return classCategorySessionService.getSessions(classCategoryUuid, [sessionStatusEnum.DONE], page, size);
 
 }
 
