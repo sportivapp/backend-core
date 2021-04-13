@@ -6,7 +6,6 @@ const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
 const notificationService = require('../notificationService');
 const NotificationEnum = require('../../models/enum/NotificationEnum');
 const CodeToTextMonthEnum = require('../../models/enum/CodeToTextMonthEnum');
-const { raw } = require('objection');
 
 const ErrorEnum = {
     INVALID_SESSION: 'INVALID_SESSION',

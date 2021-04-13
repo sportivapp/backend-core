@@ -183,6 +183,7 @@ module.exports = {
             complaint: '/class-category-session/:classCategorySessionUuid/complaint',
             generate: '/class-category-session-generate',
             participantsHistory: '/history-class-category-session/:classCategorySessionUuid/participants',
+            finishedSessions: '/class-category/:classCategorySessionUuid/finished-sessions',
         },
         classCategory: {
             list: '/category',

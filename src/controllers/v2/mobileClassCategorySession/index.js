@@ -131,4 +131,20 @@ classCategorySessionController.sessionParticipantsHistory = async (req, res, nex
 
 }
 
+classCategorySessionController.getFinishedSessions = async (req, res, next) => {
+
+    const { classCategorySessionUuid } = req.params;
+    const { page = '0', size = '10' } = req.query;
+
+    try {
+
+        const result = await classCategorySessionService.getFinishedSessions(classCategorySessionUuid, parseInt(page), parseInt(size));
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = classCategorySessionController;
