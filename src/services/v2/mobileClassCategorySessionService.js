@@ -14,6 +14,7 @@ const notificationService = require('../notificationService');
 const NotificationEnum = require('../../models/enum/NotificationEnum');
 const CodeToTextMonthEnum = require('../../models/enum/CodeToTextMonthEnum');
 const ServiceHelper = require('../../helper/ServiceHelper');
+const { size } = require('lodash');
 
 const ErrorEnum = {
     INVALID_SESSION: 'INVALID_SESSION',
@@ -217,7 +218,7 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
 
     const session = await classCategorySessionService.findById(classCategorySessionDTO.uuid);
     const upcomingSessions = await classCategorySessionService
-        .getSessions(classCategorySessionDTO.classCategoryUuid, [sessionStatusEnum.UPCOMING]);
+        .getUpcomingSessions(classCategorySessionDTO.classCategoryUuid, [sessionStatusEnum.UPCOMING]);
 
     if (!isRepeat) {
 
@@ -314,29 +315,6 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
         return Promise.all(promises);
 
     }
-
-}
-
-classCategorySessionService.getSessions = async (classCategoryUuid, statuses, page, size) => {
-
-    statuses.forEach(status => {
-        if (!sessionStatusEnum[status])
-        throw new UnsupportedOperationError(ErrorEnum.INVALID_STATUS);
-    });
-
-    let query = ClassCategorySession.query()
-        .modify('list')
-        .where('class_category_uuid', classCategoryUuid)
-        .whereIn('status', statuses)
-
-    if (typeof(page) === 'number' && typeof(size) === 'number') {
-        query = query.page(page, size)
-        .then(sessionPage => {
-            return ServiceHelper.toPageObj(page, size, sessionPage);
-        });
-    }
-
-    return query;
 
 }
 
@@ -678,7 +656,38 @@ classCategorySessionService.sessionParticipantsHistoryBySessionUuid = async (ses
 
 classCategorySessionService.getFinishedSessions = async (classCategoryUuid, page, size) => {
 
-    return classCategorySessionService.getSessions(classCategoryUuid, [sessionStatusEnum.DONE], page, size);
+    let query = ClassCategorySession.query()
+        .modify('list')
+        .where('class_category_uuid', classCategoryUuid)
+        .where('status', sessionStatusEnum.DONE)
+
+    if (typeof(page) === 'number' && typeof(size) === 'number') {
+        query = query.page(page, size)
+        .then(sessionPage => {
+            return ServiceHelper.toPageObj(page, size, sessionPage);
+        });
+    }
+
+    return query;
+
+}
+
+classCategorySessionService.getUpcomingSessions = async (classCategoryUuid, page, size) => {
+
+    let query = ClassCategorySession.query()
+        .modify('list')
+        .where('class_category_uuid', classCategoryUuid)
+        .where('status', sessionStatusEnum.UPCOMING)
+        .where('start_date', '>', Date.now())
+
+    if (typeof(page) === 'number' && typeof(size) === 'number') {
+        query = query.page(page, size)
+        .then(sessionPage => {
+            return ServiceHelper.toPageObj(page, size, sessionPage);
+        });
+    }
+
+    return query;
 
 }
 
