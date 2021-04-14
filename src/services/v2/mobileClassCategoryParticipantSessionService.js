@@ -101,7 +101,7 @@ classCategoryParticipantSessionService.register = async (participantSessionDTOs,
 
     const participant = participants[0];
 
-    const completeParticipant = await participant.$query().withGraphFetched('[class, classCategory.coaches]');
+    const completeParticipant = await participant.$query(trx).withGraphFetched('[class, classCategory.coaches]');
     const classCategory = completeParticipant.classCategory;
     const cls = completeParticipant.class;
     const coaches = completeParticipant.classCategory.coaches;
