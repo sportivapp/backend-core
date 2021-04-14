@@ -11,5 +11,6 @@ router.post(routes.classCategorySession.reason, auth.authenticateToken, controll
 router.post(routes.classCategorySession.complaint, auth.authenticateToken, controller.complaintSession);
 router.get(routes.classCategorySession.participantsHistory, auth.authenticateToken, controller.sessionParticipantsHistory);
 router.get(routes.classCategorySession.finishedSessions, auth.authenticateToken, controller.getFinishedSessions);
+router.get(routes.classCategorySession.upcomingSessions, auth.authenticateToken, controller.getUpcomingSessions);
 
 module.exports = router.expressRouter;

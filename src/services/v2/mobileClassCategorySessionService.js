@@ -14,6 +14,8 @@ const notificationService = require('../notificationService');
 const NotificationEnum = require('../../models/enum/NotificationEnum');
 const CodeToTextMonthEnum = require('../../models/enum/CodeToTextMonthEnum');
 const ServiceHelper = require('../../helper/ServiceHelper');
+const cityService = require('../cityService');
+const luxon = require('luxon');
 
 const ErrorEnum = {
     INVALID_SESSION: 'INVALID_SESSION',
@@ -120,14 +122,6 @@ classCategorySessionService.getSessionByUuid = async (classCategorySessionUuid) 
 
 }
 
-classCategorySessionService.getSessionByCategoryUuidAndStatus = async (classCategoryUuid, status) => {
-
-    return ClassCategorySession.query()
-        .where('class_category_uuid', classCategoryUuid)
-        .where('status', status);
-
-}
-
 classCategorySessionService.endSession = async (classCategorySessionUuid, user, trx) => {
 
     const session = await ClassCategorySession.query()
@@ -150,7 +144,7 @@ classCategorySessionService.endSession = async (classCategorySessionUuid, user, 
 
     const category = completeSession.classCategory;
     const cls = completeSession.class;
-    const upcomingSessions = await classCategorySessionService.getSessionByCategoryUuidAndStatus(category.uuid, sessionStatusEnum.UPCOMING);
+    const upcomingSessions = await classCategorySessionService.getUpcomingSessions(category.uuid, sessionStatusEnum.UPCOMING);
 
     const notifPromiseList = [];
     if (upcomingSessions.length === 0) {
@@ -215,9 +209,22 @@ classCategorySessionService.getSessionParticipants = async (classCategoryUuid, c
 
 classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepeat, user) => {
 
-    const session = await classCategorySessionService.findById(classCategorySessionDTO.uuid);
+    const session = await ClassCategorySession.query()
+        .findById(classCategorySessionDTO.uuid)
+        .withGraphFetched('class')
+        .then(session => {
+            if (!session)
+                throw new UnsupportedOperationError(ErrorEnum.SESSION_NOT_FOUND);
+            return session;
+        });
+
+    const timezone = await cityService.getTimezoneFromCityId(session.class.cityId);
+
+    classCategorySessionDTO.startDate = luxon.DateTime.fromMillis(classCategorySessionDTO.startDate).setZone(timezone).toMillis();
+    classCategorySessionDTO.endDate = luxon.DateTime.fromMillis(classCategorySessionDTO.endDate).setZone(timezone).toMillis();
+    
     const upcomingSessions = await classCategorySessionService
-        .getSessions(classCategorySessionDTO.classCategoryUuid, [sessionStatusEnum.UPCOMING]);
+        .getUpcomingSessions(classCategorySessionDTO.classCategoryUuid);
 
     if (!isRepeat) {
 
@@ -314,29 +321,6 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
         return Promise.all(promises);
 
     }
-
-}
-
-classCategorySessionService.getSessions = async (classCategoryUuid, statuses, page, size) => {
-
-    statuses.forEach(status => {
-        if (!sessionStatusEnum[status])
-        throw new UnsupportedOperationError(ErrorEnum.INVALID_STATUS);
-    });
-
-    let query = ClassCategorySession.query()
-        .modify('list')
-        .where('class_category_uuid', classCategoryUuid)
-        .whereIn('status', statuses)
-
-    if (typeof(page) === 'number' && typeof(size) === 'number') {
-        query = query.page(page, size)
-        .then(sessionPage => {
-            return ServiceHelper.toPageObj(page, size, sessionPage);
-        });
-    }
-
-    return query;
 
 }
 
@@ -678,7 +662,38 @@ classCategorySessionService.sessionParticipantsHistoryBySessionUuid = async (ses
 
 classCategorySessionService.getFinishedSessions = async (classCategoryUuid, page, size) => {
 
-    return classCategorySessionService.getSessions(classCategoryUuid, [sessionStatusEnum.DONE], page, size);
+    let query = ClassCategorySession.query()
+        .modify('list')
+        .where('class_category_uuid', classCategoryUuid)
+        .where('status', sessionStatusEnum.DONE)
+
+    if (typeof(page) === 'number' && typeof(size) === 'number') {
+        query = query.page(page, size)
+        .then(sessionPage => {
+            return ServiceHelper.toPageObj(page, size, sessionPage);
+        });
+    }
+
+    return query;
+
+}
+
+classCategorySessionService.getUpcomingSessions = async (classCategoryUuid, page, size) => {
+
+    let query = ClassCategorySession.query()
+        .modify('list')
+        .where('class_category_uuid', classCategoryUuid)
+        .where('status', sessionStatusEnum.UPCOMING)
+        .where('start_date', '>', Date.now())
+
+    if (typeof(page) === 'number' && typeof(size) === 'number') {
+        query = query.page(page, size)
+        .then(sessionPage => {
+            return ServiceHelper.toPageObj(page, size, sessionPage);
+        });
+    }
+
+    return query;
 
 }
 
