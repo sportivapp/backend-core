@@ -14,7 +14,8 @@ const notificationService = require('../notificationService');
 const NotificationEnum = require('../../models/enum/NotificationEnum');
 const CodeToTextMonthEnum = require('../../models/enum/CodeToTextMonthEnum');
 const ServiceHelper = require('../../helper/ServiceHelper');
-const { size } = require('lodash');
+const cityService = require('../cityService');
+const luxon = require('luxon');
 
 const ErrorEnum = {
     INVALID_SESSION: 'INVALID_SESSION',
@@ -208,7 +209,20 @@ classCategorySessionService.getSessionParticipants = async (classCategoryUuid, c
 
 classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepeat, user) => {
 
-    const session = await classCategorySessionService.findById(classCategorySessionDTO.uuid);
+    const session = await ClassCategorySession.query()
+        .findById(classCategorySessionDTO.uuid)
+        .withGraphFetched('class')
+        .then(session => {
+            if (!session)
+                throw new UnsupportedOperationError(ErrorEnum.SESSION_NOT_FOUND);
+            return session;
+        });
+
+    const timezone = await cityService.getTimezoneFromCityId(session.class.cityId);
+
+    classCategorySessionDTO.startDate = luxon.DateTime.fromMillis(classCategorySessionDTO.startDate).setZone(timezone).toMillis();
+    classCategorySessionDTO.endDate = luxon.DateTime.fromMillis(classCategorySessionDTO.endDate).setZone(timezone).toMillis();
+    
     const upcomingSessions = await classCategorySessionService
         .getUpcomingSessions(classCategorySessionDTO.classCategoryUuid);
 
