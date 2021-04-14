@@ -119,7 +119,7 @@ classCategoryService.endSession = async (classCategoryUuid, classCategorySession
     return ClassCategory.transaction(async trx => {
 
         const upcomingSessions = await classCategorySessionService
-            .getSessionByCategoryUuidAndStatus(classCategoryUuid, sessionStatusEnum.UPCOMING);
+            .getUpcomingSessions(classCategoryUuid, sessionStatusEnum.UPCOMING);
 
         let onHold = false;
         if (upcomingSessions.length === 0)
