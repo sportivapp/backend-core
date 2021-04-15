@@ -10,7 +10,6 @@ const dateFormatter = require('../../helper/dateFormatter');
 const notificationService = require('../notificationService');
 const NotificationEnum = require('../../models/enum/NotificationEnum');
 const CodeToTextMonthEnum = require('../../models/enum/CodeToTextMonthEnum');
-const ServiceHelper = require('../../helper/ServiceHelper');
 
 const ErrorEnum = {
     DOUBLE_COMPLAINT: 'DOUBLE_COMPLAINT',
@@ -80,7 +79,7 @@ mobileClassComplaintService.checkNewComplaints = async (sessions) => {
 
 }
 
-mobileClassComplaintService.getMyCategoryComplaints = async (classCategoryUuid, page, size, status, user) => {
+mobileClassComplaintService.getMyCategoryComplaints = async (classCategoryUuid, status, user) => {
 
     if (!classComplaintStatusEnum[status])
         throw new UnsupportedOperationError(ErrorEnum.INVALID_STATUS);
@@ -89,11 +88,7 @@ mobileClassComplaintService.getMyCategoryComplaints = async (classCategoryUuid, 
         .modify('myCategoryComplaints')
         .where('class_category_uuid', classCategoryUuid)
         .where('create_by', user.sub)
-        .where('status', status)
-        .orderBy('create_time', 'DESC')
-        .then(complaints => {
-            ServiceHelper.toPageObj(page, size, complaints)
-        });
+        .where('status', status);
 
 }
 
@@ -173,7 +168,7 @@ mobileClassComplaintService.coachRejectComplaint = async (classComplaintUuid, co
 
         await classComplaintMediaService.insertComplaintMedias(complaintMediaDTOs, user, trx);
 
-        const completeComplaint = await complaint.$query().withGraphFetched('[classCategorySession.participantSession, classCategory, class]')
+        const completeComplaint = await complaint.$query(trx).withGraphFetched('[classCategorySession.participantSession, classCategory, class]')
 
         const session = completeComplaint.classCategorySession;
         const participants = session.participantSession;
