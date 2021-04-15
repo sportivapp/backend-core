@@ -185,6 +185,7 @@ module.exports = {
             participantsHistory: '/history-class-category-session/:classCategorySessionUuid/participants',
             upcomingSessions: '/class-category/:classCategoryUuid/upcoming-sessions',
             finishedSessions: '/class-category/:classCategoryUuid/finished-sessions',
+            myParticipantsHistory: '/my-class-category-session/:classCategorySessionUuid/participations',
         },
         classCategory: {
             list: '/category',
