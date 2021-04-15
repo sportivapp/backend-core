@@ -6,6 +6,7 @@ const classCategoryParticipantSessionService = require('./mobileClassCategoryPar
 const classTransactionDetailService = require('./mobileClassTransactionDetailService');
 const zeroPrefixHelper = require('../../helper/zeroPrefixHelper');
 const dateFormatter = require('../../helper/dateFormatter');
+const outboundPaymentService = require('./outboundPaymentService');
 
 const classTransactionService = {};
 
@@ -150,7 +151,14 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
             .generateDetailTransactionDTOs(classTransaction, cls, category, sessions, null, user);
         await classTransactionDetailService
             .generateTransactionDetail(transactionDetailDTOs, user, trx);
-
+        if (price > 0) {
+            const paymentChannel = 1;
+            const timeLimit = new Date();
+            timeLimit.setMinutes(timeLimit.getMinutes() + 15);
+            const callResult = await outboundPaymentService.createDOKUPayment(classTransaction.invoice, price, user.email,
+                user.email, paymentChannel, timeLimit.getTime());
+            if (!callResult) trx.rollback();
+        }
         return {
             ...classTransaction,
             details: detailTransactions,
