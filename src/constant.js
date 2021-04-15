@@ -311,6 +311,9 @@ module.exports = {
             list: '/company-banks',
             main: '/company-banks/:companyBankUuid/main',
             id: '/company-banks/:companyBankUuid',
+        },
+        payment: {
+            methods: '/payment-methods',
         }
     }
 }
