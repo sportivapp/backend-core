@@ -273,7 +273,8 @@ classCategoryService.generateSessionAndScheduleFromCategorySchedules = (classUui
     let sessionDTO = [];
     let scheduleDTO = [];
     schedules.map(schedule => {
-        const categoryStartDate = luxon.DateTime.fromMillis(startMonth).setZone(timezone).toJSDate();
+        const offset = luxon.DateTime.fromMillis(startMonth).setZone(timezone).offset;
+        const categoryStartDate = new Date(startMonth - (60000 * offset));
         const day = categoryStartDate.getDay();
         const requestedDay = dayToCodeEnum[schedule.day];
         if (day !== requestedDay) {

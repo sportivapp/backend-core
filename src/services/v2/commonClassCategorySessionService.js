@@ -5,8 +5,9 @@ const classCategorySessionService = {};
 
 classCategorySessionService.convertStartEndToTimezone = (start, end, timezone) => {
 
-    const startDate = luxon.DateTime.fromMillis(start).setZone(timezone).toMillis();
-    const endDate = luxon.DateTime.fromMillis(end).setZone(timezone).toMillis();
+    const offset = luxon.DateTime.fromMillis(start).setZone(timezone).offset;
+    const startDate = new Date(start - (60000 * offset)).getTime();
+    const endDate = new Date(end - (60000 * offset)).getTime();
 
     return {
         startDate: startDate,
