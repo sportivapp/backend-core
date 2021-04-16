@@ -155,7 +155,7 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
             const paymentChannel = 1;
             const timeLimit = new Date();
             timeLimit.setMinutes(timeLimit.getMinutes() + 15);
-            const callResult = await outboundPaymentService.createDOKUPayment(classTransaction.invoice, price, user.email,
+            const callResult = await outboundPaymentService.createDOKUPayment(classTransaction.invoice, price, user.name,
                 user.email, paymentChannel, timeLimit.getTime());
             if (!callResult) trx.rollback();
         }
