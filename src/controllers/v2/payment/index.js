@@ -19,10 +19,11 @@ paymentController.getPaymentMethods = (req, res, next) => {
 paymentController.updatePayment = (req, res, next) => {
 
     const { invoice } = req.params;
+    const { status } = req.query;
 
     try {
 
-        const result = paymentService.updatePayment(invoice);
+        const result = paymentService.updatePayment(invoice, status);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
