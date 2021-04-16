@@ -19,7 +19,7 @@ paymentController.getPaymentMethods = (req, res, next) => {
 paymentController.updatePayment = (req, res, next) => {
 
     const { invoice } = req.params;
-    const { status } = req.query;
+    const { status } = req.body;
 
     try {
 
