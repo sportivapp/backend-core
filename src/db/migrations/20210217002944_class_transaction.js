@@ -11,6 +11,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('class_transaction', t =
     t.string('user_name');
     t.decimal('amount', 14, 2);
     t.enum('status', ['AWAITING_PAYMENT', 'PROCESSED', 'DONE', 'CANCELLED']).defaultTo('AWAITING_PAYMENT');
+    t.bigInteger('time_limit');
     t.integer('create_by').notNullable();
     t.bigInteger('create_time').notNullable();
     t.integer('change_by');
