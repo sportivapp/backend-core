@@ -149,7 +149,7 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
     timeLimit.setMinutes(timeLimit.getMinutes() + 15);
 
     const classTransactionDTO = classTransactionService
-        .generateClassTransactionDTO(cls, category, invoice, invoiceCode, price, classTransactionStatusEnum.AWAITING_PAYMENT, timeLimit, user);
+        .generateClassTransactionDTO(cls, category, invoice, invoiceCode, price, classTransactionStatusEnum.AWAITING_PAYMENT, timeLimit.getTime(), user);
 
     return ClassTransaction.transaction(async trx => {
 
