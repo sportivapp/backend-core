@@ -7,6 +7,7 @@ const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
 const classCategorySessionService = require('./mobileClassCategorySessionService');
 const classTransactionService = require('./mobileClassTransactionService');
 const coachCategoryService = require('./mobileClassCategoryCoachService');
+const classTransactionDetailService = require('./mobileClassTransactionDetailService');
 
 const ErrorEnum = {
     INVALID_COACH_ID: 'INVALID_COACH_ID',
@@ -100,7 +101,7 @@ classService.getClassCategory = async (classUuid, classCategoryUuid, user) => {
 
 classService.register = async (classUuid, classCategoryUuid, classCategorySessionUuids, user) => {
 
-    await classCategoryParticipantSessionService.checkUserRegisteredToSessions(classCategorySessionUuids, user.sub);
+    await classTransactionDetailService.checkUserRegisteredToSessions(classCategorySessionUuids, user.sub);
     const cls = await classService.findById(classUuid);
     const category = await classCategoryService.findById(classCategoryUuid);
     const sessions = await classCategorySessionService.findSessions(classCategorySessionUuids);
