@@ -65,7 +65,7 @@ classTransactionService.generateDetailTransactionDTOs = (classTransaction, cls, 
 
 }
 
-classTransactionService.generateClassTransactionDTO = (cls, category, invoice, invoiceCode, amount, status, user) => {
+classTransactionService.generateClassTransactionDTO = (cls, category, invoice, invoiceCode, amount, status, timeLimit, user) => {
 
     return {
         invoice: invoice,
@@ -78,6 +78,7 @@ classTransactionService.generateClassTransactionDTO = (cls, category, invoice, i
         userName: user.name,
         amount: amount,
         status: status,
+        timeLimit: timeLimit
     }
 
 }
@@ -144,8 +145,11 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
     const prefixedCode = zeroPrefixHelper.zeroPrefixCodeByLength(invoiceCode, 9);
     const invoice = `INV/${dateFormatter.formatDateToYYYYMMDD(new Date())}/${moduleTransactionEnum[moduleEnum.CLASS]}/${prefixedCode}`;
 
+    const timeLimit = new Date();
+    timeLimit.setMinutes(timeLimit.getMinutes() + 15);
+
     const classTransactionDTO = classTransactionService
-        .generateClassTransactionDTO(cls, category, invoice, invoiceCode, price, classTransactionStatusEnum.AWAITING_PAYMENT, user);
+        .generateClassTransactionDTO(cls, category, invoice, invoiceCode, price, classTransactionStatusEnum.AWAITING_PAYMENT, timeLimit, user);
 
     return ClassTransaction.transaction(async trx => {
 
@@ -159,8 +163,6 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
 
         if (price > 0) {
             const paymentChannel = 1;
-            const timeLimit = new Date();
-            timeLimit.setMinutes(timeLimit.getMinutes() + 15);
             const callResult = await outboundPaymentService.createDOKUPayment(invoice, price, user.name,
                 user.email, paymentChannel, timeLimit.getTime());
             if (!callResult) throw new UnsupportedOperationError('FAILED_PAYMENT');
