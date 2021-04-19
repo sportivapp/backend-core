@@ -2,13 +2,13 @@ const User = require('../models/User');
 const CompanyUserMapping = require('../models/CompanyUserMapping')
 const Company = require('../models/Company')
 const bcrypt = require('../helper/bcrypt');
-const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const emailService = require('../helper/emailService');
 const ServiceHelper = require('../helper/ServiceHelper');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors');
 const Otp = require('../models/Otp');
 const { raw } = require('objection');
+const jwtService = require('./common/jwtService');
 
 const ErrorEnum = {
     EMAIL_INVALID: 'EMAIL_INVALID',
@@ -119,9 +119,8 @@ UserService.generateJWTToken = async (user, companyId) => {
         mobileNumber: user.eusermobilenumber,
         companyId: companyId
     }
-    const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' });
 
-    return token;
+    return jwtService.sign(config, '1800s');
 
 }
 

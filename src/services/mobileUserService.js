@@ -3,13 +3,13 @@ const User = require('../models/User');
 const CoachIndustryMapping = require('../models/CoachIndustryMapping')
 const UserIndustryMapping = require('../models/UserIndustryMapping')
 const bcrypt = require('../helper/bcrypt');
-const jwt = require('jsonwebtoken');
 const fileService = require('./fileService');
 const Otp = require('../models/Otp');
 const emailService = require('../helper/emailService');
 const { UnsupportedOperationError, NotFoundError } = require('../models/errors')
 const CompanyLogTypeEnum = require('../models/enum/CompanyLogTypeEnum')
 const companyLogService = require('../services/companyLogService')
+const jwtService = require('./common/jwtService');
 
 const UserService = {};
 
@@ -38,9 +38,8 @@ async function generateJWTToken(user) {
         name: user.eusername,
         mobileNumber: user.eusermobilenumber
     }
-    const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET); // , { expiresIn: '1800s' }
 
-    return token;
+    return jwtService.sign(config, '1800s');
 
 }
 
