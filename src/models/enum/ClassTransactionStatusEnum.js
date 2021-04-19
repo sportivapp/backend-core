@@ -1,5 +1,6 @@
 module.exports = {
-    ONGOING: 'ONGOING',
+    AWAITING_PAYMENT: 'AWAITING_PAYMENT',
     DONE: 'DONE',
     CANCELLED: 'CANCELLED',
+    FAIL: 'FAIL',
 }

@@ -139,7 +139,7 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
     }
 
     const classTransactionDTO = classTransactionService
-        .generateClassTransactionDTO(cls, category, null, null, price, classTransactionStatusEnum.ONGOING, user);
+        .generateClassTransactionDTO(cls, category, null, null, price, classTransactionStatusEnum.AWAITING_PAYMENT, user);
 
     return ClassTransaction.transaction(async trx => {
 
