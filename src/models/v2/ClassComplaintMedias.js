@@ -23,7 +23,7 @@ class ClassComplaintMedias extends Model {
         return {
             list(builder) {
                 builder.select('id', 'class_complaint_uuid')
-                    .withGraphFetched('medias(baseAttributes)')
+                    .withGraphFetched('file(baseAttributes)')
             },
         }
     }
@@ -42,8 +42,8 @@ class ClassComplaintMedias extends Model {
                     to: 'class_complaints.uuid',
                 },
             },
-            medias: {
-                relation: Model.HasManyRelation,
+            file: {
+                relation: Model.BelongsToOneRelation,
                 modelClass: File,
                 join: {
                     from: 'class_complaint_medias.file_id',

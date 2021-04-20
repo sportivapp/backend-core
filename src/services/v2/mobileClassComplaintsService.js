@@ -10,6 +10,7 @@ const dateFormatter = require('../../helper/dateFormatter');
 const notificationService = require('../notificationService');
 const NotificationEnum = require('../../models/enum/NotificationEnum');
 const CodeToTextMonthEnum = require('../../models/enum/CodeToTextMonthEnum');
+const ServiceHelper = require('../../helper/ServiceHelper');
 
 const ErrorEnum = {
     DOUBLE_COMPLAINT: 'DOUBLE_COMPLAINT',
@@ -79,7 +80,7 @@ mobileClassComplaintService.checkNewComplaints = async (sessions) => {
 
 }
 
-mobileClassComplaintService.getMyCategoryComplaints = async (classCategoryUuid, status, user) => {
+mobileClassComplaintService.getMyCategoryComplaints = async (classCategoryUuid, page, size, status, user) => {
 
     if (!classComplaintStatusEnum[status])
         throw new UnsupportedOperationError(ErrorEnum.INVALID_STATUS);
@@ -88,7 +89,9 @@ mobileClassComplaintService.getMyCategoryComplaints = async (classCategoryUuid, 
         .modify('myCategoryComplaints')
         .where('class_category_uuid', classCategoryUuid)
         .where('create_by', user.sub)
-        .where('status', status);
+        .where('status', status)
+        .page(page, size)
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj));
 
 }
 
