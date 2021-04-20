@@ -7,6 +7,7 @@ const classTransactionDetailService = require('./mobileClassTransactionDetailSer
 const zeroPrefixHelper = require('../../helper/zeroPrefixHelper');
 const dateFormatter = require('../../helper/dateFormatter');
 const outboundPaymentService = require('./outboundPaymentService');
+const { UnsupportedOperationError } = require('../../models/errors')
 
 const classTransactionService = {};
 
@@ -139,8 +140,12 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
         price = classTransactionService.nonRecurringPrice(sessions);
     }
 
+    const invoiceCode = await ClassTransactionSequence.getNextVal();
+    const prefixedCode = zeroPrefixHelper.zeroPrefixCodeByLength(invoiceCode, 9);
+    const invoice = `INV/${dateFormatter.formatDateToYYYYMMDD(new Date())}/${moduleTransactionEnum[moduleEnum.CLASS]}/${prefixedCode}`;
+
     const classTransactionDTO = classTransactionService
-        .generateClassTransactionDTO(cls, category, null, null, price, classTransactionStatusEnum.AWAITING_PAYMENT, user);
+        .generateClassTransactionDTO(cls, category, invoice, invoiceCode, price, classTransactionStatusEnum.AWAITING_PAYMENT, user);
 
     return ClassTransaction.transaction(async trx => {
 
@@ -149,16 +154,18 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
 
         const transactionDetailDTOs = classTransactionService
             .generateDetailTransactionDTOs(classTransaction, cls, category, sessions, null, user);
-        await classTransactionDetailService
+        const detailTransactions = await classTransactionDetailService
             .generateTransactionDetail(transactionDetailDTOs, user, trx);
+
         if (price > 0) {
             const paymentChannel = 1;
             const timeLimit = new Date();
             timeLimit.setMinutes(timeLimit.getMinutes() + 15);
-            const callResult = await outboundPaymentService.createDOKUPayment(classTransaction.invoice, price, user.name,
+            const callResult = await outboundPaymentService.createDOKUPayment(invoice, price, user.name,
                 user.email, paymentChannel, timeLimit.getTime());
-            if (!callResult) trx.rollback();
+            if (!callResult) throw new UnsupportedOperationError('FAILED_PAYMENT');
         }
+
         return {
             ...classTransaction,
             details: detailTransactions,
