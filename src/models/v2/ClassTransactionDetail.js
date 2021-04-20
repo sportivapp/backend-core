@@ -32,6 +32,7 @@ class ClassTransactionDetail extends Model {
         const Class = require('./Class');
         const ClassCategory = require('./ClassCategory');
         const User = require('../User');
+        const ClassTransaction = require('./ClassTransaction');
  
         return {
             class: {
@@ -56,6 +57,14 @@ class ClassTransactionDetail extends Model {
                 join: {
                     from: 'class_transaction_detail.user_id',
                     to: 'euser.euserid',
+                }
+            },
+            transaction: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: ClassTransaction,
+                join: {
+                    from: 'class_transaction_detail.class_transaction_uuid',
+                    to: 'class_transaction.uuid',
                 }
             }
         }

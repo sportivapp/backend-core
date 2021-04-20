@@ -138,8 +138,8 @@ classCategorySessionController.getFinishedSessions = async (req, res, next) => {
 
     try {
 
-        const result = await classCategorySessionService.getFinishedSessions(classCategoryUuid, parseInt(page), parseInt(size));
-        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+        const pageObj = await classCategorySessionService.getFinishedSessions(classCategoryUuid, parseInt(page), parseInt(size));
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
 
     } catch(e) {
         next(e);

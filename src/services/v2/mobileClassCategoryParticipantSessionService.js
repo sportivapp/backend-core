@@ -161,18 +161,6 @@ classCategoryParticipantSessionService.sessionParticipantsHistoryBySessionUuid =
         
 }
 
-classCategoryParticipantSessionService.checkUserRegisteredToSessions = async (sessionUuids, userId) => {
-
-    return ClassCategoryParticipantSession.query()
-        .whereIn('class_category_session_uuid', sessionUuids)
-        .where('user_id', userId)
-        .then(participants => {
-            if (participants.length !== 0)
-                throw new UnsupportedOperationError(ErrorEnum.REGISTERED_TO_SESSION);
-        });
-
-}
-
 classCategoryParticipantSessionService.getTotalParticipantsByClassUuid = async (classUuid) => {
 
     return ClassCategoryParticipantSession.query()
