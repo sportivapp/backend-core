@@ -1,3 +1,4 @@
+const ClassComplaintMedias = require('./ClassComplaintMedias');
 const Model = require('./Model');
 
 class ClassComplaints extends Model {
@@ -28,9 +29,10 @@ class ClassComplaints extends Model {
                     .where('status', status);
             },
             myCategoryComplaints(builder) {
-                builder.select('uuid', 'complaint', 'code', 'complaint_id')
+                builder.select('uuid', 'complaint', 'code', 'complaint_id', 'coach_reason')
                     .withGraphFetched('classCategoryParticipantSession(complaint)')
-                    .withGraphFetched('classCategorySession(basicStartEnd).[classCategory(uuidAndTitle).[class(uuidAndTitle)]]');
+                    .withGraphFetched('classCategorySession(basicStartEnd).[classCategory(uuidAndTitle).[class(uuidAndTitle)]]')
+                    .withGraphFetched('medias(list)');
             },
             coachComplaints(builder) {
                 builder.select('uuid', 'complaint', 'code')
@@ -56,6 +58,7 @@ class ClassComplaints extends Model {
         const ClassCategorySession = require('./ClassCategorySession');
         const ClassCategoryParticipantSession = require('./ClassCategoryParticipantSession');
         const User = require('../User');
+        const ClassComplaintMedias = require('./ClassComplaintMedias');
  
         return {
             class: {
@@ -98,6 +101,14 @@ class ClassComplaints extends Model {
                     to: 'euser.euserid',
                 },
             },
+            medias: {
+                relation: Model.HasManyRelation,
+                modelClass: ClassComplaintMedias,
+                join: {
+                    from: 'class_complaints.uuid',
+                    to: 'class_complaint_medias.class_complaint_uuid',
+                }
+            }
         }
     }
 }
