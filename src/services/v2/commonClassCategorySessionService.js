@@ -36,6 +36,7 @@ classCategorySessionService.generateSessionsByCity = async (cityId, start, end, 
                     sessions.push({
                         startDate: session.startDate,
                         endDate: session.endDate,
+                        price: schedules[i].price,
                     });
                 }
                 session.startDate += 7 * 24 * 60 * 60 * 1000;
@@ -43,6 +44,7 @@ classCategorySessionService.generateSessionsByCity = async (cityId, start, end, 
             }
 
         } else {
+            session.price = schedules[i].price;
             sessions.push(session);
         }
 
