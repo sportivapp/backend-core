@@ -23,7 +23,7 @@ paymentController.updatePayment = (req, res, next) => {
 
     try {
 
-        const result = paymentService.updatePayment(invoice, status);
+        const result = paymentService.updatePayment(invoice.replace(/[-]/g, '/'), status);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
