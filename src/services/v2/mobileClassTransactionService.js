@@ -7,7 +7,8 @@ const classTransactionDetailService = require('./mobileClassTransactionDetailSer
 const zeroPrefixHelper = require('../../helper/zeroPrefixHelper');
 const dateFormatter = require('../../helper/dateFormatter');
 const outboundPaymentService = require('./outboundPaymentService');
-const { UnsupportedOperationError } = require('../../models/errors')
+const { UnsupportedOperationError } = require('../../models/errors');
+const dokuService = require('./dokuService');
 
 const classTransactionService = {};
 
@@ -134,13 +135,6 @@ classTransactionService.generateFreeTransaction = async (cls, category, sessions
 
 classTransactionService.generatePaidTransaction = async (cls, category, sessions, user) => {
 
-    let price = 0;
-    if (category.isRecurring) {
-        price = classTransactionService.recurringPrice(category, sessions);
-    } else {
-        price = classTransactionService.nonRecurringPrice(sessions);
-    }
-
     const invoiceCode = await ClassTransactionSequence.getNextVal();
     const prefixedCode = zeroPrefixHelper.zeroPrefixCodeByLength(invoiceCode, 9);
     const invoice = `INV/${dateFormatter.formatDateToYYYYMMDD(new Date())}/${moduleTransactionEnum[moduleEnum.CLASS]}/${prefixedCode}`;
@@ -161,16 +155,18 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
         const detailTransactions = await classTransactionDetailService
             .generateTransactionDetail(transactionDetailDTOs, user, trx);
 
-        if (price > 0) {
-            const paymentChannel = 1;
-            const callResult = await outboundPaymentService.createDOKUPayment(invoice, price, user.name,
+        const paymentChannel = 1;
+        //UNCOMMENT IF PAYMENT SEPARATED
+        // const callResult = await outboundPaymentService.createDOKUPayment(invoice, price, user.name,
+        //     user.email, paymentChannel, timeLimit.getTime());
+        // if (!callResult) throw new UnsupportedOperationError('FAILED_PAYMENT');
+        const callResult = await dokuService.generatePaymentParams(invoice, price, user.name,
                 user.email, paymentChannel, timeLimit.getTime());
-            if (!callResult) throw new UnsupportedOperationError('FAILED_PAYMENT');
-        }
 
         return {
-            ...classTransaction,
-            details: detailTransactions,
+            callResult,
+            // ...classTransaction,
+            // details: detailTransactions,
         }
 
     });
@@ -179,12 +175,17 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
 
 classTransactionService.generateTransaction = async (cls, category, sessions, user) => {
 
-    // for now everything is free!!! TODO: Change this!!!
-    // if (parseInt(category.price) === 0) {
-    if (true) {
-        return classTransactionService.generateFreeTransaction(cls, category, sessions, user);
+    let price = 0;
+    if (category.isRecurring) {
+        price = classTransactionService.recurringPrice(category, sessions);
     } else {
+        price = classTransactionService.nonRecurringPrice(sessions);
+    }
+
+    if (price > 0) {
         return classTransactionService.generatePaidTransaction(cls, category, sessions, user);
+    } else {
+        return classTransactionService.generateFreeTransaction(cls, category, sessions, user);
     }
 
 }
