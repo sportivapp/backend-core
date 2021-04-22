@@ -107,7 +107,7 @@ classTransactionService.generateFreeTransaction = async (cls, category, sessions
     const invoice = `INV/${dateFormatter.formatDateToYYYYMMDD(new Date())}/${moduleTransactionEnum[moduleEnum.CLASS]}/${prefixedCode}`;
 
     const classTransactionDTO = classTransactionService
-        .generateClassTransactionDTO(cls, category, invoice, invoiceCode, 0, classTransactionStatusEnum.DONE, user);
+        .generateClassTransactionDTO(cls, category, invoice, invoiceCode, 0, classTransactionStatusEnum.DONE, null, user);
 
     return ClassTransaction.transaction(async trx => {
 
