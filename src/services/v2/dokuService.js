@@ -37,6 +37,7 @@ dokuService.generatePaymentParams = async (invoice, price, customerName, custome
         REQUESTDATETIME: requestDateTime,
         CURRENCY: 360,
         PURCHASECURRENCY: 360,
+        // TODO: do this right (SESSIONID, BASKET)
         SESSIONID: 'abc',
         BASKET: `item1,${price},1,${price}`,
         PAYMENTCHANNEL: paymentChannel,

@@ -27,18 +27,9 @@ class DokuRequest extends Model {
     }
 
     static get relationMappings() {
-
-        // const Class = require('./Class');
  
         return {
-            // class: {
-            //     relation: Model.BelongsToOneRelation,
-            //     modelClass: Class,
-            //     join: {
-            //         from: 'class_transaction.class_uuid',
-            //         to: 'class.uuid',
-            //     }
-            // },
+
         }
     }
 }
