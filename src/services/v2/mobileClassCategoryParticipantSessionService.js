@@ -183,13 +183,4 @@ classCategoryParticipantSessionService.getTotalParticipantsBySessionUuids = asyn
 
 }
 
-classCategoryParticipantSessionService.sessionMyParticipantsHistoryBySessionUuid = async(classCategorySessionUuid, userId) => {
-
-    return ClassCategoryParticipantSession.query()
-        .where('class_category_session_uuid', classCategorySessionUuid)
-        .where('user_id', userId)
-        .modify('sessionsHistory', classCategorySessionUuid);
-        
-}
-
 module.exports = classCategoryParticipantSessionService;

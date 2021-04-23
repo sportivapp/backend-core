@@ -698,10 +698,4 @@ classCategorySessionService.getUpcomingSessions = async (classCategoryUuid, page
 
 }
 
-classCategorySessionService.getMyParticipantsHistory = async (sessionUuid, user) => {
-
-    return classCategoryParticipantSessionService.sessionMyParticipantsHistoryBySessionUuid(sessionUuid, user.sub);
-
-}
-
 module.exports = classCategorySessionService;

@@ -14,5 +14,6 @@ router.get(routes.classCategory.myHistory, auth.authenticateToken, controller.my
 router.get(routes.classCategory.complaints, auth.authenticateToken, controller.getCategoryComplaints);
 router.get(routes.classCategory.monthPicker, auth.authenticateToken, controller.getMonthPicker);
 router.get(routes.classCategory.history, auth.authenticateToken, controller.getCategoryHistory);
+router.get(routes.classCategory.myParticipantsHistory, auth.authenticateToken, controller.getMyParticipantsHistory);
 
 module.exports = router.expressRouter;
