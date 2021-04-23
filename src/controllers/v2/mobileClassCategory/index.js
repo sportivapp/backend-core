@@ -211,4 +211,19 @@ classCategoryController.getCategoryHistory = async (req, res, next) => {
 
 }
 
+classCategoryController.getMyParticipantsHistory = async (req, res, next) => {
+
+    const { classCategoryUuid } = req.params;
+
+    try {
+
+        const result = await classCategoryService.getMyParticipantsHistory(classCategoryUuid, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = classCategoryController;
