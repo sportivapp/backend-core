@@ -161,7 +161,7 @@ exports.sendReportThread = async (report, callback) => {
 exports.sendClassReport = async (cls, report, user, callback) => {
 
     const d = new Date();
-    const formattedDate = luxon.DateTime.fromJSDate(d).toFormat('dd LLL yyyy H:mm')
+    const formattedDate = luxon.DateTime.fromJSDate(d).toFormat('dd LLL yyyy HH:mm')
     let html
 
     html = `Laporan Kelas #${report.id} <br><br>
