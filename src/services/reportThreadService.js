@@ -53,7 +53,7 @@ reportThreadService.report = async (message, threadId, commentId, replyId, typeI
         if (error) {
             report = ReportThread.query()
                 .findById(report.ereportthreadid)
-                .updateByUserId({ ereportthreadsent: false })
+                .updateByUserId({ ereportthreadsent: false }, 0)
         }
     }
 
