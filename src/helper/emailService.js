@@ -5,6 +5,7 @@ const bcrypt = require('../helper/bcrypt');
 const User = require('../models/User');
 const EmailValidator = require('email-deep-validator');
 const UnsupportedOperationError = require('../models/errors/UnsupportedOperationError');
+const luxon = require('luxon');
 
 exports.validateEmail = async (email) => {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -120,7 +121,7 @@ exports.sendReportThread = async (report, callback) => {
     if (report.reply) {
         type = 'COMMENT REPLY'
         html = `Report - ${type} <br/>
-                Report Type: ${report.type.ereportthreadtypename}</br></br>
+                Report Type: ${report.type.ereportthreadtypename}<br/><br/>
                 Thread Id: ${report.thread.ethreadid}<br/>
                 Thread Title: ${report.thread.ethreadtitle}<br/><br/>
                 Comment Id: ${report.comment.ethreadpostid}<br/>
@@ -132,7 +133,7 @@ exports.sendReportThread = async (report, callback) => {
     } else if (report.comment) {
         type = 'REPLY THREAD'
         html = `Report - ${type} <br/>
-                Report Type: ${report.type.ereportthreadtypename}</br></br>
+                Report Type: ${report.type.ereportthreadtypename}<br/><br/>
                 Thread Id: ${report.thread.ethreadid}<br/>
                 Thread Title: ${report.thread.ethreadtitle}<br/><br/>
                 Comment Id: ${report.comment.ethreadpostid}<br/>
@@ -141,7 +142,7 @@ exports.sendReportThread = async (report, callback) => {
     } else {
         type = 'THREAD'
         html = `Report - ${type} <br/>
-                Report Type: ${report.type.ereportthreadtypename}</br></br>
+                Report Type: ${report.type.ereportthreadtypename}<br/><br/>
                 Thread Id: ${report.thread.ethreadid}<br/>
                 Thread Title: ${report.thread.ethreadtitle}<br/><br/>`
     }
@@ -150,6 +151,32 @@ exports.sendReportThread = async (report, callback) => {
         from: report.reporter.euseremail, // sender address
         to: 'noreply@sportiv.app', // list of receivers
         subject: `REPORT - ${type}`, // Subject line
+        text: "", // plain text body
+        html: html
+    };
+
+    await transporter.sendMail(info, callback);
+}
+
+exports.sendClassReport = async (cls, report, user, callback) => {
+
+    const d = new Date();
+    const formattedDate = luxon.DateTime.fromJSDate(d).toFormat('dd LLL yyyy HH:mm')
+    let html
+
+    html = `Laporan Kelas #${report.id} <br><br>
+            ${user.name} (USER #${user.sub}) telah melaporkan kelas pada ${formattedDate} dengan detail sebagai berikut: <br><br>
+            Nama Kelas: Kelas ${cls.title} (${cls.uuid}) <br>
+            Kategori Laporan: ${report.codeName} <br>
+            Alasan: ${report.report} <br><br>
+            Harap segera ditindaklanjuti.
+            Terimakasih.
+            `
+
+    const info = {
+        from: report.reporter.euseremail, // sender address
+        to: 'noreply@sportiv.app', // list of receivers
+        subject: `Laporan Kelas ${cls.title} #${cls.id}`, // Subject line
         text: "", // plain text body
         html: html
     };

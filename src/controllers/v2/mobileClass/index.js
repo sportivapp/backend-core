@@ -136,4 +136,26 @@ classController.getCoachClassHistory = async (req, res, next) => {
 
 }
 
+classController.reportClass = async (req, res, next) => {
+
+    const { classUuid } = req.params;
+    const { code, report } = req.body;
+
+    const classReportDTO = {
+        code: code,
+        report: report,
+        classUuid: classUuid,
+    }
+
+    try {
+
+        const result = await classService.reportClass(classUuid, classReportDTO, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = classController;

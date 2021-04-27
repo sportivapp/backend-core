@@ -8,6 +8,7 @@ const classCategorySessionService = require('./mobileClassCategorySessionService
 const classTransactionService = require('./mobileClassTransactionService');
 const coachCategoryService = require('./mobileClassCategoryCoachService');
 const classTransactionDetailService = require('./mobileClassTransactionDetailService');
+const classReportService = require('./mobileClassReportService');
 
 const ErrorEnum = {
     INVALID_COACH_ID: 'INVALID_COACH_ID',
@@ -217,6 +218,17 @@ classService.getCoachClassHistory = async (user) => {
             return isDone;
         }));
         
+}
+
+classService.reportClass = async (classUuid, classReportDTO, user) => {
+
+    const cls = await classService.findById(classUuid);
+
+    classReportDTO.userName = user.name;
+    classReportDTO.classTitle = cls.title;
+
+    return classReportService.reportClass(cls, classReportDTO, user);
+
 }
 
 module.exports = classService;
