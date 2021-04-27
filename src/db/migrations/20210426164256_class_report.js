@@ -7,6 +7,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('class_report', t => {
     t.string('code');
     t.string('code_name');
     t.string('user_name');
+    t.boolean('sent_status').defaultTo(true);
     t.integer('create_by').notNullable();
     t.bigInteger('create_time').notNullable();
     t.integer('change_by');

@@ -227,7 +227,7 @@ classService.reportClass = async (classUuid, classReportDTO, user) => {
     classReportDTO.userName = user.name;
     classReportDTO.classTitle = cls.title;
 
-    return classReportService.reportClass(classReportDTO, user);
+    return classReportService.reportClass(cls, classReportDTO, user);
 
 }
 
