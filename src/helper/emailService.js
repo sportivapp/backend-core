@@ -121,7 +121,7 @@ exports.sendReportThread = async (report, callback) => {
     if (report.reply) {
         type = 'COMMENT REPLY'
         html = `Report - ${type} <br/>
-                Report Type: ${report.type.ereportthreadtypename}</br></br>
+                Report Type: ${report.type.ereportthreadtypename}<br/><br/>
                 Thread Id: ${report.thread.ethreadid}<br/>
                 Thread Title: ${report.thread.ethreadtitle}<br/><br/>
                 Comment Id: ${report.comment.ethreadpostid}<br/>
@@ -133,7 +133,7 @@ exports.sendReportThread = async (report, callback) => {
     } else if (report.comment) {
         type = 'REPLY THREAD'
         html = `Report - ${type} <br/>
-                Report Type: ${report.type.ereportthreadtypename}</br></br>
+                Report Type: ${report.type.ereportthreadtypename}<br/><br/>
                 Thread Id: ${report.thread.ethreadid}<br/>
                 Thread Title: ${report.thread.ethreadtitle}<br/><br/>
                 Comment Id: ${report.comment.ethreadpostid}<br/>
@@ -142,7 +142,7 @@ exports.sendReportThread = async (report, callback) => {
     } else {
         type = 'THREAD'
         html = `Report - ${type} <br/>
-                Report Type: ${report.type.ereportthreadtypename}</br></br>
+                Report Type: ${report.type.ereportthreadtypename}<br/><br/>
                 Thread Id: ${report.thread.ethreadid}<br/>
                 Thread Title: ${report.thread.ethreadtitle}<br/><br/>`
     }
