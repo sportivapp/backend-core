@@ -1,5 +1,5 @@
 //FILE TO DELETE IF PAYMENT SEPARATED
-exports.up = (knex, Promise) => knex.schema.createTable('doku_payment', t => {
+exports.up = (knex, Promise) => knex.schema.createTable('doku_request', t => {
     t.specificType('id', 'serial');
     t.uuid('uuid').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     t.enum('status', ['AWAITING_PAYMENT', 'DONE', 'FAIL']).defaultTo('AWAITING_PAYMENT').notNullable();
@@ -23,4 +23,4 @@ exports.up = (knex, Promise) => knex.schema.createTable('doku_payment', t => {
     t.bigInteger('delete_time');
 });
 
-exports.down = (knex, Promise) => knex.schema.dropTable('doku_payment');
+exports.down = (knex, Promise) => knex.schema.dropTable('doku_request');

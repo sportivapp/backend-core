@@ -1,7 +1,8 @@
 //FILE TO DELETE IF PAYMENT SEPARATED
 const DokuRequest = require('../../models/v2/DokuRequest');
-const j2xParser = require('fast-xml-parser');
+const parser = require('fast-xml-parser').j2xParser;
 const ClassTransactionStatusEnum = require('../../models/enum/ClassTransactionStatusEnum');
+const crypto = require('crypto');
 
 const dokuService = {};
 
@@ -26,7 +27,7 @@ dokuService.generatePaymentParams = async (invoice, price, customerName, custome
     await DokuRequest.query()
         .insertToTable(dokuRequest, 0);
 
-    const words = createHash('sha1').update(`${price}${process.env.MALL_ID}${process.env.SHARED_KEY}${invoice}`).digest('hex');
+    const words = crypto.createHash('sha1').update(`${price}${process.env.MALL_ID}${process.env.SHARED_KEY}${invoice}`).digest('hex');
     const dokuParamsJSON = {
         MALLID: process.env.MALL_ID,
         CHAINMERCHANT: process.env.CHAIN_MERCHANT,
@@ -44,18 +45,20 @@ dokuService.generatePaymentParams = async (invoice, price, customerName, custome
         CUSTOMERNAME: customerName,
         CUSTOMEREMAIL: customerEmail,
     }
-    return new j2xParser.parse(dokuParamsJSON);
+
+    const dokuParamsXML = new parser({}).parse(dokuParamsJSON);
+    console.log(dokuParamsXML)
+    return dokuParamsXML;
 
 }
 
 dokuService.notifyRequest = async (dokuNotify) => {
 
-    const dokuNotifyJSON = j2xParser.convertToJson(dokuNotify);
-
     const dokuRequest = await DokuRequest.query()
-        .where('invoice', dokuNotifyJSON.TRANSIDMERCHANT);
+        .where('trans_id_merchant', dokuNotify.TRANSIDMERCHANT)
+        .first();
 
-    dokuRequest.approvalCode = dokuNotifyJSON.APPROVALCODE;
+    dokuRequest.approvalCode = dokuNotify.APPROVALCODE;
     dokuRequest.status = ClassTransactionStatusEnum.DONE;
 
     await dokuRequest.$query()

@@ -133,7 +133,7 @@ classTransactionService.generateFreeTransaction = async (cls, category, sessions
 
 }
 
-classTransactionService.generatePaidTransaction = async (cls, category, sessions, user) => {
+classTransactionService.generatePaidTransaction = async (cls, category, sessions, price, user) => {
 
     const invoiceCode = await ClassTransactionSequence.getNextVal();
     const prefixedCode = zeroPrefixHelper.zeroPrefixCodeByLength(invoiceCode, 9);
@@ -160,14 +160,12 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
         // const callResult = await outboundPaymentService.createDOKUPayment(invoice, price, user.name,
         //     user.email, paymentChannel, timeLimit.getTime());
         // if (!callResult) throw new UnsupportedOperationError('FAILED_PAYMENT');
-        const callResult = await dokuService.generatePaymentParams(invoice, price, user.name,
-                user.email, paymentChannel, timeLimit.getTime());
+        let callResult = await dokuService.generatePaymentParams(invoice, price, user.name,
+            user.email, paymentChannel, timeLimit.getTime());
 
-        return {
-            callResult,
-            // ...classTransaction,
-            // details: detailTransactions,
-        }
+        return callResult;
+        // ...classTransaction,
+        // details: detailTransactions,
 
     });
   
@@ -183,7 +181,7 @@ classTransactionService.generateTransaction = async (cls, category, sessions, us
     }
 
     if (price > 0) {
-        return classTransactionService.generatePaidTransaction(cls, category, sessions, user);
+        return classTransactionService.generatePaidTransaction(cls, category, sessions, price, user);
     } else {
         return classTransactionService.generateFreeTransaction(cls, category, sessions, user);
     }

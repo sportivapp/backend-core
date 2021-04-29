@@ -317,6 +317,9 @@ module.exports = {
         payment: {
             methods: '/payment-methods',
             invoiceUpdate: '/payment-invoice/:invoice',
+        },
+        doku: {
+            notify: '/notify',
         }
     }
 }
