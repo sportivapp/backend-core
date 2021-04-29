@@ -33,4 +33,28 @@ classTransactionDetailService.checkUserRegisteredToSessions = async (sessionUuid
 
 }
 
+classTransactionDetailService.getTransactionDetailsByInvoice = async (invoice) => {
+
+    return ClassTransactionDetail.query()
+        .where('invoice', invoice);
+
+}
+
+classTransactionDetailService.generateParticipantSessionDTOs = (detailTransactions) => {
+
+    return detailTransactions.map(detailTransaction => {
+        return {
+            classUuid: detailTransaction.classUuid,
+            classCategoryUuid: detailTransaction.classCategoryUuid,
+            classCategorySessionUuid: detailTransaction.classCategorySessionUuid,
+            userId: detailTransaction.userId,
+            // classTitle: detailTransaction.classTitle,
+            // categoryTitle: detailTransaction.categoryTitle,
+            // userName: detailTransaction.userName,
+            classTransactionDetailUuid: detailTransaction.uuid,
+        }
+    });
+
+}
+
 module.exports = classTransactionDetailService;

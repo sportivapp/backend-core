@@ -7,7 +7,8 @@ const classTransactionDetailService = require('./mobileClassTransactionDetailSer
 const zeroPrefixHelper = require('../../helper/zeroPrefixHelper');
 const dateFormatter = require('../../helper/dateFormatter');
 const outboundPaymentService = require('./outboundPaymentService');
-const { UnsupportedOperationError } = require('../../models/errors')
+const { UnsupportedOperationError } = require('../../models/errors');
+const dokuService = require('./dokuService');
 
 const classTransactionService = {};
 
@@ -83,23 +84,6 @@ classTransactionService.generateClassTransactionDTO = (cls, category, invoice, i
 
 }
 
-classTransactionService.generateParticipantSessionDTOs = (detailTransactions) => {
-
-    return detailTransactions.map(detailTransaction => {
-        return {
-            classUuid: detailTransaction.classUuid,
-            classCategoryUuid: detailTransaction.classCategoryUuid,
-            classCategorySessionUuid: detailTransaction.classCategorySessionUuid,
-            userId: detailTransaction.userId,
-            classTitle: detailTransaction.classTitle,
-            categoryTitle: detailTransaction.categoryTitle,
-            userName: detailTransaction.userName,
-            classTransactionDetailUuid: detailTransaction.uuid,
-        }
-    });
-
-}
-
 classTransactionService.generateFreeTransaction = async (cls, category, sessions, user) => {
 
     const invoiceCode = await ClassTransactionSequence.getNextVal();
@@ -120,7 +104,7 @@ classTransactionService.generateFreeTransaction = async (cls, category, sessions
             .generateTransactionDetail(transactionDetailDTOs, user, trx);
 
         // Free, then just assign the user to session immediately
-        const participantSessionDTOs = classTransactionService.generateParticipantSessionDTOs(detailTransactions);
+        const participantSessionDTOs = classTransactionDetailService.generateParticipantSessionDTOs(detailTransactions);
         await classCategoryParticipantSessionService.register(participantSessionDTOs, user, trx);
 
         return {
@@ -132,14 +116,7 @@ classTransactionService.generateFreeTransaction = async (cls, category, sessions
 
 }
 
-classTransactionService.generatePaidTransaction = async (cls, category, sessions, user) => {
-
-    let price = 0;
-    if (category.isRecurring) {
-        price = classTransactionService.recurringPrice(category, sessions);
-    } else {
-        price = classTransactionService.nonRecurringPrice(sessions);
-    }
+classTransactionService.generatePaidTransaction = async (cls, category, sessions, price, user) => {
 
     const invoiceCode = await ClassTransactionSequence.getNextVal();
     const prefixedCode = zeroPrefixHelper.zeroPrefixCodeByLength(invoiceCode, 9);
@@ -157,21 +134,21 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
             .insertToTable(classTransactionDTO, user.sub);
 
         const transactionDetailDTOs = classTransactionService
-            .generateDetailTransactionDTOs(classTransaction, cls, category, sessions, null, user);
+            .generateDetailTransactionDTOs(classTransaction, cls, category, sessions, invoice, user);
         const detailTransactions = await classTransactionDetailService
             .generateTransactionDetail(transactionDetailDTOs, user, trx);
 
-        if (price > 0) {
-            const paymentChannel = 1;
-            const callResult = await outboundPaymentService.createDOKUPayment(invoice, price, user.name,
-                user.email, paymentChannel, timeLimit.getTime());
-            if (!callResult) throw new UnsupportedOperationError('FAILED_PAYMENT');
-        }
+        const paymentChannel = 1;
+        //UNCOMMENT IF PAYMENT SEPARATED
+        // const callResult = await outboundPaymentService.createDOKUPayment(invoice, price, user.name,
+        //     user.email, paymentChannel, timeLimit.getTime());
+        // if (!callResult) throw new UnsupportedOperationError('FAILED_PAYMENT');
+        let callResult = await dokuService.generatePaymentParams(invoice, price, user.name,
+            user.email, paymentChannel, timeLimit.getTime());
 
-        return {
-            ...classTransaction,
-            details: detailTransactions,
-        }
+        return callResult;
+        // ...classTransaction,
+        // details: detailTransactions,
 
     });
   
@@ -179,12 +156,17 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
 
 classTransactionService.generateTransaction = async (cls, category, sessions, user) => {
 
-    // for now everything is free!!! TODO: Change this!!!
-    // if (parseInt(category.price) === 0) {
-    if (true) {
-        return classTransactionService.generateFreeTransaction(cls, category, sessions, user);
+    let price = 0;
+    if (category.isRecurring) {
+        price = classTransactionService.recurringPrice(category, sessions);
     } else {
-        return classTransactionService.generatePaidTransaction(cls, category, sessions, user);
+        price = classTransactionService.nonRecurringPrice(sessions);
+    }
+
+    if (price > 0) {
+        return classTransactionService.generatePaidTransaction(cls, category, sessions, price, user);
+    } else {
+        return classTransactionService.generateFreeTransaction(cls, category, sessions, user);
     }
 
 }
