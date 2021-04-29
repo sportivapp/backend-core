@@ -84,23 +84,6 @@ classTransactionService.generateClassTransactionDTO = (cls, category, invoice, i
 
 }
 
-classTransactionService.generateParticipantSessionDTOs = (detailTransactions) => {
-
-    return detailTransactions.map(detailTransaction => {
-        return {
-            classUuid: detailTransaction.classUuid,
-            classCategoryUuid: detailTransaction.classCategoryUuid,
-            classCategorySessionUuid: detailTransaction.classCategorySessionUuid,
-            userId: detailTransaction.userId,
-            classTitle: detailTransaction.classTitle,
-            categoryTitle: detailTransaction.categoryTitle,
-            userName: detailTransaction.userName,
-            classTransactionDetailUuid: detailTransaction.uuid,
-        }
-    });
-
-}
-
 classTransactionService.generateFreeTransaction = async (cls, category, sessions, user) => {
 
     const invoiceCode = await ClassTransactionSequence.getNextVal();
@@ -121,7 +104,7 @@ classTransactionService.generateFreeTransaction = async (cls, category, sessions
             .generateTransactionDetail(transactionDetailDTOs, user, trx);
 
         // Free, then just assign the user to session immediately
-        const participantSessionDTOs = classTransactionService.generateParticipantSessionDTOs(detailTransactions);
+        const participantSessionDTOs = classTransactionDetailService.generateParticipantSessionDTOs(detailTransactions);
         await classCategoryParticipantSessionService.register(participantSessionDTOs, user, trx);
 
         return {
@@ -151,7 +134,7 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
             .insertToTable(classTransactionDTO, user.sub);
 
         const transactionDetailDTOs = classTransactionService
-            .generateDetailTransactionDTOs(classTransaction, cls, category, sessions, null, user);
+            .generateDetailTransactionDTOs(classTransaction, cls, category, sessions, invoice, user);
         const detailTransactions = await classTransactionDetailService
             .generateTransactionDetail(transactionDetailDTOs, user, trx);
 

@@ -3,6 +3,8 @@ const DokuRequest = require('../../models/v2/DokuRequest');
 const parser = require('fast-xml-parser').j2xParser;
 const ClassTransactionStatusEnum = require('../../models/enum/ClassTransactionStatusEnum');
 const crypto = require('crypto');
+const classTransactionDetailService = require('./mobileClassTransactionDetailService');
+const classCategoryParticipantSessionService = require('./mobileClassCategoryParticipantSessionService');
 
 const dokuService = {};
 
@@ -61,10 +63,17 @@ dokuService.notifyRequest = async (dokuNotify) => {
     dokuRequest.approvalCode = dokuNotify.APPROVALCODE;
     dokuRequest.status = ClassTransactionStatusEnum.DONE;
 
-    await dokuRequest.$query()
-        .updateByUserId(dokuRequest, 0);
-    
-    return true;
+    return DokuRequest.transaction(async trx => {
+
+        await dokuRequest.$query(trx)
+            .updateByUserId(dokuRequest, 0);
+
+        const detailTransactions = await classTransactionDetailService.getTransactionDetailsByInvoice(dokuNotify.TRANSIDMERCHANT);
+        const participantSessionDTOs = classTransactionDetailService.generateParticipantSessionDTOs(detailTransactions);
+        await classCategoryParticipantSessionService.register(participantSessionDTOs, { sub: detailTransactions[0].createBy }, trx);
+
+        return true;
+    });
 
 }
 
