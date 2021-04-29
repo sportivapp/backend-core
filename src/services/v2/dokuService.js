@@ -49,7 +49,6 @@ dokuService.generatePaymentParams = async (invoice, price, customerName, custome
     }
 
     const dokuParamsXML = new parser({}).parse(dokuParamsJSON);
-    console.log(dokuParamsXML)
     return dokuParamsXML;
 
 }
