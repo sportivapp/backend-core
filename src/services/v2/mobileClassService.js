@@ -100,14 +100,14 @@ classService.getClassCategory = async (classUuid, classCategoryUuid, user) => {
 
 }
 
-classService.register = async (classUuid, classCategoryUuid, classCategorySessionUuids, user) => {
+classService.register = async (classUuid, classCategoryUuid, classCategorySessionUuids, paymentMethodCode, user) => {
 
     await classTransactionDetailService.checkUserRegisteredToSessions(classCategorySessionUuids, user.sub);
     const cls = await classService.findById(classUuid);
     const category = await classCategoryService.findById(classCategoryUuid);
     const sessions = await classCategorySessionService.findSessions(classCategorySessionUuids);
 
-    return classTransactionService.generateTransaction(cls, category, sessions, user);
+    return classTransactionService.generateTransaction(cls, category, sessions, paymentMethodCode, user);
 
 }
 
