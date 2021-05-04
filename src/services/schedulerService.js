@@ -91,9 +91,9 @@ function checkNewClassSessionRatings() {
 }
 
 function checkLastClassSession() {
-    // schedule.scheduleJob('0 0 * * *', async function() {
-    //     await classCategorySessionService.checkLastSession();
-    // });
+    schedule.scheduleJob('0 0 * * *', async function() {
+        await classCategorySessionService.checkLastSession();
+    });
 }
 
 module.exports = schedulerService
