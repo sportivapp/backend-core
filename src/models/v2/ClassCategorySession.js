@@ -26,6 +26,9 @@ class ClassCategorySession extends Model {
                 builder.select('uuid', 'class_category_uuid', 'month_utc', 'start_date', 'end_date', 'start_time', 'absence_time', 'status')
                     .orderBy('start_date', 'ASC');
             },
+            listWithoutOrder(builder) {
+                builder.select('uuid', 'class_category_uuid', 'month_utc', 'start_date', 'end_date', 'start_time', 'absence_time', 'status');
+            },
             sessionParticipants(builder) {
                 builder.select('uuid', 'start_date', 'status')
                     .withGraphFetched('sessionParticipants(sessionParticipants)')

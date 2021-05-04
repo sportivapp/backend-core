@@ -241,7 +241,7 @@ classCategorySessionService.getAllFinishedSessions = async () => {
 classCategorySessionService.checkLastSession = async () => {
     const lastSessions = await ClassCategorySession.query()
         .distinctOn('class_category_uuid')
-        .modify('list')
+        .modify('listWithoutOrder')
         .where('status', sessionStatusEnum.UPCOMING)
         .orderBy(['class_category_uuid', { column: 'start_date', order: 'DESC' }]);
     const promises = lastSessions.map(async session => {
