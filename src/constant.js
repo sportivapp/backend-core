@@ -320,6 +320,11 @@ module.exports = {
         },
         doku: {
             notify: '/notify',
+        },
+        bca: {
+            oauth: '/api/oauth/token',
+            bills: '/va/bills',
+            invocation: '/va/payments'
         }
     }
 }
