@@ -147,6 +147,7 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
         const existPaymentMethod = paymentMethodEnum.filter(paymentMethod => {
             return paymentMethod.code === paymentMethodCode.toString();
         });
+
         if (existPaymentMethod.length === 0)
             throw new UnsupportedOperationError(ErrorEnum.INVALID_PAYMENT_CHANNEL_CODE);
         // const paymentChannel = 1;
