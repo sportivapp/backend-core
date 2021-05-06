@@ -11,7 +11,6 @@ const jwtService = require('../common/jwtService');
 const bcaService = {};
 
 bcaService.generateOauthToken = async (basicToken, grantType) => {
-    console.log(grantType !== 'client_credentials');
     if (grantType !== 'client_credentials') throw new UnauthorizedError();
     const authStrings = Buffer.from(basicToken, 'base64').toString('ascii').split(':');
     const clientId = authStrings[0];
@@ -38,18 +37,11 @@ bcaService.verifyOauthToken = async (token) => {
 
 bcaService.getAllPaymentBills = async (vaNumber, requestId, transactionDate) => {
 
-    console.log(vaNumber);
-
-    await BCARequest.query()
+    return BCARequest.query()
         .updateByUserId({ bcaRequestId: requestId, bcaTransactionDate: transactionDate }, 0)
         .where('va_number', vaNumber)
-        .andWhere('status', 'AWAITING_PAYMENT');
-
-    return BCARequest.query()
-        .where('va_number', vaNumber)
-        .andWhere('bca_request_id', requestId)
-        .andWhere('bca_transaction_date', transactionDate)
-        .andWhere('status', 'AWAITING_PAYMENT');
+        .andWhere('status', 'AWAITING_PAYMENT')
+        .returning('*');
 }
 
 bcaService.receivePaymentInvocation = async (vaNumber, requestId, transactionDate) => {
@@ -64,10 +56,7 @@ bcaService.receivePaymentInvocation = async (vaNumber, requestId, transactionDat
             .andWhere('status', 'AWAITING_PAYMENT')
             .returning('*');
 
-        console.log(payments);
-
         const detailTransactions = await classTransactionDetailService.getTransactionDetailsByInvoices(payments.map(payment => payment.invoice));
-        console.log(detailTransactions);
         const participantSessionDTOs = classTransactionDetailService.generateParticipantSessionDTOs(detailTransactions);
         await classCategoryParticipantSessionService.register(participantSessionDTOs, { sub: detailTransactions[0].createBy }, trx);
 
