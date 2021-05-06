@@ -9,6 +9,7 @@ const dateFormatter = require('../../helper/dateFormatter');
 const outboundPaymentService = require('./outboundPaymentService');
 const { UnsupportedOperationError } = require('../../models/errors');
 const dokuService = require('./dokuService');
+const bcaService = require('./bcaService');
 const paymentMethodEnum = require('../../models/enum/PaymentMethodEnum');
 
 const ErrorEnum = {
@@ -146,6 +147,7 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
         const existPaymentMethod = paymentMethodEnum.filter(paymentMethod => {
             return paymentMethod.code === paymentMethodCode;
         });
+
         if (!existPaymentMethod.length === 0)
             throw new UnsupportedOperationError(ErrorEnum.INVALID_PAYMENT_CHANNEL_CODE);
         // const paymentChannel = 1;
@@ -154,8 +156,25 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
         //     user.email, paymentChannel, timeLimit.getTime());
         // if (!callResult) throw new UnsupportedOperationError('FAILED_PAYMENT');
 
-        let callResult = await dokuService.generatePaymentParams(invoice, price, user.name,
-            user.email, existPaymentMethod[0].code, timeLimit.getTime());
+        let callResult
+
+        if (existPaymentMethod[0].code === '29') {
+
+            const paymentRequest = {
+                timeLimit: timeLimit.getTime(),
+                amount: parseFloat(price),
+                invoice: invoice,
+                productCode: '00002',
+            };
+
+            callResult = await bcaService.createBCARequest(paymentRequest, user);
+        }
+
+        else {
+
+            callResult = await dokuService.generatePaymentParams(invoice, price, user.name,
+                user.email, existPaymentMethod[0].code, timeLimit.getTime());
+        }
 
         return callResult;
         // ...classTransaction,

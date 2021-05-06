@@ -40,6 +40,13 @@ classTransactionDetailService.getTransactionDetailsByInvoice = async (invoice) =
 
 }
 
+classTransactionDetailService.getTransactionDetailsByInvoices = async (invoices) => {
+
+    return ClassTransactionDetail.query()
+        .whereIn('invoice', invoices);
+
+}
+
 classTransactionDetailService.generateParticipantSessionDTOs = (detailTransactions) => {
 
     return detailTransactions.map(detailTransaction => {
