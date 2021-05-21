@@ -79,7 +79,7 @@ function toBCABillWebResponseWithPaymentFlag (webRequest, payments) {
     webResponse.CurrencyCode = 'IDR';
     webResponse.CustomerNumber = payments[0].vaNumber;
     webResponse.CustomerName = payments[0].customerName;
-    webResponse.PaymentFlagReason = { indonesian: 'Sukses', english:  'Success' };
+    webResponse.PaymentFlagReason = { Indonesian: 'Sukses', English:  'Success' };
     webResponse.PaymentFlagStatus = '00';
     let total = 0.0;
     payments.forEach(payment => {
