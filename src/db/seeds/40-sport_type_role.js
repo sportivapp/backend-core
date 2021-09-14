@@ -141,6 +141,12 @@ exports.seed = (knex, Promise) => knex('esporttyperole').del()
                     esporttyperolecreateby: 0
                 },
                 {
+                    esporttyperolename: 'Center (C)',
+                    eindustryeindustryid: 3,
+                    esporttyperolecreatetime: Date.now(),
+                    esporttyperolecreateby: 0
+                },
+                {
                     esporttyperolename: 'Men’s Singles',
                     eindustryeindustryid: 4,
                     esporttyperolecreatetime: Date.now(),

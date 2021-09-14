@@ -41,5 +41,23 @@ exports.seed = (knex, Promise) => knex('emodule').del()
         {
           emodulename: 'Setting'
         },
+        {
+          emodulename: 'Class'
+        },
+        {
+          emodulename: 'Team'
+        },
+        {
+          emodulename: 'Theory'
+        },
+        {
+          emodulename: 'Forum'
+        },
+        {
+          emodulename: 'News'
+        },
+        {
+          emodulename: 'Tournament'
+        },
       ]
     ));

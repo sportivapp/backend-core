@@ -262,5 +262,113 @@ exports.seed = (knex, Promise) => knex('efunction').del()
                   efunctioncode: 'D13',
                   efunctionname: 'Delete Setting'
                 },
+                {
+                  
+                  efunctioncode: 'C14',
+                  efunctionname: 'Create Class'
+                },
+                {
+                  
+                  efunctioncode: 'R14',
+                  efunctionname: 'Read Class'
+                },
+                {
+                  
+                  efunctioncode: 'U14',
+                  efunctionname: 'Update Class'
+                },
+                {
+                  
+                  efunctioncode: 'D14',
+                  efunctionname: 'Delete Class'
+                },
+                {
+                  
+                  efunctioncode: 'C15',
+                  efunctionname: 'Create Team'
+                },
+                {
+                  
+                  efunctioncode: 'R15',
+                  efunctionname: 'Read Team'
+                },
+                {
+                  
+                  efunctioncode: 'U15',
+                  efunctionname: 'Update Team'
+                },
+                {
+                  
+                  efunctioncode: 'D15',
+                  efunctionname: 'Delete Team'
+                },
+                {
+                  
+                  efunctioncode: 'C16',
+                  efunctionname: 'Create Theory'
+                },
+                {
+                  
+                  efunctioncode: 'R16',
+                  efunctionname: 'Read Theory'
+                },
+                {
+                  
+                  efunctioncode: 'U16',
+                  efunctionname: 'Update Theory'
+                },
+                {
+                  
+                  efunctioncode: 'D16',
+                  efunctionname: 'Delete Theory'
+                },
+                {
+                  efunctioncode: 'P17',
+                  efunctionname: 'Set Public Status Forum'
+                },
+                {
+                  efunctioncode: 'D17',
+                  efunctionname: 'Delete Forum'
+                },
+                {
+                  
+                  efunctioncode: 'C18',
+                  efunctionname: 'Create News'
+                },
+                {
+                  
+                  efunctioncode: 'R18',
+                  efunctionname: 'Read News'
+                },
+                {
+                  
+                  efunctioncode: 'U18',
+                  efunctionname: 'Update News'
+                },
+                {
+                  
+                  efunctioncode: 'D18',
+                  efunctionname: 'Delete News'
+                },
+                {
+                  
+                  efunctioncode: 'C19',
+                  efunctionname: 'Create Tournament'
+                },
+                {
+                  
+                  efunctioncode: 'R19',
+                  efunctionname: 'Read Tournament'
+                },
+                {
+                  
+                  efunctioncode: 'U19',
+                  efunctionname: 'Update Tournament'
+                },
+                {
+                  
+                  efunctioncode: 'D19',
+                  efunctionname: 'Delete Tournament'
+                },
             ]
         ));
