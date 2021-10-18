@@ -30,4 +30,26 @@ classCategoryCoachService.checkCoachCategory = (userId, categoryUuid) => {
 
 }
 
+classCategoryCoachService.getCoachCategoryUuidsByUserId = (userId) => {
+
+    return ClassCategoryCoach.query()
+        .where('user_id', userId)
+        .then(categoryCoaches => categoryCoaches.map(categoryCoach => {
+            return categoryCoach.classCategoryUuid;
+        }));
+
+}
+
+
+classCategoryCoachService.getCoachClassUuidsByUserId = (userId) => {
+
+    return ClassCategoryCoach.query()
+        .distinctOn('class_uuid')
+        .where('user_id', userId)
+        .then(categoryCoaches => categoryCoaches.map(categoryCoach => {
+            return categoryCoach.classUuid;
+        }));
+
+}
+
 module.exports = classCategoryCoachService;

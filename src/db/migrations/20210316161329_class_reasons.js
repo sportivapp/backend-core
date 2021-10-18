@@ -1,16 +1,11 @@
-exports.up = (knex, Promise) => knex.schema.createTable('class_transaction', t => {
+exports.up = (knex, Promise) => knex.schema.createTable('class_reasons', t => {
     t.specificType('id', 'serial');
     t.uuid('uuid').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     t.uuid('class_uuid').references('class.uuid');
     t.uuid('class_category_uuid').references('class_category.uuid');
-    t.integer('user_id');
-    t.string('class_title');
-    t.string('category_title');
-    t.string('user_name');
-    t.uuid('class_category_participant_uuid');
-    t.bigInteger('month_utc');
-    t.bigInteger('start');
-    t.bigInteger('end');
+    t.uuid('class_category_session_uuid').references('class_category_session.uuid');
+    t.uuid('class_category_participant_session_uuid').references('class_category_participant_session.uuid');
+    t.string('reason');
     t.integer('create_by').notNullable();
     t.bigInteger('create_time').notNullable();
     t.integer('change_by');
@@ -18,4 +13,4 @@ exports.up = (knex, Promise) => knex.schema.createTable('class_transaction', t =
     t.bigInteger('delete_time');
 });
 
-exports.down = (knex, Promise) => knex.schema.dropTable('class_transaction');
+exports.down = (knex, Promise) => knex.schema.dropTable('class_reasons');

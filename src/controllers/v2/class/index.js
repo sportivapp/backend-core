@@ -6,9 +6,7 @@ const classController = {};
 classController.createClass = async (req, res, next) => {
 
     const { title, description, address, cityId, industryId, picId, picMobileNumber, administrationFee, stateId, addressName } = req.body;
-    const { fileIds } = req.body;
-    const { classCoachUserIds } = req.body;
-    const { categories } = req.body;
+    const { fileIds, classCoachUserIds, categories } = req.body;
 
     const classDTO = {
         title: title,

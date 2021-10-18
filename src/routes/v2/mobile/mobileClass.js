@@ -10,5 +10,8 @@ router.post(routes.classV2.register, auth.authenticateToken, controller.register
 router.get(routes.classV2.myClass, auth.authenticateToken, controller.getMyClass);
 router.get(routes.classV2.coachClass, auth.authenticateToken, controller.getCoachClass);
 router.get(routes.classV2.listCategory, auth.authenticateToken, controller.getCategories);
+router.get(routes.classV2.myClassHistory, auth.authenticateToken, controller.getMyClassHistory);
+router.get(routes.classV2.coachHistory, auth.authenticateToken, controller.getCoachClassHistory);
+router.post(routes.classV2.report, auth.authenticateToken, controller.reportClass);
 
 module.exports = router.expressRouter;

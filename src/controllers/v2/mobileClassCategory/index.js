@@ -1,6 +1,5 @@
 const classCategoryService = require('../../../services/v2/mobileClassCategoryService');
 const ResponseHelper = require('../../../helper/ResponseHelper');
-const classCategorySessionService = require('../../../services/v2/mobileClassCategorySessionService');
 
 const classCategoryController = {};
 
@@ -26,22 +25,6 @@ classCategoryController.startSession = async (req, res, next) => {
     try {
 
         const result = await classCategoryService.startSession(classCategoryUuid, classCategorySessionUuid, req.user);
-        return res.status(200).json(ResponseHelper.toBaseResponse(result));
-
-    } catch(e) {
-        next(e);
-    }
-
-}
-
-// Might be used later for getting participants by category, also by month, just add month params
-classCategoryController.getParticipants = async (req, res, next) => {
-
-    const { classCategoryUuid } = req.params;
-
-    try {
-
-        const result = await classCategoryService.getParticipants(classCategoryUuid, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
@@ -113,6 +96,128 @@ classCategoryController.getMyUnconfirmedSessions = async (req, res, next) => {
     try {
 
         const result = await classCategoryService.getMyUnconfirmedSessions(classCategoryUuid, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classCategoryController.getBookableSessions = async (req, res, next) => {
+
+    const { classCategoryUuid } = req.params;
+    const { year } = req.query;
+
+    try {
+
+        const result = await classCategoryService.getBookableSessions(classCategoryUuid, parseInt(year), req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classCategoryController.mySessionsHistory = async (req, res, next) => {
+    
+    const { classCategoryUuid } = req.params;
+
+    try {
+
+        const result = await classCategoryService.mySessionsHistory(classCategoryUuid, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classCategoryController.categorySessionsHistory = async (req, res, next) => {
+    
+    const { classCategoryUuid } = req.params;
+
+    try {
+
+        const result = await classCategoryService.categoryParticipantsHistory(classCategoryUuid);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classCategoryController.categorySessionsHistory = async (req, res, next) => {
+    
+    const { classCategoryUuid } = req.params;
+
+    try {
+
+        const result = await classCategoryService.categorySessionsHistory(classCategoryUuid);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classCategoryController.getCategoryComplaints = async (req, res, next) => {
+
+    const { classCategoryUuid } = req.params;
+    const { status } = req.query;
+
+    try {
+
+        const result = await classCategoryService.getCategoryComplaints(classCategoryUuid, status, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classCategoryController.getMonthPicker = async (req, res, next) => {
+
+    const { classCategoryUuid } = req.params;
+
+    try {
+
+        const result = await classCategoryService.getMonthPicker(classCategoryUuid);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classCategoryController.getCategoryHistory = async (req, res, next) => {
+
+    const { classCategoryUuid } = req.params;
+
+    try {
+
+        const result = await classCategoryService.getCategoryHistory(classCategoryUuid);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classCategoryController.getMyParticipantsHistory = async (req, res, next) => {
+
+    const { classCategoryUuid } = req.params;
+
+    try {
+
+        const result = await classCategoryService.getMyParticipantsHistory(classCategoryUuid, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {

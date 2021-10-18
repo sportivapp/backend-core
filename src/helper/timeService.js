@@ -13,3 +13,12 @@ exports.thisMonthTimestampUTC = () => {
     return firstDay.getTime();
 
 }
+
+exports.getYearRange = (year) => {
+
+    return {
+        start: new Date(year, 0, 1).getTime(),
+        end: new Date(year+1, 0, 1).getTime(),
+    }
+
+}

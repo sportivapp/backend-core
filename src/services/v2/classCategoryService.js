@@ -4,10 +4,12 @@ const classCategoryCoachService = require('./classCategoryCoachService');
 const classCategorySessionService = require ('./classCategorySessionService');
 const dayToCodeEnum = require('../../models/enum/DayToCodeEnum');
 const codeToDayEnum = require('../../models/enum/CodeToDayEnum');
-const classCategoryParticipantService = require('./classCategoryParticipantService');
 const classCategoryScheduleService = require('./classCategoryScheduleService');
-const classCoachService = require('./classCoachService');
 const classCategoryPriceLogService = require('./classCategoryPriceLogService');
+const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
+const classComplaintService = require('./classComplaintsService');
+const cityService = require('../cityService');
+const luxon = require("luxon");
 
 const ErrorEnum = {
     CATEGORY_NOT_FOUND: 'CATEGORY_NOT_FOUND',
@@ -18,7 +20,9 @@ const ErrorEnum = {
 
 const classCategoryService = {};
 
-classCategoryService.initCategories = async (categories, user, trx) => {
+classCategoryService.initCategories = async (categories, cityId, user, trx) => {
+
+    const timezone = await cityService.getTimezoneFromCityId(cityId);
 
     const classCategoryPromises = categories.map(category => {
         const newCategory = {};
@@ -27,6 +31,7 @@ classCategoryService.initCategories = async (categories, user, trx) => {
         newCategory.description = category.description;
         newCategory.price = category.price;
         newCategory.requirements = category.requirements;
+        newCategory.isRecurring = category.isRecurring;
 
         return classCategories = ClassCategory.query(trx)
             .insertToTable(newCategory, user.sub)
@@ -45,22 +50,34 @@ classCategoryService.initCategories = async (categories, user, trx) => {
                     price: classCategory.price,
                 }
 
-                const sessionAndSchedule = classCategoryService
-                    .generateSessionAndScheduleFromCategorySchedules(classCategory.classUuid, classCategory.uuid, 
-                        category.startMonth, category.endMonth, category.schedules);
+                let sessionsDTO = [];
+                if (classCategory.isRecurring) {
 
-                if (sessionAndSchedule.session.length === 0)
-                    throw new UnsupportedOperationError(ErrorEnum.NO_SESSIONS);
+                    const sessionAndSchedule = classCategoryService
+                        .generateSessionAndScheduleFromCategorySchedules(classCategory.classUuid, classCategory.uuid, 
+                            category.startMonth, category.endMonth, category.schedules, timezone);
+                    await classCategoryScheduleService.initSchedules(sessionAndSchedule.schedule, user, trx);
+                    sessionsDTO = sessionAndSchedule.session;
+
+                } else {
+
+                    // Non recurring logic here
+                    // sessionsDTO = result
+
+                }
+
+                if (sessionsDTO.length === 0)
+                        throw new UnsupportedOperationError(ErrorEnum.NO_SESSIONS);
+                
+                const classCategorySession = await classCategorySessionService.initCategorySession(sessionsDTO, user, trx);
                 const classCategoryCoach = await classCategoryCoachService.initCategoryCoach(categoryCoachDTO, user, trx);
-                const classCategorySession = await classCategorySessionService.initCategorySession(sessionAndSchedule.session, user, trx);
-                const classCategorySchedule = await classCategoryScheduleService.initSchedules(sessionAndSchedule.schedule, user, trx);
+                
                 await classCategoryPriceLogService.addPriceLog(priceLogDTO, user, trx);
 
                 return {
                     ...classCategory,
                     classCategoryCoach: classCategoryCoach,
                     classCategorySession: classCategorySession,
-                    classCategorySchedule: classCategorySchedule,
                 }
             });
 
@@ -83,7 +100,6 @@ classCategoryService.getClassCategory = async (classCategoryUuid) => {
 
     return {
         ...category,
-        totalParticipants: await classCategoryParticipantService.getParticipantsCountByClassCategoryUuid(classCategoryUuid),
     }
 
 }
@@ -132,12 +148,16 @@ classCategoryService.findById = async (classCategoryUuid) => {
 
 classCategoryService.extendSchedule = async (extendCategoryDTO, user) => {
 
-    const category = await classCategoryService.findById(extendCategoryDTO.uuid);
+    const category = await ClassCategory.query()
+        .modify('classCity')
+        .findById(extendCategoryDTO.uuid);
+    const timezone = await cityService.getTimezoneFromCityId(category.class.city.ecityid);
 
     const sessionAndSchedule = classCategoryService
         .generateSessionAndScheduleFromCategorySchedules(category.classUuid, category.uuid, 
-            extendCategoryDTO.startMonth, extendCategoryDTO.endMonth, category.schedules);
+            extendCategoryDTO.startMonth, extendCategoryDTO.endMonth, extendCategoryDTO.schedules, timezone);
 
+    const sessionDTO = sessionAndSchedule.session;
     if (sessionDTO.length === 0)
         throw new UnsupportedOperationError(ErrorEnum.NO_SESSIONS);
 
@@ -194,20 +214,13 @@ classCategoryService.deleteCategory = async (classCategoryUuid) => {
 
     const category = await classCategoryService.findById(classCategoryUuid);
 
-    const totalParticipants = await classCategoryParticipantService
-        .getParticipantsCountByClassCategoryUuid(classCategoryUuid);
-
-    if (totalParticipants !== 0)
-        throw new UnsupportedOperationError(ErrorEnum.PARTICIPANTS_EXISTED);
-    else {
-        return category.$query()
-            .softDelete()
-            .then(rowsAffected => rowsAffected === 1);
-    }
+    return category.$query()
+        .softDelete()
+        .then(rowsAffected => rowsAffected === 1);
 
 }
 
-classCategoryService.addCategory = async (startMonth, endMonth, category, user) => {
+classCategoryService.addCategory = async (startMonth, endMonth, category, cityId, user) => {
 
     const newCategory = {};
     newCategory.classUuid = category.classUuid;
@@ -215,6 +228,8 @@ classCategoryService.addCategory = async (startMonth, endMonth, category, user) 
     newCategory.description = category.description;
     newCategory.price = category.price;
     newCategory.requirements = category.requirements;
+
+    const timezone = await cityService.getTimezoneFromCityId(cityId);
 
     return ClassCategory.transaction(async trx => {
 
@@ -232,7 +247,7 @@ classCategoryService.addCategory = async (startMonth, endMonth, category, user) 
             
             const sessionAndSchedule = classCategoryService
                 .generateSessionAndScheduleFromCategorySchedules(classCategory.classUuid, classCategory.uuid, 
-                    startMonth, endMonth, category.schedules);
+                    startMonth, endMonth, category.schedules, timezone);
 
             if (sessionAndSchedule.session.length === 0)
                 throw new UnsupportedOperationError(ErrorEnum.NO_SESSIONS);
@@ -253,12 +268,13 @@ classCategoryService.addCategory = async (startMonth, endMonth, category, user) 
 }
 
 classCategoryService.generateSessionAndScheduleFromCategorySchedules = (classUuid, classCategoryUuid, 
-    startMonth, endMonth, schedules) => {
+    startMonth, endMonth, schedules, timezone) => {
 
     let sessionDTO = [];
     let scheduleDTO = [];
     schedules.map(schedule => {
-        const categoryStartDate = new Date(startMonth);
+        const offset = luxon.DateTime.fromMillis(startMonth).setZone(timezone).offset;
+        const categoryStartDate = new Date(startMonth - (60000 * offset));
         const day = categoryStartDate.getDay();
         const requestedDay = dayToCodeEnum[schedule.day];
         if (day !== requestedDay) {
@@ -268,6 +284,8 @@ classCategoryService.generateSessionAndScheduleFromCategorySchedules = (classUui
         scheduleDTO.push({
             classUuid: classUuid,
             classCategoryUuid: classCategoryUuid,
+            startMonth: startMonth,
+            endMonth: endMonth,
             day: codeToDayEnum[requestedDay],
             dayCode: requestedDay,
             startHour: schedule.startHour,
@@ -275,8 +293,24 @@ classCategoryService.generateSessionAndScheduleFromCategorySchedules = (classUui
             startMinute: schedule.startMinute,
             endMinute: schedule.endMinute,
         });
-        let sessionStartDate = new Date(categoryStartDate.getFullYear(), categoryStartDate.getMonth(), categoryStartDate.getDate(), schedule.startHour, schedule.startMinute);
-        let sessionEndDate = new Date(categoryStartDate.getFullYear(), categoryStartDate.getMonth(), categoryStartDate.getDate(), schedule.endHour, schedule.endMinute);
+        let sessionStartDate = luxon.DateTime.fromObject({
+            year: categoryStartDate.getFullYear(),
+            // Why +1? js date start from 0 while luxon start from 1
+            month: categoryStartDate.getMonth() + 1,
+            day: categoryStartDate.getDate(),
+            hour: schedule.startHour,
+            minute: schedule.startMinute,
+            zone: timezone,
+        }).toJSDate();
+        let sessionEndDate = luxon.DateTime.fromObject({
+            year: categoryStartDate.getFullYear(),
+            // Why +1? js date start from 0 while luxon start from 1
+            month: categoryStartDate.getMonth() + 1,
+            day: categoryStartDate.getDate(),
+            hour: schedule.endHour,
+            minute: schedule.endMinute,
+            zone: timezone,
+        }).toJSDate();
         const now = Date.now();
         // Loop to increase 7days per schedule from startDate to endDate
         while (sessionStartDate.getTime() < endMonth) {
@@ -304,7 +338,12 @@ classCategoryService.generateSessionAndScheduleFromCategorySchedules = (classUui
         schedule: scheduleDTO,
     }
 
-    
+}
+
+classCategoryService.getCategoryComplaints = async (classCategoryUuid, status, user) => {
+
+    return classComplaintService.getCategoryComplaints(classCategoryUuid, status);
+
 }
 
 module.exports = classCategoryService;

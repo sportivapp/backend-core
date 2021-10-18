@@ -12,24 +12,9 @@ classCategoryScheduleService.initSchedules = async (scheduleDTO, user, trx) => {
 classCategoryScheduleService.getSchedules = async (classCategoryUuid, user) => {
 
     return ClassCategorySchedule.query()
-        .modify('list')
+        .modify('latest')
         .where('class_category_uuid', classCategoryUuid);
 
 };
-
-classCategoryScheduleService.renewSchedules = async (classCategoryUuid, scheduleDTO, user) => {
-
-    return ClassCategorySchedule.transaction(async trx => {
-
-        await ClassCategorySchedule.query(trx)
-            .where('class_category_uuid', classCategoryUuid)
-            .delete();
-
-        return ClassCategorySchedule.query(trx)
-            .insertToTable(scheduleDTO, user.sub);
-
-    });
-
-}
 
 module.exports = classCategoryScheduleService;

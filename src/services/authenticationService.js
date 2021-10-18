@@ -1,9 +1,9 @@
 const User = require('../models/User');
 const bcrypt = require('../helper/bcrypt');
-const jwt = require('jsonwebtoken');
 const { UnsupportedOperationError, UnauthorizedError } = require('../models/errors');
 const companyService = require('./companyService');
 const userService = require('./userService');
+const jwtService = require('./common/jwtService');
 
 const ErrorEnum = {
     UNSUCCESSFUL_LOGIN: 'UNSUCCESSFUL_LOGIN',
@@ -22,9 +22,8 @@ AuthenticationService.generateJWTToken = async(user) => {
         name: user.eusername,
         mobileNumber: user.eusermobilenumber
     }
-    const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET); // , { expiresIn: '1800s' }
 
-    return token;
+    return jwtService.sign(config, '1800s');
 
 }
 
@@ -52,9 +51,8 @@ AuthenticationService.generateCompanyJWTToken = async (user, companyId) => {
         mobileNumber: user.eusermobilenumber,
         companyId: companyId
     }
-    const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' });
 
-    return token;
+    return jwtService.sign(config, '1800s');
 
 }
 
@@ -64,9 +62,8 @@ AuthenticationService.generateCustomJWTToken = async (user, companyId) => {
         uid: user.euserid,
         cid: companyId
     }
-    const token = jwt.sign(config, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10s' });
 
-    return token;
+    return jwtService.sign(config, '10s');
 
 }
 
@@ -99,18 +96,18 @@ AuthenticationService.loginCompany = async(companyId, user) => {
 
 AuthenticationService.autoLogin = async(token) => {
 
-    return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async function(err, data) {
-        if (err) {
-            throw new UnauthorizedError()
-        }
+    const data = await jwtService.verify(token, false)
+        .catch(() => {
+            throw new UnauthorizedError();
+        });
 
-        const userId = data.uid;
-        const companyId = data.cid;
 
-        const singleUser = await AuthenticationService.checkInCompanyAndGetSingleUser(companyId, userId);
+    const userId = data.uid;
+    const companyId = data.cid;
 
-        return AuthenticationService.generateCompanyJWTToken(singleUser, companyId);
-    });
+    const singleUser = await AuthenticationService.checkInCompanyAndGetSingleUser(companyId, userId);
+
+    return AuthenticationService.generateCompanyJWTToken(singleUser, companyId);
 
 }
 

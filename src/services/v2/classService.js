@@ -5,7 +5,6 @@ const classCategoriesService = require('./classCategoryService');
 const { UnsupportedOperationError, NotFoundError } = require('../../models/errors');
 const ServiceHelper = require('../../helper/ServiceHelper');
 const classCategoryService = require('./classCategoryService');
-const classCategoryParticipantService = require('./classCategoryParticipantService');
 const classCategorySessionService = require('./classCategorySessionService');
 
 const ErrorEnum = {
@@ -35,7 +34,7 @@ classService.createClass = async (classDTO, fileIds, classCoachUserIds, categori
                 fileId: fileId,
             }
         });
-
+        
         const classCoachDTO = classCoachUserIds.map(classCoachUserId => {
             return {
                 classUuid: cls.uuid,
@@ -52,7 +51,7 @@ classService.createClass = async (classDTO, fileIds, classCoachUserIds, categori
 
         const classMedia = await classMediaService.initMedia(mediaDTO, user, trx);
         const classCoaches = await classCoachService.initClassCoach(classCoachDTO, user, trx);
-        const classCategory = await classCategoriesService.initCategories(categories, user, trx);
+        const classCategory = await classCategoriesService.initCategories(categories, classDTO.cityId, user, trx);
 
         return {
             ...cls,
@@ -83,7 +82,6 @@ classService.getClasses = async (page, size, keyword, industryId, user) => {
         return {
             ...cls,
             priceRange: await classCategoryService.getClassCategoryPriceRangeByClassUuid(cls.uuid),
-            totalParticipants: await classCategoryParticipantService.getParticipantsCountByClassUuid(cls.uuid),
         }
     });
     
@@ -116,8 +114,6 @@ classService.getClass = async (classUuid, user) => {
 
     const promises = cls.classCategories.map(async category => {
         category.price = parseInt(category.price);
-        category.totalParticipants = await classCategoryParticipantService
-            .getParticipantsCountByClassCategoryUuid(category.uuid)
         return category;
     });
 
@@ -126,7 +122,6 @@ classService.getClass = async (classUuid, user) => {
     return {
         ...cls,
         priceRange: await classCategoryService.getClassCategoryPriceRangeByClassUuid(cls.uuid),
-        totalParticipants: await classCategoryParticipantService.getParticipantsCountByClassUuid(cls.uuid),
     }
 
 }
@@ -164,15 +159,10 @@ classService.deleteClass = async (classUuid, user) => {
     await classService.checkUserInClassCompany(classUuid, user);
 
     const cls = await classService.findById(classUuid);
-    const totalParticipants = await classCategoryParticipantService.getParticipantsCountByClassUuid(cls.uuid);
 
-    if (totalParticipants !== 0)
-        throw new UnsupportedOperationError(ErrorEnum.PARTICIPANTS_EXISTED);
-    else {
-        return cls.$query()
-            .softDelete()
-            .then(rowsAffected => rowsAffected === 1);
-    }
+    return cls.$query()
+        .softDelete()
+        .then(rowsAffected => rowsAffected === 1);
 
 }
 
@@ -216,7 +206,12 @@ classService.deleteCategory = async (classUuid, classCategoryUuid, user) => {
 classService.addCategory = async (startMonth, endMonth, category, user) => {
 
     await classService.checkUserInClassCompany(category.classUuid, user);
-    return classCategoryService.addCategory(startMonth, endMonth, category, user);
+
+    const cls = Class.query()
+        .findById(category.classUuid)
+        .withGraphFetched('city(baseAttributes');
+
+    return classCategoryService.addCategory(startMonth, endMonth, category, cls.city.ecityid, user);
 
 }
 

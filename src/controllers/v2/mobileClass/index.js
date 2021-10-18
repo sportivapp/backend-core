@@ -5,11 +5,12 @@ const classController = {};
 
 classController.getClasses = async (req, res, next) => {
 
-    const { page='0', size='10', keyword='', industryId, cityId } = req.query;
+    const { page='0', size='10', keyword='', industryId, cityId, companyId } = req.query;
 
     try {
 
-        const pageObj = await classService.getClasses(parseInt(page), parseInt(size), keyword, parseInt(industryId), parseInt(cityId));
+        const pageObj = await classService.getClasses(parseInt(page), parseInt(size), keyword, 
+            parseInt(industryId), parseInt(cityId), parseInt(companyId));
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
 
     } catch(e) {
@@ -51,10 +52,12 @@ classController.getClassCategory = async (req, res, next) => {
 classController.register = async (req, res, next) => {
 
     const { classUuid, classCategoryUuid } = req.params;
+    const { classCategorySessionUuids, paymentMethodCode } = req.body;
 
     try {
 
-        const result = await classService.register(classUuid, classCategoryUuid, req.user);
+        const result = await classService.register(classUuid, classCategoryUuid, classCategorySessionUuids, 
+            paymentMethodCode, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
@@ -100,6 +103,54 @@ classController.getCategories = async (req, res, next) => {
     try {
 
         const result = await classService.getCategories(classUuid);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classController.getMyClassHistory = async (req, res, next) => {
+
+    try {
+
+        const result = await classService.getMyClassHistory(req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classController.getCoachClassHistory = async (req, res, next) => {
+
+    try {
+
+        const result = await classService.getCoachClassHistory(req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classController.reportClass = async (req, res, next) => {
+
+    const { classUuid } = req.params;
+    const { code, report } = req.body;
+
+    const classReportDTO = {
+        code: code,
+        report: report,
+        classUuid: classUuid,
+    }
+
+    try {
+
+        const result = await classService.reportClass(classUuid, classReportDTO, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {

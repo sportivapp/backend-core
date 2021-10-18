@@ -5,9 +5,11 @@ const controller = {};
 
 controller.getNotificationCount = async (req, res, next) => {
 
+    const { type = null } = req.query
+
     try {
 
-        const result = await notificationService.getNotificationCount(req.user);
+        const result = await notificationService.getNotificationCount(type, req.user);
         return res.status(200).json(ResponseHelper.toBaseResponse(result));
 
     } catch(e) {
@@ -33,11 +35,11 @@ controller.clickNotification = async (req, res, next) => {
 
 controller.getAllNotification = async (req, res, next) => {
 
-    const {page = '0', size = '100' } = req.query
+    const {page = '0', size = '100', type = 'FORUM' } = req.query
     
     try {
 
-        const pageObj = await notificationService.getAllNotification(parseInt(page), parseInt(size), req.user);
+        const pageObj = await notificationService.getAllNotification(parseInt(page), parseInt(size), type, req.user);
 
         return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging))
 

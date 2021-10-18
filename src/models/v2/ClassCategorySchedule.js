@@ -21,10 +21,11 @@ class ClassCategorySchedule extends Model {
 
     static get modifiers() {
         return {
-            list(builder) {
-                builder.select('uuid', 'class_uuid', 'class_category_uuid', 'day', 'start_hour', 'start_minute', 
-                'end_hour', 'end_minute')
-                    .orderBy('day_code');
+            latest(builder) {
+                builder.select('uuid', 'class_uuid', 'class_category_uuid', 'start_month', 'end_month', 
+                'day', 'start_hour', 'start_minute', 'end_hour', 'end_minute')
+                    .orderBy('create_time', 'DESC')
+                    .first();
             },
         }
     }

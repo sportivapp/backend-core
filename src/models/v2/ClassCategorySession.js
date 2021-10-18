@@ -1,3 +1,4 @@
+const SessionStatusEnum = require('../enum/SessionStatusEnum');
 const Model = require('./Model');
 
 class ClassCategorySession extends Model {
@@ -25,13 +26,38 @@ class ClassCategorySession extends Model {
                 builder.select('uuid', 'class_category_uuid', 'month_utc', 'start_date', 'end_date', 'start_time', 'absence_time', 'status')
                     .orderBy('start_date', 'ASC');
             },
+            listWithoutOrder(builder) {
+                builder.select('uuid', 'class_category_uuid', 'month_utc', 'start_date', 'end_date', 'start_time', 'absence_time', 'status');
+            },
             sessionParticipants(builder) {
                 builder.select('uuid', 'start_date', 'status')
                     .withGraphFetched('sessionParticipants(sessionParticipants)')
                     .withGraphFetched('classCategory(uuidAndTitle)');
             },
             basicStartEnd(builder) {
-                builder.select('uuid', 'start_date', 'end_date');
+                builder.select('uuid', 'start_date', 'end_date', 'status');
+            },
+            mySessions(builder, userId) {
+                builder.withGraphJoined('participantSession(sessionParticipants)')
+                    .where('participantSession.user_id', userId)
+            },
+            single(builder) {
+                builder.select('uuid', 'class_category_uuid', 'month_utc', 'start_date', 'end_date', 'start_time', 'absence_time', 'status');
+            },
+            bookableSessions(builder, classCategoryUuid, start, end, userId) {
+                builder.select('class_category_session.uuid', 'start_date', 'end_date', 'title', 'price')
+                    .where('class_category_uuid', classCategoryUuid)
+                    .where('status', SessionStatusEnum.UPCOMING)
+                    .where('start_date', '>=', start)
+                    .where('end_date', '<=', end)
+                    .orderBy('start_date', 'ASC')
+                    .withGraphFetched('participantSession(sessionParticipants)')
+                    .modifyGraph('participantSession', builder => {
+                        builder.where('user_id', userId);
+                    });
+            },
+            price(builder) {
+                builder.select('price');
             }
         }
     }
@@ -59,7 +85,7 @@ class ClassCategorySession extends Model {
                     to: 'class_category.uuid',
                 }
             },
-            sessionParticipants: {
+            participantSession: {
                 relation: Model.HasManyRelation,
                 modelClass: ClassCategoryParticipantSession,
                 join: {

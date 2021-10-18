@@ -3,84 +3,34 @@ const classCategoryCoachService = require('./mobileClassCategoryCoachService');
 const { UnsupportedOperationError, NotFoundError } = require('../../models/errors');
 const sessionStatusEnum = require('../../models/enum/SessionStatusEnum');
 const classCategorySessionService = require('./mobileClassCategorySessionService');
-const codeToDayEnum = require('../../models/enum/CodeToDayEnum');
-const classCategoryParticipantService = require('./mobileClassCategoryParticipantService');
-const codeToMonthEnum = require('../../models/enum/CodeToMonthEnum');
 const classCategoryParticipantSessionService = require('./mobileClassCategoryParticipantSessionService');
+const classComplaintService = require('./mobileClassComplaintsService');
 
 const ErrorEnum = {
     INVALID_STATUS: 'INVALID_STATUS',
+    CATEGORY_NOT_FOUND: 'CATEGORY_NOT_FOUND',
 }
 
 const classCategoryService = {};
 
-classCategoryService.groupSessions = (sessions) => {
+classCategoryService.getClassCategory = async (categoryUuid, user) => {
 
-    const grouped = [];
-    
-    let mappedMonthCode = {};
-    let mappedDayCode = {};
-    let monthIndex = 0;
-    let dayIndex = 0;
-    sessions.forEach(session => {
-        const startDate = new Date(parseInt(session.startDate));
-        const monthCode = startDate.getMonth();
-        const month = codeToMonthEnum[monthCode];
-        const dayCode = startDate.getDay();
-        const day = codeToDayEnum[dayCode];
-        if (grouped[mappedMonthCode[monthCode]]) {
-            if (grouped[mappedMonthCode[monthCode]].days[mappedDayCode[dayCode]]) {
-                grouped[mappedMonthCode[monthCode]].days[mappedDayCode[dayCode]].sessions.push(session);
-            } else {
-                if (mappedDayCode[dayCode] || mappedDayCode[dayCode] === undefined) {
-                    mappedDayCode[dayCode] = dayIndex;
-                    dayIndex++;
-                }
-
-                grouped[mappedMonthCode[monthCode]].days[mappedDayCode[dayCode]] = {
-                    name: day,
-                    sessions: [session],
-                }
-            }
-        } else {
-            if (mappedDayCode[dayCode] || mappedDayCode[dayCode] === undefined) {
-                mappedDayCode[dayCode] = dayIndex;
-                dayIndex++;
-            }
-            mappedMonthCode[monthCode] = monthIndex;
-            monthIndex++;
-            
-            grouped[mappedMonthCode[monthCode]] = {
-                name: month,
-                days: [],
-            }
-            grouped[mappedMonthCode[monthCode]].days[mappedDayCode[dayCode]] = {
-                name: day,
-                sessions: [session],
-            };
-        }
-    });
-
-    return grouped;
-}
-
-classCategoryService.getClassCategory = async (classCategoryUuid, user) => {
-
-    const classCategory = await ClassCategory.query()
+    const category = await ClassCategory.query()
         .modify('userDetail')
-        .findById(classCategoryUuid)
-        .then(classCategory => {
-            if (!classCategory)
+        .findById(categoryUuid)
+        .then(async category => {
+            if (!category)
                 throw new NotFoundError();
-            classCategory.price = parseInt(classCategory.price);
-            return classCategory;
+                category.totalParticipants = await classCategorySessionService.getTotalParticipantsByCategoryUuid(category.uuid);
+                category.price = parseInt(category.price);
+            return category;
         })
 
-    const isCoach = await classCategoryCoachService.getCoachCategory(user.sub, classCategoryUuid);
-    classCategory.categorySessions = classCategoryService.groupSessions(classCategory.categorySessions);
-    classCategory.isCoach = !!isCoach;
+    const isCoach = await classCategoryCoachService.getCoachCategory(user.sub, categoryUuid);
+    category.categorySessions = classCategorySessionService.groupSessions(category.categorySessions);
+    category.isCoach = !!isCoach;
 
-    return classCategory;
+    return category;
 
 }
 
@@ -121,7 +71,7 @@ classCategoryService.getCoachCategory = async (classCategoryUuid, user) => {
         let isToday = false;
         // Only for the first upcoming session
         if (index === 0) {
-            isToday = new Date(parseInt(session.startDate)).getDate === new Date().getDate();
+            isToday = new Date(parseInt(session.startDate)).getDate() === new Date().getDate();
         }
 
         return {
@@ -142,27 +92,21 @@ classCategoryService.startSession = async (classCategoryUuid, classCategorySessi
 
 }
 
-classCategoryService.getParticipants = async (classCategoryUuid) => {
-
-    return classCategoryParticipantService.getParticipants(classCategoryUuid);
-
-}
-
 classCategoryService.getMyCategory = async (classCategoryUuid, status, user) => {
 
     if (!sessionStatusEnum[status])
         throw new UnsupportedOperationError(ErrorEnum.INVALID_STATUS);
 
-    const participant = await classCategoryParticipantService
-        .getClosestActiveParticipantByCategoryUuidAndUserId(classCategoryUuid, user.sub);
+    const sessionUuids = await classCategorySessionService.getMySessionUuidsByCategoryUuid(classCategoryUuid, status, user);
+    if (sessionUuids.length === 0)
+        return [];
 
     return ClassCategory.query()
         .findById(classCategoryUuid)
-        .modify('myCategory', participant, status)
+        .modify('myCategory', user.sub, sessionUuids)
         .then(classCategory => {
             if (!classCategory)
                 throw new NotFoundError();
-            classCategory.price = parseInt(classCategory.price);
             return classCategory;
         });
 
@@ -171,21 +115,24 @@ classCategoryService.getMyCategory = async (classCategoryUuid, status, user) => 
 classCategoryService.endSession = async (classCategoryUuid, classCategorySessionUuid, user) => {
 
     await classCategoryCoachService.checkCoachCategory(user.sub, classCategoryUuid);
-    const endedSession = await classCategorySessionService.endSession(classCategorySessionUuid, user);
 
-    const upcomingSessions = await classCategorySessionService
-        .getSessionByCategoryUuidAndStatus(classCategoryUuid, sessionStatusEnum.UPCOMING);
+    return ClassCategory.transaction(async trx => {
 
-    let onHold = false;
-    if (upcomingSessions.length === 0)
-        onHold = true;
+        const upcomingSessions = await classCategorySessionService
+            .getUpcomingSessions(classCategoryUuid, sessionStatusEnum.UPCOMING);
 
-    await ClassCategory.query()
-        .updateByUserId({
-            onHold: onHold,
-        }, user.sub);
+        let onHold = false;
+        if (upcomingSessions.length === 0)
+            onHold = true;
 
-    return endedSession;
+        await ClassCategory.query(trx)
+            .updateByUserId({
+                onHold: onHold,
+            }, user.sub);
+
+        return classCategorySessionService.endSession(classCategorySessionUuid, user, trx);
+
+    });
 
 }
 
@@ -197,12 +144,129 @@ classCategoryService.reschedule = async (classCategorySessionDTO, isRepeat, user
 
 classCategoryService.getMyUnconfirmedSessions = async (classCategoryUuid, user) => {
 
-    const participants = await classCategoryParticipantService
-        .getActiveParticipantsByCategoryUuidAndUserId(classCategoryUuid, user.sub);
-    const participantUuids = participants.map(participant => {
-        return participant.uuid;
+    return classCategoryParticipantSessionService.getMyUnconfirmedSessions(classCategoryUuid, user);
+
+}
+
+classCategoryService.findById = async (classCategoryUuid) => {
+
+    return ClassCategory.query()
+        .findById(classCategoryUuid)
+        .then(category => {
+            if (!category)
+                throw new UnsupportedOperationError(ErrorEnum.CATEGORY_NOT_FOUND);
+            return category;
+        })
+
+}
+
+classCategoryService.getBookableSessions = async (classCategoryUuid, year, user) => {
+
+    const category = await ClassCategory.query()
+        .modify('book')
+        .findById(classCategoryUuid)
+        .then(category => {
+            if (!category)
+                throw new UnsupportedOperationError(ErrorEnum.CATEGORY_NOT_FOUND);
+            category.price = parseInt(category.price);
+            return category;
+        });
+
+    let bookableSessions = await classCategorySessionService
+        .getBookableSessions(classCategoryUuid, year, user.sub);
+
+    if (category.isRecurring)
+        bookableSessions = classCategorySessionService.groupOrderedRecurringSessions(bookableSessions);
+    else
+        bookableSessions = classCategorySessionService.groupOrderedNonRecurringSessions(bookableSessions);
+
+    return {
+        ...category,
+        categorySessions: bookableSessions,
+    }
+
+}
+
+classCategoryService.mySessionsHistory = async (classCategoryUuid, user) => {
+
+    const categoryDetailWithInvoices = await ClassCategory.query()
+        .findById(classCategoryUuid)
+        .modify('categoryDetailWithInvoices', user.sub);
+
+    const sessions = await classCategoryParticipantSessionService
+        .mySessionsHistoryByCategoryUuidAndUserId(classCategoryUuid, user.sub);
+
+    return {
+        ...categoryDetailWithInvoices,
+        sessions: sessions,
+    }
+
+}
+
+classCategoryService.categorySessionsHistory = async (classCategoryUuid) => {
+
+    return classCategoryParticipantSessionService
+        .categorySessionsHistoryByCategoryUuid(classCategoryUuid);
+
+}
+
+classCategoryService.getCategoryComplaints = async (classCategoryUuid, status, user) => {
+
+    return classComplaintService.getCategoryComplaints(classCategoryUuid, status);
+
+}
+
+classCategoryService.getMonthPicker = async (classCategoryUuid) => {
+
+    const sessions = await classCategorySessionService.getOrderedActiveAndUpcomingSessions(classCategoryUuid);
+
+    let currYear = -1;
+    let currMonth = -1;
+
+    let grouped = [];
+    sessions.forEach(session => {
+
+        const newYear = new Date(parseInt(session.startDate)).getFullYear();
+        const newMonth = new Date(parseInt(session.startDate)).getMonth();
+
+        if (currYear !== newYear) {
+            currYear = newYear;
+            currMonth = newMonth;
+            grouped.push({
+                year: newYear,
+                months: [newMonth],
+            })
+        } else {
+            if (currMonth !== newMonth) {
+                grouped[grouped.length-1].months.push(month);
+            }
+        }
+
     });
-    return classCategoryParticipantSessionService.getMyUnconfirmedSessionsByParticipantUuids(participantUuids);
+
+    return grouped;
+
+}
+
+classCategoryService.getCategoryHistory = async (classCategoryUuid) => {
+
+    const category = await ClassCategory.query()
+        .findById(classCategoryUuid)
+        .modify('categoryDetailWithoutInvoices');
+
+    const participants = await classCategoryParticipantSessionService
+        .categoryParticipantHistoryByCategoryUuid(classCategoryUuid);
+
+    return {
+        ...category,
+        participants: participants,
+    }
+
+}
+
+classCategoryService.getMyParticipantsHistory = async (categoryUuid, user) => {
+
+    return classCategoryParticipantSessionService.mySessionsHistoryByCategoryUuidAndUserId(categoryUuid, user.sub);
 
 }
 
