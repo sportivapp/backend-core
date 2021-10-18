@@ -77,5 +77,10 @@ exports.seed = (knex, Promise) => knex('ecompanymodulemapping').del()
           ecompanyecompanyid: 1,
           emoduleemoduleid: 15,
         },
+        {
+          ecompanymodulemappingname: 'Bank',
+          ecompanyecompanyid: 1,
+          emoduleemoduleid: 16,
+        },
       ]
     ));

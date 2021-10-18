@@ -18,22 +18,10 @@ exports.seed = (knex, Promise) => knex('emodule').del()
           emodulename: 'Employee'
         },
         {
-          emodulename: 'Absence'
-        },
-        {
-          emodulename: 'Attendance'
-        },
-        {
           emodulename: 'Shift'
         },
         {
           emodulename: 'Timesheet'
-        },
-        {
-          emodulename: 'Project'
-        },
-        {
-          emodulename: 'Announcement'
         },
         {
           emodulename: 'Report'
@@ -59,5 +47,8 @@ exports.seed = (knex, Promise) => knex('emodule').del()
         {
           emodulename: 'Tournament'
         },
+        {
+          emodulename: 'Bank'
+        }
       ]
     ));

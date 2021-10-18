@@ -196,19 +196,59 @@ exports.seed = (knex, Promise) => knex('egradefunctionmapping').del()
                 },
                 {
                   egradeegradeid: 1,
-                  efunctionefunctioncode: 'C13'
-                },
-                {
-                  egradeegradeid: 1,
-                  efunctionefunctioncode: 'R13'
-                },
-                {
-                  egradeegradeid: 1,
-                  efunctionefunctioncode: 'U13'
+                  efunctionefunctioncode: 'P13'
                 },
                 {
                   egradeegradeid: 1,
                   efunctionefunctioncode: 'D13'
+                },
+                {
+                  egradeegradeid: 1,
+                  efunctionefunctioncode: 'C14'
+                },
+                {
+                  egradeegradeid: 1,
+                  efunctionefunctioncode: 'R14'
+                },
+                {
+                  egradeegradeid: 1,
+                  efunctionefunctioncode: 'U14'
+                },
+                {
+                  egradeegradeid: 1,
+                  efunctionefunctioncode: 'D14'
+                },
+                {
+                  egradeegradeid: 1,
+                  efunctionefunctioncode: 'C15'
+                },
+                {
+                  egradeegradeid: 1,
+                  efunctionefunctioncode: 'R15'
+                },
+                {
+                  egradeegradeid: 1,
+                  efunctionefunctioncode: 'U15'
+                },
+                {
+                  egradeegradeid: 1,
+                  efunctionefunctioncode: 'D15'
+                },
+                {
+                  egradeegradeid: 1,
+                  efunctionefunctioncode: 'C16'
+                },
+                {
+                  egradeegradeid: 1,
+                  efunctionefunctioncode: 'R16'
+                },
+                {
+                  egradeegradeid: 1,
+                  efunctionefunctioncode: 'U16'
+                },
+                {
+                  egradeegradeid: 1,
+                  efunctionefunctioncode: 'D16'
                 },
             ]
       ));

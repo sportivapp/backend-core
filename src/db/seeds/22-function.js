@@ -105,270 +105,210 @@ exports.seed = (knex, Promise) => knex('efunction').del()
                 {
                   
                   efunctioncode: 'C6',
-                  efunctionname: 'Create Absence'
-                },
-                {
-                  
-                  efunctioncode: 'R6',
-                  efunctionname: 'Read Absence'
-                },
-                {
-                  
-                  efunctioncode: 'U6',
-                  efunctionname: 'Update Absence'
-                },
-                {
-                  
-                  efunctioncode: 'D6',
-                  efunctionname: 'Delete Absence'
-                },
-                {
-                  
-                  efunctioncode: 'C7',
-                  efunctionname: 'Create Attendance'
-                },
-                {
-                  
-                  efunctioncode: 'R7',
-                  efunctionname: 'Read Attendance'
-                },
-                {
-                  
-                  efunctioncode: 'U7',
-                  efunctionname: 'Update Attendance'
-                },
-                {
-                  
-                  efunctioncode: 'D7',
-                  efunctionname: 'Delete Attendance'
-                },
-                {
-                  
-                  efunctioncode: 'C8',
                   efunctionname: 'Create Shift'
                 },
                 {
                   
-                  efunctioncode: 'R8',
+                  efunctioncode: 'R6',
                   efunctionname: 'Read Shift'
                 },
                 {
                   
-                  efunctioncode: 'U8',
+                  efunctioncode: 'U6',
                   efunctionname: 'Update Shift'
                 },
                 {
                   
-                  efunctioncode: 'D8',
+                  efunctioncode: 'D6',
                   efunctionname: 'Delete Shift'
                 },
                 {
                   
-                  efunctioncode: 'C9',
+                  efunctioncode: 'C7',
                   efunctionname: 'Create Timesheet'
                 },
                 {
                   
-                  efunctioncode: 'R9',
+                  efunctioncode: 'R7',
                   efunctionname: 'Read Timesheet'
                 },
                 {
                   
-                  efunctioncode: 'U9',
+                  efunctioncode: 'U7',
                   efunctionname: 'Update Timesheet'
                 },
                 {
                   
-                  efunctioncode: 'D9',
+                  efunctioncode: 'D7',
                   efunctionname: 'Delete Timesheet'
                 },
                 {
                   
-                  efunctioncode: 'C10',
-                  efunctionname: 'Create Project'
-                },
-                {
-                  
-                  efunctioncode: 'R10',
-                  efunctionname: 'Read Project'
-                },
-                {
-                  
-                  efunctioncode: 'U10',
-                  efunctionname: 'Update Project'
-                },
-                {
-                  
-                  efunctioncode: 'D10',
-                  efunctionname: 'Delete Project'
-                },
-                {
-                  
-                  efunctioncode: 'C11',
-                  efunctionname: 'Create Announcement'
-                },
-                {
-                  
-                  efunctioncode: 'R11',
-                  efunctionname: 'Read Announcement'
-                },
-                {
-                  
-                  efunctioncode: 'U11',
-                  efunctionname: 'Update Announcement'
-                },
-                {
-                  
-                  efunctioncode: 'D11',
-                  efunctionname: 'Delete Announcement'
-                },
-                {
-                  
-                  efunctioncode: 'C12',
+                  efunctioncode: 'C8',
                   efunctionname: 'Create Report'
                 },
                 {
                   
-                  efunctioncode: 'R12',
+                  efunctioncode: 'R8',
                   efunctionname: 'Read Report'
                 },
                 {
                   
-                  efunctioncode: 'U12',
+                  efunctioncode: 'U8',
                   efunctionname: 'Update Report'
                 },
                 {
                   
-                  efunctioncode: 'D12',
+                  efunctioncode: 'D8',
                   efunctionname: 'Delete Report'
                 },
                 {
                   
-                  efunctioncode: 'C13',
+                  efunctioncode: 'C9',
                   efunctionname: 'Create Setting'
                 },
                 {
                   
-                  efunctioncode: 'R13',
+                  efunctioncode: 'R9',
                   efunctionname: 'Read Setting'
                 },
                 {
                   
-                  efunctioncode: 'U13',
+                  efunctioncode: 'U9',
                   efunctionname: 'Update Setting'
                 },
                 {
                   
-                  efunctioncode: 'D13',
+                  efunctioncode: 'D9',
                   efunctionname: 'Delete Setting'
                 },
                 {
                   
-                  efunctioncode: 'C14',
+                  efunctioncode: 'C10',
                   efunctionname: 'Create Class'
                 },
                 {
                   
-                  efunctioncode: 'R14',
+                  efunctioncode: 'R10',
                   efunctionname: 'Read Class'
                 },
                 {
                   
-                  efunctioncode: 'U14',
+                  efunctioncode: 'U10',
                   efunctionname: 'Update Class'
                 },
                 {
                   
-                  efunctioncode: 'D14',
+                  efunctioncode: 'D10',
                   efunctionname: 'Delete Class'
                 },
                 {
                   
-                  efunctioncode: 'C15',
+                  efunctioncode: 'C11',
                   efunctionname: 'Create Team'
                 },
                 {
                   
-                  efunctioncode: 'R15',
+                  efunctioncode: 'R11',
                   efunctionname: 'Read Team'
                 },
                 {
                   
-                  efunctioncode: 'U15',
+                  efunctioncode: 'U11',
                   efunctionname: 'Update Team'
                 },
                 {
                   
-                  efunctioncode: 'D15',
+                  efunctioncode: 'D11',
                   efunctionname: 'Delete Team'
                 },
                 {
                   
-                  efunctioncode: 'C16',
+                  efunctioncode: 'C12',
                   efunctionname: 'Create Theory'
                 },
                 {
                   
-                  efunctioncode: 'R16',
+                  efunctioncode: 'R12',
                   efunctionname: 'Read Theory'
                 },
                 {
                   
-                  efunctioncode: 'U16',
+                  efunctioncode: 'U12',
                   efunctionname: 'Update Theory'
                 },
                 {
                   
-                  efunctioncode: 'D16',
+                  efunctioncode: 'D12',
                   efunctionname: 'Delete Theory'
                 },
                 {
-                  efunctioncode: 'P17',
+                  efunctioncode: 'P13',
                   efunctionname: 'Set Public Status Forum'
                 },
                 {
-                  efunctioncode: 'D17',
+                  efunctioncode: 'D13',
                   efunctionname: 'Delete Forum'
                 },
                 {
                   
-                  efunctioncode: 'C18',
+                  efunctioncode: 'C14',
                   efunctionname: 'Create News'
                 },
                 {
                   
-                  efunctioncode: 'R18',
+                  efunctioncode: 'R14',
                   efunctionname: 'Read News'
                 },
                 {
                   
-                  efunctioncode: 'U18',
+                  efunctioncode: 'U14',
                   efunctionname: 'Update News'
                 },
                 {
                   
-                  efunctioncode: 'D18',
+                  efunctioncode: 'D14',
                   efunctionname: 'Delete News'
                 },
                 {
                   
-                  efunctioncode: 'C19',
+                  efunctioncode: 'C15',
                   efunctionname: 'Create Tournament'
                 },
                 {
                   
-                  efunctioncode: 'R19',
+                  efunctioncode: 'R15',
                   efunctionname: 'Read Tournament'
                 },
                 {
                   
-                  efunctioncode: 'U19',
+                  efunctioncode: 'U15',
                   efunctionname: 'Update Tournament'
                 },
                 {
                   
-                  efunctioncode: 'D19',
+                  efunctioncode: 'D15',
                   efunctionname: 'Delete Tournament'
+                },
+                {
+                  
+                  efunctioncode: 'C16',
+                  efunctionname: 'Create Bank'
+                },
+                {
+                  
+                  efunctioncode: 'R16',
+                  efunctionname: 'Read Bank'
+                },
+                {
+                  
+                  efunctioncode: 'U16',
+                  efunctionname: 'Update Bank'
+                },
+                {
+                  
+                  efunctioncode: 'D16',
+                  efunctionname: 'Delete Bank'
                 },
             ]
         ));

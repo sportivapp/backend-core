@@ -1,4 +1,4 @@
-exports.up = (knex, Promise) => knex.schema.createTable('class_reasons', t => {
+exports.up = (knex, Promise) => knex.schema.createTable('category_session_report', t => {
     t.specificType('id', 'serial');
     t.uuid('uuid').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     t.uuid('class_uuid').references('class.uuid');
@@ -13,4 +13,4 @@ exports.up = (knex, Promise) => knex.schema.createTable('class_reasons', t => {
     t.bigInteger('delete_time');
 });
 
-exports.down = (knex, Promise) => knex.schema.dropTable('class_reasons');
+exports.down = (knex, Promise) => knex.schema.dropTable('category_session_report');

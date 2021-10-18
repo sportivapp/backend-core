@@ -2,3 +2,5 @@ change create city migrations
 swapped session_report_type and category_session_report timestamp ( session_report_type should be first )
 removed add sport type role from migrations to seed
 removed news and tournament module from migrations to seed
+fixed seeds for fresh start (changed starting data)
+removed bank module from migrations to seed
