@@ -33,7 +33,7 @@ app.use(cookieParser());
 app.use(express.json({limit: '1000mb'}));
 app.use(express.urlencoded({limit: '1000mb', extended: true }));
 app.use(morgan('dev'));
-app.use('/core', express.static(process.env.TEMP_DIRECTORY));
+app.use('/core', express.static(path.join(__dirname, process.env.TEMP_DIRECTORY)));
 
 app.use(unprefixedRoutes, routes, secondRoutes);
 
