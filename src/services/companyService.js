@@ -36,6 +36,7 @@ function isNameUniqueValidationError(e) {
     if (!e.nativeError)
         return false;
 
+    console.log(e)
     return e.nativeError.detail.includes('ecompanyname') && e instanceof UniqueViolationError
 }
 

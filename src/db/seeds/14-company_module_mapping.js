@@ -47,5 +47,40 @@ exports.seed = (knex, Promise) => knex('ecompanymodulemapping').del()
           ecompanyecompanyid: 1,
           emoduleemoduleid: 9,
         },
+        {
+          ecompanymodulemappingname: 'Class',
+          ecompanyecompanyid: 1,
+          emoduleemoduleid: 10,
+        },
+        {
+          ecompanymodulemappingname: 'Team',
+          ecompanyecompanyid: 1,
+          emoduleemoduleid: 11,
+        },
+        {
+          ecompanymodulemappingname: 'Theory',
+          ecompanyecompanyid: 1,
+          emoduleemoduleid: 12,
+        },
+        {
+          ecompanymodulemappingname: 'Forum',
+          ecompanyecompanyid: 1,
+          emoduleemoduleid: 13,
+        },
+        {
+          ecompanymodulemappingname: 'News',
+          ecompanyecompanyid: 1,
+          emoduleemoduleid: 14,
+        },
+        {
+          ecompanymodulemappingname: 'Tournament',
+          ecompanyecompanyid: 1,
+          emoduleemoduleid: 15,
+        },
+        {
+          ecompanymodulemappingname: 'Bank',
+          ecompanyecompanyid: 1,
+          emoduleemoduleid: 16,
+        },
       ]
     ));
