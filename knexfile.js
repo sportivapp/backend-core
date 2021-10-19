@@ -3,8 +3,8 @@ const BASE_PATH = path.join(__dirname, 'src', 'db');
 
 module.exports = {
   development: {
-    client: process.env.DB_CLIENT,
-    connection: process.env.DB_CONNECTION,
+    client: process.env.DATABASE_CLIENT,
+    connection: process.env.DATABASE_CONNECTION,
     migrations: {
       directory: path.join(BASE_PATH, 'migrations')
     },
