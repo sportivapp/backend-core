@@ -3,8 +3,8 @@ const BASE_PATH = path.join(__dirname, 'src', 'db');
 
 module.exports = {
   development: {
-    client: 'postgres',
-    connection: 'postgres://fybpgjrhtopkns:db290aff96ec10b4a90714bdff11f3d474b01fca3778c689467406e9d66a9120@ec2-34-233-64-238.compute-1.amazonaws.com:5432/d47qb0d8n2jbd',
+    client: process.env.DB_CLIENT,
+    connection: process.env.DB_CONNECTION,
     migrations: {
       directory: path.join(BASE_PATH, 'migrations')
     },
