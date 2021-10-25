@@ -22,7 +22,11 @@ classCategoryService.getClassCategory = async (categoryUuid, user) => {
             if (!category)
                 throw new NotFoundError();
                 category.totalParticipants = await classCategorySessionService.getTotalParticipantsByCategoryUuid(category.uuid);
-                category.price = parseInt(category.price);
+                if (category.price === null || category.price === undefined) {
+                    category.price = await classCategorySessionService.getLowestSessionPrice(category.uuid);
+                } else {
+                    category.price = parseInt(category.price);
+                }
             return category;
         })
 
