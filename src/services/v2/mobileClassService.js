@@ -20,6 +20,38 @@ const ErrorEnum = {
 
 const classService = {};
 
+classService.getPriceRange = async (classUuid) => {
+
+    const result = await Class.query()
+        .findById(classUuid)
+        .modify('prices')
+        .then(cls => {
+            let lowestPrice = Number.MAX_VALUE;
+            let highestPrice = Number.MIN_VALUE;
+            cls.classCategories.map(category => {
+                const categoryPriceInt = parseInt(category.price);
+                if (categoryPriceInt < lowestPrice)
+                    lowestPrice = categoryPriceInt;
+                if (categoryPriceInt > highestPrice)
+                    highestPrice = categoryPriceInt
+                category.categorySessions.map(session => {
+                    const sessionPriceInt = parseInt(session.price);
+                    if (sessionPriceInt < lowestPrice)
+                        lowestPrice = sessionPriceInt;
+                    if (sessionPriceInt > highestPrice)
+                        highestPrice = sessionPriceInt
+                });
+            });
+            return {
+                minPrice: lowestPrice,
+                maxPrice: highestPrice
+            };
+        });
+
+    return result;
+
+}
+
 classService.getClasses = async (page, size, keyword, industryId, cityId, companyId) => {
 
     let clsPromise = Class.query()
@@ -40,7 +72,7 @@ classService.getClasses = async (page, size, keyword, industryId, cityId, compan
     const resultPromise = pageObj.results.map(async cls => {
         return {
             ...cls,
-            priceRange: await classCategoryService.getClassCategoryPriceRangeByClassUuid(cls.uuid),
+            priceRange: await classService.getPriceRange(cls.uuid),
             totalParticipants: await classCategoryParticipantSessionService.getTotalParticipantsByClassUuid(cls.uuid),
         }
     });
