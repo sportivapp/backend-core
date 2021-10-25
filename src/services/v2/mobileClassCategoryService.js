@@ -49,6 +49,10 @@ classCategoryService.getClassCategoryPriceRangeByClassUuid = async (classUuid) =
             min = price;
         if (price > max)
             max = price;
+        if (min === Number.MAX_SAFE_INTEGER && max === Number.MIN_SAFE_INTEGER) {
+            min = 0;
+            max = 0;
+        }
     })
 
     return {
