@@ -97,11 +97,13 @@ classService.getClassStartFromPrice = async (classUuid) => {
         .then(cls => {
             let lowestPrice = Number.MAX_VALUE;
             cls.classCategories.map(category => {
-                if (category.price < lowestPrice)
-                    lowestPrice = category.price;
+                const categoryPriceInt = parseInt(category.price);
+                if (categoryPriceInt < lowestPrice)
+                    lowestPrice = categoryPriceInt;
                 category.categorySessions.map(session => {
-                    if (session.price < lowestPrice)
-                        lowestPrice = session.price;
+                    const sessionPriceInt = parseInt(session.price);
+                    if (sessionPriceInt < lowestPrice)
+                        lowestPrice = sessionPriceInt;
                 });
             });
             return lowestPrice;
