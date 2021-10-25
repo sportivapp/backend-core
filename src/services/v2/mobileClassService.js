@@ -104,7 +104,11 @@ classService.getClass = async (classUuid, user) => {
 
     const clsCategoriesPromise = cls.classCategories.map(async category => {
         category.totalParticipants = await classCategorySessionService.getTotalParticipantsByCategoryUuid(category.uuid);
-        category.price = parseInt(category.price);
+        if (category.price === null || category.price === undefined) {
+            category.price = await classCategorySessionService.getLowestSessionPrice(category.uuid);
+        } else {
+            category.price = parseInt(category.price);
+        }
     })
 
     await Promise.all(clsCategoriesPromise);
