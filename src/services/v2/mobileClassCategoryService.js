@@ -22,7 +22,11 @@ classCategoryService.getClassCategory = async (categoryUuid, user) => {
             if (!category)
                 throw new NotFoundError();
                 category.totalParticipants = await classCategorySessionService.getTotalParticipantsByCategoryUuid(category.uuid);
-                category.price = parseInt(category.price);
+                if (category.price === null || category.price === undefined) {
+                    category.price = await classCategorySessionService.getLowestSessionPrice(category.uuid);
+                } else {
+                    category.price = parseInt(category.price);
+                }
             return category;
         })
 
@@ -34,29 +38,34 @@ classCategoryService.getClassCategory = async (categoryUuid, user) => {
 
 }
 
-classCategoryService.getClassCategoryPriceRangeByClassUuid = async (classUuid) => {
+// Fooked, useless, using getPriceRange on classService now
+// classCategoryService.getClassCategoryPriceRangeByClassUuid = async (classUuid) => {
 
-    const prices = await ClassCategory.query()
-        .modify('price')
-        .where('class_uuid', classUuid)
-        .then(prices => prices.map(price => parseInt(price.price)));
+//     const prices = await ClassCategory.query()
+//         .modify('price')
+//         .where('class_uuid', classUuid)
+//         .then(prices => prices.map(price => parseInt(price.price)));
 
-    let min = Number.MAX_SAFE_INTEGER;
-    let max = Number.MIN_SAFE_INTEGER;
+//     let min = Number.MAX_SAFE_INTEGER;
+//     let max = Number.MIN_SAFE_INTEGER;
 
-    prices.forEach(price => {
-        if (price < min)
-            min = price;
-        if (price > max)
-            max = price;
-    })
+//     prices.forEach(price => {
+//         if (price < min)
+//             min = price;
+//         if (price > max)
+//             max = price;
+//         if (min === Number.MAX_SAFE_INTEGER && max === Number.MIN_SAFE_INTEGER) {
+//             min = 0;
+//             max = 0;
+//         }
+//     })
 
-    return {
-        minPrice: min,
-        maxPrice: max,
-    }
+//     return {
+//         minPrice: min,
+//         maxPrice: max,
+//     }
 
-}
+// }
 
 classCategoryService.getCoachCategory = async (classCategoryUuid, user) => {
 

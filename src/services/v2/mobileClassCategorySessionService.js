@@ -645,6 +645,26 @@ classCategorySessionService.getTotalParticipantsByCategoryUuid = async (category
 
 }
 
+// IMPORTANT NOTE!!
+// Only use this function when the category price is null (price is on every single sessions)
+classCategorySessionService.getLowestSessionPrice = async (categoryUuid) => {
+
+    return ClassCategorySession.query()
+        .where('class_category_uuid', categoryUuid)
+        .where('status', sessionStatusEnum.UPCOMING)
+        .then(sessions => {
+            let min = Number.MAX_SAFE_INTEGER;
+            sessions.forEach(session => {
+                const sessionPriceInt = parseInt(session.price)
+                if (sessionPriceInt < min) {
+                    min = sessionPriceInt
+                }
+            });
+            return min
+        })
+
+}
+
 classCategorySessionService.getOrderedActiveAndUpcomingSessions = async (categoryUuid) => {
 
     return ClassCategorySession.query()
