@@ -4,13 +4,13 @@ const classCategoryCoachService = require('./mobileClassCategoryCoachService');
 const classComplaintMediaService = require('./mobileClassComplaintMediasService');
 const classComplaintStatusEnum = require('../../models/enum/ClassComplaintStatusEnum');
 const zeroPrefixHelper = require('../../helper/zeroPrefixHelper');
-const ClassTransactionSequence = require('../../models/v2/ClassComplaintSequence');
 const { moduleTransactionEnum, moduleEnum } = require('../../models/enum/ModuleTransactionEnum');
 const dateFormatter = require('../../helper/dateFormatter');
 const notificationService = require('../notificationService');
 const NotificationEnum = require('../../models/enum/NotificationEnum');
 const CodeToTextMonthEnum = require('../../models/enum/CodeToTextMonthEnum');
 const ServiceHelper = require('../../helper/ServiceHelper');
+const ClassComplaintSequence = require('../../models/v2/ClassComplaintSequence');
 
 const ErrorEnum = {
     DOUBLE_COMPLAINT: 'DOUBLE_COMPLAINT',
@@ -37,7 +37,7 @@ mobileClassComplaintService.checkExistUserComplaint = async (classCategorySessio
 
 mobileClassComplaintService.complaintSession = async (classComplaintsDTO, user) => {
 
-    const complaintIdCode = await ClassTransactionSequence.getNextVal();
+    const complaintIdCode = await ClassComplaintSequence.getNextVal();
     const prefixedCode = zeroPrefixHelper.zeroPrefixCodeByLength(complaintIdCode, 9);
     const complaintId = `CMP/${dateFormatter.formatDateToYYYYMMDD(new Date())}/${moduleTransactionEnum[moduleEnum.CLASS]}/${prefixedCode}`;
 
