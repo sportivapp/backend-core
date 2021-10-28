@@ -26,8 +26,8 @@ classService.getPriceRange = async (classUuid) => {
         .findById(classUuid)
         .modify('prices')
         .then(cls => {
-            let lowestPrice = Number.MAX_VALUE;
-            let highestPrice = Number.MIN_VALUE;
+            let lowestPrice = Number.MAX_SAFE_INTEGER;
+            let highestPrice = Number.MIN_SAFE_INTEGER;
             cls.classCategories.map(category => {
                 const categoryPriceInt = parseInt(category.price);
                 if (categoryPriceInt < lowestPrice)
