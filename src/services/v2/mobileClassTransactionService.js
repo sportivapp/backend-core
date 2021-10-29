@@ -11,6 +11,7 @@ const { UnsupportedOperationError } = require('../../models/errors');
 const dokuService = require('./dokuService');
 const bcaService = require('./bcaService');
 const paymentMethodEnum = require('../../models/enum/PaymentMethodEnum');
+const xenditPaymentService = require('./xenditPaymentService');
 
 const ErrorEnum = {
     INVALID_PAYMENT_CHANNEL_CODE: 'INVALID_PAYMENT_CHANNEL_CODE',
@@ -128,60 +129,29 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
     const prefixedCode = zeroPrefixHelper.zeroPrefixCodeByLength(invoiceCode, 9);
     const invoice = `INV/${dateFormatter.formatDateToYYYYMMDD(new Date())}/${moduleTransactionEnum[moduleEnum.CLASS]}/${prefixedCode}`;
 
-    const timeLimit = new Date();
-    timeLimit.setMinutes(timeLimit.getMinutes() + 15);
+    let expiryDate = new Date();
+    const timeLimit = expiryDate.setMinutes(expiryDate.getMinutes() + 15);
+    const expiryDateISO = timeLimit.toISOString();
 
     const classTransactionDTO = classTransactionService
         .generateClassTransactionDTO(cls, category, invoice, invoiceCode, price, classTransactionStatusEnum.AWAITING_PAYMENT, timeLimit.getTime(), user);
 
     return ClassTransaction.transaction(async trx => {
 
+        const xenditPayment = xenditPaymentService.createXenditPayment(invoice, price, 'Class Purchase', expiryDateISO, null, paymentMethodCode, user);
+
         const classTransaction = await ClassTransaction.query(trx)
             .insertToTable(classTransactionDTO, user.sub);
 
         const transactionDetailDTOs = classTransactionService
             .generateDetailTransactionDTOs(classTransaction, cls, category, sessions, invoice, user);
-        const detailTransactions = await classTransactionDetailService
+        // save transaction detail to use when the invoice is paid
+        await classTransactionDetailService
             .generateTransactionDetail(transactionDetailDTOs, user, trx);
 
-        const existPaymentMethod = paymentMethodEnum.filter(paymentMethod => {
-            return paymentMethod.code === paymentMethodCode.toString();
-        });
-
-        if (existPaymentMethod.length === 0)
-            throw new UnsupportedOperationError(ErrorEnum.INVALID_PAYMENT_CHANNEL_CODE);
-        // const paymentChannel = 1;
-        //UNCOMMENT IF PAYMENT SEPARATED
-        // const callResult = await outboundPaymentService.createDOKUPayment(invoice, price, user.name,
-        //     user.email, paymentChannel, timeLimit.getTime());
-        // if (!callResult) throw new UnsupportedOperationError('FAILED_PAYMENT');
-
-        let callResult
-
-        if (existPaymentMethod[0].code === '29') {
-
-            const paymentRequest = {
-                timeLimit: timeLimit.getTime(),
-                amount: parseFloat(price),
-                invoice: invoice,
-                productCode: '00002',
-            };
-
-            callResult = await bcaService.createBCARequest(paymentRequest, user);
-        }
-
-        else {
-
-            callResult = await dokuService.generatePaymentParams(invoice, price, user.name,
-                user.email, existPaymentMethod[0].code, timeLimit.getTime());
-        }
-
-        return callResult;
-        // ...classTransaction,
-        // details: detailTransactions,
+        return xenditPayment.invoiceUrl
 
     });
-  
 }
 
 classTransactionService.generateTransaction = async (cls, category, sessions, paymentMethodCode, user) => {
@@ -198,6 +168,26 @@ classTransactionService.generateTransaction = async (cls, category, sessions, pa
     } else {
         return classTransactionService.generateFreeTransaction(cls, category, sessions, user);
     }
+
+}
+
+classTransactionService.processInvoice = async(invoice) => {
+
+    const classTransaction = await ClassTransaction.query()
+        .where('invoice', invoice)
+        .first();
+
+    const user = {
+        sub: classTransaction.createBy
+    }
+
+    const savedDetailTransactions = await classTransactionDetailService.getTransactionDetailsByInvoice(classTransaction.invoice);
+
+    const participantSessionDTOs = classTransactionDetailService.generateParticipantSessionDTOs(savedDetailTransactions);
+    
+    ClassTransaction.transaction(async trx => {
+        await classCategoryParticipantSessionService.register(participantSessionDTOs, user, trx);
+    })
 
 }
 

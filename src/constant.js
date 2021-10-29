@@ -325,6 +325,10 @@ module.exports = {
             oauth: '/api/oauth/token',
             bills: '/va/bills',
             invocation: '/va/payments'
+        },
+        xendit: {
+            receivePayment: '/receive-payment',
+            channels: '/payment-channels',
         }
     }
 }
