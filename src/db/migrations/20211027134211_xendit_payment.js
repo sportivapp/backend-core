@@ -4,6 +4,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('xendit_payment', t => {
     t.string('invoice').unique().notNullable();
     t.decimal('amount', 14, 2).notNullable();
     t.string('description');
+    t.string('invoice_url').notNullable();
     t.timestamp('expiry_date').notNullable();
     t.string('name');
     t.string('email');

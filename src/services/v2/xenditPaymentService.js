@@ -22,7 +22,7 @@ xenditPaymentService.createXenditPayment = async (invoice, amount, description, 
         name: user.name,
         email: user.email,
         items: JSON.stringify(items),
-        status: xenditPaymentStatusEnum.AWAITING_PAYMENT
+        status: xenditPaymentStatusEnum.AWAITING_PAYMENT,
     }
 
     return XenditPayment.transaction(async trx => {
@@ -37,12 +37,13 @@ xenditPaymentService.createXenditPayment = async (invoice, amount, description, 
             .findById(xenditPayment.uuid)
             .updateByUserId({
                 invoice: xenditResponse.id,
-                expiryDate: new Date(xenditResponse.expiryDate).getTime()
+                expiryDate: new Date(xenditResponse.expiryDate).getTime(),
+                invoiceUrl: xenditResponse.invoice_url
             }, user.sub)
         
         return {
             ...updatedPayment,
-            invoiceUrl: xenditResponse.url
+            invoiceUrl: xenditResponse.invoice_url
         }
         
     })
