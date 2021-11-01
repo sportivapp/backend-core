@@ -183,4 +183,19 @@ classCategoryParticipantSessionService.getTotalParticipantsBySessionUuids = asyn
 
 }
 
+classCategoryParticipantSessionService.isUserClassParticipant = async (userId, classUuid) => {
+
+    await ClassCategoryParticipantSession.query()
+        .where('user_id', userId)
+        .andWhere('class_uuid', classUuid)
+        .first()
+        .then(exist => {
+            if (exist) 
+                return true
+        });
+
+    return false
+
+}
+
 module.exports = classCategoryParticipantSessionService;

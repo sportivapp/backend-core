@@ -123,7 +123,7 @@ classTransactionService.generateFreeTransaction = async (cls, category, sessions
 
 }
 
-classTransactionService.generatePaidTransaction = async (cls, category, sessions, price, paymentMethodCode, user) => {
+classTransactionService.generatePaidTransaction = async (cls, category, sessions, price, paymentMethodCode, items, user) => {
 
     const invoiceCode = await ClassTransactionSequence.getNextVal();
     const prefixedCode = zeroPrefixHelper.zeroPrefixCodeByLength(invoiceCode, 9);
@@ -138,7 +138,7 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
 
     return ClassTransaction.transaction(async trx => {
 
-        const xenditPayment = xenditPaymentService.createXenditPayment(invoice, price, 'Class Purchase', expiryDateISO, null, paymentMethodCode, user);
+        const xenditPayment = xenditPaymentService.createXenditPayment(invoice, price, 'Class Purchase', expiryDateISO, items, paymentMethodCode, user);
 
         const classTransaction = await ClassTransaction.query(trx)
             .insertToTable(classTransactionDTO, user.sub);
@@ -164,7 +164,28 @@ classTransactionService.generateTransaction = async (cls, category, sessions, pa
     }
 
     if (price > 0) {
-        return classTransactionService.generatePaidTransaction(cls, category, sessions, price, paymentMethodCode, user);
+
+        const items = [];
+        items.push({
+            'name': 'Class Session(s)',
+            'quantity': 1,
+            'price': price
+        })
+        // Check if the registrant have registered to this class
+        // If not, apply administration fee
+        const isClassParticipant = await classCategoryParticipantSessionService.isUserClassParticipant(user.sub, cls.uuid);
+        if (!isClassParticipant) {
+            if (cls.administrationFee !== 0) {
+                price += cls.administrationFee;            
+                items.push({
+                    'name': 'Administration Fee',
+                    'quantity': 1,
+                    'price': cls.administrationFee
+                });
+            }
+        }
+
+        return classTransactionService.generatePaidTransaction(cls, category, sessions, price, paymentMethodCode, items, user);
     } else {
         return classTransactionService.generateFreeTransaction(cls, category, sessions, user);
     }
