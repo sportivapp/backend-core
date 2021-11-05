@@ -277,6 +277,7 @@ module.exports = {
         },
         authentication: {
             login: '/login',
+            miniLogin: '/mini-login',
             logout: '/logout',
             loginCompany: '/login-company',
             loginAuto: '/login-auto'
