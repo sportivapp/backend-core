@@ -29,6 +29,36 @@ controller.login = async (req, res, next) => {
 
 }
 
+controller.miniLogin = async (req, res, next) => {
+
+    const { email, password, api_key } = req.body;
+
+    const loginDTO = {
+        email: email,
+        password: password
+    }
+
+    console.log(api_key)
+
+    try {
+
+        const result = await authenticationService.miniLogin(loginDTO, api_key);
+        // Not returning the jwt token, because not used and not secure.
+        return res.status(200).json(ResponseHelper.toBaseResponse('jwt-token'));
+
+        // return res.cookie('tok', result, {
+        //     secure: true,
+        //     httpOnly: true,
+        //     domain: process.env.COOKIE_DOMAIN,
+        //     maxAge: 3 * 24 * 60 * 60 * 1000
+        // }).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 controller.logout = async (req, res, next) => {
 
     return res.cookie('tok', undefined, {
