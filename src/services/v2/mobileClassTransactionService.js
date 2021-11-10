@@ -149,7 +149,10 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
         await classTransactionDetailService
             .generateTransactionDetail(transactionDetailDTOs, user, trx);
 
-        return xenditPayment.invoiceUrl
+        return {
+            url: xenditPayment.invoiceUrl,
+            invoice: invoice,
+        }
 
     });
 }
