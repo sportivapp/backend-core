@@ -430,7 +430,7 @@ classCategorySessionService.getMySessionUuidsByCategoryUuid = async (categoryUui
         .modify('mySessions', user.sub)
         .where('status', status)
         .where('class_category_uuid', categoryUuid)
-        .where('start_date', '>=', Date.now())
+        // .where('start_date', '>=', Date.now())
         .orderBy('start_date', 'ASC')
         .then(sessions => sessions.map(session => {
             return session.uuid;
