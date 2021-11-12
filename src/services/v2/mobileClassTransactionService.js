@@ -131,7 +131,7 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
 
     let expiryDate = new Date();
     const timeLimit = expiryDate.setMinutes(expiryDate.getMinutes() + 15);
-    const expiryDateISO = timeLimit.toISOString();
+    const expiryDateISO = new Date(timeLimit.toISOString());
 
     const classTransactionDTO = classTransactionService
         .generateClassTransactionDTO(cls, category, invoice, invoiceCode, price, classTransactionStatusEnum.AWAITING_PAYMENT, timeLimit.getTime(), user);
