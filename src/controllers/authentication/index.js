@@ -38,8 +38,6 @@ controller.miniLogin = async (req, res, next) => {
         password: password
     }
 
-    console.log(api_key)
-
     try {
 
         const result = await authenticationService.miniLogin(loginDTO, api_key);
