@@ -2,7 +2,6 @@ exports.up = (knex, Promise) => knex.schema.createTable('class_transaction', t =
     t.specificType('id', 'serial');
     t.uuid('uuid').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     t.string('invoice').unique();
-    t.integer('invoice_code').unique();
     t.uuid('class_uuid').references('class.uuid');
     t.uuid('class_category_uuid').references('class_category.uuid');
     t.integer('user_id');
