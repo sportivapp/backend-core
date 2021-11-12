@@ -5,6 +5,7 @@ const auth = require('../../../middlewares/authentication');
 const { routes } = require('../../../constant')
 
 router.post(routes.authentication.login, controller.login);
+router.post(routes.authentication.miniLogin, controller.miniLogin);
 router.delete(routes.authentication.logout, controller.logout);
 router.post(routes.authentication.loginCompany, auth.authenticateToken, controller.loginCompany);
 router.post(routes.authentication.loginAuto, controller.autoLogin);

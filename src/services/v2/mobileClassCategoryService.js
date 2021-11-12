@@ -108,7 +108,7 @@ classCategoryService.getMyCategory = async (classCategoryUuid, status, user) => 
 
     const sessionUuids = await classCategorySessionService.getMySessionUuidsByCategoryUuid(classCategoryUuid, status, user);
     if (sessionUuids.length === 0)
-        return [];
+        return {};
 
     return ClassCategory.query()
         .findById(classCategoryUuid)

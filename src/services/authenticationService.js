@@ -8,7 +8,8 @@ const jwtService = require('./common/jwtService');
 const ErrorEnum = {
     UNSUCCESSFUL_LOGIN: 'UNSUCCESSFUL_LOGIN',
     NOT_IN_COMPANY: 'NOT_IN_COMPANY',
-    USER_NOT_FOUND: 'USER_NOT_FOUND'
+    USER_NOT_FOUND: 'USER_NOT_FOUND',
+    INVALID_MINI_API_KEY: 'INVALID_MINI_API_KEY',
 }
 
 const AuthenticationService = {};
@@ -24,6 +25,16 @@ AuthenticationService.generateJWTToken = async(user) => {
     }
 
     return jwtService.sign(config, '1800s');
+
+}
+
+AuthenticationService.miniLogin = async (loginDTO, apiKey) => {
+
+    if (apiKey !== 'miniapikey') {
+        throw new UnsupportedOperationError(ErrorEnum.INVALID_MINI_API_KEY);
+    }
+
+    return AuthenticationService.login(loginDTO);
 
 }
 
