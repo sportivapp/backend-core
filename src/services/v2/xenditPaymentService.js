@@ -2,6 +2,7 @@ const { UnsupportedOperationError } = require('../../models/errors');
 const XenditPayment = require('../../models/v2/XenditPayment');
 const xenditOutboundService = require('./xenditOutboundService');
 const mobileClassTransactionService = require('./mobileClassTransactionService');
+const uuid = require('uuid');
 
 const paymentChannelsEnum = {
     "CREDIT_CARD": "CREDIT_CARD",
@@ -51,41 +52,39 @@ xenditPaymentService.getPaymentChannels = () => {
 
 }
 
-xenditPaymentService.createXenditPayment = async (invoice, amount, description, expiryDate, items, paymentChannel, user) => {
+xenditPaymentService.createXenditPayment = async (invoice, amount, description, invoiceDuration, items, paymentChannel, user) => {
 
     if (!paymentChannelsEnum[paymentChannel]) {
         throw new UnsupportedOperationError(ErrorEnum.PAYMENT_CHANNEL_NOT_SUPPORTED);
     }
 
-    const paymentDTO = {
-        invoice: invoice,
-        amount: amount,
-        description: description,
-        expiryDate: expiryDate,
-        name: user.name,
-        email: user.email,
-        items: JSON.stringify(items),
-        status: xenditPaymentStatusEnum.AWAITING_PAYMENT,
-    }
+    const paymentUuid = uuid.v4();
 
     return XenditPayment.transaction(async trx => {
-        
+
+        const xenditResponse = await xenditOutboundService.generateXenditInvoice(paymentUuid, amount, 
+            description, invoiceDuration, user.name, user.email, items, [paymentChannel]);
+
+        const paymentDTO = {
+            uuid: paymentUuid,
+            invoice: invoice,
+            amount: amount,
+            description: description,
+            expiryDate: xenditResponse.expiryDate,
+            name: user.name,
+            email: user.email,
+            items: JSON.stringify(items),
+            status: xenditPaymentStatusEnum.AWAITING_PAYMENT,
+            xenditInvoiceId: xenditResponse.id,
+            invoiceUrl: xenditResponse.invoiceUrl
+        }
+
         const xenditPayment = await XenditPayment.query(trx)
             .insertToTable(paymentDTO, user.sub);
 
-        const xenditResponse = await xenditOutboundService.generateXenditInvoice(xenditPayment.uuid, amount, 
-            xenditPayment.description, xenditPayment.name, xenditPayment.email, JSON.parse(xenditPayment.items), [paymentChannel]);
-    
-        const updatedPayment = await XenditPayment.query(trx)
-            .findById(xenditPayment.uuid)
-            .updateByUserId({
-                xenditInvoiceId: xenditResponse.id,
-                invoiceUrl: xenditResponse.invoiceUrl,
-            }, user.sub)
-        
         return {
-            ...updatedPayment,
-            invoiceUrl: xenditResponse.invoiceURl
+            ...xenditPayment,
+            invoiceUrl: xenditPayment.invoiceUrl
         }
         
     })

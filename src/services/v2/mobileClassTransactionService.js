@@ -129,16 +129,14 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
     const prefixedCode = zeroPrefixHelper.zeroPrefixCodeByLength(invoiceCode, 9);
     const invoice = `INV/${dateFormatter.formatDateToYYYYMMDD(new Date())}/${moduleTransactionEnum[moduleEnum.CLASS]}/${prefixedCode}`;
 
-    let expiryDate = new Date();
-    const timeLimit = expiryDate.setMinutes(expiryDate.getMinutes() + 15);
-    const expiryDateISO = new Date(timeLimit).toISOString();
-
-    const classTransactionDTO = classTransactionService
-        .generateClassTransactionDTO(cls, category, invoice, invoiceCode, price, classTransactionStatusEnum.AWAITING_PAYMENT, timeLimit.getTime(), user);
+    const invoiceDuration = 15 // 900 secs = 15 mins
 
     return ClassTransaction.transaction(async trx => {
 
-        const xenditPayment = xenditPaymentService.createXenditPayment(invoice, price, 'Class Purchase', expiryDateISO, items, paymentMethodCode, user);
+        const xenditPayment = await xenditPaymentService.createXenditPayment(invoice, price, 'Class Purchase', invoiceDuration, items, paymentMethodCode, user);
+
+        const classTransactionDTO = classTransactionService
+            .generateClassTransactionDTO(cls, category, invoice, invoiceCode, price, classTransactionStatusEnum.AWAITING_PAYMENT, new Date(xenditPayment.expiryDate).getTime(), user);
 
         const classTransaction = await ClassTransaction.query(trx)
             .insertToTable(classTransactionDTO, user.sub);
