@@ -129,7 +129,7 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
     const prefixedCode = zeroPrefixHelper.zeroPrefixCodeByLength(invoiceCode, 9);
     const invoice = `INV/${dateFormatter.formatDateToYYYYMMDD(new Date())}/${moduleTransactionEnum[moduleEnum.CLASS]}/${prefixedCode}`;
 
-    const invoiceDuration = 15 // 900 secs = 15 mins
+    const invoiceDuration = 900 // 900 secs = 15 mins
 
     return ClassTransaction.transaction(async trx => {
 
