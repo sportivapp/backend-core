@@ -11,7 +11,6 @@ const { UnsupportedOperationError } = require('../../models/errors');
 const dokuService = require('./dokuService');
 const bcaService = require('./bcaService');
 const paymentMethodEnum = require('../../models/enum/PaymentMethodEnum');
-const xenditPaymentService = require('./xenditPaymentService');
 
 const ErrorEnum = {
     INVALID_PAYMENT_CHANNEL_CODE: 'INVALID_PAYMENT_CHANNEL_CODE',
@@ -73,11 +72,10 @@ classTransactionService.generateDetailTransactionDTOs = (classTransaction, cls, 
 
 }
 
-classTransactionService.generateClassTransactionDTO = (cls, category, invoice, invoiceCode, amount, status, timeLimit, user) => {
+classTransactionService.generateClassTransactionDTO = (cls, category, invoice, amount, status, timeLimit, user) => {
 
     return {
         invoice: invoice,
-        invoiceCode: invoiceCode,
         classUuid: cls.uuid,
         classCategoryUuid: category.uuid,
         userId: user.sub,
@@ -91,14 +89,18 @@ classTransactionService.generateClassTransactionDTO = (cls, category, invoice, i
 
 }
 
-classTransactionService.generateFreeTransaction = async (cls, category, sessions, user) => {
+classTransactionService.generateInvoice = async () => {
 
     const invoiceCode = await ClassTransactionSequence.getNextVal();
     const prefixedCode = zeroPrefixHelper.zeroPrefixCodeByLength(invoiceCode, 9);
-    const invoice = `INV/${dateFormatter.formatDateToYYYYMMDD(new Date())}/${moduleTransactionEnum[moduleEnum.CLASS]}/${prefixedCode}`;
+    return `INV/${dateFormatter.formatDateToYYYYMMDD(new Date())}/${moduleTransactionEnum[moduleEnum.CLASS]}/${prefixedCode}`;
+
+}
+
+classTransactionService.generateFreeTransaction = async (cls, category, sessions, invoice, user) => {
 
     const classTransactionDTO = classTransactionService
-        .generateClassTransactionDTO(cls, category, invoice, invoiceCode, 0, classTransactionStatusEnum.DONE, null, user);
+        .generateClassTransactionDTO(cls, category, invoice, 0, classTransactionStatusEnum.DONE, null, user);
 
     return ClassTransaction.transaction(async trx => {
 
@@ -123,22 +125,18 @@ classTransactionService.generateFreeTransaction = async (cls, category, sessions
 
 }
 
-classTransactionService.generatePaidTransaction = async (cls, category, sessions, price, paymentMethodCode, items, user) => {
+classTransactionService.getNextTransactionSequenceVal = async () => {
 
-    const invoiceCode = await ClassTransactionSequence.getNextVal();
-    const prefixedCode = zeroPrefixHelper.zeroPrefixCodeByLength(invoiceCode, 9);
-    const invoice = `INV/${dateFormatter.formatDateToYYYYMMDD(new Date())}/${moduleTransactionEnum[moduleEnum.CLASS]}/${prefixedCode}`;
+    return ClassTransactionSequence.getNextVal();
 
-    let expiryDate = new Date();
-    const timeLimit = expiryDate.setMinutes(expiryDate.getMinutes() + 15);
-    const expiryDateISO = new Date(timeLimit).toISOString();
+}
 
-    const classTransactionDTO = classTransactionService
-        .generateClassTransactionDTO(cls, category, invoice, invoiceCode, price, classTransactionStatusEnum.AWAITING_PAYMENT, timeLimit.getTime(), user);
+classTransactionService.generatePaidTransaction = async (cls, category, sessions, price, invoice, expiryDate, user) => {
 
     return ClassTransaction.transaction(async trx => {
 
-        const xenditPayment = xenditPaymentService.createXenditPayment(invoice, price, 'Class Purchase', expiryDateISO, items, paymentMethodCode, user);
+        const classTransactionDTO = classTransactionService
+            .generateClassTransactionDTO(cls, category, invoice, price, classTransactionStatusEnum.AWAITING_PAYMENT, new Date(expiryDate).getTime(), user);
 
         const classTransaction = await ClassTransaction.query(trx)
             .insertToTable(classTransactionDTO, user.sub);
@@ -149,53 +147,52 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
         await classTransactionDetailService
             .generateTransactionDetail(transactionDetailDTOs, user, trx);
 
-        return {
-            url: xenditPayment.invoiceUrl,
-            invoice: invoice,
-        }
-
     });
 }
 
-classTransactionService.generateTransaction = async (cls, category, sessions, paymentMethodCode, user) => {
+classTransactionService.getTotalPriceAndItems = async (cls, category, sessions, user) => {
 
-    let price = 0;
+    let priceAndItems = {
+        totalPrice: 0,
+        items: []
+    }
+    let itemPrice = 0
+
     if (category.isRecurring) {
-        price = classTransactionService.recurringPrice(category, sessions);
+        itemPrice = classTransactionService.recurringPrice(category, sessions);
     } else {
-        price = classTransactionService.nonRecurringPrice(sessions);
+        itemPrice = classTransactionService.nonRecurringPrice(sessions);
     }
 
-    if (price > 0) {
-
-        const items = [];
-        items.push({
+    // sessions / category price (not free)
+    if (itemPrice > 0) {
+        priceAndItems.items.push({
             'name': 'Class Session(s)',
             'quantity': 1,
-            'price': price
-        })
-        // Check if the registrant have registered to this class
-        // If not, apply administration fee
-        const isClassParticipant = await classCategoryParticipantSessionService.isUserClassParticipant(user.sub, cls.uuid);
-        if (!isClassParticipant) {
-            if (cls.administrationFee !== 0) {
-                price += cls.administrationFee;            
-                items.push({
-                    'name': 'Administration Fee',
-                    'quantity': 1,
-                    'price': cls.administrationFee
-                });
-            }
-        }
-
-        return classTransactionService.generatePaidTransaction(cls, category, sessions, price, paymentMethodCode, items, user);
-    } else {
-        return classTransactionService.generateFreeTransaction(cls, category, sessions, user);
+            'price': itemPrice
+        });
+        priceAndItems.totalPrice += itemPrice;
     }
+
+    // Check if the registrant have registered to this class
+    // If not, apply administration fee
+    const isClassParticipant = await classCategoryParticipantSessionService.isUserClassParticipant(user.sub, cls.uuid);
+    if (!isClassParticipant) {
+        if (cls.administrationFee !== 0) {           
+            priceAndItems.items.push({
+                'name': 'Administration Fee',
+                'quantity': 1,
+                'price': cls.administrationFee
+            });
+            priceAndItems.totalPrice += cls.administrationFee;
+        }
+    }
+
+    return priceAndItems
 
 }
 
-classTransactionService.processInvoice = async(invoice) => {
+classTransactionService.processInvoice = async (invoice) => {
 
     const classTransaction = await ClassTransaction.query()
         .where('invoice', invoice)
@@ -209,7 +206,7 @@ classTransactionService.processInvoice = async(invoice) => {
 
     const participantSessionDTOs = classTransactionDetailService.generateParticipantSessionDTOs(savedDetailTransactions);
     
-    ClassTransaction.transaction(async trx => {
+    return ClassTransaction.transaction(async trx => {
         await classCategoryParticipantSessionService.register(participantSessionDTOs, user, trx);
     })
 

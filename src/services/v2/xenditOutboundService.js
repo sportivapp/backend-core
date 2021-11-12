@@ -8,7 +8,7 @@ const i = new Invoice(invoiceSpecificOptions);
 
 const xenditService = {}
 
-xenditService.generateXenditInvoice = async (externalId, amount, description, userName, userEmail, items, paymentChannels) => {
+xenditService.generateXenditInvoice = async (externalId, amount, description, invoiceDuration, userName, userEmail, items, paymentChannels) => {
 
     // NOTE: please save this id and other data to xendit payment table
     const response = await i.createInvoice({
@@ -19,16 +19,17 @@ xenditService.generateXenditInvoice = async (externalId, amount, description, us
             given_names: userName,
             email: userEmail
         },
+        invoiceDuration: invoiceDuration,
         currency: 'IDR',
-        // items: items,
-        payment_methods: paymentChannels,
+        items: items,
+        paymentMethods: paymentChannels,
         //success_redirect_url,
     });
 
     return {
         id: response.id,
         invoiceUrl: response.invoice_url,
-        expiryDate: response.expiryDate
+        expiryDate: response.expiry_date
     }
 
 }
