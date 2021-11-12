@@ -9,6 +9,7 @@ const classTransactionService = require('./mobileClassTransactionService');
 const coachCategoryService = require('./mobileClassCategoryCoachService');
 const classTransactionDetailService = require('./mobileClassTransactionDetailService');
 const classReportService = require('./mobileClassReportService');
+const xenditPaymentService = require('./xenditPaymentService');
 
 const ErrorEnum = {
     INVALID_COACH_ID: 'INVALID_COACH_ID',
@@ -143,7 +144,22 @@ classService.register = async (classUuid, classCategoryUuid, classCategorySessio
     const category = await classCategoryService.findById(classCategoryUuid);
     const sessions = await classCategorySessionService.findSessions(classCategorySessionUuids);
 
-    return classTransactionService.generateTransaction(cls, category, sessions, paymentMethodCode, user);
+    const priceAndItems = await classTransactionService.getTotalPriceAndItems(cls, category, sessions, user);
+    const invoice = await classTransactionService.generateInvoice();
+
+    if (priceAndItems.totalPrice > 0) {
+        const invoiceDuration = 900 // 900 secs = 15 mins
+        const xenditPayment = await xenditPaymentService.createXenditPayment(invoice, priceAndItems.totalPrice, 'Class Purchase', invoiceDuration, priceAndItems.items, paymentMethodCode, user);
+
+        await classTransactionService.generatePaidTransaction(cls, category, sessions, priceAndItems.totalPrice, invoice, xenditPayment.expiryDate, user);
+
+        return {
+            url: xenditPayment.invoiceUrl,
+            invoice: invoice,
+        }
+    } else {
+        return classTransactionService.generateFreeTransaction(cls, category, sessions, invoice, user);
+    }
 
 }
 

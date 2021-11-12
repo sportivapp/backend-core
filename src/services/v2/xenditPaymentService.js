@@ -3,6 +3,7 @@ const XenditPayment = require('../../models/v2/XenditPayment');
 const xenditOutboundService = require('./xenditOutboundService');
 const mobileClassTransactionService = require('./mobileClassTransactionService');
 const uuid = require('uuid');
+const { moduleTransactionEnum, moduleEnum } = require('../../models/enum/ModuleTransactionEnum');
 
 const paymentChannelsEnum = {
     "CREDIT_CARD": "CREDIT_CARD",
@@ -41,7 +42,7 @@ const invoiceStatusEnum = {
 const ErrorEnum = {
     PAID_AMOUNT_NOT_MATCH: 'PAID_AMOUNT_NOT_MATCH',
     PAYMENT_CHANNEL_NOT_SUPPORTED: 'PAYMENT_CHANNEL_NOT_SUPPORTED',
-    INVALID_INVOICE_STATUS: 'INVALID_INVOICE_STATUS'
+    INVALID_INVOICE_STATUS: 'INVALID_INVOICE_STATUS',
 }
 
 const xenditPaymentService = {};
@@ -96,9 +97,10 @@ xenditPaymentService.receivePayment = async (payload) => {
     // get the paid payment by uuid
     // external id is our xenditpayment uuid that we sent
     const xenditPayment = await XenditPayment.query()
-        .findById(payload.external_id);
+        .where('uuid', payload.external_id)
+        .first();
 
-    if (xenditPayment.amount !== payload.paid_amount)
+    if (parseInt(xenditPayment.amount) !== payload.paid_amount)
         throw new UnsupportedOperationError(ErrorEnum.PAID_AMOUNT_NOT_MATCH);
 
     if (!invoiceStatusEnum[payload.status])
@@ -108,7 +110,7 @@ xenditPaymentService.receivePayment = async (payload) => {
     if (payload.status === invoiceStatusEnum.PAID) {
 
         await XenditPayment.query()
-        .findById(payload.external_id)
+        .where('uuid', payload.external_id)
         .updateByUserId({
             status: invoiceStatusEnum.PAID,
             paymentMethod: payload.payment_method,
@@ -119,7 +121,7 @@ xenditPaymentService.receivePayment = async (payload) => {
         }, 0);
 
         const paymentType = xenditPayment.invoice.split('/')[2];
-        if (paymentType.toLowerCase() === 'class') {
+        if (paymentType === moduleTransactionEnum[moduleEnum.CLASS]) {
             await mobileClassTransactionService.processInvoice(xenditPayment.invoice);
         }
 
