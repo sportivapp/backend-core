@@ -17,7 +17,7 @@ classCategoryService.initCategories = async (categories, user, trx) => {
     const classCategoryPromises = categories.map(category => {
 
         // If it's recurring then remove price on session object, else remove price on category object
-        if (isRecurring) {
+        if (category.isRecurring) {
             category.sessions.map(session => {
                 session.price = null
             })
