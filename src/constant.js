@@ -330,6 +330,7 @@ module.exports = {
         xendit: {
             receivePayment: '/receive-payment',
             channels: '/payment-channels',
+            invoice: '/invoice',
         }
     }
 }

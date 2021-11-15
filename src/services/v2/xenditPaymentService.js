@@ -43,6 +43,7 @@ const ErrorEnum = {
     PAID_AMOUNT_NOT_MATCH: 'PAID_AMOUNT_NOT_MATCH',
     PAYMENT_CHANNEL_NOT_SUPPORTED: 'PAYMENT_CHANNEL_NOT_SUPPORTED',
     INVALID_INVOICE_STATUS: 'INVALID_INVOICE_STATUS',
+    INVALID_INVOICE: 'INVALID_INVOICE',
 }
 
 const xenditPaymentService = {};
@@ -129,6 +130,21 @@ xenditPaymentService.receivePayment = async (payload) => {
 
     return 'success'
     
+}
+
+xenditPaymentService.getInvoiceStatus = async (invoice) => {
+
+    const xenditPayment = await XenditPayment.query()
+        .where('invoice', invoice)
+        .first();
+
+    if(!xenditPayment)
+        throw new UnsupportedOperationError(ErrorEnum.INVALID_INVOICE);
+
+    return {
+        status: xenditPayment.status
+    }
+
 }
 
 module.exports = xenditPaymentService;
