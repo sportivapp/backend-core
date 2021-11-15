@@ -30,15 +30,13 @@ classTransactionService.recurringPrice = (category, sessions) => {
         }
     });
 
-    return category.price * months.length;
+    return parseInt(category.price) * months.length;
 
 }
 
 classTransactionService.nonRecurringPrice = (sessions) => {
 
-    return sessions.reduce((acc, curr) => {
-        return acc.price + curr.price;
-    });
+    return sessions.reduce((sum, sess) => sum + parseInt(sess.price), 0);
 
 }
 
