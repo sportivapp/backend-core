@@ -154,7 +154,7 @@ xenditPaymentService.getAwaitingPayments = async (user) => {
     const awaitingPayments = await XenditPayment.query()
         .where('create_by', userId)
         .where('status', xenditPaymentStatusEnum.AWAITING_PAYMENT)
-        // .where('expiry_date', '>=', new Date().toISOString());
+        .where('expiry_date', '>=', new Date().toISOString());
 
     return awaitingPayments.map(awaitingPayment => {
         let type = awaitingPayment.invoice.split('/')[2];
