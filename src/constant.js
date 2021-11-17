@@ -331,6 +331,7 @@ module.exports = {
             receivePayment: '/receive-payment',
             channels: '/payment-channels',
             invoice: '/invoice',
+            awaitingPayments: '/awaiting-payments'
         }
     }
 }

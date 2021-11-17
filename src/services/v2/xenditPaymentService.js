@@ -147,4 +147,32 @@ xenditPaymentService.getInvoiceStatus = async (invoice) => {
 
 }
 
+xenditPaymentService.getAwaitingPayments = async (user) => {
+
+    const userId = user.sub;
+    
+    const awaitingPayments = await XenditPayment.query()
+        .where('create_by', userId)
+        .where('status', xenditPaymentStatusEnum.AWAITING_PAYMENT)
+        // .where('expiry_date', '>=', new Date().toISOString());
+
+    return awaitingPayments.map(awaitingPayment => {
+        let type = awaitingPayment.invoice.split('/')[2];
+        let paymentType = '';
+
+        if (type === moduleTransactionEnum.CLASS) {
+            paymentType = moduleEnum.CLASS
+        }
+
+        return {
+            uuid: awaitingPayment.uuid,
+            status: awaitingPayment.status,
+            invoice: awaitingPayment.invoice,
+            price: parseInt(awaitingPayment.amount),
+            expiryDate: awaitingPayment.expiryDate,
+            paymentType: paymentType,
+        }
+    })
+}
+
 module.exports = xenditPaymentService;
