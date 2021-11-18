@@ -27,7 +27,6 @@ classTransactionService.processRecurring = (category, sessions) => {
 
     let itemDetails = [];
 
-    // only for counting the months
     const sevenHours = 7 * 60 * 60 * 1000;
 
     const foundMonth = {};
@@ -71,18 +70,20 @@ classTransactionService.processNonRecurring = (sessions) => {
     let itemDetails = [];
     let price = 0;
 
+    const sevenHours = 7 * 60 * 60 * 1000;
+
     sessions.forEach(session => {
         const sessionPriceInt = parseInt(session.price);
-        const startDate = new Date(parseInt(session.startDate));
-        const sessionDate = startDate.getDate();
-        const sessionMonth = startDate.getMonth();
-        const sessionYear = startDate.getFullYear();
-        const endDate = new Date(parseInt(session.endDate));
+        const startWibDate = new Date(parseInt(session.startDate) + sevenHours);
+        const sessionDate = startWibDate.getDate();
+        const sessionMonth = startWibDate.getMonth();
+        const sessionYear = startWibDate.getFullYear();
+        const endWibDate = new Date(parseInt(session.endDate) + sevenHours);
 
-        let startHourString = classTransactionService.formatTime(startDate.getHours());
-        let startMinuteString = classTransactionService.formatTime(startDate.getMinutes());
-        let endHourString = classTransactionService.formatTime(endDate.getHours());
-        let endMinuteString = classTransactionService.formatTime(endDate.getMinutes());
+        let startHourString = classTransactionService.formatTime(startWibDate.getHours());
+        let startMinuteString = classTransactionService.formatTime(startWibDate.getMinutes());
+        let endHourString = classTransactionService.formatTime(endWibDate.getHours());
+        let endMinuteString = classTransactionService.formatTime(endWibDate.getMinutes());
 
         price += sessionPriceInt;
         const paymentDetailTemplate = paymentDetailTemplateHelper.itemDetailTemplate = {
