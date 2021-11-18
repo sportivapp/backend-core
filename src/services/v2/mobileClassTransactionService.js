@@ -17,6 +17,13 @@ const ErrorEnum = {
     INVALID_PAYMENT_CHANNEL_CODE: 'INVALID_PAYMENT_CHANNEL_CODE',
 }
 
+const transactionStatusEnum = {
+    AWAITING_PAYMENT: "AWAITING_PAYMENT",
+    DONE: "DONE",
+    PROCESSED: "PROCESSED",
+    CANCELLED: "CANCELLED",
+}
+
 const classTransactionService = {};
 
 const monthNames = ["January", "February", "March", "April", "May", "June",
@@ -271,6 +278,10 @@ classTransactionService.processInvoice = async (invoice) => {
     const participantSessionDTOs = classTransactionDetailService.generateParticipantSessionDTOs(savedDetailTransactions);
     
     return ClassTransaction.transaction(async trx => {
+        await ClassTransaction.query()
+            .updateByUserId({
+                status: transactionStatusEnum.DONE,
+            }, 0);
         await classCategoryParticipantSessionService.register(participantSessionDTOs, user, trx);
     })
 

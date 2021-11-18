@@ -167,7 +167,13 @@ xenditPaymentService.getAwaitingPayments = async (user) => {
             paymentType = moduleEnum.CLASS
         }
 
+        let className = ''
+        const paymentDetails = JSON.parse(awaitingPayment.paymentDetails);
+        if (paymentDetails)
+            className = paymentDetails.itemHeader.title
+
         return {
+            name: className,
             uuid: awaitingPayment.uuid,
             status: awaitingPayment.status,
             invoice: awaitingPayment.invoice,
