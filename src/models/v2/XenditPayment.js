@@ -6,7 +6,7 @@ class XenditPayment extends Model {
     };
 
     static get idColumn() {
-        return 'id'
+        return 'uuid'
     };
 
     static get jsonSchema() {

@@ -331,7 +331,8 @@ module.exports = {
             receivePayment: '/receive-payment',
             channels: '/payment-channels',
             invoice: '/invoice',
-            awaitingPayments: '/awaiting-payments'
+            awaitingPayments: '/awaiting-payments',
+            paymentDetail: '/xendit-payment/:xenditPaymentUuid'
         }
     }
 }

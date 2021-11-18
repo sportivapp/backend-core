@@ -16,6 +16,7 @@ exports.up = (knex, Promise) => knex.schema.createTable('xendit_payment', t => {
     t.string('email');
     t.string('items');
     t.enum('status', ['AWAITING_PAYMENT', 'PAID', 'CANCELLED_OR_EXPIRED', 'REFUSED_OR_ERROR', 'REFUNDED']);
+    t.string('payment_details', 100000);
     t.integer('create_by').notNullable();
     t.bigInteger('create_time').notNullable();
     t.integer('change_by');
