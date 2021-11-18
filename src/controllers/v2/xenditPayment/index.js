@@ -59,4 +59,19 @@ xenditPaymentController.getAwaitingPayments = async (req, res, next) => {
 
 }
 
+xenditPaymentController.getPaymentDetail = async (req, res, next) => {
+
+    const { xenditPaymentUuid } = req.params;
+
+    try {
+        
+        const result = await xenditPaymentService.getPaymentDetail(xenditPaymentUuid, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = xenditPaymentController;

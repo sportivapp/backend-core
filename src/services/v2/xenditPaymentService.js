@@ -44,6 +44,8 @@ const ErrorEnum = {
     PAYMENT_CHANNEL_NOT_SUPPORTED: 'PAYMENT_CHANNEL_NOT_SUPPORTED',
     INVALID_INVOICE_STATUS: 'INVALID_INVOICE_STATUS',
     INVALID_INVOICE: 'INVALID_INVOICE',
+    INVALID_ID: 'INVALID_ID',
+    NOT_INVOICE_OWNER: 'NOT_INVOICE_OWNER',
 }
 
 const xenditPaymentService = {};
@@ -54,7 +56,7 @@ xenditPaymentService.getPaymentChannels = () => {
 
 }
 
-xenditPaymentService.createXenditPayment = async (invoice, amount, description, invoiceDuration, items, paymentChannel, user) => {
+xenditPaymentService.createXenditPayment = async (invoice, amount, description, invoiceDuration, items, paymentChannel, paymentDetails, user) => {
 
     if (!paymentChannelsEnum[paymentChannel]) {
         throw new UnsupportedOperationError(ErrorEnum.PAYMENT_CHANNEL_NOT_SUPPORTED);
@@ -78,7 +80,8 @@ xenditPaymentService.createXenditPayment = async (invoice, amount, description, 
             items: JSON.stringify(items),
             status: xenditPaymentStatusEnum.AWAITING_PAYMENT,
             xenditInvoiceId: xenditResponse.id,
-            invoiceUrl: xenditResponse.invoiceUrl
+            invoiceUrl: xenditResponse.invoiceUrl,
+            paymentDetails: JSON.stringify(paymentDetails),
         }
 
         const xenditPayment = await XenditPayment.query(trx)
@@ -173,6 +176,20 @@ xenditPaymentService.getAwaitingPayments = async (user) => {
             paymentType: paymentType,
         }
     })
+}
+
+xenditPaymentService.getPaymentDetail = async (xenditPaymentUuid, user) => {
+
+    const xenditPayment = await XenditPayment.query()
+        .findById(xenditPaymentUuid);
+
+    if(!xenditPayment)
+        throw new UnsupportedOperationError(ErrorEnum.INVALID_ID);
+    if(xenditPayment.createBy !== user.sub)
+        throw new UnsupportedOperationError(ErrorEnum.NOT_INVOICE_OWNER);
+    
+    return JSON.parse(xenditPayment.paymentDetails);
+
 }
 
 module.exports = xenditPaymentService;

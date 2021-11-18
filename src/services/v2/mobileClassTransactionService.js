@@ -11,6 +11,7 @@ const { UnsupportedOperationError } = require('../../models/errors');
 const dokuService = require('./dokuService');
 const bcaService = require('./bcaService');
 const paymentMethodEnum = require('../../models/enum/PaymentMethodEnum');
+const paymentDetailTemplateHelper = require('../../helper/paymentDetailTemplateHelper');
 
 const ErrorEnum = {
     INVALID_PAYMENT_CHANNEL_CODE: 'INVALID_PAYMENT_CHANNEL_CODE',
@@ -18,25 +19,85 @@ const ErrorEnum = {
 
 const classTransactionService = {};
 
-classTransactionService.recurringPrice = (category, sessions) => {
+const monthNames = ["January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
 
-    const months = [];
+classTransactionService.processRecurring = (category, sessions) => {
+
+    let itemDetails = [];
+
+    // only for counting the months
+    const sevenHours = 7 * 60 * 60 * 1000;
 
     const foundMonth = {};
     sessions.forEach(session => {
-        if (!foundMonth[session.month]) {
-            foundMonth[session.month] = true;
-            months.push(session.month);
+
+        const wibTime = new Date(parseInt(session.startDate) + sevenHours);
+        const sessionMonth = wibTime.getMonth();
+
+        if (!foundMonth[sessionMonth]) {
+            const sessionYear = wibTime.getFullYear();
+            foundMonth[sessionMonth] = true;
+            const paymentDetailTemplate = paymentDetailTemplateHelper.itemDetailTemplate = {
+                name: monthNames[sessionMonth] + ' ' + sessionYear,
+                price: parseInt(category.price),
+                quantity: 1
+            };
+            itemDetails.push(paymentDetailTemplate);
         }
     });
 
-    return parseInt(category.price) * months.length;
+    return {
+        itemDetails: itemDetails,
+        price: parseInt(category.price) * itemDetails.length
+    }
 
 }
 
-classTransactionService.nonRecurringPrice = (sessions) => {
+classTransactionService.formatTime = (timeInt) => {
 
-    return sessions.reduce((sum, sess) => sum + parseInt(sess.price), 0);
+    // timeInt => hour / minute / second
+    if (timeInt < 10) {
+        return '0' + timeInt;
+    }
+
+    return timeInt.toString();
+
+}
+
+classTransactionService.processNonRecurring = (sessions) => {
+
+    let itemDetails = [];
+    let price = 0;
+
+    sessions.forEach(session => {
+        const sessionPriceInt = parseInt(session.price);
+        const startDate = new Date(parseInt(session.startDate));
+        const sessionDate = startDate.getDate();
+        const sessionMonth = startDate.getMonth();
+        const sessionYear = startDate.getFullYear();
+        const endDate = new Date(parseInt(session.endDate));
+
+        let startHourString = classTransactionService.formatTime(startDate.getHours());
+        let startMinuteString = classTransactionService.formatTime(startDate.getMinutes());
+        let endHourString = classTransactionService.formatTime(endDate.getHours());
+        let endMinuteString = classTransactionService.formatTime(endDate.getMinutes());
+
+        price += sessionPriceInt;
+        const paymentDetailTemplate = paymentDetailTemplateHelper.itemDetailTemplate = {
+            name: sessionDate + ' ' + monthNames[sessionMonth] + ' ' + sessionYear,
+            description: startHourString + ':' + startMinuteString + ' - ' + endHourString + ':' + endMinuteString,
+            quantity: 1,
+            price: sessionPriceInt
+        }
+        itemDetails.push(paymentDetailTemplate);
+    });
+
+    return {
+        itemDetails: itemDetails,
+        price: price
+    }
 
 }
 
@@ -148,28 +209,34 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
     });
 }
 
-classTransactionService.getTotalPriceAndItems = async (cls, category, sessions, user) => {
+classTransactionService.processItems = async (cls, category, sessions, user) => {
 
-    let priceAndItems = {
-        totalPrice: 0,
-        items: []
+    const paymentDetailTemplate = paymentDetailTemplateHelper.paymentDetailTemplate;
+    paymentDetailTemplate.payment = paymentDetailTemplateHelper.paymentTemplate;
+
+    paymentDetailTemplate.itemHeader = {
+        type: 'Class',
+        title: cls.title,
+        sportType: cls.industry.eindustryname,
+        file: {
+            name: cls.classMedia[0].file.efilename,
+            type: cls.classMedia[0].file.efiletype
+        }
     }
-    let itemPrice = 0
+    let itemDetailsAndPrice = {
+        itemDetails: [paymentDetailTemplateHelper.itemDetailTemplate],
+        price: 0
+    };
 
     if (category.isRecurring) {
-        itemPrice = classTransactionService.recurringPrice(category, sessions);
+        itemDetailsAndPrice = classTransactionService.processRecurring(category, sessions);
     } else {
-        itemPrice = classTransactionService.nonRecurringPrice(sessions);
+        itemDetailsAndPrice = classTransactionService.processNonRecurring(sessions);
     }
 
     // sessions / category price (not free)
-    if (itemPrice > 0) {
-        priceAndItems.items.push({
-            'name': 'Class Session(s)',
-            'quantity': 1,
-            'price': itemPrice
-        });
-        priceAndItems.totalPrice += itemPrice;
+    if (itemDetailsAndPrice.price > 0) {
+        paymentDetailTemplate.payment.subtotal += itemDetailsAndPrice.price;
     }
 
     // Check if the registrant have registered to this class
@@ -177,16 +244,14 @@ classTransactionService.getTotalPriceAndItems = async (cls, category, sessions, 
     const isClassParticipant = await classCategoryParticipantSessionService.isUserClassParticipant(user.sub, cls.uuid);
     if (!isClassParticipant) {
         if (cls.administrationFee !== 0) {           
-            priceAndItems.items.push({
-                'name': 'Administration Fee',
-                'quantity': 1,
-                'price': cls.administrationFee
-            });
-            priceAndItems.totalPrice += cls.administrationFee;
+            paymentDetailTemplate.payment.adminFee = cls.administrationFee;
+            paymentDetailTemplate.paymentsubtotal += cls.administrationFee;
         }
     }
 
-    return priceAndItems
+    paymentDetailTemplate.itemDetails = itemDetailsAndPrice.itemDetails;
+
+    return paymentDetailTemplate
 
 }
 

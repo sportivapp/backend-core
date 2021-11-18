@@ -131,6 +131,20 @@ classService.findById = async (classUuid) => {
 
 }
 
+classService.findByIdWithFileAndIndustry = async (classUuid) => {
+
+    return Class.query()
+        .modify('withFileAndIndustry')
+        .findById(classUuid)
+        .then(cls => {
+            if (!cls)
+                throw new NotFoundError();
+            cls.administrationFee = parseInt(cls.administrationFee);
+            return cls;
+        });
+
+}
+
 classService.getClassCategory = async (classUuid, classCategoryUuid, user) => {
 
     return classCategoryService.getClassCategory(classCategoryUuid, user);
@@ -140,18 +154,19 @@ classService.getClassCategory = async (classUuid, classCategoryUuid, user) => {
 classService.register = async (classUuid, classCategoryUuid, classCategorySessionUuids, paymentMethodCode, user) => {
 
     await classTransactionDetailService.checkUserRegisteredToSessions(classCategorySessionUuids, user.sub);
-    const cls = await classService.findById(classUuid);
+    const cls = await classService.findByIdWithFileAndIndustry(classUuid);
     const category = await classCategoryService.findById(classCategoryUuid);
     const sessions = await classCategorySessionService.findSessions(classCategorySessionUuids);
 
-    const priceAndItems = await classTransactionService.getTotalPriceAndItems(cls, category, sessions, user);
+    const processItems = await classTransactionService.processItems(cls, category, sessions, user);
+    const totalPrice = processItems.payment.subtotal + processItems.payment.adminFee;
     const invoice = await classTransactionService.generateInvoice();
 
-    if (priceAndItems.totalPrice > 0) {
+    if (totalPrice > 0) {
         const invoiceDuration = 900 // 900 secs = 15 mins
-        const xenditPayment = await xenditPaymentService.createXenditPayment(invoice, priceAndItems.totalPrice, 'Class Purchase', invoiceDuration, priceAndItems.items, paymentMethodCode, user);
+        const xenditPayment = await xenditPaymentService.createXenditPayment(invoice, totalPrice, 'Class Purchase', invoiceDuration, null, paymentMethodCode, processItems, user);
 
-        await classTransactionService.generatePaidTransaction(cls, category, sessions, priceAndItems.totalPrice, invoice, xenditPayment.expiryDate, user);
+        await classTransactionService.generatePaidTransaction(cls, category, sessions, totalPrice, invoice, xenditPayment.expiryDate, user);
 
         return {
             url: xenditPayment.invoiceUrl,

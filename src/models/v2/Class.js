@@ -133,6 +133,11 @@ class Class extends Model {
                     .withGraphFetched('company(baseAttributes)')
                     .withGraphFetched(`classCategories(uuidAndTitle).[categorySessions(basicStartEnd)]`);
             },
+            withFileAndIndustry(builder) {
+                builder.modify('notDeleted')
+                    .withGraphFetched('classMedia(list)')
+                    .withGraphFetched('industry(baseAttributes)')
+            }
         }
     }
 

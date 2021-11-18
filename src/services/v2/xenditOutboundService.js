@@ -21,7 +21,7 @@ xenditService.generateXenditInvoice = async (externalId, amount, description, in
         },
         invoiceDuration: invoiceDuration,
         currency: 'IDR',
-        items: items,
+        // items: items,
         paymentMethods: paymentChannels,
         //success_redirect_url,
     });
