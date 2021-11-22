@@ -24,7 +24,8 @@ classTransactionDetailService.checkUserRegisteredToSessions = async (sessionUuid
         .then(transactionDetails => {
             transactionDetails.forEach(transactionDetail => {
                 if (transactionDetail.transaction.status === ClassTransactionStatusEnum.DONE ||
-                    transactionDetail.transaction.status === ClassTransactionStatusEnum.AWAITING_PAYMENT) {
+                    (transactionDetail.transaction.status === ClassTransactionStatusEnum.AWAITING_PAYMENT &&
+                    transactionDetail.transaction.timeLimit >= Date.now())) {
                         throw new UnsupportedOperationError(ErrorEnum.REGISTERED_TO_SESSION);
                     }
             });
