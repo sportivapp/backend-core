@@ -220,7 +220,11 @@ classTransactionService.generatePaidTransaction = async (cls, category, sessions
 classTransactionService.processItems = async (cls, category, sessions, user) => {
 
     const paymentDetailTemplate = paymentDetailTemplateHelper.paymentDetailTemplate;
-    paymentDetailTemplate.payment = paymentDetailTemplateHelper.paymentTemplate;
+    paymentDetailTemplate.payment = {
+        subtotal: 0,
+        adminFee: 0,
+        promo: 0
+    }
 
     paymentDetailTemplate.itemHeader = {
         type: 'Class',
@@ -253,7 +257,7 @@ classTransactionService.processItems = async (cls, category, sessions, user) => 
     if (!isClassParticipant) {
         if (cls.administrationFee !== 0) {           
             paymentDetailTemplate.payment.adminFee = cls.administrationFee;
-            paymentDetailTemplate.paymentsubtotal += cls.administrationFee;
+            paymentDetailTemplate.payment.subtotal += cls.administrationFee;
         }
     }
 
