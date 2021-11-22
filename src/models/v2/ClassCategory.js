@@ -23,7 +23,7 @@ class ClassCategory extends Model {
     static get modifiers() {
         return {
             list(builder) {
-                builder.select('uuid', 'title', 'price')
+                builder.select('uuid', 'title', 'price', 'is_recurring')
                     .modify('notDeleted');
             },
             adminDetail(builder) {
