@@ -22,7 +22,7 @@ class ClassTransaction extends Model {
     static get modifiers() {
         return {
             baseAttributes(builder) {
-                builder.select('uuid', 'class_title', 'category_title', 'status');
+                builder.select('uuid', 'class_title', 'category_title', 'status', 'time_limit');
             },
             invoice(builder) {
                 builder.select('invoice', 'create_time');
