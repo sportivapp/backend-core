@@ -159,7 +159,7 @@ classService.register = async (classUuid, classCategoryUuid, classCategorySessio
     const sessions = await classCategorySessionService.findSessions(classCategorySessionUuids);
 
     const processItems = await classTransactionService.processItems(cls, category, sessions, user);
-    const totalPrice = processItems.payment.subtotal;
+    const totalPrice = processItems.payment.subtotal + processItems.payment.adminFee;
     const invoice = await classTransactionService.generateInvoice();
 
     if (totalPrice > 0) {
