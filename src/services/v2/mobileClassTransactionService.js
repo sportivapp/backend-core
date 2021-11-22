@@ -257,7 +257,6 @@ classTransactionService.processItems = async (cls, category, sessions, user) => 
     if (!isClassParticipant) {
         if (cls.administrationFee !== 0) {           
             paymentDetailTemplate.payment.adminFee = cls.administrationFee;
-            paymentDetailTemplate.payment.subtotal += cls.administrationFee;
         }
     }
 
