@@ -180,6 +180,7 @@ xenditPaymentService.getAwaitingPayments = async (user) => {
             price: parseInt(awaitingPayment.amount),
             expiryDate: awaitingPayment.expiryDate,
             paymentType: paymentType,
+            invoiceUrl: awaitingPayment.invoiceUrl,
         }
     })
 }
