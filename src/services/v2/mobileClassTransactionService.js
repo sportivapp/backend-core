@@ -229,7 +229,9 @@ classTransactionService.processItems = async (cls, category, sessions, user) => 
     paymentDetailTemplate.itemHeader = {
         type: 'Class',
         title: cls.title,
+        subtitle: category.title,
         sportType: cls.industry.eindustryname,
+        city: cls.city.ecityname,
         file: {
             name: cls.classMedia[0].file.efilename,
             type: cls.classMedia[0].file.efiletype
