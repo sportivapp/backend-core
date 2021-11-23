@@ -131,10 +131,10 @@ classService.findById = async (classUuid) => {
 
 }
 
-classService.findByIdWithFileAndIndustry = async (classUuid) => {
+classService.findByIdWithFileAndIndustryAndCity = async (classUuid) => {
 
     return Class.query()
-        .modify('withFileAndIndustry')
+        .modify('basic')
         .findById(classUuid)
         .then(cls => {
             if (!cls)
@@ -154,7 +154,7 @@ classService.getClassCategory = async (classUuid, classCategoryUuid, user) => {
 classService.register = async (classUuid, classCategoryUuid, classCategorySessionUuids, paymentMethodCode, user) => {
 
     await classTransactionDetailService.checkUserRegisteredToSessions(classCategorySessionUuids, user.sub);
-    const cls = await classService.findByIdWithFileAndIndustry(classUuid);
+    const cls = await classService.findByIdWithFileAndIndustryAndCity(classUuid);
     const category = await classCategoryService.findById(classCategoryUuid);
     const sessions = await classCategorySessionService.findSessions(classCategorySessionUuids);
 
