@@ -257,8 +257,8 @@ classTransactionService.processItems = async (cls, category, sessions, user) => 
     // If not, apply administration fee
     const isClassParticipant = await classCategoryParticipantSessionService.isUserClassParticipant(user.sub, cls.uuid);
     if (!isClassParticipant) {
-        if (cls.administrationFee !== 0) {           
-            paymentDetailTemplate.payment.adminFee = cls.administrationFee;
+        if (cls.administrationFee !== 0) {
+            paymentDetailTemplate.payment.adminFee = parseInt(cls.administrationFee);
         }
     }
 

@@ -85,7 +85,6 @@ class Class extends Model {
             },
             basic(builder) {
                 builder.select('uuid', 'title')
-                    .modify('notDeleted')
                     .withGraphFetched('industry(baseAttributes)')
                     .withGraphFetched('city(baseAttributes)')
                     .withGraphFetched('classMedia(list)')
@@ -133,7 +132,13 @@ class Class extends Model {
                     .withGraphFetched('classMedia(list)')
                     .withGraphFetched('company(baseAttributes)')
                     .withGraphFetched(`classCategories(uuidAndTitle).[categorySessions(basicStartEnd)]`);
-            }
+            },
+            basicAll(builder) {
+                builder.modify('notDeleted')
+                    .withGraphFetched('industry(baseAttributes)')
+                    .withGraphFetched('city(baseAttributes)')
+                    .withGraphFetched('classMedia(list)')
+            },
         }
     }
 
