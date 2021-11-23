@@ -134,7 +134,7 @@ classService.findById = async (classUuid) => {
 classService.findByIdWithFileAndIndustryAndCity = async (classUuid) => {
 
     return Class.query()
-        .modify('basic')
+        .modify('basicAll')
         .findById(classUuid)
         .then(cls => {
             if (!cls)
