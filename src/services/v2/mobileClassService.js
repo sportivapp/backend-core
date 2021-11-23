@@ -171,6 +171,7 @@ classService.register = async (classUuid, classCategoryUuid, classCategorySessio
         return {
             url: xenditPayment.invoiceUrl,
             invoice: invoice,
+            uuid: xenditPayment.uuid,
         }
     } else {
         return classTransactionService.generateFreeTransaction(cls, category, sessions, invoice, user);
