@@ -195,7 +195,16 @@ xenditPaymentService.getPaymentDetail = async (xenditPaymentUuid, user) => {
     if(xenditPayment.createBy !== user.sub)
         throw new UnsupportedOperationError(ErrorEnum.NOT_INVOICE_OWNER);
     
-    return JSON.parse(xenditPayment.paymentDetails);
+    const parsedPaymentDetails = JSON.parse(xenditPayment.paymentDetails);
+
+    return {
+        invoice: xenditPayment.invoice,
+        paymentDate: xenditPayment.changeTime,
+        paymentMethod: xenditPayment.paymentMethod,
+        name: xenditPayment.name,
+        isPaid: xenditPayment.status === invoiceStatusEnum.PAID ? true : false,
+        ...parsedPaymentDetails
+    }
 
 }
 

@@ -229,7 +229,9 @@ classTransactionService.processItems = async (cls, category, sessions, user) => 
     paymentDetailTemplate.itemHeader = {
         type: 'Class',
         title: cls.title,
+        subtitle: category.title,
         sportType: cls.industry.eindustryname,
+        city: cls.city.ecityname,
         file: {
             name: cls.classMedia[0].file.efilename,
             type: cls.classMedia[0].file.efiletype
@@ -255,8 +257,8 @@ classTransactionService.processItems = async (cls, category, sessions, user) => 
     // If not, apply administration fee
     const isClassParticipant = await classCategoryParticipantSessionService.isUserClassParticipant(user.sub, cls.uuid);
     if (!isClassParticipant) {
-        if (cls.administrationFee !== 0) {           
-            paymentDetailTemplate.payment.adminFee = cls.administrationFee;
+        if (cls.administrationFee !== 0) {
+            paymentDetailTemplate.payment.adminFee = parseInt(cls.administrationFee);
         }
     }
 

@@ -131,10 +131,10 @@ classService.findById = async (classUuid) => {
 
 }
 
-classService.findByIdWithFileAndIndustry = async (classUuid) => {
+classService.findByIdWithFileAndIndustryAndCity = async (classUuid) => {
 
     return Class.query()
-        .modify('withFileAndIndustry')
+        .modify('basicAll')
         .findById(classUuid)
         .then(cls => {
             if (!cls)
@@ -154,7 +154,7 @@ classService.getClassCategory = async (classUuid, classCategoryUuid, user) => {
 classService.register = async (classUuid, classCategoryUuid, classCategorySessionUuids, paymentMethodCode, user) => {
 
     await classTransactionDetailService.checkUserRegisteredToSessions(classCategorySessionUuids, user.sub);
-    const cls = await classService.findByIdWithFileAndIndustry(classUuid);
+    const cls = await classService.findByIdWithFileAndIndustryAndCity(classUuid);
     const category = await classCategoryService.findById(classCategoryUuid);
     const sessions = await classCategorySessionService.findSessions(classCategorySessionUuids);
 
@@ -171,6 +171,7 @@ classService.register = async (classUuid, classCategoryUuid, classCategorySessio
         return {
             url: xenditPayment.invoiceUrl,
             invoice: invoice,
+            uuid: xenditPayment.uuid,
         }
     } else {
         return classTransactionService.generateFreeTransaction(cls, category, sessions, invoice, user);
