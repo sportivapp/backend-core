@@ -82,6 +82,7 @@ xenditPaymentService.createXenditPayment = async (invoice, amount, description, 
             xenditInvoiceId: xenditResponse.id,
             invoiceUrl: xenditResponse.invoiceUrl,
             paymentDetails: JSON.stringify(paymentDetails),
+            paymentMethod: paymentChannel,
         }
 
         const xenditPayment = await XenditPayment.query(trx)
