@@ -225,7 +225,7 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
     classCategorySessionDTO.endDate = new Date(classCategorySessionDTO.endDate - (60000 * offset)).getTime();
     
     const upcomingSessions = await classCategorySessionService
-        .getUpcomingSessions(classCategorySessionDTO.classCategoryUuid);
+        .getAllUpcomingSessions(classCategorySessionDTO.classCategoryUuid);
 
     if (!isRepeat) {
 
@@ -715,6 +715,14 @@ classCategorySessionService.getUpcomingSessions = async (classCategoryUuid, page
     }
 
     return query;
+
+}
+
+classCategorySessionService.getAllUpcomingSessions = async (classCategoryUuid) => {
+
+    return ClassCategorySession.query()
+        .modify('list')
+        .where('class_category_uuid', classCategoryUuid);
 
 }
 
