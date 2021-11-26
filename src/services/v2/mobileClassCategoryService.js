@@ -83,7 +83,7 @@ classCategoryService.getCoachCategory = async (classCategoryUuid, user) => {
             let sessionStart = new Date(parseInt(session.startDate));
             // add 7 hours because we are fixed to utc + 7
             // TODO: use timezone offset
-            sessionStart.setTime(sessionStart.getDate() + (7*60*60*1000));
+            sessionStart.setTime(sessionStart.getTime() + (7*60*60*1000));
             const todayDate = new Date().getDate();
             isToday = sessionStart.getDate() === todayDate;
         }
