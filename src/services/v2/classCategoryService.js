@@ -22,7 +22,8 @@ const classCategoryService = {};
 
 classCategoryService.initCategories = async (categories, cityId, user, trx) => {
 
-    const timezone = await cityService.getTimezoneFromCityId(cityId);
+    // const timezone = await cityService.getTimezoneFromCityId(cityId);
+    const timezone = 'Asia/Jakarta';
 
     const classCategoryPromises = categories.map(category => {
 
@@ -166,7 +167,8 @@ classCategoryService.extendSchedule = async (extendCategoryDTO, user) => {
     const category = await ClassCategory.query()
         .modify('classCity')
         .findById(extendCategoryDTO.uuid);
-    const timezone = await cityService.getTimezoneFromCityId(category.class.city.ecityid);
+    // const timezone = await cityService.getTimezoneFromCityId(category.class.city.ecityid);
+    const timezone = 'Asia/Jakarta';
 
     const sessionAndSchedule = classCategoryService
         .generateSessionAndScheduleFromCategorySchedules(category.classUuid, category.uuid, 
@@ -244,7 +246,8 @@ classCategoryService.addCategory = async (startMonth, endMonth, category, cityId
     newCategory.price = category.price;
     newCategory.requirements = category.requirements;
 
-    const timezone = await cityService.getTimezoneFromCityId(cityId);
+    // const timezone = await cityService.getTimezoneFromCityId(cityId);
+    const timezone = 'Asia/Jakarta';
 
     return ClassCategory.transaction(async trx => {
 
@@ -288,7 +291,8 @@ classCategoryService.generateSessionAndScheduleFromCategorySchedules = (classUui
     let sessionDTO = [];
     let scheduleDTO = [];
     schedules.map(schedule => {
-        const offset = luxon.DateTime.fromMillis(startMonth).setZone(timezone).offset;
+        // const offset = luxon.DateTime.fromMillis(startMonth).setZone(timezone).offset;
+        const offset = 420 // UTC + 7
         const categoryStartDate = new Date(startMonth - (60000 * offset));
         const day = categoryStartDate.getDay();
         const requestedDay = dayToCodeEnum[schedule.day];
