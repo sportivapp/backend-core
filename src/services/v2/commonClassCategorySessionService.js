@@ -18,7 +18,8 @@ classCategorySessionService.convertStartEndToTimezone = (start, end, timezone) =
 
 classCategorySessionService.generateSessionsByCity = async (cityId, start, end, schedules) => {
 
-    const timezone = await cityService.getTimezoneFromCityId(cityId);
+    // const timezone = await cityService.getTimezoneFromCityId(cityId);
+    const timezone = 'Asia/Jakarta';
     const startEndWithTimezone = classCategorySessionService.convertStartEndToTimezone(start, end, timezone);
     const now = luxon.DateTime.now().setZone(timezone).toMillis();
 
