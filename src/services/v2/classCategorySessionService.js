@@ -64,7 +64,8 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
             return session;
         });
 
-    const timezone = await cityService.getTimezoneFromCityId(session.class.cityId);
+    // const timezone = await cityService.getTimezoneFromCityId(session.class.cityId);
+    const timezone = 'Asia/Jakarta';
     const offset = luxon.DateTime.fromMillis(classCategorySessionDTO.startDate).setZone(timezone).offset;
 
     classCategorySessionDTO.startDate = new Date(classCategorySessionDTO.startDate - (60000 * offset)).getTime();
