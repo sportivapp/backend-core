@@ -336,6 +336,10 @@ module.exports = {
         },
         disbursement: {
             myDisbursementAmount: '/my-disbursement-amount',
+        },
+        disbursementRequest: {
+            create: '/disbursement-request',
+            withdrawn: '/withdrawn-disbursement-request'
         }
     }
 }
