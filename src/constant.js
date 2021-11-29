@@ -333,6 +333,9 @@ module.exports = {
             invoice: '/invoice',
             awaitingPayments: '/awaiting-payments',
             paymentDetail: '/xendit-payment/:xenditPaymentUuid'
+        },
+        disbursement: {
+            myDisbursementAmount: '/my-disbursement-amount',
         }
     }
 }
