@@ -4,6 +4,7 @@ const xenditOutboundService = require('./xenditOutboundService');
 const mobileClassTransactionService = require('./mobileClassTransactionService');
 const uuid = require('uuid');
 const { moduleTransactionEnum, moduleEnum } = require('../../models/enum/ModuleTransactionEnum');
+const disbursementService = require('./disbursementService');
 
 const paymentChannelsEnum = {
     "CREDIT_CARD": "CREDIT_CARD",
@@ -129,6 +130,14 @@ xenditPaymentService.receivePayment = async (payload) => {
         if (paymentType === moduleTransactionEnum[moduleEnum.CLASS]) {
             await mobileClassTransactionService.processInvoice(xenditPayment.invoice);
         }
+
+        const disbursementDTO = {
+            userId: xenditPayment.createBy,
+            xenditPaymentUuid: xenditPayment.uuid,
+            invoice: xenditPayment.invoice,
+            amount: xenditPayment.amount,
+        }
+        await disbursementService.createDisbursement(disbursementDTO);
 
     }
 

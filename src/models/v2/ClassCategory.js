@@ -61,13 +61,15 @@ class ClassCategory extends Model {
                     .withGraphFetched('class(basic)')
                     .withGraphFetched('categorySessions(list) as ongoingSessions')
                     .modifyGraph('ongoingSessions', builder => {
-                        builder.where('start_date', '>=', Date.now())
+                        // why -7? we fix at utc+7
+                        builder.where('start_date', '>=', new Date().setHours(-7, 0, 0, 0))
                             .where('status', sessionStatusEnum.ONGOING)
                             .orderBy('start_date', 'ASC');
                     })
                     .withGraphFetched('categorySessions(list) as upcomingSessions')
                     .modifyGraph('upcomingSessions', builder => {
-                        builder.where('start_date', '>=', Date.now())
+                        // why -7? we fix at utc+7
+                        builder.where('start_date', '>=', new Date().setHours(-7, 0, 0, 0))
                             .where('status', sessionStatusEnum.UPCOMING)
                             .orderBy('start_date', 'ASC');
                     });

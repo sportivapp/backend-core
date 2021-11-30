@@ -8,6 +8,8 @@ const paymentRoutes = require('./payment');
 const dokuRoutes = require('./doku');
 const bcaRoutes = require('./bca');
 const xenditRoutes = require('./xenditPayment');
+const disbursementRoutes = require('./disbursement');
+const disbursementRequestRoutes = require('./disbursementRequest');
 
 router.use([
     masterBankRoutes,
@@ -16,5 +18,7 @@ router.use([
     dokuRoutes,
     bcaRoutes,
     xenditRoutes,
+    disbursementRoutes,
+    disbursementRequestRoutes,
 ]);
 module.exports = router;
