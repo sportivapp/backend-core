@@ -20,13 +20,21 @@ classCategorySessionService.generateSessionsByCity = async (cityId, start, end, 
 
     // const timezone = await cityService.getTimezoneFromCityId(cityId);
     const timezone = 'Asia/Jakarta';
-    const startEndWithTimezone = classCategorySessionService.convertStartEndToTimezone(start, end, timezone);
+    // const startEndWithTimezone = classCategorySessionService.convertStartEndToTimezone(start, end, timezone);
+    const startEndWithTimezone = {
+        startDate: start,
+        endDate: end,
+    }
     const now = luxon.DateTime.now().setZone(timezone).toMillis();
 
     const sessions = [];
     for (let i=0;i<schedules.length;i++) {
 
-        let session = classCategorySessionService.convertStartEndToTimezone(schedules[i].start, schedules[i].end, timezone)
+        // let session = classCategorySessionService.convertStartEndToTimezone(schedules[i].start, schedules[i].end, timezone)
+        let session = {
+            startDate: schedules[i].start,
+            endDate: schedules[i].end,
+        }
 
         if (schedules[i].isWeekly) {
             
