@@ -207,7 +207,7 @@ classCategorySessionService.getSessionParticipants = async (classCategoryUuid, c
 
 }
 
-classCategorySessionService.reschedule = async (classCategoryDTO, isRepeat, user) => {
+classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepeat, user) => {
 
     const chosenSession = await ClassCategorySession.query()
         .findById(classCategorySessionDTO.uuid)
