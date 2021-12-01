@@ -23,7 +23,7 @@ xenditService.generateXenditInvoice = async (externalId, amount, description, in
         currency: 'IDR',
         // items: items,
         paymentMethods: paymentChannels,
-        successRedirectURL: 'https://www.sportiv.app/payment/type=class/',
+        successRedirectURL: 'https://booking.sportiv.asia/',
     });
 
     return {
