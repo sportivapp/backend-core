@@ -232,7 +232,7 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
 
         // remove the chosen session to be changed from checkConflict
         sessions = sessions.map(session => {
-            if(!session.uuid === session.uuid)
+            if(!(session.uuid === chosenSession.uuid))
                 return session
         });
 
@@ -292,7 +292,7 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
                     }
                 });
             } else {
-                filteredSessions.push(sessionDate)
+                filteredSessions.push(session)
             }
         });
 

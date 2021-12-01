@@ -139,7 +139,7 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
                     }
                 });
             } else {
-                filteredSessions.push(sessionDate)
+                filteredSessions.push(session)
             }
         });
 
