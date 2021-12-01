@@ -71,12 +71,18 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
     // classCategorySessionDTO.startDate = new Date(classCategorySessionDTO.startDate - (60000 * offset)).getTime();
     // classCategorySessionDTO.endDate = new Date(classCategorySessionDTO.endDate - (60000 * offset)).getTime();
 
-    const upcomingSessions = await classCategorySessionService
-        .getSessions(classCategorySessionDTO.classCategoryUuid, [sessionStatusEnum.UPCOMING]);
+    let sessions = await classCategorySessionService
+        .getAllSessions(classCategorySessionDTO.classCategoryUuid);
 
     if (!isRepeat) {
 
-        classCategorySessionService.checkConflictSession(upcomingSessions, [classCategorySessionDTO]);
+        // remove the chosen session to be changed from checkConflict
+        sessions = sessions.map(session => {
+            if(!session.uuid === session.uuid)
+                return session
+        });
+
+        classCategorySessionService.checkConflictSession(sessions, [classCategorySessionDTO]);
 
         const updateSession = await updatedSession.$query()
             .updateByUserId(classCategorySessionDTO, user.sub)
@@ -111,30 +117,33 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
         const endDiff = parseInt(classCategorySessionDTO.endDate) - parseInt(updatedSession.endDate);
 
         const updatedSessions = [];
-        upcomingSessions.forEach(upcomingSession => {
+        const filteredSessions = [];
+        sessions.forEach(session => {
             
-            const sessionDate = new Date(parseInt(updatedSession.startDate));
-            const upcomingSessionDate = new Date(parseInt(upcomingSession.startDate));
+            const updatedSessionDate = new Date(parseInt(updatedSession.startDate));
+            const sessionDate = new Date(parseInt(session.startDate));
 
             // Get all matched session by day & hour & minute
-            if (sessionDate.getDay() === upcomingSessionDate.getDay() &&
-            sessionDate.getHours() === upcomingSessionDate.getHours() &&
-            sessionDate.getMinutes() === upcomingSessionDate.getMinutes()) {
+            if (updatedSessionDate.getDay() === sessionDate.getDay() &&
+            updatedSessionDate.getHours() === sessionDate.getHours() &&
+            updatedSessionDate.getMinutes() === sessionDate.getMinutes()) {
                 updatedSessions.push({
                     updatedSession: {
-                        uuid: upcomingSession.uuid,
-                        startDate: parseInt(upcomingSession.startDate) + startDiff,
-                        endDate: parseInt(upcomingSession.endDate) + endDiff,
+                        uuid: sessionDate.uuid,
+                        startDate: parseInt(sessionDate.startDate) + startDiff,
+                        endDate: parseInt(sessionDate.endDate) + endDiff,
                     },
                     previous: {
-                        startDate: parseInt(upcomingSession.startDate),
-                        endDate: parseInt(upcomingSession.endDate),
+                        startDate: parseInt(sessionDate.startDate),
+                        endDate: parseInt(sessionDate.endDate),
                     }
                 });
+            } else {
+                filteredSessions.push(sessionDate)
             }
         });
 
-        classCategorySessionService.checkConflictSession(upcomingSessions, updatedSessions);
+        classCategorySessionService.checkConflictSession(filteredSessions, updatedSessions);
 
         const promises = updatedSessions.map(async ({ updatedSession, previous }) => {
             const updateSession = await ClassCategorySession.query()
@@ -219,6 +228,14 @@ classCategorySessionService.getSessions = async (classCategoryUuid, statuses, pa
     }
 
     return query;
+
+}
+
+classCategorySessionService.getAllSessions = async (classCategoryUuid) => {
+
+    return ClassCategorySession.query()
+        .modify('list')
+        .where('class_category_uuid', classCategoryUuid);
 
 }
 
