@@ -207,7 +207,7 @@ classCategorySessionService.getSessionParticipants = async (classCategoryUuid, c
 
 }
 
-classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepeat, user) => {
+classCategoryService.reschedule = async (classCategoryDTO, isRepeat, user) => {
 
     const chosenSession = await ClassCategorySession.query()
         .findById(classCategorySessionDTO.uuid)
@@ -238,7 +238,7 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
 
         classCategorySessionService.checkConflictSession(sessions, [classCategorySessionDTO]);
 
-        const updateSession = await session.$query()
+        const updateSession = await chosenSession.$query()
             .updateByUserId(classCategorySessionDTO, user.sub)
             .returning('*');
 
@@ -247,13 +247,13 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
         const cls = completeSession.class;
         const category = completeSession.classCategory;
         const participants = completeSession.participantSession.map(participant => participant.userId);
-        const sessionDate = new Date(parseInt(session.startDate));
+        const sessionDate = new Date(parseInt(chosenSession.startDate));
         const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
 
         const notifAction = NotificationEnum.classSession.actions.reschedule;
 
         const notifObj = await notificationService.buildNotificationEntity(
-            session.uuid,
+            chosenSession.uuid,
             NotificationEnum.classSession.type,
             notifAction.title(cls.title, category.title),
             notifAction.message(sessionTitle),
@@ -266,8 +266,8 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
 
     } else {
 
-        const startDiff = parseInt(classCategorySessionDTO.startDate) - parseInt(session.startDate);
-        const endDiff = parseInt(classCategorySessionDTO.endDate) - parseInt(session.endDate);
+        const startDiff = parseInt(classCategorySessionDTO.startDate) - parseInt(chosenSession.startDate);
+        const endDiff = parseInt(classCategorySessionDTO.endDate) - parseInt(chosenSession.endDate);
 
         const updatedSessions = [];
         const filteredSessions = [];
