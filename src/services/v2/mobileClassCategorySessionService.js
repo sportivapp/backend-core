@@ -231,12 +231,13 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
     if (!isRepeat) {
 
         // remove the chosen session to be changed from checkConflict
-        sessions = sessions.map(session => {
+        const filteredSessions = [];
+        sessions.forEach(session => {
             if(!(session.uuid === chosenSession.uuid))
-                return session
+                filteredSessions.push(session);
         });
 
-        classCategorySessionService.checkConflictSession(sessions, [classCategorySessionDTO]);
+        classCategorySessionService.checkConflictSession(filteredSessions, [classCategorySessionDTO]);
 
         const updateSession = await chosenSession.$query()
             .updateByUserId(classCategorySessionDTO, user.sub)
@@ -337,6 +338,7 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
 
 classCategorySessionService.checkConflictSession = (existingSessions, newSessions) => {
 
+    console.log(existingSessions)
     existingSessions.forEach(existingSession => {
         const existingStartDate = parseInt(existingSession.startDate);
         const existingEndDate = parseInt(existingSession.endDate);
