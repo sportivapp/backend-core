@@ -183,3 +183,23 @@ exports.sendClassReport = async (cls, report, user, callback) => {
 
     await transporter.sendMail(info, callback);
 }
+
+exports.sendDisbursementReport = async (uuid) => {
+
+    const info = {
+        from: process.env.MAIL_SMTPNAME, // sender address
+        to: ['suryaboyz04@gmail.com', 'taysteven111@gmail.com', 'leonardodika.13@gmail.com'], // list of receivers
+        subject: 'Disbursement Process - Sportiv', // Subject line
+        text: 'Disbursement Request ID: ' + uuid, // plain text body
+        // html: html
+    };
+
+    transporter.sendMail(info, (err, data) => {
+        if (err) {
+            console.log(err);
+        }
+        console.log("Email sent!");
+    });
+
+    return true;
+}
