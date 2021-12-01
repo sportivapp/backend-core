@@ -82,7 +82,7 @@ classCategoryParticipantSessionService.confirmParticipation = async (classCatego
 
 classCategoryParticipantSessionService.updateParticipantConfirmedExpiration = async (classCategorySessionUuid, trx) => {
 
-    const twoDays = 2 * 60 * 60 * 1000;
+    const twoDays = 2 * 24 * 60 * 60 * 1000;
 
     return ClassCategoryParticipantSession.query(trx)
         .where('class_category_session_uuid', classCategorySessionUuid)
