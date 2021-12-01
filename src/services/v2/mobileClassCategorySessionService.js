@@ -219,11 +219,11 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
         });
 
     // const timezone = await cityService.getTimezoneFromCityId(session.class.cityId);
-    const timezone = 'Asia/Jakarta';
-    const offset = luxon.DateTime.fromMillis(classCategorySessionDTO.startDate).setZone(timezone).offset;
+    // const timezone = 'Asia/Jakarta';
+    // const offset = luxon.DateTime.fromMillis(classCategorySessionDTO.startDate).setZone(timezone).offset;
 
-    classCategorySessionDTO.startDate = new Date(classCategorySessionDTO.startDate - (60000 * offset)).getTime();
-    classCategorySessionDTO.endDate = new Date(classCategorySessionDTO.endDate - (60000 * offset)).getTime();
+    // classCategorySessionDTO.startDate = new Date(classCategorySessionDTO.startDate - (60000 * offset)).getTime();
+    // classCategorySessionDTO.endDate = new Date(classCategorySessionDTO.endDate - (60000 * offset)).getTime();
     
     const upcomingSessions = await classCategorySessionService
         .getAllUpcomingSessions(classCategorySessionDTO.classCategoryUuid);
