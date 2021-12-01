@@ -19,21 +19,27 @@ classCategorySessionService.convertStartEndToTimezone = (start, end, timezone) =
 classCategorySessionService.generateSessionsByCity = async (cityId, start, end, schedules) => {
 
     // const timezone = await cityService.getTimezoneFromCityId(cityId);
-    const timezone = 'Asia/Jakarta';
-    const startEndWithTimezone = classCategorySessionService.convertStartEndToTimezone(start, end, timezone);
-    const now = luxon.DateTime.now().setZone(timezone).toMillis();
+    // const timezone = 'Asia/Jakarta';
+    // const startEndWithTimezone = classCategorySessionService.convertStartEndToTimezone(start, end, timezone);
+    const startEndWithTimezone = {
+        startDate: start,
+        endDate: end,
+    }
 
     const sessions = [];
     for (let i=0;i<schedules.length;i++) {
 
-        let session = classCategorySessionService.convertStartEndToTimezone(schedules[i].start, schedules[i].end, timezone)
+        // let session = classCategorySessionService.convertStartEndToTimezone(schedules[i].start, schedules[i].end, timezone)
+        let session = {
+            startDate: schedules[i].start,
+            endDate: schedules[i].end,
+        }
 
         if (schedules[i].isWeekly) {
             
-            while (session.startDate < startEndWithTimezone.endDate) {
-                if (session.startDate < startEndWithTimezone.endDate && session.endDate < startEndWithTimezone.endDate &&
-                    session.startDate > startEndWithTimezone.startDate && session.endDate > startEndWithTimezone.startDate && 
-                    session.startDate > now) {
+            while (session.startDate <= startEndWithTimezone.endDate) {
+                if (session.startDate <= startEndWithTimezone.endDate && session.endDate <= startEndWithTimezone.endDate &&
+                    session.startDate >= startEndWithTimezone.startDate && session.endDate >= startEndWithTimezone.startDate) {
                     sessions.push({
                         startDate: session.startDate,
                         endDate: session.endDate,
