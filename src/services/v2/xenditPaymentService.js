@@ -10,7 +10,7 @@ const paymentChannelsEnum = {
     "CREDIT_CARD": "CREDIT_CARD",
     "BCA": "BCA",
     "BNI": "BNI",
-    "BSI": "BSI",
+    "BSS": "BSS",
     "BRI": "BRI",
     "MANDIRI": "MANDIRI",
     "PERMATA": "PERMATA",
