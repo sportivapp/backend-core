@@ -77,12 +77,13 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
     if (!isRepeat) {
 
         // remove the chosen session to be changed from checkConflict
-        sessions = sessions.map(session => {
-            if(!session.uuid === session.uuid)
-                return session
+        const filteredSessions = [];
+        sessions.forEach(session => {
+            if(!(session.uuid === chosenSession.uuid))
+                filteredSessions.push(session);
         });
 
-        classCategorySessionService.checkConflictSession(sessions, [classCategorySessionDTO]);
+        classCategorySessionService.checkConflictSession(filteredSessions, [classCategorySessionDTO]);
 
         const updateSession = await updatedSession.$query()
             .updateByUserId(classCategorySessionDTO, user.sub)
@@ -139,7 +140,7 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
                     }
                 });
             } else {
-                filteredSessions.push(sessionDate)
+                filteredSessions.push(session)
             }
         });
 
