@@ -23,7 +23,7 @@ xenditService.generateXenditInvoice = async (externalId, amount, description, in
         currency: 'IDR',
         // items: items,
         paymentMethods: paymentChannels,
-        successRedirectURL: 'https://sportivapppaymentsuccess.com/.well-known/assetlinks.json',
+        successRedirectURL: 'https://www.sportivapppaymentsuccess.com/.well-known/assetlinks.json',
     });
 
     return {
