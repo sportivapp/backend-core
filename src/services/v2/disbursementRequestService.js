@@ -1,5 +1,5 @@
 const { UnsupportedOperationError } = require('../../models/errors');
-const DisbursementRequest = require('../../models/v2/Disbursement');
+const DisbursementRequest = require('../../models/v2/DisbursementRequest');
 const disbursementService = require('./disbursementService');
 const emailService = require('../../helper/emailService');
 
@@ -22,9 +22,14 @@ disbursementRequestService.createDisbursementRequest = async(userId) => {
         const disbursementRequest = await DisbursementRequest.query(trx)
             .insertToTable({}, userId);
 
-        await disbursementService.processDisbursements(disbursementRequest.uuid, userId, trx);
+        const disbursements = await disbursementService.processDisbursements(disbursementRequest.uuid, userId, trx);
 
-        emailService.sendDisbursementReport(disbursementRequest.uuid);
+        let amount = 0;
+        disbursements.forEach(disbursement => {
+            amount += parseINt(disbursement.amount);
+        });
+
+        emailService.sendDisbursementReport(disbursementRequest.uuid, amount);
 
         return disbursementRequest
     });

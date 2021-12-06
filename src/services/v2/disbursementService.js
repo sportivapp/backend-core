@@ -65,7 +65,7 @@ disbursementService.processDisbursements = async (disbursementRequestUuid, userI
         .where('user_id', userId)
         .andWhere('status', disbursementStatusEnum.PENDING)
         .updateByUserId({
-            disbutsementRequestUuid: disbursementRequestUuid,
+            disbursementRequestUuid: disbursementRequestUuid,
             status: disbursementStatusEnum.PROCESSING,
         }, userId);
 
