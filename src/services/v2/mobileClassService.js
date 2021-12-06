@@ -164,7 +164,7 @@ classService.register = async (classUuid, classCategoryUuid, classCategorySessio
 
     if (totalPrice > 0) {
         const invoiceDuration = 900 // 900 secs = 15 mins
-        const xenditPayment = await xenditPaymentService.createXenditPayment(invoice, totalPrice, 'Class Purchase', invoiceDuration, null, paymentMethodCode, processItems, user);
+        const xenditPayment = await xenditPaymentService.createXenditPayment(invoice, totalPrice, 'Class Purchase', invoiceDuration, null, paymentMethodCode, processItems, cls.createBy, user);
 
         await classTransactionService.generatePaidTransaction(cls, category, sessions, totalPrice, invoice, xenditPayment.expiryDate, user);
 

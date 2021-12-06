@@ -10,7 +10,7 @@ const paymentChannelsEnum = {
     "CREDIT_CARD": "CREDIT_CARD",
     "BCA": "BCA",
     "BNI": "BNI",
-    "BSI": "BSI",
+    "BSS": "BSS",
     "BRI": "BRI",
     "MANDIRI": "MANDIRI",
     "PERMATA": "PERMATA",
@@ -57,7 +57,7 @@ xenditPaymentService.getPaymentChannels = () => {
 
 }
 
-xenditPaymentService.createXenditPayment = async (invoice, amount, description, invoiceDuration, items, paymentChannel, paymentDetails, user) => {
+xenditPaymentService.createXenditPayment = async (invoice, amount, description, invoiceDuration, items, paymentChannel, paymentDetails, creatorUserId, user) => {
 
     if (!paymentChannelsEnum[paymentChannel]) {
         throw new UnsupportedOperationError(ErrorEnum.PAYMENT_CHANNEL_NOT_SUPPORTED);
@@ -84,6 +84,7 @@ xenditPaymentService.createXenditPayment = async (invoice, amount, description, 
             invoiceUrl: xenditResponse.invoiceUrl,
             paymentDetails: JSON.stringify(paymentDetails),
             paymentMethod: paymentChannel,
+            toUserId: creatorUserId,
         }
 
         const xenditPayment = await XenditPayment.query(trx)
@@ -132,7 +133,7 @@ xenditPaymentService.receivePayment = async (payload) => {
         }
 
         const disbursementDTO = {
-            userId: xenditPayment.createBy,
+            userId: xenditPayment.toUserId,
             xenditPaymentUuid: xenditPayment.uuid,
             invoice: xenditPayment.invoice,
             amount: xenditPayment.amount,

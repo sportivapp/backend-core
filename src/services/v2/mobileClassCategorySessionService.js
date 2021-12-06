@@ -209,30 +209,37 @@ classCategorySessionService.getSessionParticipants = async (classCategoryUuid, c
 
 classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepeat, user) => {
 
-    const session = await ClassCategorySession.query()
+    const chosenSession = await ClassCategorySession.query()
         .findById(classCategorySessionDTO.uuid)
         .withGraphFetched('class')
-        .then(session => {
-            if (!session)
+        .then(chosenSession => {
+            if (!chosenSession)
                 throw new UnsupportedOperationError(ErrorEnum.SESSION_NOT_FOUND);
-            return session;
+            return chosenSession;
         });
 
     // const timezone = await cityService.getTimezoneFromCityId(session.class.cityId);
-    const timezone = 'Asia/Jakarta';
-    const offset = luxon.DateTime.fromMillis(classCategorySessionDTO.startDate).setZone(timezone).offset;
+    // const timezone = 'Asia/Jakarta';
+    // const offset = luxon.DateTime.fromMillis(classCategorySessionDTO.startDate).setZone(timezone).offset;
 
-    classCategorySessionDTO.startDate = new Date(classCategorySessionDTO.startDate - (60000 * offset)).getTime();
-    classCategorySessionDTO.endDate = new Date(classCategorySessionDTO.endDate - (60000 * offset)).getTime();
+    // classCategorySessionDTO.startDate = new Date(classCategorySessionDTO.startDate - (60000 * offset)).getTime();
+    // classCategorySessionDTO.endDate = new Date(classCategorySessionDTO.endDate - (60000 * offset)).getTime();
     
-    const upcomingSessions = await classCategorySessionService
-        .getAllUpcomingSessions(classCategorySessionDTO.classCategoryUuid);
+    let sessions = await classCategorySessionService
+        .getAllSessions(classCategorySessionDTO.classCategoryUuid);
 
     if (!isRepeat) {
 
-        classCategorySessionService.checkConflictSession(upcomingSessions, [classCategorySessionDTO]);
+        // remove the chosen session to be changed from checkConflict
+        const filteredSessions = [];
+        sessions.forEach(session => {
+            if(!(session.uuid === chosenSession.uuid))
+                filteredSessions.push(session);
+        });
 
-        const updateSession = await session.$query()
+        classCategorySessionService.checkConflictSession(filteredSessions, [classCategorySessionDTO]);
+
+        const updateSession = await chosenSession.$query()
             .updateByUserId(classCategorySessionDTO, user.sub)
             .returning('*');
 
@@ -241,13 +248,13 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
         const cls = completeSession.class;
         const category = completeSession.classCategory;
         const participants = completeSession.participantSession.map(participant => participant.userId);
-        const sessionDate = new Date(parseInt(session.startDate));
+        const sessionDate = new Date(parseInt(chosenSession.startDate));
         const sessionTitle = `Sesi ${sessionDate.getDate()} ${CodeToTextMonthEnum[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
 
         const notifAction = NotificationEnum.classSession.actions.reschedule;
 
         const notifObj = await notificationService.buildNotificationEntity(
-            session.uuid,
+            chosenSession.uuid,
             NotificationEnum.classSession.type,
             notifAction.title(cls.title, category.title),
             notifAction.message(sessionTitle),
@@ -260,34 +267,37 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
 
     } else {
 
-        const startDiff = parseInt(classCategorySessionDTO.startDate) - parseInt(session.startDate);
-        const endDiff = parseInt(classCategorySessionDTO.endDate) - parseInt(session.endDate);
+        const startDiff = parseInt(classCategorySessionDTO.startDate) - parseInt(chosenSession.startDate);
+        const endDiff = parseInt(classCategorySessionDTO.endDate) - parseInt(chosenSession.endDate);
 
         const updatedSessions = [];
-        upcomingSessions.forEach(upcomingSession => {
+        const filteredSessions = [];
+        sessions.forEach(session => {
             
+            const chosenSessionDate = new Date(parseInt(chosenSession.startDate));
             const sessionDate = new Date(parseInt(session.startDate));
-            const upcomingSessionDate = new Date(parseInt(upcomingSession.startDate));
 
             // Get all matched session by day & hour & minute
-            if (sessionDate.getDay() === upcomingSessionDate.getDay() &&
-            sessionDate.getHours() === upcomingSessionDate.getHours() &&
-            sessionDate.getMinutes() === upcomingSessionDate.getMinutes()) {
+            if (chosenSessionDate.getDay() === sessionDate.getDay() &&
+            chosenSessionDate.getHours() === sessionDate.getHours() &&
+            chosenSessionDate.getMinutes() === sessionDate.getMinutes()) {
                 updatedSessions.push({
                     updatedSession: {
-                        uuid: upcomingSession.uuid,
-                        startDate: parseInt(upcomingSession.startDate) + startDiff,
-                        endDate: parseInt(upcomingSession.endDate) + endDiff,
+                        uuid: sessionDate.uuid,
+                        startDate: parseInt(sessionDate.startDate) + startDiff,
+                        endDate: parseInt(sessionDate.endDate) + endDiff,
                     },
                     previous: {
-                        startDate: parseInt(upcomingSession.startDate),
-                        endDate: parseInt(upcomingSession.endDate),
+                        startDate: parseInt(sessionDate.startDate),
+                        endDate: parseInt(sessionDate.endDate),
                     }
                 });
+            } else {
+                filteredSessions.push(session)
             }
         });
 
-        classCategorySessionService.checkConflictSession(upcomingSessions, updatedSessions);
+        classCategorySessionService.checkConflictSession(filteredSessions, updatedSessions);
 
         const promises = updatedSessions.map(async ({ updatedSession, previous }) => {
             const updateSession = await ClassCategorySession.query()
@@ -328,6 +338,7 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
 
 classCategorySessionService.checkConflictSession = (existingSessions, newSessions) => {
 
+    console.log(existingSessions)
     existingSessions.forEach(existingSession => {
         const existingStartDate = parseInt(existingSession.startDate);
         const existingEndDate = parseInt(existingSession.endDate);
@@ -719,7 +730,7 @@ classCategorySessionService.getUpcomingSessions = async (classCategoryUuid, page
 
 }
 
-classCategorySessionService.getAllUpcomingSessions = async (classCategoryUuid) => {
+classCategorySessionService.getAllSessions = async (classCategoryUuid) => {
 
     return ClassCategorySession.query()
         .modify('list')
