@@ -1,5 +1,5 @@
 const { UnsupportedOperationError } = require('../../models/errors');
-const DisbursementRequest = require('../../models/v2/Disbursement');
+const DisbursementRequest = require('../../models/v2/DisbursementRequest');
 const disbursementService = require('./disbursementService');
 const emailService = require('../../helper/emailService');
 
