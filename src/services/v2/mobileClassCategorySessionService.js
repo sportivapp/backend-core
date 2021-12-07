@@ -338,7 +338,6 @@ classCategorySessionService.reschedule = async (classCategorySessionDTO, isRepea
 
 classCategorySessionService.checkConflictSession = (existingSessions, newSessions) => {
 
-    console.log(existingSessions)
     existingSessions.forEach(existingSession => {
         const existingStartDate = parseInt(existingSession.startDate);
         const existingEndDate = parseInt(existingSession.endDate);
