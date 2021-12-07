@@ -345,7 +345,8 @@ classCategorySessionService.checkConflictSession = (existingSessions, newSession
             const newSessionStartDate = parseInt(newSession.startDate);
             const newSessionEndDate = parseInt(newSession.endDate);
             if (newSessionStartDate > existingStartDate && newSessionStartDate < existingEndDate ||
-                newSessionEndDate > existingStartDate && newSessionEndDate < existingEndDate) {
+                newSessionEndDate > existingStartDate && newSessionEndDate < existingEndDate ||
+                newSessionStartDate < existingStartDate && newSessionEndDate > existingEndDate) {
                     throw new UnsupportedOperationError(ErrorEnum.SCHEDULE_CONFLICT);
                 }
         });
