@@ -30,7 +30,8 @@ class Class extends Model {
                     .modify('notDeleted')
                     .withGraphFetched('industry(baseAttributes)')
                     .withGraphFetched('city(baseAttributes)')
-                    .withGraphFetched('classMedia(list)');
+                    .withGraphFetched('classMedia(list)')
+                    .orderBy('create_time', 'DESC');
             },
             adminDetail(builder) {
                 builder.select('uuid', 'title', 'description', 'pic_mobile_number', 'address', 'address_name', 'administration_fee', 'company_id')
@@ -123,7 +124,8 @@ class Class extends Model {
                     .withGraphFetched('city(baseAttributes)')
                     .withGraphFetched('classMedia(list)')
                     .withGraphFetched('company(baseAttributes)')
-                    .withGraphFetched('creator(basic)');
+                    .withGraphFetched('creator(basic)')
+                    .orderBy('create_time', 'DESC');
             },
             coachClassHistory(builder) {
                 builder.select('class.uuid', 'class.title')
