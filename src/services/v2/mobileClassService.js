@@ -99,6 +99,7 @@ classService.getClass = async (classUuid, user) => {
             if (!cls)
                 throw new NotFoundError();
             cls.totalParticipants = await classCategoryParticipantSessionService.getTotalParticipantsByClassUuid(cls.uuid);
+            cls.wasRegistered = await classCategoryParticipantSessionService.isUserClassParticipant(user.sub, cls.uuid);
             cls.administrationFee = parseInt(cls.administrationFee);
             return cls;
         });

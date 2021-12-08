@@ -283,11 +283,11 @@ classTransactionService.processInvoice = async (invoice) => {
     const participantSessionDTOs = classTransactionDetailService.generateParticipantSessionDTOs(savedDetailTransactions);
     
     return ClassTransaction.transaction(async trx => {
+        await classCategoryParticipantSessionService.register(participantSessionDTOs, user, trx);
         await ClassTransaction.query()
             .updateByUserId({
                 status: transactionStatusEnum.DONE,
             }, 0);
-        await classCategoryParticipantSessionService.register(participantSessionDTOs, user, trx);
     })
 
 }
