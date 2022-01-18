@@ -142,4 +142,50 @@ classService.getMyCreatedClasses = async (page, size, keyword, user) => {
 
 }
 
+classService.getLandingClassDetail = async (classUuid, user) => {
+
+    const cls = await Class.query()
+        .modify('landingDetail')
+        .findById(classUuid)
+        .then(cls => {
+            if (!cls)
+                throw new NotFoundError();
+            cls.administrationFee = parseInt(cls.administrationFee);
+            return cls;
+        });
+
+    return {
+        ...cls,
+        totalParticipants: await classCategoryParticipantSessionService.getTotalParticipantsByClassUuid(cls.uuid),
+        isOwner: cls.createBy === user.sub,
+    }
+
+}
+
+// cls must .withGraphFetched('classCategories(list).[categorySessions(price)]');
+// classService.getClassPriceRange = (cls) => {
+
+//     let lowestPrice = Number.MAX_SAFE_INTEGER;
+//     let highestPrice = Number.MIN_SAFE_INTEGER;
+//     cls.classCategories.map(category => {
+//         const categoryPriceInt = parseInt(category.price);
+//         if (categoryPriceInt < lowestPrice)
+//             lowestPrice = categoryPriceInt;
+//         if (categoryPriceInt > highestPrice)
+//             highestPrice = categoryPriceInt
+//         category.categorySessions.map(session => {
+//             const sessionPriceInt = parseInt(session.price);
+//             if (sessionPriceInt < lowestPrice)
+//                 lowestPrice = sessionPriceInt;
+//             if (sessionPriceInt > highestPrice)
+//                 highestPrice = sessionPriceInt
+//         });
+//     });
+//     return {
+//         minPrice: lowestPrice,
+//         maxPrice: highestPrice
+//     };
+
+// }
+
 module.exports = classService;

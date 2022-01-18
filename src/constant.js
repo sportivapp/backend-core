@@ -173,6 +173,7 @@ module.exports = {
             coachHistory: '/history-coach-class-v2',
             report: '/class-v2/:classUuid/report',
             myCreatedClass: '/my-created-class-v2',
+            landingClassDetail: '/landing-class-v2/:classUUid',
         },
         classCategorySession: {
             list: '/class-category/:classCategoryUuid/class-category-session',
