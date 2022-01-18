@@ -145,9 +145,11 @@ class Class extends Model {
                 builder.select('uuid', 'title', 'description', 'address', 'address_name', 'administration_fee')
                     .modify('notDeleted')
                     .withGraphFetched('industry(baseAttributes)')
+                    .withGraphFetched('city(baseAttributes)')
                     .withGraphFetched('classMedia(list)')
                     .withGraphFetched('classCategories(list)')
                     .withGraphFetched('coaches(baseAttributes)')
+                    .withGraphFetched('state(baseAttributes)');
             },
         }
     }
