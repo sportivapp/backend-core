@@ -113,4 +113,33 @@ classService.getClassStartFromPrice = async (classUuid) => {
 
 }
 
+classService.getMyCreatedClasses = async (page, size, keyword, user) => {
+
+    let clsPromise = Class.query()
+        .modify('landingList')
+        .whereRaw(`LOWER("title") LIKE LOWER('%${keyword}%')`)
+        .andWhere('create_by', user.sub)
+
+    const pageObj = await clsPromise.page(page, size);
+
+    const resultPromise = pageObj.results.map(async cls => {
+        return {
+            ...cls,
+            startFrom: await classService.getClassStartFromPrice(cls.uuid),
+            totalParticipants: await classCategoryParticipantSessionService.getTotalParticipantsByClassUuid(cls.uuid),
+        }
+    });
+    
+    return Promise.all(resultPromise)
+        .then(cList => {
+            pageObj.results = cList.map(cls => {
+                cls.administrationFee = parseInt(cls.administrationFee);
+                return cls;
+            });
+            return pageObj;
+        })
+        .then(pageObj => ServiceHelper.toPageObj(page, size, pageObj));
+
+}
+
 module.exports = classService;

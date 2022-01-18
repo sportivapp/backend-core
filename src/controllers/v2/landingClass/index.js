@@ -48,4 +48,34 @@ classController.createClass = async (req, res, next) => {
 
 }
 
+classController.getMyCreatedClasses = async (req, res, next) => {
+
+    const { page='0', size='10', keyword='' } = req.query;
+
+    try {
+
+        const pageObj = await classService.getMyCreatedClasses(parseInt(page), parseInt(size), keyword, req.user);
+        return res.status(200).json(ResponseHelper.toPageResponse(pageObj.data, pageObj.paging));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classController.getClass = async (req, res, next) => {
+
+    const { classUuid } = req.params;
+
+    try {
+
+        const result = await classService.getClass(classUuid, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = classController;
