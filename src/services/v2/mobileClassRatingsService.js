@@ -11,6 +11,8 @@ const ErrorEnum = {
     DOUBLE_RATING: 'DOUBLE_RATING',
 }
 
+const MINUTE_IN_MILLIS = 60000;
+
 mobileClassRatingsService = {};
 
 mobileClassRatingsService.checkExistUserRating = async (classCategorySessionUuid, user) => {
