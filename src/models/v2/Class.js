@@ -147,7 +147,7 @@ class Class extends Model {
                     .withGraphFetched('industry(baseAttributes)')
                     .withGraphFetched('city(baseAttributes)')
                     .withGraphFetched('classMedia(list)')
-                    .withGraphFetched('classCategories(list)')
+                    .withGraphFetched('classCategories(listNoPrice)')
                     .withGraphFetched('coaches(baseAttributes)')
                     .withGraphFetched('state(baseAttributes)');
             },

@@ -154,6 +154,20 @@ classService.getLandingClassDetail = async (classUuid, user) => {
             return cls;
         });
 
+    const newCategories = cls.classCategories.map(async category => {
+        priceRange = await classCategoriesService.getCategoryPriceRange(category.uuid)
+        
+        return {
+            ...category,
+            priceRange: priceRange
+        }
+    });
+
+    await Promise.all(newCategories)
+        .then(newCategories => {
+            cls.classCategories = newCategories;
+        });
+
     return {
         ...cls,
         totalParticipants: await classCategoryParticipantSessionService.getTotalParticipantsByClassUuid(cls.uuid),
@@ -161,31 +175,5 @@ classService.getLandingClassDetail = async (classUuid, user) => {
     }
 
 }
-
-// cls must .withGraphFetched('classCategories(list).[categorySessions(price)]');
-// classService.getClassPriceRange = (cls) => {
-
-//     let lowestPrice = Number.MAX_SAFE_INTEGER;
-//     let highestPrice = Number.MIN_SAFE_INTEGER;
-//     cls.classCategories.map(category => {
-//         const categoryPriceInt = parseInt(category.price);
-//         if (categoryPriceInt < lowestPrice)
-//             lowestPrice = categoryPriceInt;
-//         if (categoryPriceInt > highestPrice)
-//             highestPrice = categoryPriceInt
-//         category.categorySessions.map(session => {
-//             const sessionPriceInt = parseInt(session.price);
-//             if (sessionPriceInt < lowestPrice)
-//                 lowestPrice = sessionPriceInt;
-//             if (sessionPriceInt > highestPrice)
-//                 highestPrice = sessionPriceInt
-//         });
-//     });
-//     return {
-//         minPrice: lowestPrice,
-//         maxPrice: highestPrice
-//     };
-
-// }
 
 module.exports = classService;
