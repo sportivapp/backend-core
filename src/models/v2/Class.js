@@ -141,6 +141,16 @@ class Class extends Model {
                     .withGraphFetched('city(baseAttributes)')
                     .withGraphFetched('classMedia(list)')
             },
+            landingDetail(builder) {
+                builder.select('uuid', 'title', 'description', 'address', 'address_name', 'administration_fee')
+                    .modify('notDeleted')
+                    .withGraphFetched('industry(baseAttributes)')
+                    .withGraphFetched('city(baseAttributes)')
+                    .withGraphFetched('classMedia(list)')
+                    .withGraphFetched('classCategories(listNoPrice)')
+                    .withGraphFetched('coaches(baseAttributes)')
+                    .withGraphFetched('state(baseAttributes)');
+            },
         }
     }
 

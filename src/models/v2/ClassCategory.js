@@ -26,6 +26,10 @@ class ClassCategory extends Model {
                 builder.select('uuid', 'title', 'price', 'is_recurring')
                     .modify('notDeleted');
             },
+            listNoPrice(builder) {
+                builder.select('uuid', 'title', 'is_recurring')
+                    .modify('notDeleted');
+            },
             adminDetail(builder) {
                 builder.select('uuid', 'title', 'description', 'price', 'requirements', 'is_recurring')
                     .modify('notDeleted')

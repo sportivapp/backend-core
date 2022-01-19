@@ -72,4 +72,33 @@ classCategoryService.initCategories = async (categories, user, trx) => {
 
 }
 
+classCategoryService.getCategoryPriceRange = async (categoryUuid) => {
+
+    return ClassCategory.query()
+        .findById(categoryUuid)
+        .modify('list')
+        .withGraphFetched('categorySessions(price)')
+        .then(category => {
+            let lowestPrice = Number.MAX_SAFE_INTEGER;
+            let highestPrice = Number.MIN_SAFE_INTEGER;
+            const categoryPriceInt = parseInt(category.price);
+            if (categoryPriceInt < lowestPrice)
+                lowestPrice = categoryPriceInt;
+            if (categoryPriceInt > highestPrice)
+                highestPrice = categoryPriceInt
+            category.categorySessions.map(session => {
+                const sessionPriceInt = parseInt(session.price);
+                if (sessionPriceInt < lowestPrice)
+                    lowestPrice = sessionPriceInt;
+                if (sessionPriceInt > highestPrice)
+                    highestPrice = sessionPriceInt
+            });
+            return {
+                minPrice: lowestPrice,
+                maxPrice: highestPrice
+            };
+        });
+
+}
+
 module.exports = classCategoryService;
