@@ -246,4 +246,33 @@ classService.deleteClass = async (classUuid, user) => {
 
 }
 
+classService.addCategory = async (category, user) => {
+
+    const cls = await classService.findById(category.classUuid);
+
+    isOwner = classService.isClassCreatedByUser(cls, user.sub);
+    if (!isOwner) {
+        throw new UnsupportedOperationError(ErrorEnum.NOT_CLASS_OWNER);
+    }
+
+    return Class.transaction(async trx => {
+
+        const classCoachDTO = {
+            classUuid: cls.uuid,
+            userId: user.sub,
+        };
+
+        const classCoaches = await classCoachService.initClassCoach(classCoachDTO, user, trx);
+        const classCategory = await classCategoriesService.initCategories([category], user, trx);
+
+        return {
+            ...cls,
+            classCoaches: classCoaches,
+            classCategory: classCategory,
+        };
+
+    });
+
+};
+
 module.exports = classService;

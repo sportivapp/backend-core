@@ -118,4 +118,32 @@ classController.deleteClass = async (req, res, next) => {
 
 }
 
+classController.addCategory = async (req, res, next) => {
+
+    const { classUuid } = req.params;
+    const { title, description, requirements, isRecurring, price, minParticipants, maxParticipants, sessions } = req.body;
+
+    const category = {
+        classUuid: classUuid,
+        title: title,
+        description: description,
+        requirements: requirements,
+        iSRecurring: isRecurring,
+        price: price,
+        minParticipants: minParticipants,
+        maxParticipants: maxParticipants,
+        sessions: sessions,
+    };
+
+    try {
+
+        const result = await classService.addCategory(category, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = classController;
