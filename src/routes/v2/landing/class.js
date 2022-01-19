@@ -7,5 +7,7 @@ router.get(routes.classV2.list, auth.authenticateToken, controller.getClasses);
 router.post(routes.classV2.list, auth.authenticateToken, controller.createClass);
 router.get(routes.classV2.myClass, auth.authenticateToken, controller.getMyCreatedClasses);
 router.get(routes.classV2.id, auth.authenticateToken, controller.getLandingClassDetail);
+router.put(routes.classV2.id, auth.authenticateToken, controller.updateClass);
+router.delete(routes.classV2.id, auth.authenticateToken, controller.deleteClass);
 
 module.exports = router.expressRouter;

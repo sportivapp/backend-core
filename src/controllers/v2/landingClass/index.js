@@ -78,4 +78,44 @@ classController.getLandingClassDetail = async (req, res, next) => {
 
 }
 
+classController.updateClass = async (req, res, next) => {
+
+    const { classUuid } = req.params;
+    const { description, address, addressName, administrationFee, fileIds } = req.body;
+
+    const classDTO = {
+        uuid: classUuid,
+        description: description,
+        address: address,
+        addressName: addressName,
+        administrationFee: administrationFee,
+        fileIds: fileIds
+    };
+
+    try {
+
+        const result = await classService.updateClass(classDTO, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classController.deleteClass = async (req, res, next) => {
+
+    const { classUuid } = req.params;
+
+    try {
+
+        const result = await classService.deleteClass(classUuid, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = classController;

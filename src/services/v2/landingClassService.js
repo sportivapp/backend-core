@@ -4,9 +4,11 @@ const classCategoryParticipantSessionService = require('./landingClassCategoryPa
 const classCategoriesService = require('./landingClassCategoriesService');
 const classCoachService = require('./landingClassCoachService');
 const classMediaService = require('./landingClassMediaService');
+const { NotFoundError } = require('../../models/errors');
 
 const ErrorEnum = {
     PARTICIPANTS_EXISTED: 'PARTICIPANTS_EXISTED',
+    NOT_CLASS_OWNER: 'NOT_CLASS_OWNER',
 }
 
 const classService = {};
@@ -171,8 +173,76 @@ classService.getLandingClassDetail = async (classUuid, user) => {
     return {
         ...cls,
         totalParticipants: await classCategoryParticipantSessionService.getTotalParticipantsByClassUuid(cls.uuid),
-        isOwner: cls.createBy === user.sub,
+        isOwner: classService.isClassCreatedByUser(cls, user.sub),
     }
+
+}
+
+classService.findById = async (classUuid) => {
+
+    return Class.query()
+        .findById(classUuid)
+        .then(cls => {
+            if (!cls)
+                throw new NotFoundError();
+            cls.administrationFee = parseInt(cls.administrationFee);
+            return cls;
+        });
+
+}
+
+classService.isClassCreatedByUser = (cls, userId) => {
+
+    return cls.createBy === userId;
+
+}
+
+classService.updateClass = async (classDTO, user) => {
+
+    const cls = await classService.findById(classDTO.uuid);
+
+    isOwner = classService.isClassCreatedByUser(cls, user.sub);
+    if (!isOwner) {
+        throw new UnsupportedOperationError(ErrorEnum.NOT_CLASS_OWNER);
+    }
+
+    const newClass = {
+        uuid: classDTO.uuid,
+        description: classDTO.description,
+        address: classDTO.address,
+        addressName: classDTO.addressName,
+        administrationFee: classDTO.administrationFee,
+    };
+
+    return Class.transaction(async trx => {
+
+        const updatedClass = await cls.$query(trx)
+            .updateByUserId(newClass, user.sub)
+            .returning('*');
+
+        const classMedia = await classMediaService.saveMedia(classDTO.uuid, classDTO.fileIds, user, trx);
+
+        return {
+            ...updatedClass,
+            classMedia: classMedia,
+        }
+        
+    });
+
+}
+
+classService.deleteClass = async (classUuid, user) => {
+
+    const cls = await classService.findById(classUuid);
+
+    isOwner = classService.isClassCreatedByUser(cls, user.sub);
+    if (!isOwner) {
+        throw new UnsupportedOperationError(ErrorEnum.NOT_CLASS_OWNER);
+    }
+
+    return cls.$query()
+        .softDelete()
+        .then(rowsAffected => rowsAffected === 1);
 
 }
 
