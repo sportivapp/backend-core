@@ -101,4 +101,52 @@ classCategoryService.getCategoryPriceRange = async (categoryUuid) => {
 
 }
 
+classCategoryService.addCategory = async (startMonth, endMonth, category, cityId, user) => {
+
+    const newCategory = {};
+    newCategory.classUuid = category.classUuid;
+    newCategory.title = category.title;
+    newCategory.description = category.description;
+    newCategory.price = category.price;
+    newCategory.requirements = category.requirements;
+
+    // const timezone = await cityService.getTimezoneFromCityId(cityId);
+    const timezone = 'Asia/Jakarta';
+
+    return ClassCategory.transaction(async trx => {
+
+        return ClassCategory.query(trx)
+        .insertToTable(newCategory, user.sub)
+        .then(async classCategory => {
+
+            const categoryCoachDTO = category.categoryCoachUserIds.map(categoryCoachUserId => {
+                return {
+                    classUuid: classCategory.classUuid,
+                    classCategoryUuid: classCategory.uuid,
+                    userId: categoryCoachUserId,
+                }
+            });
+            
+            const sessionAndSchedule = classCategoryService
+                .generateSessionAndScheduleFromCategorySchedules(classCategory.classUuid, classCategory.uuid, 
+                    startMonth, endMonth, category.schedules, timezone);
+
+            if (sessionAndSchedule.session.length === 0)
+                throw new UnsupportedOperationError(ErrorEnum.NO_SESSIONS);
+            const classCategoryCoach = await classCategoryCoachService.initCategoryCoach(categoryCoachDTO, user, trx);
+            const classCategorySession = await classCategorySessionService.initCategorySession(sessionAndSchedule.session, user, trx);
+            const classCategorySchedule = await classCategoryScheduleService.initSchedules(sessionAndSchedule.schedule, user, trx);
+
+            return {
+                ...classCategory,
+                classCategoryCoach: classCategoryCoach,
+                classCategorySession: classCategorySession,
+                classCategorySchedule: classCategorySchedule,
+            }
+        });
+
+    });
+
+}
+
 module.exports = classCategoryService;
