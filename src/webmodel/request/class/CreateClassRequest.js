@@ -5,7 +5,7 @@ const schema = Joi.object({
     description: Joi.string(),
     categories: Joi.array().items(Joi.object({
         title: Joi.string().max(255).required(),
-        description: Joi.string(),
+        description: Joi.string().allow(''),
         isRecurring: Joi.bool().required(),
         price: Joi.number().min(0).when('isRecurring', { is: true, then: Joi.required(), otherwise: Joi.disallow() }),
         sessions: Joi.array().when('isRecurring', {
