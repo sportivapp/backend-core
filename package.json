@@ -41,7 +41,7 @@
     "nodemailer": "^6.4.10",
     "objection": "^2.2.1",
     "pg": "^8.3.0",
-    "read-excel-file": "^4.0.6",
+    "read-excel-file": "^5.5.1",
     "shortid": "^2.2.15",
     "swagger-jsdoc": "^4.0.0",
     "swagger-ui-express": "^4.1.4"
