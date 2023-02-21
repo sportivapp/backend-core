@@ -146,4 +146,32 @@ classController.addCategory = async (req, res, next) => {
 
 }
 
+classController.deleteCategory = async (req, res, next) => {
+
+    const { classUuid, classCategoryUuid } = req.params;
+
+    try {
+
+        const result = await classService.deleteCategory(classUuid, classCategoryUuid, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+
+    } catch(e) {
+        next(e);
+    }
+
+}
+
+classController.checkIsClassOwner = async (req, res, next) => {
+
+    const { classUuid } = req.params;
+
+    try {
+        const result = await classService.checkIsClassOwner(classUuid, req.user);
+        return res.status(200).json(ResponseHelper.toBaseResponse(result));
+    } catch(e) {
+        next(e);
+    }
+
+}
+
 module.exports = classController;
