@@ -197,6 +197,27 @@ classService.isClassCreatedByUser = (cls, userId) => {
 
 }
 
+classService.checkIsClassOwner = async (classUuid, user) => {
+    
+    const cls = await classService.findById(classUuid);
+    const isOwner = classService.isClassCreatedByUser(cls, user.sub);
+
+    if (!isOwner) {
+        throw new UnsupportedOperationError(ErrorEnum.NOT_CLASS_OWNER);
+    }
+
+    return;
+    
+}
+
+classService.deleteCategory = async (classUuid, categoryUuid, user) => {
+
+    await classService.checkIsClassOwner(classUuid, user);
+
+    return classCategoriesService.deleteCategory(categoryUuid, user);
+
+}
+
 classService.updateClass = async (classDTO, user) => {
 
     const cls = await classService.findById(classDTO.uuid);

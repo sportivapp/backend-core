@@ -10,5 +10,7 @@ router.get(routes.classV2.id, auth.authenticateToken, controller.getLandingClass
 router.put(routes.classV2.id, auth.authenticateToken, controller.updateClass);
 router.delete(routes.classV2.id, auth.authenticateToken, controller.deleteClass);
 router.post(routes.classV2.listCategory, auth.authenticateToken, controller.addCategory);
+router.delete(routes.classV2.idCategory, auth.authenticateToken, controller.deleteCategory);
+router.get(routes.classV2.isOwner, auth.authenticateToken, controller.checkIsClassOwner);
 
 module.exports = router.expressRouter;

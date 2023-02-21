@@ -149,4 +149,26 @@ classCategoryService.addCategory = async (startMonth, endMonth, category, cityId
 
 }
 
+classCategoryService.findById = async (categoryUuid) => {
+
+    return ClassCategory.query()
+        .findById(categoryUuid)
+        .then(category => {
+            if (!category)
+                throw new UnsupportedOperationError(ErrorEnum.CATEGORY_NOT_FOUND);
+            return category;
+        });
+
+}
+
+classCategoryService.deleteCategory = async (categoryUuid) => {
+
+    const category = await classCategoryService.findById(categoryUuid);
+
+    return category.$query()
+        .softDelete()
+        .then(rowsAffected => rowsAffected === 1);
+        
+}
+
 module.exports = classCategoryService;
