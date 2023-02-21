@@ -206,8 +206,8 @@ classService.checkIsClassOwner = async (classUuid, user) => {
         throw new UnsupportedOperationError(ErrorEnum.NOT_CLASS_OWNER);
     }
 
-    return;
-    
+    return isOwner;
+
 }
 
 classService.deleteCategory = async (classUuid, categoryUuid, user) => {
