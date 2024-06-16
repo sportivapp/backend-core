@@ -13,13 +13,11 @@ module.exports = {
     }
   },
   production: {
-    production: {
-      client: 'pg',
-      connection: process.env.DATABASE_URL + `?ssl=true`,
-      migrations: {
-        directory: path.join(BASE_PATH, 'migrations')
-      },
-      useNullAsDefault: true
-    }
+    client: 'pg',
+    connection: process.env.DATABASE_URL + `?ssl=true`,
+    migrations: {
+      directory: path.join(BASE_PATH, 'migrations')
+    },
+    useNullAsDefault: true
   }
 };
