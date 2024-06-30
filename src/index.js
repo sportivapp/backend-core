@@ -63,10 +63,12 @@ app.use((_, __, ___) => {
 
 app.use(errorHandler)
 
-const serviceAccount = require(process.env.FIREBASE_KEY_DIRECTORY);
-
 firebaseAdmin.initializeApp({
-    credential: firebaseAdmin.credential.cert(serviceAccount),
+    credential: firebaseAdmin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL, 
+        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+    }),
     databaseURL: databaseUrl
 });
 
